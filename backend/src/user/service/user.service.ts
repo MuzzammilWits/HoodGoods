@@ -11,9 +11,9 @@ export class UserService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async createUser(name: string): Promise<User> {
-    const user = this.userRepo.create({ name });
-    return await this.userRepo.save(user);
+  createUser(data: { name: string; email: string }) {
+    const user = this.userRepo.create(data);
+    return this.userRepo.save(user);
   }
 
   async getAllUsers(): Promise<User[]> {

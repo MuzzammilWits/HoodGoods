@@ -1,14 +1,14 @@
-// src/user/user.controller.ts
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { UserService } from '../service/user.service';
+import { CreateUserDto } from '../dto/create-user.dto'; // import this
 
-@Controller('users') // what ever the end point is, it is relative to what is defined in these brackets
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body('name') name: string) {
-    return this.userService.createUser(name);
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
   }
 
   @Get()
