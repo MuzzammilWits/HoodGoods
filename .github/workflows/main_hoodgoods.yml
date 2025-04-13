@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend  # 👈 Your NestJS app lives here
+        working-directory: backend  # 👈 Your NestJS app is in /backend
 
     steps:
       - name: 📥 Checkout code
@@ -34,8 +34,13 @@ jobs:
       - name: 🧪 Run tests (optional)
         run: npm test --if-present
 
-      - name: 📦 Zip artifact for deployment
-        run: zip -r ../release.zip . -x "node_modules/*" "*.git*" "test/*" ".github/*"
+      - name: 📦 Zip production output (dist + package files)
+        run: |
+          mkdir deploy
+          cp -r dist deploy/
+          cp package.json package-lock.json deploy/
+          cd deploy
+          zip -r ../release.zip .
 
       - name: ⬆️ Upload artifact
         uses: actions/upload-artifact@v4
@@ -73,6 +78,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'HoodGoods'  # make sure this matches your Azure Web App name
+          app-name: 'HoodGoods'
           slot-name: 'Production'
           package: .
