@@ -1,22 +1,37 @@
-import { Auth0Provider } from '@auth0/auth0-react';  
-import AuthButtons from './AuthButtons.tsx';  
 
-function App() {  
-  return (  
-    <Auth0Provider  
-      domain={import.meta.env.VITE_AUTH0_DOMAIN}  
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}  
-      authorizationParams={{  
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,  
-        redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL,  
-      }}  
-    >  
-      <main>  
-        <h1>Welcome to HoodGoods</h1>  
-        <AuthButtons />  
-      </main>  
-    </Auth0Provider>  
-  );  
-}  
+//import { useState } from 'react';
+import './App.css';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import ExploreShops from './components/ExploreShops';
+import SearchBar from './components/SearchBar';
+import FeaturedProducts from './components/FeaturedProducts';
+import WhyChooseUs from './components/WhyChooseUs';
+import Footer from './components/Footer';
 
-export default App;  
+function App() {
+ // const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (query: string) => {
+    //setSearchQuery(query);
+    // Implement search functionality here
+    console.log('Searching for:', query);
+  };
+
+  return (
+    <div className="app">
+      <Navbar />
+      <main>
+        <Hero />
+        <ExploreShops />
+        <SearchBar onSearch={handleSearch} />
+        <FeaturedProducts />
+        <WhyChooseUs />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+
