@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend  # 👈 Your NestJS app is in /backend
+        working-directory: backend  # 👈 Your NestJS app lives here
 
     steps:
       - name: 📥 Checkout code
@@ -31,15 +31,13 @@ jobs:
       - name: 🛠️ Build NestJS app
         run: npm run build
 
-      - name: 🧪 Run tests (optional)
-        run: npm test --if-present
-
-      - name: 📦 Zip production output (dist + package files)
+      - name: 📦 Zip artifact for deployment
         run: |
-          mkdir deploy
-          cp -r dist deploy/
-          cp package.json package-lock.json deploy/
-          cd deploy
+          mkdir -p ../deploy
+          cp -r dist package.json package-lock.json ../deploy
+          cd ../deploy
+          npm install --omit=dev
+          echo 'web: npm run start:prod' > Procfile  # 👈 tells Azure to use start:prod
           zip -r ../release.zip .
 
       - name: ⬆️ Upload artifact
