@@ -9,10 +9,10 @@ import WhyChooseUs from './components/WhyChooseUs';
 import Footer from './components/Footer';
 
 function App() {
-  const [searchQuery, setSearchQuery] = useState('');
+ // const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    //setSearchQuery(query);
     // Implement search functionality here
     console.log('Searching for:', query);
   };
