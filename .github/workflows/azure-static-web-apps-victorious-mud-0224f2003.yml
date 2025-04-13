@@ -42,6 +42,7 @@ jobs:
           api_location: ""  # Leave empty if no API
           output_location: "dist"  # Vite default output folder
           github_id_token: ${{ steps.idtoken.outputs.result }}
+          skip_deploy_on_missing_secrets: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
