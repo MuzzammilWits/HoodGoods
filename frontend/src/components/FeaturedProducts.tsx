@@ -51,8 +51,8 @@ const FeaturedProducts: React.FC = () => {
   const products: Product[] = [
     {
       id: 1,
-      name: 'Abstract Art',
-      price: 'R1000',
+      name: 'Pearl Wisdom',
+      price: 'R125',
       image: abstractArtImg,
       colorOptions: [
         { id: 1, color: '#000000' },
@@ -62,8 +62,8 @@ const FeaturedProducts: React.FC = () => {
     },
     {
       id: 2,
-      name: 'Eco - Jewellery Chain',
-      price: 'R300',
+      name: 'Marble Ocean',
+      price: 'R125',
       image: ecoJewelleryImg,
       colorOptions: [
         { id: 1, color: '#CFB53B' },
@@ -73,8 +73,8 @@ const FeaturedProducts: React.FC = () => {
     },
     {
       id: 3,
-      name: 'Handwoven Scarf',
-      price: 'R450',
+      name: 'Loom-nastic',
+      price: 'R100',
       image: scarfImg,
       colorOptions: [
         { id: 1, color: '#FF5733' },
@@ -84,8 +84,8 @@ const FeaturedProducts: React.FC = () => {
     },
     {
       id: 4,
-      name: 'Hand Made Leather Bag',
-      price: 'R2500',
+      name: 'Long Live The Resistance',
+      price: 'R150',
       image: leatherBagImg,
       colorOptions: [
         { id: 1, color: '#8B4513' },
@@ -96,10 +96,10 @@ const FeaturedProducts: React.FC = () => {
   ];
 
   return (
-    <section className="featured-products section">
+    <section id= "featured-products" className="featured-products section">
       <div className="container">
         <div className="section-title">
-          <h2>Featured</h2>
+          <h2>Wrist Lovers</h2>
           <a href="#" className="view-all">view all</a>
         </div>
         <div className="products-slider">

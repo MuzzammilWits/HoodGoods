@@ -17,7 +17,7 @@ const ShopCard: React.FC<ShopCardProps> = ({ name, image, info }) => {
       </div>
       <div className="shop-card-content">
         <h3 className="shop-name">{name}</h3>
-        <a href="#" className="shop-info">{info}</a>
+        <a href="#featured-products" className="shop-info">{info}</a>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import './WhyChooseUs.css';
-// Import using the utility instead of direct import
-import { interiorImg, getImage } from './utils/ImageImports';
+// Import interior image directly
+import { interiorImg } from './utils/ImageImports';
 
 interface FeatureProps {
   icon: React.ReactNode;
@@ -25,8 +25,17 @@ const WhyChooseUs: React.FC = () => {
   return (
     <section className="why-choose-us light-purple-bg">
       <div className="container">
-        <div className="why-choose-us-content">
-          <div className="why-choose-us-text">
+        {/* First row: About Us */}
+        <div id="about-us" className="about-us-content">
+          <h2 className="section-title">About Us</h2>
+          <p className="about-us-text">
+            HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
+          </p>
+        </div>
+        
+        {/* Second row: Why Choose Us + Image */}
+        <div className="why-choose-us-row">
+          <div className="why-choose-us-content">
             <h2 className="section-title">Why Choose Us</h2>
             
             <div className="features-grid">
@@ -72,8 +81,8 @@ const WhyChooseUs: React.FC = () => {
             </div>
           </div>
           
-          <div className="why-choose-us-image">
-            {getImage(interiorImg, "Interior design with Hood Goods products", 500, 400)}
+          <div className="interior-image-container">
+            <img src={interiorImg} alt="Interior design with Hood Goods products" className="interior-image" />
           </div>
         </div>
       </div>
