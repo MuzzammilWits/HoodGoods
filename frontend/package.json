@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+
+    "@auth0/auth0-react": "^2.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
