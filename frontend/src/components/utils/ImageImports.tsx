@@ -1,5 +1,5 @@
 // This file centralizes all image imports and provides fallbacks
-import React from 'react';
+//import React from 'react';
 import ImagePlaceholder from './ImagePlaceholder';
 
 // IMPORTANT: Using relative paths from the assets directory
