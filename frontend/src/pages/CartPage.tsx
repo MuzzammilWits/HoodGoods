@@ -18,14 +18,14 @@ const CartPage = () => {
     {
       id: 'ex-1',
       name: 'Handcrafted Ceramic Mug',
-      price: 10,
+      price: 100,
       image: 'https://www.tday.co.za/cdn/shop/files/white3Ddaisymughandmadeceramicmug-1_460x.jpg?v=1743184126',
       quantity: 0 // Changed to 2 to show quantity adjustment works
     },
     {
       id: 'ex-2',
       name: 'Artisan Wooden Bowl',
-      price: 10000,
+      price: 200,
       image: 'https://www.spencerpeterman.com/wp-content/uploads/2020/08/spalted-live-edge-bowl.jpg',
       quantity: 0
     }
@@ -46,27 +46,27 @@ const CartPage = () => {
   }, []);
 
   return (
-    <div className="cart-page">
+    <main className="cart-page">
       <h1>Your Shopping Cart</h1>
       
       {cartItems.length === 0 ? (
-        <div className="empty-cart">
+        <section className="empty-cart">
           <p>Your cart is empty:(</p>
-        </div>
+        </section>
       ) : (
         <>
-          <div className="cart-items">
+          <section className="cart-items">
             {cartItems.map(item => (
-              <div key={item.id} className="cart-item">
-                <div className="item-image-container">
+              <article key={item.id} className="cart-item">
+                <figure className="item-image-container">
                   {item.image && (
                     <img src={item.image} alt={item.name} className="cart-item-image" />
                   )}
-                </div>
-                <div className="item-details">
+                </figure>
+                <section className="item-details">
                   <h3>{item.name}</h3>
                   <p>Price: R{item.price.toFixed(2)}</p>
-                  <div className="quantity-controls">
+                  <menu className="quantity-controls">
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
@@ -74,16 +74,16 @@ const CartPage = () => {
                     >
                       -
                     </button>
-                    <span className="quantity-value">{item.quantity}</span>
+                    <output className="quantity-value">{item.quantity}</output>
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="quantity-btn"
                     >
                       +
                     </button>
-                  </div>
+                  </menu>
                   <p className="subtotal">Subtotal: R{(item.price * item.quantity).toFixed(2)}</p>
-                </div>
+                </section>
                 <button 
                   onClick={() => removeFromCart(item.id)}
                   className="remove-btn"
@@ -91,37 +91,33 @@ const CartPage = () => {
                 >
                   ×
                 </button>
-              </div>
+              </article>
             ))}
-          </div>
+          </section>
           
-          <div className="cart-summary">
+          <aside className="cart-summary">
             <h3>Order Summary</h3>
-            <div className="summary-row">
-              <span>Subtotal:</span>
-              <span>R{totalPrice.toFixed(2)}</span>
-            </div>
-            <div className="summary-row">
-              <span>Shipping:</span>
-              <span>Free</span>
-            </div>
-            <div className="summary-row total">
-              <span>Total:</span>
-              <span>R{totalPrice.toFixed(2)}</span>
-            </div>
-            
-            <div className="cart-actions">
+            <section className="summary-row">
+              <p><strong>Subtotal:</strong> R{totalPrice.toFixed(2)}</p>
+            </section>
+            <section className="summary-row">
+             <p><strong>Shipping:</strong>Free</p>
+            </section>
+            <section className="summary-row total">
+              <p><strong>Total:</strong>R{totalPrice.toFixed(2)}</p>
+            </section>
+            <section className="cart-actions">
               <Link to="/checkout" className="checkout-btn">
                 Proceed to Checkout
               </Link>
               <button className="clear-btn" onClick={clearCart}>
                 Clear Cart
               </button>
-            </div>
-          </div>
+            </section>
+          </aside>
         </>
       )}
-    </div>
+    </main>
   );
 };
 
