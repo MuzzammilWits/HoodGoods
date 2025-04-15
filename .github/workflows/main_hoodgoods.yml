@@ -44,12 +44,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd backend
-          mkdir -p ../app
-          cp -r dist ../app/dist
-          cp package.json ../app/
-          cp package-lock.json ../app/
-          cd ..
-          zip -r release.zip app/
+          zip -r ../release.zip dist/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
