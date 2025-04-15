@@ -25,7 +25,7 @@ jobs:
       - name: Install production dependencies
         run: |
           cd backend
-          npm install --omit=dev
+          npm install
 
       - name: Build NestJS app
         run: |
