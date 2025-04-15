@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          zip -r ../release.zip .
 
   deploy:
     runs-on: ubuntu-latest
