@@ -24,7 +24,7 @@ import { AuthModule } from './auth/auth.module';
         synchronize: false,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         extra: {
-          // encrypt: true,
+           encrypt: true,
         },
       }),
       inject: [ConfigService],
