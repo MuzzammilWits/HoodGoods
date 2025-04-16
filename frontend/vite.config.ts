@@ -13,3 +13,6 @@ export default defineConfig({
     setupFiles: './src/setupTests.ts' // 👈 optional, for custom setup like jest-dom
   },
 })
+
+
+//working with  vite
