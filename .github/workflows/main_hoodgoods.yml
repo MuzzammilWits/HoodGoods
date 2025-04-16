@@ -1,5 +1,6 @@
 # Docs for Azure Web Apps Deploy: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+# Working verions of the code:
 
 name: Build and deploy NestJS app to Azure Web App - HoodGoods
 
