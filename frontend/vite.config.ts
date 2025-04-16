@@ -1,7 +1,15 @@
+/// <reference types="vitest" />
+
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  test: {
+    globals: true,           // 👈 this makes `expect` available
+    environment: 'jsdom',    // 👈 this mimics the browser
+    setupFiles: './src/setupTests.ts' // 👈 optional, for custom setup like jest-dom
+  },
 })
