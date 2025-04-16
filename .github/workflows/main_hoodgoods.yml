@@ -1,3 +1,6 @@
+# Docs for Azure Web Apps Deploy: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy NestJS app to Azure Web App - HoodGoods
 
 on:
@@ -22,7 +25,7 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Install production dependencies
+      - name: Install dependencies
         run: |
           cd backend
           npm install
@@ -32,10 +35,15 @@ jobs:
           cd backend
           npm run build
 
-      - name: Zip full backend folder for deployment
+      - name: Run tests (optional)
         run: |
           cd backend
-          zip -r ../release.zip ./
+          npm run test --if-present
+
+      - name: Zip artifact for deployment
+        run: |
+          cd backend
+          zip -r ../release.zip dist package.json package-lock.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -57,7 +65,7 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip -d backend
+        run: unzip release.zip -d app
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -72,4 +80,4 @@ jobs:
         with:
           app-name: 'HoodGoods'
           slot-name: 'Production'
-          package: ./backend
+          package: ./app
