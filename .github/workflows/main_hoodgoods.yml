@@ -37,11 +37,6 @@ jobs:
           cd backend
           npm run build
 
-#      - name: Run tests (optional)
-#        run: |
-#          cd backend
-#          npm run test --if-present
-
       - name: Zip artifact for deployment
         run: |
           cd backend
@@ -67,7 +62,7 @@ jobs:
           name: node-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip -d app
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -82,4 +77,4 @@ jobs:
         with:
           app-name: 'HoodGoods'
           slot-name: 'Production'
-          package: ./app
+          package: .
