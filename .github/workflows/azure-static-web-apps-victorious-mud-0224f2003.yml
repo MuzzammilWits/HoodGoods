@@ -1,73 +1,83 @@
-name: Azure Static Web Apps CI/CD
+# Docs for Azure Web Apps Deploy: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy NestJS app to Azure Web App - HoodGoods
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    permissions:
-      id-token: write
-      contents: read
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '20.x'
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ./frontend
+        run: |
+          cd backend
+          npm install
 
-      - name: Build Vite app
-        run: npm run build
-        working-directory: ./frontend
+      - name: Build NestJS app
+        run: |
+          cd backend
+          npm run build
 
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
+      - name: Run tests (optional)
+        run: |
+          cd backend
+          npm run test --if-present
 
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
+      - name: Zip artifact for deployment
+        run: |
+          cd backend
+          zip -r ../release.zip dist package.json package-lock.json
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-              const coredemo = require('@actions/core')
-              return await coredemo.getIDToken()
-          result-encoding: string
+          name: node-app
+          path: release.zip
 
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_MUD_0224F2003 }}
-          action: "upload"
-          app_location: "./frontend"
-          api_location: ""
-          output_location: "dist"
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          skip_deploy_on_missing_secrets: false
-
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+  deploy:
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
         with:
-          action: "close"
+          name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip -d app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E8A3AE7C0A2B4EE8BB72DEB2CA04592E }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A7942632F4AB432CB31F1660332BD653 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E4E0A05D52542C89C9AFDBA776942EB }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'HoodGoods'
+          slot-name: 'Production'
+          package: ./app
