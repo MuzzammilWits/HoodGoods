@@ -14,7 +14,7 @@ import { UserModule } from './user/user.module';
       username: 'postgres.euudlgzarnvbsvzlizcu',
       password: 'Muzzammil1!',
       database: 'postgres',
-      synchronize: false, // set to true if you want TypeORM to auto-create tables (dev only) Set this to true if your tables are fucking out 
+      synchronize: true, // set to true if you want TypeORM to auto-create tables (dev only) Set this to true if your tables are fucking out 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
 
       ssl: {
