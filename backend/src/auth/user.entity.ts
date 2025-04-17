@@ -1,20 +1,11 @@
 // src/auth/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('Users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn('varchar')
+  userID: string;
 
-  @Column({ unique: true })
-  auth0Id: string; // ID from Auth0 (example: auth0|12345)
-
-  @Column('text')
-  accessToken: string;
-
-  @Column({ nullable: true })
-  email?: string; // Optional: save email too
-
-  @Column({ nullable: true })
-  name?: string; // Optional: save name too
+  @Column({ default: 'buyer' })
+  role: string;
 }

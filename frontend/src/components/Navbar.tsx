@@ -21,13 +21,13 @@ const Navbar: React.FC = () => {
         console.log("✅ Access Token:", token);
   
         // Send token to your server
-        await fetch('http://localhost:3000/auth/save-token', {
+        await fetch('hoodgoods-fghkdgehaqe6f3ht.southafricanorth-01.azurewebsites.net/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`, // Pass the token as Bearer
           },
-          body: JSON.stringify({ token }), // Or send any other info you want
+         
         });
   
       } catch (e) {
