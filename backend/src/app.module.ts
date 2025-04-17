@@ -8,16 +8,17 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mssql',
-      host: 'hoodgoodsserver.database.windows.net',
-      port: 1433,
-      username: 'Muzzammil',
-      password: 'Password123!',
-      database: 'HoodGoodsDB',
-      synchronize: false,
+      type: 'postgres',
+      host: 'aws-0-eu-central-1.pooler.supabase.com',
+      port: 5432,
+      username: 'postgres.euudlgzarnvbsvzlizcu',
+      password: 'Muzzammil1!',
+      database: 'postgres',
+      synchronize: false, // set to true if you want TypeORM to auto-create tables (dev only) Set this to true if your tables are fucking out 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      extra: {
-        // encrypt: true,
+
+      ssl: {
+        rejectUnauthorized: false, // required for Supabase (self-signed certs)
       },
     }),
 
