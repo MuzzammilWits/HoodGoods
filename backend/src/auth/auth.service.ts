@@ -11,27 +11,19 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async saveUserToken(userInfo: any, token: string) {
-    const auth0Id = userInfo.sub;
-    const email = userInfo.email;
-    const name = userInfo.name;
+  async saveUserInfo(userInfo: any) {
+    const userID = userInfo.sub;
 
-    let user = await this.userRepository.findOne({ where: { auth0Id } });
+    let user = await this.userRepository.findOne({ where: { userID } });
 
     if (!user) {
       user = this.userRepository.create({
-        auth0Id,
-        accessToken: token,
-        email,
-        name,
+        userID,
+        role: 'buyer',
       });
-    } else {
-      user.accessToken = token; // Update token
-      user.email = email ?? user.email; // Update email if available
-      user.name = name ?? user.name;   // Update name if available
+      await this.userRepository.save(user);
     }
 
-    await this.userRepository.save(user);
-    return { message: 'Token saved successfully' };
+    return { message: 'User registered or already exists' };
   }
 }
