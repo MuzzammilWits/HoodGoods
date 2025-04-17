@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
         console.log("✅ Access Token:", token);
   
         // Send token to your server
-        await fetch('hoodgoods-fghkdgehaqe6f3ht.southafricanorth-01.azurewebsites.net/auth/register', {
+        await fetch('https://hoodgoods-fghkdgehaqe6f3ht.southafricanorth-01.azurewebsites.net/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
