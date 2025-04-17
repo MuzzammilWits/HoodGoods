@@ -32,11 +32,6 @@ jobs:
         run: npm install
         working-directory: ./frontend
 
-      # 🚫 Skipping tests
-      # - name: Run tests
-      #   run: npm test
-      #   working-directory: ./frontend
-
       - name: Build Vite app
         run: npm run build
         working-directory: ./frontend
@@ -64,6 +59,7 @@ jobs:
           output_location: "dist"
           github_id_token: ${{ steps.idtoken.outputs.result }}
           skip_deploy_on_missing_secrets: false
+
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
