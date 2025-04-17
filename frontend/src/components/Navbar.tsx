@@ -19,15 +19,27 @@ const Navbar: React.FC = () => {
         const token = await getAccessTokenSilently();
         sessionStorage.setItem('access_token', token);
         console.log("✅ Access Token:", token);
+  
+        // Send token to your server
+        await fetch('http://localhost:3000/auth/save-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Pass the token as Bearer
+          },
+          body: JSON.stringify({ token }), // Or send any other info you want
+        });
+  
       } catch (e) {
         console.error("❌ Error getting token:", e);
       }
     };
-
+  
     if (isAuthenticated) {
       fetchToken();
     }
   }, [isAuthenticated, getAccessTokenSilently]);
+  
 
   return (
     <nav className="navbar">
