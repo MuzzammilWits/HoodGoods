@@ -15,7 +15,7 @@ import { AuthModule } from './auth/auth.module';
       password: 'Muzzammil1!',
       database: 'postgres',
       synchronize: true, // set to true if you want TypeORM to auto-create tables (dev only!)
-      entities: [__dirname + '/*/.entity{.ts,.js}'],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       ssl: {
         rejectUnauthorized: false, // required for Supabase (self-signed certs)
       },
