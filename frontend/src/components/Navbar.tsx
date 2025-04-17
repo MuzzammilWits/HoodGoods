@@ -19,15 +19,27 @@ const Navbar: React.FC = () => {
         const token = await getAccessTokenSilently();
         sessionStorage.setItem('access_token', token);
         console.log("✅ Access Token:", token);
+  
+        // Send token to your server
+        await fetch('hoodgoods-fghkdgehaqe6f3ht.southafricanorth-01.azurewebsites.net/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Pass the token as Bearer
+          },
+         
+        });
+  
       } catch (e) {
         console.error("❌ Error getting token:", e);
       }
     };
-
+  
     if (isAuthenticated) {
       fetchToken();
     }
   }, [isAuthenticated, getAccessTokenSilently]);
+  
 
   return (
     <nav className="navbar">
