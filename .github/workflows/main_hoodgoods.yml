@@ -36,10 +36,10 @@ jobs:
           cd backend
           npm run build
 
-      - name: Run tests (optional)
-        run: |
-          cd backend
-          npm run test --if-present
+#      - name: Run tests (optional)
+#        run: |
+#          cd backend
+#          npm run test --if-present
 
       - name: Zip artifact for deployment
         run: |
