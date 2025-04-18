@@ -45,7 +45,6 @@ const Navbar: React.FC = () => {
           setRole(data.role);
           console.log("🧠 Role:", data.role);
 
-          // Show alert if user was trying to become a seller (only once)
           const wasTryingToBecomeSeller = sessionStorage.getItem('clicked_become_seller');
           if (wasTryingToBecomeSeller === 'true' && data.role !== 'seller') {
             alert("Welcome! Click 'Become a Seller' again to set up your shop.");
@@ -82,8 +81,8 @@ const Navbar: React.FC = () => {
             <a href="#about-us" className="nav-link">About Us</a>
           </li>
 
-          {/* Show Become a Seller or My Store */}
-          {role !== 'seller' && (
+          {/* Show Become a Seller button only for non-seller, non-admin users */}
+          {role !== 'seller' && role !== 'admin' && (
             <li className="nav-item">
               <button
                 className="nav-link"
@@ -105,9 +104,17 @@ const Navbar: React.FC = () => {
             </li>
           )}
 
+          {/* Show My Store button for sellers only */}
           {isAuthenticated && role === 'seller' && (
             <li className="nav-item">
               <Link to="/my-store" className="nav-link">My Store</Link>
+            </li>
+          )}
+
+          {/* Show Admin Dashboard button for admins only */}
+          {isAuthenticated && role === 'admin' && (
+            <li className="nav-item">
+              <Link to="/admin" className="nav-link">Admin Dashboard</Link>
             </li>
           )}
         </ul>
