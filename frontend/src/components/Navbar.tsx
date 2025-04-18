@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import './Navbar.css';
 import { logo } from './utils/ImageImports';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const Navbar: React.FC = () => {
   const {
     loginWithRedirect,
@@ -23,7 +25,7 @@ const Navbar: React.FC = () => {
         console.log("✅ Access Token:", token);
 
         // Send token to your server for registration
-        await fetch('http://localhost:3000/auth/register', {
+        await fetch(`${backendUrl}/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -32,7 +34,7 @@ const Navbar: React.FC = () => {
         });
 
         // Fetch role from backend
-        const roleRes = await fetch('http://localhost:3000/auth/me', {
+        const roleRes = await fetch(`${backendUrl}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

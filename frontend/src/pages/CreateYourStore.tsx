@@ -2,11 +2,13 @@ import React from 'react';
 
 const CreateYourStore: React.FC = () => {
 
+  const baseUrl = import.meta.env.VITE_BACKEND_URL;
+
   const handleCreateStore = async () => {
     const token = sessionStorage.getItem('access_token');
     try {
       // Change to your local URL for testing
-      const response = await fetch('http://localhost:3000/auth/promote-to-seller', {
+      const response = await fetch(`${baseUrl}/auth/promote-to-seller`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
