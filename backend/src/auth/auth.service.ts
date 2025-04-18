@@ -26,4 +26,35 @@ export class AuthService {
 
     return { message: 'User registered or already exists' };
   }
+
+
+  async promoteUserToSeller(userInfo: any) {
+    const userID = userInfo.sub;
+
+    const user = await this.userRepository.findOne({ where: { userID } });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.role === 'seller') {
+      return { message: 'User is already a seller' };
+    }
+
+    user.role = 'seller';
+    await this.userRepository.save(user);
+
+    return { message: 'User promoted to seller successfully' };
+  }
+  
+
+  async getUserRole(userID: string) {
+    const user = await this.userRepository.findOne({ where: { userID } });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return { role: user.role };
+  }
 }
