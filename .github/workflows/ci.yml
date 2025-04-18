@@ -1,3 +1,58 @@
+name: CI/CD for React + NestJS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  frontend-tests:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run frontend tests
+        run: npm run test
+
+  backend-tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run backend tests
+        run: npm run test
+
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
@@ -7,7 +62,7 @@
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -16,7 +71,7 @@
         run: npm install
         working-directory: ./frontend
 
-      - name: Run frontend tests (with coverage)
+      - name: Run frontend tests with coverage
         run: npm run test
         working-directory: ./frontend
 
@@ -24,7 +79,7 @@
         run: npm install
         working-directory: ./backend
 
-      - name: Run backend tests (with coverage)
+      - name: Run backend tests with coverage
         run: npm run test
         working-directory: ./backend
 
