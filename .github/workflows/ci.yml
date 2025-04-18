@@ -1,56 +1,36 @@
-name: CI/CD for React + NestJS
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  frontend-tests:
-    name: Run Frontend Tests
+  sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./frontend
+    needs: [frontend-tests, backend-tests]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run frontend tests
-        run: npm run test
-
-  backend-tests:
-    name: Run Backend Tests
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./backend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm install
+        working-directory: ./frontend
 
-      - name: Run backend tests
+      - name: Run frontend tests (with coverage)
         run: npm run test
+        working-directory: ./frontend
 
-  # Optional: You can add build & deploy jobs after test jobs
+      - name: Install backend dependencies
+        run: npm install
+        working-directory: ./backend
+
+      - name: Run backend tests (with coverage)
+        run: npm run test
+        working-directory: ./backend
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: .
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
