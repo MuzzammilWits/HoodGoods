@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
@@ -13,33 +13,54 @@ const Navbar: React.FC = () => {
     getAccessTokenSilently,
   } = useAuth0();
 
+  const [role, setRole] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchToken = async () => {
       try {
         const token = await getAccessTokenSilently();
         sessionStorage.setItem('access_token', token);
         console.log("✅ Access Token:", token);
-  
-        // Send token to your server
-        await fetch('https://hoodgoods-fghkdgehaqe6f3ht.southafricanorth-01.azurewebsites.net/auth/register', {
+
+        // Send token to your server for registration
+        await fetch('http://localhost:3000/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Pass the token as Bearer
+            'Authorization': `Bearer ${token}`,
           },
-         
         });
-  
+
+        // Fetch role from backend
+        const roleRes = await fetch('http://localhost:3000/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (roleRes.ok) {
+          const data = await roleRes.json();
+          setRole(data.role);
+          console.log("🧠 Role:", data.role);
+
+          // Show alert if user was trying to become a seller (only once)
+          const wasTryingToBecomeSeller = sessionStorage.getItem('clicked_become_seller');
+          if (wasTryingToBecomeSeller === 'true' && data.role !== 'seller') {
+            alert("Welcome! Click 'Become a Seller' again to set up your shop.");
+            sessionStorage.setItem('clicked_become_seller', 'handled');
+          }
+        } else {
+          console.error("❌ Could not fetch user role");
+        }
       } catch (e) {
         console.error("❌ Error getting token:", e);
       }
     };
-  
+
     if (isAuthenticated) {
       fetchToken();
     }
   }, [isAuthenticated, getAccessTokenSilently]);
-  
 
   return (
     <nav className="navbar">
@@ -58,9 +79,35 @@ const Navbar: React.FC = () => {
           <li className="nav-item">
             <a href="#about-us" className="nav-link">About Us</a>
           </li>
-          <li className="nav-item">
-            <a href="#become-seller" className="nav-link">Become A Seller</a>
-          </li>
+
+          {/* Show Become a Seller or My Store */}
+          {role !== 'seller' && (
+            <li className="nav-item">
+              <button
+                className="nav-link"
+                onClick={() => {
+                  const status = sessionStorage.getItem('clicked_become_seller');
+                  if (!status) {
+                    sessionStorage.setItem('clicked_become_seller', 'true');
+                  }
+
+                  if (!isAuthenticated) {
+                    loginWithRedirect();
+                  } else {
+                    window.location.href = '/create-store';
+                  }
+                }}
+              >
+                Become A Seller
+              </button>
+            </li>
+          )}
+
+          {isAuthenticated && role === 'seller' && (
+            <li className="nav-item">
+              <Link to="/my-store" className="nav-link">My Store</Link>
+            </li>
+          )}
         </ul>
 
         <div className="nav-icons">
