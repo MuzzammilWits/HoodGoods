@@ -52,6 +52,7 @@
   }
   
   .sign-in-btn {
+    color: aliceblue;
     background-color: #432C53;
     border: none;
     padding: 0.5rem 1rem;
