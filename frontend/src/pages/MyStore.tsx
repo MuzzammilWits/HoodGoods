@@ -1,7 +1,7 @@
 // frontend/src/pages/MyStore.tsx
 import React, { useState, useEffect, useCallback, useRef, ChangeEvent } from 'react'; // Added ChangeEvent
 import { useAuth0 } from '@auth0/auth0-react';
-import './MyStore.css';
+import './myStore.css';
 import { CreateProductDto } from '../../../backend/src/store/dto/create-product.dto'; // Adjust path if needed
 
 // --- Interface (Ensure imageURL is defined) ---
