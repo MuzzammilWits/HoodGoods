@@ -157,7 +157,8 @@ const MyStore: React.FC = () => {
               productPrice: newProduct.productPrice,
               productCategory: newProduct.productCategory,
               imageURL: imageUrl, // Use uploaded URL
-              storeName: store.storeName
+              storeName: store.storeName,
+              products: [] // Add an empty array or appropriate value for 'products'
           };
           const response = await fetch(`${baseUrl}/stores/products`, { // Send to backend
               method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(productDataToSend),
