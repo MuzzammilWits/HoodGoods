@@ -23,8 +23,15 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Configure API base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// Configure axios instance with default settings
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
 
 export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
@@ -49,15 +56,13 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
       try {
         if (isAuthenticated && user?.sub) {
           const token = await getAccessTokenSilently();
-          const response = await axios.get(`${API_BASE_URL}/cart`, {
+          const response = await api.get('/cart', {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
-          // Ensure we always set an array
           setCartItems(Array.isArray(response?.data) ? response.data : []);
         } else {
-          // For guests, use localStorage
           const savedCart = localStorage.getItem('cart');
           setCartItems(savedCart ? JSON.parse(savedCart) : []);
         }
@@ -79,12 +84,11 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
         try {
           if (isAuthenticated && user?.sub) {
             const token = await getAccessTokenSilently();
-            await axios.post(`${API_BASE_URL}/cart/sync`, 
+            await api.post('/cart/sync', 
               { items: cartItems },
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
-                  'Content-Type': 'application/json'
                 },
               }
             );
@@ -96,7 +100,12 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
         }
       };
       
-      persistCart();
+      // Add debounce to prevent too many syncs
+      const timer = setTimeout(() => {
+        persistCart();
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
   }, [cartItems, isLoading, isAuthenticated, user?.sub, getAccessTokenSilently]);
 
@@ -134,13 +143,8 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   };
 
   // Safe calculations
-  const totalItems = Array.isArray(cartItems)
-    ? cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
-    : 0;
-
-  const totalPrice = Array.isArray(cartItems)
-    ? cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0)
-    : 0;
+  const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
 
   return (
     <CartContext.Provider
