@@ -307,7 +307,7 @@ const CreateYourStore: React.FC = () => {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor={`product-price-${index}`}>Price ($)</label>
+                <label htmlFor={`product-price-${index}`}>Price (R)</label>
                 <input
                   type="number"
                   id={`product-price-${index}`}
