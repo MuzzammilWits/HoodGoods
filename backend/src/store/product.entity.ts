@@ -22,9 +22,10 @@ export class Product {
   @Column({ name: 'userID' })
   userID: string;
 
-  // REMOVE THIS LINE:
-  // @Column({ name: 'imageURL' })
-  // imageURL: string;
+  // --- ADD THIS BACK ---
+  @Column({ name: 'imageURL', type: 'varchar', length: 2048, nullable: true }) // Allow longer URLs, make nullable
+  imageURL: string | null; // Use string | null type
+  // --- END ADD ---
 
   @Column({ name: 'storeName' })
   storeName: string;

@@ -1,11 +1,35 @@
 // src/store/dto/update-product.dto.ts
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateProductDto } from './create-product.dto';
+import { IsString, IsOptional, IsNumber, Min, IsUrl } from 'class-validator';
+// You might want to use PartialType if you haven't already
+// import { PartialType } from '@nestjs/mapped-types';
+// import { CreateProductDto } from './create-product.dto';
+// export class UpdateProductDto extends PartialType(CreateProductDto) {}
+// If not using PartialType, define explicitly:
 
-// All fields from CreateProductDto will be optional here
-export class UpdateProductDto extends PartialType(CreateProductDto) {}
+export class UpdateProductDto {
+  @IsString()
+  @IsOptional()
+  productName?: string;
 
-// Note: CreateProductDto already had imageURL removed. 
-// If you need to specifically disallow changing the storeName during an update, 
-// you might need a more specific DTO or add logic in the service.
-// For now, this allows updating name, description, price, category, and potentially storeName.
+  @IsString()
+  @IsOptional()
+  productDescription?: string;
+
+  @IsNumber()
+  @Min(0.01)
+  @IsOptional()
+  productPrice?: number;
+
+  @IsString()
+  @IsOptional()
+  productCategory?: string;
+
+  // --- ADD THIS ---
+  @IsUrl()
+  @IsOptional() // Optional during updates
+  imageURL?: string;
+  // --- END ADD ---
+
+  // storeName is generally not updated per product
+  // userID is derived from the token, not the body
+}
