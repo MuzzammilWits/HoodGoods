@@ -10,7 +10,12 @@ export default defineConfig({
   test: {
     globals: true,           // 👈 this makes `expect` available
     environment: 'jsdom',    // 👈 this mimics the browser
-    setupFiles: './src/setupTests.ts' // 👈 optional, for custom setup like jest-dom
+    setupFiles: './src/setupTests.ts',// 👈 optional, for custom setup like jest-dom
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: 'coverage',
+      reporter: ['text', 'lcov'],
+    },
   },
 })
 
