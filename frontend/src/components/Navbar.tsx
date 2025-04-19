@@ -1,4 +1,3 @@
-// frontend/src/components/Navbar.tsx
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
@@ -19,16 +18,18 @@ const Navbar: React.FC = () => {
 
   // State to hold the user's role fetched from the backend
   const [role, setRole] = useState<string | null>(null);
+  const [isRoleLoading, setIsRoleLoading] = useState<boolean>(true); // Flag to handle loading state for role
 
   // Effect to fetch token and role when authentication state changes
   useEffect(() => {
     const fetchTokenAndRole = async () => {
-      // Only run if Auth0 is not loading and the user is authenticated
       if (!isLoading && isAuthenticated) {
         try {
           console.log("Navbar Effect: Getting token (isAuthenticated=true, isLoading=false)");
+
           // Fetch the access token silently
           const token = await getAccessTokenSilently();
+
           // Store the token in session storage for potential use elsewhere
           sessionStorage.setItem('access_token', token);
           console.log("✅ Access Token stored.");
@@ -50,43 +51,32 @@ const Navbar: React.FC = () => {
           });
 
           if (roleRes.ok) {
-            // If role fetch is successful, update the state
             const data = await roleRes.json();
             setRole(data.role);
             console.log("🧠 Role fetched:", data.role);
-
-            // Handle the specific flow for users who clicked "Become a Seller" before logging in
-            const wasTryingToBecomeSeller = sessionStorage.getItem('clicked_become_seller');
-            if (wasTryingToBecomeSeller === 'true' && data.role !== 'seller') {
-              alert("Welcome! Click 'Become a Seller' again to set up your shop.");
-              // Mark the alert as handled in session storage
-              sessionStorage.setItem('clicked_become_seller', 'handled');
-            }
           } else {
-            // Log error if role fetch fails and clear local role state
             console.error("❌ Could not fetch user role. Status:", roleRes.status);
             setRole(null);
           }
         } catch (e) {
-          // Handle errors during token fetching or role fetching
           console.error("❌ Error in fetchTokenAndRole:", e);
-          // Clear token/role on significant error
           sessionStorage.removeItem('access_token');
           setRole(null);
+        } finally {
+          setIsRoleLoading(false); // Ensure loading flag is set to false once role is fetched
         }
       } else if (!isLoading && !isAuthenticated) {
         // If Auth0 is done loading and user is NOT authenticated, clear token/role
         console.log("Navbar Effect: Clearing token/role (isAuthenticated=false, isLoading=false)");
         sessionStorage.removeItem('access_token');
         setRole(null);
+        setIsRoleLoading(false);
       } else {
-         // Log if the effect is skipped due to loading state or other conditions
-         console.log("Navbar Effect: Skipping fetch (isLoading=", isLoading, ", isAuthenticated=", isAuthenticated, ")");
+        console.log("Navbar Effect: Skipping fetch (isLoading=", isLoading, ", isAuthenticated=", isAuthenticated, ")");
       }
     };
 
     fetchTokenAndRole();
-    // Dependencies: run effect if any of these change
   }, [isAuthenticated, getAccessTokenSilently, isLoading, backendUrl]); // Added backendUrl
 
   // --- Render Logic ---
@@ -101,22 +91,17 @@ const Navbar: React.FC = () => {
         {/* Navigation Menu Links */}
         <ul className="nav-menu">
           {/* Standard navigation links */}
-          <li className="nav-item"><a href="#shop" className="nav-link">Shop</a></li>
+          <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
           <li className="nav-item"><a href="#featured-products" className="nav-link">Products</a></li>
           <li className="nav-item"><a href="#about-us" className="nav-link">About Us</a></li>
 
           {/* Conditional "Become a Seller" Button */}
           {/* Only show if Auth0 is done loading, user is authenticated, and role is NOT seller */}
-          {!isLoading && isAuthenticated && role !== 'seller' && (
+          {!isLoading && isAuthenticated && !isRoleLoading && role !== 'seller' && role !== 'admin' && (
             <li className="nav-item">
               <button
                 className="nav-link" // Use nav-link class for styling consistency (or create specific button style)
                 onClick={() => {
-                  // Set flag indicating user wants to become a seller
-                  const status = sessionStorage.getItem('clicked_become_seller');
-                  if (!status) {
-                    sessionStorage.setItem('clicked_become_seller', 'true');
-                  }
                   // Redirect to the create store page (assuming user is already authenticated here)
                   window.location.href = '/create-store';
                 }}
@@ -128,9 +113,17 @@ const Navbar: React.FC = () => {
 
           {/* Conditional "My Store" Link */}
           {/* Only show if Auth0 is done loading, user is authenticated, and role IS seller */}
-          {!isLoading && isAuthenticated && role === 'seller' && (
+          {!isLoading && isAuthenticated && !isRoleLoading && role === 'seller' && (
             <li className="nav-item">
               <Link to="/my-store" className="nav-link">My Store</Link>
+            </li>
+          )}
+
+          {/* Conditional "Admin Dashboard" Link */}
+          {/* Only show if user is authenticated and role is admin */}
+          {!isLoading && isAuthenticated && !isRoleLoading && role === 'admin' && (
+            <li className="nav-item">
+              <Link to="/admin-dashboard" className="nav-link">Admin Dashboard</Link>
             </li>
           )}
         </ul>
@@ -173,14 +166,15 @@ const Navbar: React.FC = () => {
           </a>
           <a href="#account" className="icon-link">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-6 9v-1a6 6 0 0 1 12 0v1" />
+              <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 0v5m0 0v5" />
             </svg>
           </a>
           <Link to="/cart" className="icon-link">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM8.3 5H19l-3 7H8.3M4.5 2h2l.6 3" />
+              <path fill="none" stroke="currentColor" strokeWidth="2" d="M2 4h4l3 9h8l3-9h4" />
+              <path fill="none" stroke="currentColor" strokeWidth="2" d="M7 13h10" />
             </svg>
-          </Link>
+            </Link>
         </div>
       </div>
     </nav>
