@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { CartItem } from './entities/cart-item.entity';
@@ -13,7 +13,10 @@ export class CartService {
   ) {}
 
   async getCart(userId: string): Promise<CartItem[]> {
-    return await this.cartItemRepository.find({ where: { userId } });
+    return await this.cartItemRepository.find({ 
+      where: { userId },
+      order: { createdAt: 'DESC' }
+    });
   }
 
   async addToCart(userId: string, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
@@ -34,6 +37,25 @@ export class CartService {
       userId,
     });
     return await this.cartItemRepository.save(cartItem);
+  }
+
+  async syncCart(userId: string, items: CreateCartItemDto[]): Promise<void> {
+    try {
+      await this.cartItemRepository.manager.transaction(async manager => {
+        await manager.delete(CartItem, { userId });
+        
+        const cartItems = items.map(item => 
+          manager.create(CartItem, { 
+            ...item,
+            userId
+          })
+        );
+        
+        await manager.save(cartItems);
+      });
+    } catch (error) {
+      throw new HttpException('Failed to sync cart', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async updateCartItem(
