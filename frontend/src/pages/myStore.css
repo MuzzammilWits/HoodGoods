@@ -1,3 +1,4 @@
+/* === Base and Layout Styles === */
 .my-store-container {
   max-width: 1200px;
   margin: 40px auto;
@@ -34,6 +35,7 @@
   background-color: #388e3c;
 }
 
+/* === Messages and Loading States === */
 .error-message {
   background-color: #fee;
   border-left: 4px solid #d32f2f;
@@ -43,8 +45,12 @@
   border-radius: 4px;
 }
 
-.loading,
-.loading-container, /* Added for consistency */
+.action-error {
+  margin-top: 15px; /* Space below header/form */
+  border-color: #d32f2f; /* Match error message style */
+}
+
+.loading-container,
 .store-error,
 .no-store {
   text-align: center;
@@ -72,6 +78,7 @@
   background-color: #3a7bc8;
 }
 
+/* === Add Product Form Styles === */
 .add-product-form {
   background-color: #f9f9f9;
   padding: 25px;
@@ -86,8 +93,16 @@
   color: #333;
 }
 
+/* === General Form Element Styles === */
 .form-group {
   margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
 }
 
 .form-row {
@@ -101,13 +116,6 @@
   margin-bottom: 0;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #333;
-}
-
 input[type="text"],
 input[type="number"],
 textarea,
@@ -117,33 +125,13 @@ select {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  box-sizing: border-box; /* Added for better layout */
+  box-sizing: border-box;
 }
 
-/* Input type file styling is no longer needed */
-/*
-input[type="file"] {
-  padding: 8px 0;
+textarea {
+  min-height: 60px; /* Adjust as needed */
+  vertical-align: top; /* Better alignment */
 }
-*/
-
-/* Image preview styling REMOVED */
-/*
-.image-preview {
-  margin-top: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-  height: 150px;
-  width: 150px;
-}
-
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-*/
 
 .form-actions {
   display: flex;
@@ -182,6 +170,16 @@ input[type="file"] {
   background-color: #3a7bc8;
 }
 
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* === Products Display Section === */
+.products-section {
+  margin-top: 40px;
+}
+
 .products-section h2 {
   margin-bottom: 20px;
   color: #333;
@@ -195,35 +193,21 @@ input[type="file"] {
   color: #666;
 }
 
-.add-first-product {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-top: 15px;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.add-first-product:hover {
-  background-color: #3a7bc8;
-}
-
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 25px;
 }
 
+/* === Product Card Styles === */
 .product-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: hidden; /* Prevents content spillover */
   transition: transform 0.3s, box-shadow 0.3s;
-  display: flex; /* Added for better structure with placeholder */
-  flex-direction: column; /* Added */
+  display: flex;
+  flex-direction: column; /* Stack image/details vertically */
+  background-color: #fff; /* Ensure background color */
 }
 
 .product-card:hover {
@@ -231,33 +215,13 @@ input[type="file"] {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Original product image styling REMOVED */
-/*
-.product-image {
-  height: 200px;
-  overflow: hidden;
-}
-
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-}
-
-.product-card:hover .product-image img {
-  transform: scale(1.05);
-}
-*/
-
-/* Placeholder styling added */
 .product-image-placeholder {
-  height: 200px; /* Match original image height */
-  background-color: #f0f0f0; /* Light gray background */
+  height: 200px;
+  background-color: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a0a0a0; /* Gray text */
+  color: #a0a0a0;
   font-size: 14px;
   text-align: center;
   border-bottom: 1px solid #e0e0e0; /* Optional separator */
@@ -265,7 +229,9 @@ input[type="file"] {
 
 .product-details {
   padding: 15px;
-  flex-grow: 1; /* Allow details to fill space */
+  flex-grow: 1; /* Allows details to fill available space */
+  display: flex;
+  flex-direction: column; /* Stack details and actions */
 }
 
 .product-details h3 {
@@ -277,7 +243,7 @@ input[type="file"] {
 
 .product-price {
   font-weight: bold;
-  color: #4caf50;
+  color: #388e3c; /* Darker green */
   margin: 5px 0;
 }
 
@@ -291,26 +257,161 @@ input[type="file"] {
   color: #555;
   font-size: 14px;
   margin-top: 10px;
-  /* Optional: limit description lines */
-  /* display: -webkit-box; 
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden; */
+  flex-grow: 1; /* Takes up space before actions */
+  line-height: 1.4; /* Improve readability */
 }
 
+/* === NEW/UPDATED Styles for Edit/Delete Buttons === */
+.product-actions {
+  margin-top: 15px; /* Space above buttons */
+  padding-top: 10px;
+  border-top: 1px solid #eee; /* Separator line */
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px; /* Space between buttons */
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+.product-actions button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.edit-button {
+  background-color: #e0e0e0;
+  color: #333;
+  border-color: #ccc;
+}
+
+.edit-button:hover {
+  background-color: #d5d5d5;
+  border-color: #bbb;
+}
+
+.delete-button {
+  background-color: #fbe9e7; /* Light red */
+  color: #c62828; /* Darker red text */
+  border-color: #ffcdd2; /* Light red border */
+}
+
+.delete-button:hover {
+  background-color: #ffcdd2;
+  border-color: #ef9a9a;
+}
+
+.delete-button:disabled {
+  background-color: #eeeeee;
+  color: #9e9e9e;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+  opacity: 0.7; /* Make it look disabled */
+}
+
+/* === Modal Styles === */
+.modal-backdrop {
+  position: fixed;
+  inset: 0; /* Equivalent to top:0, left:0, right:0, bottom:0 */
+  background-color: rgba(0, 0, 0, 0.6); /* Dark semi-transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+  padding: 20px; /* Padding for smaller screens */
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  width: 100%; /* Take available width */
+  max-width: 550px; /* Limit maximum width */
+  z-index: 1001; /* Above the backdrop */
+  max-height: 90vh; /* Limit height to prevent overflow */
+  overflow-y: auto; /* Enable scrolling if content exceeds max-height */
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* Ensure modal form elements use space well */
+.modal-content .form-group {
+  margin-bottom: 18px;
+}
+.modal-content .form-row {
+  margin-bottom: 18px;
+}
+.modal-content .form-actions {
+  margin-top: 30px;
+}
+
+.modal-error {
+  margin-bottom: 15px;
+  text-align: center; /* Center error text inside modal */
+  /* Inherits .error-message styles for color/background */
+}
+
+/* === Responsive Adjustments === */
 @media (max-width: 768px) {
   .store-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .form-row {
     flex-direction: column;
-    gap: 15px; /* Keep gap for spacing */
+    gap: 15px; /* Retain gap for vertical spacing */
   }
-  
+
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .modal-content {
+    padding: 20px; /* Reduce padding on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr; /* Single column layout */
+  }
+
+  .product-actions {
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 8px;
+    align-items: stretch; /* Make buttons full width */
+  }
+
+  .product-actions button {
+    width: 100%; /* Ensure buttons fill width */
+  }
+
+  .modal-content {
+    padding: 15px; /* Further reduce padding */
+    max-height: 95vh; /* Allow slightly more height */
+  }
+
+  .modal-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .form-actions {
+    flex-direction: column; /* Stack modal buttons */
+    gap: 10px;
+  }
+
+  .form-actions button {
+    width: 100%; /* Make modal buttons full width */
   }
 }
