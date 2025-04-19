@@ -1,32 +1,27 @@
 // src/store/dto/create-product.dto.ts
-import { IsString, IsNotEmpty, IsNumber, Min, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Min, IsUrl } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
-  @IsNotEmpty()
-  productName: string;
+  productName!: string;
 
   @IsString()
-  @IsNotEmpty()
-  productDescription: string;
+  productDescription!: string;
 
   @IsNumber()
   @Min(0.01)
-  productPrice: number;
+  productPrice!: number;
 
   @IsString()
-  @IsNotEmpty()
-  productCategory: string;
+  productCategory!: string;
+
+  @IsUrl()
+  imageURL!: string;
 
   @IsString()
-  @IsOptional() // Make optional if storeName can be inferred sometimes (like in addProduct service)
-  storeName?: string;
+  storeName!: string;
 
-  // --- ADD THIS ---
-  @IsUrl() // Validate that it's a URL
-  @IsNotEmpty() // Make it required for new products based on the flow
-  imageURL: string;
-  // --- END ADD ---
+  products!: any[]; // Adjust type as needed
 }
 
 // Used for the initial store creation
