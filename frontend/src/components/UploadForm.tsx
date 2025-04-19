@@ -1,6 +1,8 @@
 // frontend/src/components/UploadForm.tsx
 import { useState } from 'react';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+
 const UploadForm = () => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -17,7 +19,7 @@ const UploadForm = () => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch('http://localhost:3000/upload/image', {
+    const res = await fetch(`${backendUrl}/upload/image`, {
       method: 'POST',
       body: formData,
     });
