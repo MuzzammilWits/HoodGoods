@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import './CreateYourStore.css';
+import supabase from '../supabaseClient'; // adjust path if needed
+
 
 // Define product categories
 const PRODUCT_CATEGORIES = [
@@ -24,9 +26,10 @@ interface ProductFormData {
   productDescription: string;
   productPrice: string;
   productCategory: string;
-  // REMOVED: image: File | null;
-  // REMOVED: imagePreview: string;
+  image: File | null;
+  imagePreview: string;
 }
+
 
 interface StoreFormData {
   storeName: string;
@@ -41,6 +44,30 @@ const CreateYourStore: React.FC = () => {
   // const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const { data, error } = await supabase.storage.from('images').list('uploads', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+  
+      if (error) {
+        console.error('Error fetching images:', error.message);
+        return;
+      }
+  
+      const urls = data?.map((file: { name: any; }) => 
+        supabase.storage.from('images').getPublicUrl(`uploads/${file.name}`).data.publicUrl
+      ) || [];
+  
+      setGalleryImages(urls);
+    };
+  
+    fetchImages();
+  }, []);
+  
 
   // Check authentication using the token in sessionStorage
   useEffect(() => {
@@ -67,11 +94,26 @@ const CreateYourStore: React.FC = () => {
         productDescription: '',
         productPrice: '',
         productCategory: '',
-        // REMOVED: image: null,
-        // REMOVED: imagePreview: ''
+        image: null,
+        imagePreview: ''
       }
     ]
   });
+  const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const updatedProducts = [...formData.products];
+      updatedProducts[index].image = file;
+      updatedProducts[index].imagePreview = reader.result as string;
+      setFormData({ ...formData, products: updatedProducts });
+    };
+  
+    reader.readAsDataURL(file);
+  };
+  
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,8 +154,8 @@ const CreateYourStore: React.FC = () => {
           productDescription: '',
           productPrice: '',
           productCategory: '',
-          // REMOVED: image: null,
-          // REMOVED: imagePreview: ''
+          image: null,
+          imagePreview: ''
         }
       ]
     });
@@ -257,6 +299,17 @@ const CreateYourStore: React.FC = () => {
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+      {galleryImages.length > 0 && (
+  <div className="image-gallery">
+    <h2>Recently Uploaded Images</h2>
+    <div className="gallery-grid">
+      {galleryImages.map((url, index) => (
+        <img key={index} src={url} alt={`Uploaded ${index}`} className="gallery-image" />
+      ))}
+    </div>
+  </div>
+)}
+
 
       <form onSubmit={handleSubmit}>
         <div className="store-info-section">
@@ -320,22 +373,39 @@ const CreateYourStore: React.FC = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor={`product-category-${index}`}>Category</label>
-                <select
-                  id={`product-category-${index}`}
-                  value={product.productCategory}
-                  onChange={(e) => handleProductChange(index, 'productCategory', e.target.value)}
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+<div className="form-group">
+  <label htmlFor={`product-category-${index}`}>Category</label>
+  <select
+    id={`product-category-${index}`}
+    value={product.productCategory}
+    onChange={(e) => handleProductChange(index, 'productCategory', e.target.value)}
+    required
+  >
+    <option value="">Select a category</option>
+    {PRODUCT_CATEGORIES.map((category) => (
+      <option key={category} value={category}>
+        {category}
+      </option>
+    ))}
+  </select>
+</div>
+
+{/* Image upload section */}
+<div className="form-group">
+  <label htmlFor={`product-image-${index}`}>Product Image</label>
+  <input
+    type="file"
+    id={`product-image-${index}`}
+    accept="image/*"
+    onChange={(e) => handleImageUpload(index, e)}
+  />
+  {product.imagePreview && (
+    <div className="image-preview">
+      <img src={product.imagePreview} alt={`Preview for product ${index + 1}`} />
+    </div>
+  )}
+</div>
+
             </div>
 
             {/* Image input and preview section REMOVED */}
