@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from 'react'; // Import React if not already
-import { Auth0Provider, AppState, withAuthenticationRequired } from '@auth0/auth0-react';
+import { Auth0Provider, AppState} from '@auth0/auth0-react';
 import { Routes, Route, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { CartProvider } from './context/ContextCart'; // Ensure path is correct
 import './App.css';
