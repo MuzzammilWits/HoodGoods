@@ -28,9 +28,9 @@ export class CreateProductDto {
 export class CreateStoreWithProductsDto {
     @IsString()
     @IsNotEmpty()
-    storeName: string;
+    storeName!: string;
 
     // Ensure products within this DTO also validate the imageURL
     // You might need to use @ValidateNested() and @Type(() => CreateProductDto) if you haven't already
-    products: CreateProductDto[];
+    products!: CreateProductDto[];
 }
