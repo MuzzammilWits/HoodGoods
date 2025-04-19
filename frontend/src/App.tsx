@@ -10,6 +10,7 @@ import FeaturedProducts from './components/FeaturedProducts';
 import WhyChooseUs from './components/WhyChooseUs';
 import Footer from './components/Footer';
 import CartPage from './pages/CartPage';
+import ProductsPage from './pages/ProductsPage';
 
 function App() {
   const handleSearch = (query: string) => {
@@ -39,6 +40,7 @@ function App() {
                   <WhyChooseUs />
                 </>
               } />
+              <Route path="/products" element={<ProductsPage />} />
               <Route path="/cart" element={<CartPage />} />
 
             </Routes>
