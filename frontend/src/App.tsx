@@ -16,13 +16,13 @@ import Footer from './components/Footer';
 import CartPage from './pages/CartPage';
 import CreateYourStore from './pages/CreateYourStore';
 import MyStore from './pages/MyStore';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 // Define a component to handle protected routes
 // This uses withAuthenticationRequired HOC from Auth0 SDK
-const ProtectedRoute = ({ component, ...args }: { component: React.ComponentType, [key: string]: any }) => {
-  const Component = withAuthenticationRequired(component, args);
-  return <Component />;
-};
+import ProtectedRoute from './components/ProtectedRoute'; // adjust the path if it's somewhere else
+
 
 
 // Main App Component needs to be wrapped by BrowserRouter in main.tsx/index.tsx
@@ -77,13 +77,29 @@ const AppContent: React.FC = () => {
 
               {/* Protected Routes */}
               <Route
-                path="/create-store"
-                element={<ProtectedRoute component={CreateYourStore} />}
-              />
-              <Route
-                path="/my-store"
-                element={<ProtectedRoute component={MyStore} />}
-              />
+                  path="/create-store"
+                  element={
+                    <ProtectedRoute allowedRoles={['buyer']}>
+                      <CreateYourStore />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/my-store"
+                  element={
+                    <ProtectedRoute allowedRoles={['seller']}>
+                      <MyStore />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin-dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
               {/* Add other routes as needed */}
             </Routes>
           </main>
