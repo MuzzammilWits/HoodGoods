@@ -54,11 +54,23 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
     
     try {
       const token = await getAccessTokenSilently();
-      await api.post('/cart/sync', { items: cartItems }, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await api.post('/cart/sync', {
+        items: cartItems.map(item => ({
+          productId: item.productId,
+          name: item.name,
+          price: Number(item.price), // Ensure number
+          quantity: Number(item.quantity), // Ensure number
+          image: item.image || null
+        }))
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      return response.data;
     } catch (error) {
-      console.error('Failed to sync cart:', error);
+      throw error;
     }
   }, [cartItems, isAuthenticated, getAccessTokenSilently]);
 
