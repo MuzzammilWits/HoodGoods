@@ -74,14 +74,30 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   }, [cartItems, isLoading, isAuthenticated, syncCart]);
 
   const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
-    setCartItems(prev => {
-      const existing = prev.find(i => i.productId === item.productId);
-      return existing 
-        ? prev.map(i => i.productId === item.productId 
-            ? { ...i, quantity: i.quantity + 1 } 
-            : i)
-        : [...prev, { ...item, quantity: 1 }];
-    });
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await api.post('/cart', {
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        quantity: 1 // Default quantity
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      // Update local state
+      setCartItems(prev => {
+        const existing = prev.find(i => i.productId === item.productId);
+        return existing 
+          ? prev.map(i => i.productId === item.productId 
+              ? { ...i, quantity: i.quantity + 1 } 
+              : i)
+          : [...prev, { ...item, quantity: 1 }];
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
   };
 
   const removeFromCart = async (productId: string) => {

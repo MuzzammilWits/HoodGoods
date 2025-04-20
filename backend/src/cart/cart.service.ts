@@ -20,20 +20,28 @@ export class CartService {
   }
 
   async addToCart(userId: string, dto: CreateCartItemDto): Promise<CartItem> {
+    // First check if product exists (optional but recommended)
     const existingItem = await this.cartRepository.findOne({
-      where: { userId, productId: dto.productId }
+      where: { 
+        userId, 
+        productId: dto.productId 
+      }
     });
-
+  
     if (existingItem) {
-      existingItem.quantity += dto.quantity;
+      existingItem.quantity += dto.quantity || 1;
+      existingItem.updatedAt = new Date();
       return this.cartRepository.save(existingItem);
     }
-
+  
     const newItem = this.cartRepository.create({
       ...dto,
       userId,
-      createdAt: new Date()
+      quantity: dto.quantity || 1, // Default to 1 if not specified
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
+    
     return this.cartRepository.save(newItem);
   }
 

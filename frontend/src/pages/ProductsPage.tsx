@@ -4,19 +4,25 @@ import axios from 'axios';
 import './ProductsPage.css';
 
 interface Product {
-  id: number;
+  prodId: number;
   name: string;
-  price: number;
   description: string;
-  imageUrl: string;
-}
-
-interface CartItem {
-  productId: string;
-  name: string;
+  category: string;
   price: number;
-  image: string;
+  userId: string;
+  imageUrl: string;
+  storeName : string;
+  isActive : boolean;
 }
+// "prodId": "10",
+//   "name": "Corn",
+//   "description": "WTF",
+//   "category": "Clothing",
+//   "price": 1000,
+//   "userId": "auth0|6802e4ee8773a9cc0ae23d94",
+//   "imageUrl": "https://euudlgzarnvbsvzlizcu.supabase.co/storage/v1/object/public/images/uploads/1745066194700-interior.jpg",
+//   "storeName": "Testing Editing WIth Images",
+//   "isActive": true
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,7 +34,7 @@ const ProductsPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:3000/products');
-        
+
         if (!Array.isArray(response.data)) {
           throw new Error('Invalid data format received from server');
         }
@@ -41,7 +47,7 @@ const ProductsPage = () => {
           : err instanceof Error
           ? err.message
           : 'Failed to load products';
-          
+
         setError(errorMessage);
         setProducts([]);
       } finally {
@@ -52,14 +58,25 @@ const ProductsPage = () => {
     fetchProducts();
   }, []);
 
-  const handleAddToCart = (product: Product) => {
-    const cartItem: CartItem = {
-      productId: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.imageUrl
-    };
-    addToCart(cartItem);
+  const handleAddToCart = async (product: Product) => {
+    try {
+      if (!product.prodId) {
+        throw new Error('Product ID is missing');
+      }
+  
+      const cartItem = {
+        productId: product.prodId.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.imageUrl
+      };
+      
+      await addToCart(cartItem);
+      alert(`${product.name} added to cart!`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+    }
   };
 
   if (isLoading) {
@@ -70,7 +87,7 @@ const ProductsPage = () => {
     return (
       <div className="error-message">
         {error}
-        <button 
+        <button
           onClick={() => {
             setIsLoading(true);
             setError(null);
@@ -89,15 +106,16 @@ const ProductsPage = () => {
       <h1>Artisan Products</h1>
       <div className="products-grid">
         {products.map((product) => (
-          <div key={product.id} className="product-card">
+          <div key={product.prodId || `${product.name}-${product.price}`} className="product-card">
             <div className="product-image-container">
               <img
                 src={product.imageUrl}
                 alt={product.name}
                 className="product-image"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder-product.jpg';
-                  (e.target as HTMLImageElement).className = 'product-image placeholder';
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-product.jpg';
+                  target.classList.add('placeholder');
                 }}
               />
             </div>
