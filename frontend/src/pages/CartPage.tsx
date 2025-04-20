@@ -38,7 +38,7 @@ const CartPage = () => {
                 </figure>
                 <section className="item-details">
                   <h3 className="item-name">{item.name}</h3>
-                  <p className="item-price">R{item.price.toFixed(2)}</p>
+                  <p className="item-price">R{Number  (item.price).toFixed(2)}</p>
                   <section className="quantity-controls">
                     <button 
                       onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -56,7 +56,7 @@ const CartPage = () => {
                     </button>
                   </section>
                   <p className="item-subtotal">
-                    Subtotal: R{(item.price * item.quantity).toFixed(2)}
+                    Subtotal: R{(Number(item.price) * item.quantity).toFixed(2)}
                   </p>
                 </section>
                 <button 
@@ -74,7 +74,7 @@ const CartPage = () => {
             <h3 className="summary-title">Order Summary</h3>
             <section className="summary-row">
               <span>Subtotal:</span>
-              <span>R{totalPrice.toFixed(2)}</span>
+              <span>R{Number(totalPrice).toFixed(2)}</span>
             </section>
             <section className="summary-row">
               <span>Shipping:</span>
