@@ -1,17 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('cart_item')
 export class CartItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  userId: string; // This will store the Auth0 user ID
+  @Column({ name: 'userid', type: 'varchar' })
+  userId: string;
 
-  @Column()
+  @Column({ name: 'productid', type: 'varchar' })
   productId: string;
 
-  @Column()
+  @Column('varchar')
   name: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -20,12 +20,21 @@ export class CartItem {
   @Column('int')
   quantity: number;
 
-  @Column({ nullable: true })
-  image?: string;
+  @Column({ type: 'varchar', nullable: true })
+  image: string | null;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ 
+    name: 'createdat',
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP' 
+  })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @Column({ 
+    name: 'updatedat',
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP'
+  })
   updatedAt: Date;
-}
+} 

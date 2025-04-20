@@ -1,49 +1,49 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useCart } from '../context/ContextCart';
+import axios from 'axios';
+import './ProductsPage.css';
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   description: string;
+  imageUrl: string;
+}
+
+interface CartItem {
+  productId: string;
+  name: string;
+  price: number;
   image: string;
 }
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    // Simulate fetching products from Supabase
     const fetchProducts = async () => {
       try {
-        // In a real app, this would be an API call to your backend
-        // const response = await axios.get('/api/products');
-        // setProducts(response.data);
+        const response = await axios.get('http://localhost:3000/products');
         
-        // Mock data for demonstration
-        const mockProducts: Product[] = [
-          {
-            id: 'prod-1',
-            name: 'Handmade Ceramic Mug',
-            price: 24.99,
-            description: 'Beautiful handmade ceramic mug with unique glaze',
-            image: 'https://assets.woolworthsstatic.co.za/Reclaymed-Stoneware-Stipple-Mug-LINEN-509307238.jpg?V=5Fuf&o=eyJidWNrZXQiOiJ3dy1vbmxpbmUtaW1hZ2UtcmVzaXplIiwia2V5IjoiaW1hZ2VzL2VsYXN0aWNlcmEvcHJvZHVjdHMvaGVyby8yMDI0LTEwLTE2LzUwOTMwNzIzOF9MSU5FTl9oZXJvLmpwZyJ9&w=800&q=85'
-          },
-          {
-            id: 'prod-2',
-            name: 'Wooden Cutting Board',
-            price: 35.50,
-            description: 'Handcrafted oak cutting board',
-            image: 'https://assets.woolworthsstatic.co.za/Acacia-Wood-Double-Handle-Board-NATURAL-507866140.jpg?V=Luov&o=eyJidWNrZXQiOiJ3dy1vbmxpbmUtaW1hZ2UtcmVzaXplIiwia2V5IjoiaW1hZ2VzL2VsYXN0aWNlcmEvcHJvZHVjdHMvaGVyby8yMDI0LTAzLTA4LzUwNzg2NjE0MF9OQVRVUkFMX2hlcm8uanBnIn0&w=800&q=85'
-          }
-        ];
-        
-        setProducts(mockProducts);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+        if (!Array.isArray(response.data)) {
+          throw new Error('Invalid data format received from server');
+        }
+
+        setProducts(response.data);
+        setError(null);
+      } catch (err) {
+        const errorMessage = axios.isAxiosError(err)
+          ? err.response?.data?.message || err.message
+          : err instanceof Error
+          ? err.message
+          : 'Failed to load products';
+          
+        setError(errorMessage);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
@@ -52,31 +52,67 @@ const ProductsPage = () => {
     fetchProducts();
   }, []);
 
+  const handleAddToCart = (product: Product) => {
+    const cartItem: CartItem = {
+      productId: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.imageUrl
+    };
+    addToCart(cartItem);
+  };
+
   if (isLoading) {
-    return <div>Loading products...</div>;
+    return <div className="loading-spinner">Loading products...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-message">
+        {error}
+        <button 
+          onClick={() => {
+            setIsLoading(true);
+            setError(null);
+            setProducts([]);
+          }}
+          className="retry-button"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="products-container">
       <h1>Artisan Products</h1>
       <div className="products-grid">
-        {products.map(product => (
+        {products.map((product) => (
           <div key={product.id} className="product-card">
-            <img src={product.image} alt={product.name} className="product-image" />
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p className="product-price">R{product.price.toFixed(2)}</p>
-            <button 
-                onClick={() => addToCart({
-                    productId: product.id,  // Now matches the CartItem interface
-                    name: product.name,
-                    price: product.price,
-                    image: product.image
-                })}
+            <div className="product-image-container">
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="product-image"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder-product.jpg';
+                  (e.target as HTMLImageElement).className = 'product-image placeholder';
+                }}
+              />
+            </div>
+            <div className="product-details">
+              <h3 className="product-name">{product.name}</h3>
+              <p className="product-description">{product.description}</p>
+              <p className="product-price">R{product.price.toFixed(2)}</p>
+              <button
+                onClick={() => handleAddToCart(product)}
                 className="add-to-cart-btn"
-                >
+                aria-label={`Add ${product.name} to cart`}
+              >
                 Add to Cart
-                </button>
+              </button>
+            </div>
           </div>
         ))}
       </div>
