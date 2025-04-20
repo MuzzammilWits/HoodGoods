@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { ValidationPipe } from '@nestjs/common';// new for cart
-
+import { ProductsModule } from './products/products.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -16,14 +16,14 @@ import { ValidationPipe } from '@nestjs/common';// new for cart
       username: 'postgres.euudlgzarnvbsvzlizcu',
       password: 'Muzzammil1!',
       database: 'postgres',
-      synchronize: true, // set to true if you want TypeORM to auto-create tables (dev only!)
+      synchronize: false, // set to true if you want TypeORM to auto-create tables (dev only!)
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       ssl: {
         rejectUnauthorized: false, // required for Supabase (self-signed certs)
       },
     }),
 
-    AuthModule, CartModule ],// added cart module
+    AuthModule, CartModule,ProductsModule ],// added cart module
   controllers: [AppController],
   providers: [AppService],
 })

@@ -12,24 +12,14 @@ async function bootstrap() {
       transform: true,
     })
   );
-
-  // Enhanced CORS configuration
-  app.enableCors({
-    origin: [
-      'http://localhost:5173', // Vite frontend
-      'http://127.0.0.1:5173'  // Alternative localhost
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Accept',
-      'X-Requested-With'
-    ],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-  });
+//
+app.enableCors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true, // This fixes the credentials header issue
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+});
+// cart
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`Server running on port ${process.env.PORT ?? 3000}`);
