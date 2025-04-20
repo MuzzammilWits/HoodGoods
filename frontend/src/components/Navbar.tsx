@@ -52,9 +52,11 @@ const Navbar: React.FC = () => {
           <li className="nav-item">
             <a href="#shop" className="nav-link">Shop</a>
           </li>
+
           <li className="nav-item">
-            <a href="#featured-products" className="nav-link">Products</a>
-          </li>
+           <Link to="/products" className="nav-link">Products</Link>
+         </li> 
+
           <li className="nav-item">
             <a href="#about-us" className="nav-link">About Us</a>
           </li>
