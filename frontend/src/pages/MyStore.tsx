@@ -361,8 +361,6 @@ const MyStore: React.FC = () => {
         const token = sessionStorage.getItem('access_token') || await getToken(); if (!token) { setActionError("Authentication required to delete."); setDeletingProductId(null); return; }
         try {
             // Optional: Get image URL before deleting to clean up storage
-            const productToDelete = store?.products.find(p => p.productID === productId);
-            const imageUrlToDelete = productToDelete?.imageUrl; // Use imageUrl
 
             const response = await fetch(`${baseUrl}/stores/products/${productId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok && response.status !== 204) { // 204 No Content is also OK for DELETE
