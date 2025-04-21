@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.37% </span>
+                <span class="strong">4.44% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/93</span>
+                <span class='fraction'>4/90</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.37% </span>
+                <span class="strong">4.44% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>5/93</span>
+                <span class='fraction'>4/90</span>
             </div>
         
             
@@ -168,14 +168,8 @@
 <a name='L103'></a><a href='#L103'>103</a>
 <a name='L104'></a><a href='#L104'>104</a>
 <a name='L105'></a><a href='#L105'>105</a>
-<a name='L106'></a><a href='#L106'>106</a>
-<a name='L107'></a><a href='#L107'>107</a>
-<a name='L108'></a><a href='#L108'>108</a>
-<a name='L109'></a><a href='#L109'>109</a>
-<a name='L110'></a><a href='#L110'>110</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L106'></a><a href='#L106'>106</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -187,8 +181,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -283,8 +275,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import { useCart } from '../context/ContextCart';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-// import './CartPage.css'; // We'll create this
 &nbsp;
 const CartPage = <span class="fstat-no" title="function not covered" >() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
@@ -293,14 +283,12 @@ const CartPage = <span class="fstat-no" title="function not covered" >() =&gt; {
 <span class="cstat-no" title="statement not covered" >    updateQuantity,</span>
 <span class="cstat-no" title="statement not covered" >    totalPrice,</span>
 <span class="cstat-no" title="statement not covered" >    clearCart,</span>
-<span class="cstat-no" title="statement not covered" >    loadDemoItems</span>
+<span class="cstat-no" title="statement not covered" >    isLoading</span>
 <span class="cstat-no" title="statement not covered" >  } = useCart();</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (cartItems.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      loadDemoItems();</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >  }, [cartItems.length, loadDemoItems]);</span>
+<span class="cstat-no" title="statement not covered" >  if (isLoading) {</span>
+<span class="cstat-no" title="statement not covered" >    return &lt;div&gt;Loading cart...&lt;/div&gt;;</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
 <span class="cstat-no" title="statement not covered" >    &lt;main className="cart-container"&gt;</span>
@@ -310,25 +298,25 @@ const CartPage = <span class="fstat-no" title="function not covered" >() =&gt; {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      {cartItems.length === 0 ? (</span>
 <span class="cstat-no" title="statement not covered" >        &lt;section className="empty-cart"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;p className="empty-text"&gt;Your cart is empty :(&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;Link to="/" className="continue-shopping-btn"&gt;</span>
-            Continue Shopping
+<span class="cstat-no" title="statement not covered" >          &lt;p className="empty-text"&gt;Your cart is empty&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;Link to="/products" className="continue-shopping-btn"&gt;</span>
+            Browse Products
 <span class="cstat-no" title="statement not covered" >          &lt;/Link&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/section&gt;</span>
       ) : (
 <span class="cstat-no" title="statement not covered" >        &lt;section className="cart-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;section className="cart-items"&gt;</span>
 <span class="cstat-no" title="statement not covered" >            {cartItems.map(item =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >              &lt;article key={item.id} className="cart-item"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;article key={item.productId} className="cart-item"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;figure className="item-image-container"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;img src={item.image} alt={item.name} className="item-image" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/figure&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;section className="item-details"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;h3 className="item-name"&gt;{item.name}&lt;/h3&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;p className="item-price"&gt;R{item.price.toFixed(2)}&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;p className="item-price"&gt;R{Number  (item.price).toFixed(2)}&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;section className="quantity-controls"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;button </span>
-<span class="cstat-no" title="statement not covered" >                      onClick={() =&gt; updateQuantity(item.id, item.quantity - 1)}</span>
+<span class="cstat-no" title="statement not covered" >                      onClick={() =&gt; updateQuantity(item.productId, item.quantity - 1)}</span>
 <span class="cstat-no" title="statement not covered" >                      disabled={item.quantity &lt;= 1}</span>
 <span class="cstat-no" title="statement not covered" >                      className="quantity-btn"</span>
 <span class="cstat-no" title="statement not covered" >                    &gt;</span>
@@ -336,18 +324,18 @@ const CartPage = <span class="fstat-no" title="function not covered" >() =&gt; {
 <span class="cstat-no" title="statement not covered" >                    &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;span className="quantity"&gt;{item.quantity}&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;button </span>
-<span class="cstat-no" title="statement not covered" >                      onClick={() =&gt; updateQuantity(item.id, item.quantity + 1)}</span>
+<span class="cstat-no" title="statement not covered" >                      onClick={() =&gt; updateQuantity(item.productId, item.quantity + 1)}</span>
 <span class="cstat-no" title="statement not covered" >                      className="quantity-btn"</span>
 <span class="cstat-no" title="statement not covered" >                    &gt;</span>
                       +
 <span class="cstat-no" title="statement not covered" >                    &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;p className="item-subtotal"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                    Subtotal: R{(item.price * item.quantity).toFixed(2)}</span>
+<span class="cstat-no" title="statement not covered" >                    Subtotal: R{(Number(item.price) * item.quantity).toFixed(2)}</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;button </span>
-<span class="cstat-no" title="statement not covered" >                  onClick={() =&gt; removeFromCart(item.id)}</span>
+<span class="cstat-no" title="statement not covered" >                  onClick={() =&gt; removeFromCart(item.productId)}</span>
 <span class="cstat-no" title="statement not covered" >                  className="remove-btn"</span>
 <span class="cstat-no" title="statement not covered" >                  aria-label="Remove item"</span>
 <span class="cstat-no" title="statement not covered" >                &gt;</span>
@@ -361,7 +349,7 @@ const CartPage = <span class="fstat-no" title="function not covered" >() =&gt; {
 <span class="cstat-no" title="statement not covered" >            &lt;h3 className="summary-title"&gt;Order Summary&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;section className="summary-row"&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;span&gt;Subtotal:&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;span&gt;R{totalPrice.toFixed(2)}&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;span&gt;R{Number(totalPrice).toFixed(2)}&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;section className="summary-row"&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;span&gt;Shipping:&lt;/span&gt;</span>
@@ -397,7 +385,7 @@ export default CartPage;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-18T21:54:17.682Z
+                at 2025-04-21T21:12:40.318Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
