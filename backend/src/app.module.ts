@@ -7,6 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { ValidationPipe } from '@nestjs/common';// new for cart
 import { ProductsModule } from './products/products.module';
+import { StoreModule } from './store/store.module';
+import { UploadModule } from './upload/upload.module';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -23,7 +26,15 @@ import { ProductsModule } from './products/products.module';
       },
     }),
 
-    AuthModule, CartModule,ProductsModule ],// added cart module
+
+    AuthModule,
+    StoreModule,
+    UploadModule, 
+    CartModule,
+    ProductsModule, // Add the StoreModule here
+  ],
+  
+
   controllers: [AppController],
   providers: [AppService],
 })
