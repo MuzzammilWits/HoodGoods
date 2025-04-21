@@ -92,7 +92,7 @@ const Navbar: React.FC = () => {
         <ul className="nav-menu">
           {/* Standard navigation links */}
           <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
-          <li className="nav-item"><a href="#featured-products" className="nav-link">Products</a></li>
+          <li className="nav-item"><Link to="products" className="nav-link">Products</Link></li>
           <li className="nav-item"><a href="#about-us" className="nav-link">About Us</a></li>
 
           {/* Conditional "Become a Seller" Button */}

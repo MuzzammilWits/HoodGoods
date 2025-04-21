@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { StoreModule } from './store/store.module';
 import { UploadModule } from './upload/upload.module';
+import { ValidationPipe } from '@nestjs/common';// new for cart
+import { CartModule } from './cart/cart.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -25,7 +28,9 @@ import { UploadModule } from './upload/upload.module';
 
     AuthModule,
     StoreModule,
-    UploadModule,  // Add the StoreModule here
+    UploadModule,
+    CartModule,
+    ProductsModule  // Add the StoreModule here
   ],
   
   controllers: [AppController],

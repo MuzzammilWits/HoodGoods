@@ -19,9 +19,11 @@ import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 
 
+
 // Define a component to handle protected routes
 // This uses withAuthenticationRequired HOC from Auth0 SDK
 import ProtectedRoute from './components/ProtectedRoute'; // adjust the path if it's somewhere else
+import ProductsPage from './pages/ProductPage';
 
 
 
@@ -74,6 +76,7 @@ const AppContent: React.FC = () => {
               } />
               {/* Public Cart Route (can be protected if needed) */}
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/products" element={<ProductsPage/>}/>
 
               {/* Protected Routes */}
               <Route

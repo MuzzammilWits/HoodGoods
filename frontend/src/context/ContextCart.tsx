@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import axios from 'axios';
 
 interface CartItem {
-  id: string;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
@@ -10,110 +12,134 @@ interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
+  removeFromCart: (productId: string) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   totalItems: number;
   totalPrice: number;
-  loadDemoItems: () => void; // New function for demo purposes
+  isLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    // Try to load from localStorage first
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
-    }
-    return [];
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+    withCredentials: false,
   });
 
-  // Track if demo items were loaded
-  const [demoItemsLoaded, setDemoItemsLoaded] = useState<boolean>(false);
+  const fetchCart = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await api.get('/cart', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCartItems(response.data);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
 
-  // Persist cart to localStorage
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  // Cart actions
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(prevItem => prevItem.id === item.id);
-      return existingItem
-        ? prevItems.map(prevItem =>
-            prevItem.id === item.id
-              ? { ...prevItem, quantity: prevItem.quantity + 1 }
-              : prevItem
-          )
-        : [...prevItems, { ...item, quantity: 1 }];
-    });
-  };
-
-  const removeFromCart = (id: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-  };
-
-  const updateQuantity = (id: string, quantity: number) => {
-    setCartItems(prevItems => {
-      if (quantity <= 0) {
-        return prevItems.filter(item => item.id !== id);
-      }
-      return prevItems.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      );
-    });
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-    setDemoItemsLoaded(false);  // Reset demo items flag
-  };
-
-  // Demo items loader (for initial testing)
-  const loadDemoItems = () => {
-    // Only load demo items if they haven't been loaded before
-    if (!demoItemsLoaded) {
-      const demoItems: Omit<CartItem, 'quantity'>[] = [
-        {
-          id: 'demo-1',
-          name: 'Bracelet',
-          price: 25.99,
-          image: 'https://www.michakra.co.za/cdn/shop/files/2.-Triple-Protection-10mm_1200x.jpg?v=1700477897'
-        },
-        {
-          id: 'demo-2',
-          name: '"Ying-Yang" Bracelet',
-          price: 35.50,
-          image: 'https://media.takealot.com/covers_images/332c445f4d774fda85b96a4854843ba1/s-pdpxl.file'
+  const syncCart = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await api.post('/cart/sync', {
+        items: cartItems.map(item => ({
+          productId: item.productId,
+          name: item.name,
+          price: Number(item.price), // Ensure number
+          quantity: Number(item.quantity), // Ensure number
+          image: item.image || null
+        }))
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      ];
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }, [cartItems, isAuthenticated, getAccessTokenSilently]);
 
-      demoItems.forEach(item => addToCart(item));
-      setDemoItemsLoaded(true); // Set demo items flag as loaded
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      const timer = setTimeout(syncCart, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [cartItems, isLoading, isAuthenticated, syncCart]);
+
+  const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
+    try {
+      const token = await getAccessTokenSilently();
+      await api.post('/cart', {
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        quantity: 1 // Default quantity
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      // Update local state
+      setCartItems(prev => {
+        const existing = prev.find(i => i.productId === item.productId);
+        return existing 
+          ? prev.map(i => i.productId === item.productId 
+              ? { ...i, quantity: i.quantity + 1 } 
+              : i)
+          : [...prev, { ...item, quantity: 1 }];
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
     }
   };
 
-  // Calculated values
+  const removeFromCart = async (productId: string) => {
+    setCartItems(prev => prev.filter(item => item.productId !== productId));
+  };
+
+  const updateQuantity = async (productId: string, quantity: number) => {
+    setCartItems(prev => prev.map(item => 
+      item.productId === productId ? { ...item, quantity } : item
+    ).filter(item => item.quantity > 0));
+  };
+
+  const clearCart = async () => {
+    setCartItems([]);
+  };
+
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        totalPrice,
-        loadDemoItems
-      }}
-    >
+    <CartContext.Provider value={{
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      totalItems,
+      totalPrice,
+      isLoading
+    }}>
       {children}
     </CartContext.Provider>
   );
@@ -121,8 +147,6 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
+  if (!context) throw new Error('useCart must be used within CartProvider');
   return context;
 };
