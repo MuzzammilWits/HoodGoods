@@ -117,15 +117,7 @@ const Navbar: React.FC = () => {
           {/* Only show if Auth0 is done loading, user is authenticated, and role is NOT seller */}
           {!isLoading && isAuthenticated && !isRoleLoading && role !== 'seller' && role !== 'admin' && (
             <li className="nav-item">
-              <button
-                className="nav-link" // Use nav-link class for styling consistency (or create specific button style)
-                onClick={() => {
-                  // Redirect to the create store page (assuming user is already authenticated here)
-                  window.location.href = '/create-store';
-                }}
-              >
-                Become A Seller
-              </button>
+              <Link to="/create-store" className="nav-link">Become A Seller</Link>
             </li>
           )}
 

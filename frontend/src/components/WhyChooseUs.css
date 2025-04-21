@@ -1,18 +1,21 @@
+/* In WhyChooseUs.css */
+
 .why-choose-us {
   padding: 4rem 0;
+  /* background-color: var(--accent-background, #F5F1EC); */ /* Example using beige */
 }
 
 /* About Us section styling */
 .about-us-content {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid rgb(240, 235, 235);
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
 }
 
 .about-us-text {
-  font-size: 1.1rem;
+  font-size: 1.2rem; /* Increased size */
   line-height: 1.7;
-  color: #f9f9f9;
+  color: var(--text-color, #444); /* Check contrast */
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
@@ -30,6 +33,16 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Section title within this component */
+.why-choose-us-content .section-title,
+.about-us-content .section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    /* --- ADJUSTED: Set color to black --- */
+    color: black;
+}
+
 
 .features-grid {
   display: grid;
@@ -59,25 +72,28 @@
 .feature-icon svg {
   width: 24px;
   height: 24px;
-  color: var(--secondary-color);
+  color: var(--secondary-color, #B48C77);
 }
 
 .feature-title {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
+  /* --- ADJUSTED: Set color to black --- */
+  color: black;
 }
 
 .feature-description {
-  font-size: 0.9rem;
-  color: #fdfcfc;
-  line-height: 1.5;
+  font-size: 1rem; /* Increased size */
+  color: var(--text-color, #666); /* Check contrast */
+  line-height: 1.6;
 }
 
 .why-choose-us-image {
   border-radius: 8px;
   overflow: hidden;
   height: 100%;
+  align-self: center;
 }
 
 .why-choose-us-image img {
@@ -86,6 +102,7 @@
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(27, 27, 27, 0.1);
+  display: block;
 }
 
 /* Responsive styling */
@@ -93,11 +110,13 @@
   .why-choose-us-row {
     grid-template-columns: 1fr;
   }
-  
+
   .why-choose-us-image {
     order: -1;
-    height: 300px;
-    margin-bottom: 2rem;
+    height: 350px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
   }
 }
 
@@ -106,4 +125,13 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+  .why-choose-us-image {
+    height: 300px;
+  }
+   .about-us-text {
+       font-size: 1.1rem;
+   }
+   .feature-description {
+       font-size: 0.95rem;
+   }
 }

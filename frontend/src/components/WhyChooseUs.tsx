@@ -25,10 +25,10 @@ const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
 
 const WhyChooseUs: React.FC = () => {
   return (
-    <section className="why-choose-us light-purple-bg">
+    <section id="about-us" className="why-choose-us light-purple-bg">
       <div className="container">
         {/* First row: About Us */}
-        <div id="about-us" className="about-us-content">
+        <div className="about-us-content">
           <h2 className="section-title">About Us</h2>
           <p className="about-us-text">
             HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
