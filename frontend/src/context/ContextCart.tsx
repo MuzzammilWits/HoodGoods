@@ -29,7 +29,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [isLoading, setIsLoading] = useState(true);
 
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
     withCredentials: false,
   });
 
