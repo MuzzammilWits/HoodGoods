@@ -81,7 +81,7 @@ jobs:
         working-directory: ./backend
 
       - name: Run backend tests with coverage
-        run: npm run test
+        run: npm run test:cov
         working-directory: ./backend
 
       - name: SonarCloud Scan
