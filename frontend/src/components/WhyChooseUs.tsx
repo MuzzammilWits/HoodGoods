@@ -1,7 +1,9 @@
+// frontend/src/components/WhyChooseUs.tsx
+
 import React from 'react';
 import './WhyChooseUs.css';
-// Import interior image directly
-import { interiorImg } from './utils/ImageImports';
+// Import marketplace image directly (ensure path is correct relative to this file)
+import { marketplaceImg } from './utils/ImageImports';
 
 interface FeatureProps {
   icon: React.ReactNode;
@@ -32,58 +34,65 @@ const WhyChooseUs: React.FC = () => {
             HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
           </p>
         </div>
-        
+
         {/* Second row: Why Choose Us + Image */}
         <div className="why-choose-us-row">
           <div className="why-choose-us-content">
             <h2 className="section-title">Why Choose Us</h2>
-            
+
             <div className="features-grid">
-              <Feature 
+              <Feature
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M4 14h16M4 10h16M7 18l-3 4M17 18l3 4" />
                   </svg>
                 }
                 title="Fast & Free Shipping"
-                description="Donec mattis porta eros, aliquet finibus risus interdum at. Nulla vivethe as it was"
+                description="Get your handmade treasures delivered quickly—without extra cost. We offer speedy, reliable shipping across South Africa."
               />
-              
-              <Feature 
+
+              <Feature
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 6v6l4 2" />
                   </svg>
                 }
                 title="24/7 Support"
-                description="Donec mattis porta eros, aliquet finibus risus interdum at. Nulla vivethe as it was"
+                description="Need help? We’re here for you anytime, day or night. Whether it’s a question or a concern, we’ve got your back."
               />
-              
-              <Feature 
+
+              <Feature
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M22 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9 9 4 9 9zM8 15l3-3-3-3M12 12h6" />
                   </svg>
                 }
                 title="Hassle Free Returns"
-                description="Donec mattis porta eros, aliquet finibus risus interdum at. Nulla vivethe as it was"
+                description="Changed your mind? No problem. Enjoy easy returns with no stress, because we want you to love what you buy."
               />
-              
-              <Feature 
+
+              <Feature
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M3 6h18M3 12h18M3 18h18" />
                   </svg>
                 }
                 title="Easy to Shop"
-                description="Donec mattis porta eros, aliquet finibus risus interdum at. Nulla vivethe as it was"
+                description="Browse, discover, and buy with ease. Our clean, simple interface makes finding something special a breeze."
               />
             </div>
           </div>
-          
-          <div className="interior-image-container">
-            <img src={interiorImg} alt="Interior design with Hood Goods products" className="interior-image" />
+
+          {/* --- CORRECTED IMAGE SECTION --- */}
+          <div className="why-choose-us-image"> {/* Changed class name */}
+            <img
+              src={marketplaceImg}
+              alt="Artisan marketplace products display" 
+              // Class removed from img tag itself
+            />
           </div>
+          {/* --- END OF CORRECTED IMAGE SECTION --- */}
+
         </div>
       </div>
     </section>

@@ -1,102 +1,203 @@
+/* In Hero.css */
+
+/* Class now uses the new variable defined in index.css */
+/* --- UPDATED COMMENT: Reflects new accent color --- */
+.light-purple-bg { /* Now uses --accent-background (Earthy Terracotta) */
+  background-color: var(--accent-background, #a899b5); /* Fallback is new Terracotta */
+}
 
 .hero-section {
-    padding: 3rem 0;
-  }
-  
+  padding: 5rem 0;
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding: 0 1rem;
+  align-items: start;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* padding-top: 0.5rem; */ /* Adjust if needed */
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  /* --- White text still provides good contrast on new Terracotta bg --- */
+  color: var(--white, #fff);
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.hero-text {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 550px;
+  /* --- Lighter text still provides good contrast on new Terracotta bg --- */
+  color: rgba(from var(--white, #fff) r g b / 0.9); /* Slightly off-white */
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Buttons defined in App.css - should contrast ok */
+.btn:focus-visible {
+  /* --- White outline provides good contrast on new Terracotta bg --- */
+  outline: 2px solid var(--white, #fff);
+  outline-offset: 2px;
+}
+
+.hero-images {
+  position: relative;
+  top: 1.5rem; /* Nudge from previous step */
+  min-width: 0;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1rem;
+}
+
+.grid-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 1 / 1; /* Square images from previous step */
+}
+
+.grid-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.grid-item:hover img {
+  transform: scale(1.05);
+}
+
+/* Tag style adjusted for new theme */
+.tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  /* --- ADJUSTED: Use primary color (Deep Brown) with transparency --- */
+  background-color: rgba(from var(--primary-color, #6D4C41) r g b / 0.7); /* Translucent deep brown */
+  color: white; /* White text still contrasts well */
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.dots-decoration {
+  position: absolute;
+  bottom: -30px;
+  left: -25px;
+  z-index: -1;
+  opacity: 0.4; /* Further reduced opacity */
+}
+
+.dots {
+  width: 100px;
+  height: 100px;
+  /* --- White dots provide good contrast on new Terracotta bg --- */
+  background-image: radial-gradient(circle, var(--white, #fff) 1.5px, transparent 1.5px); /* Made dots slightly smaller */
+  background-size: 12px 12px;
+}
+
+/* --- Seller Prompt Styling (Adjusted for Dark BG - Terracotta) --- */
+.hero-seller-prompt {
+  margin-top: 2rem;
+  padding: 1rem;
+  /* Using subtle transparent white background - shows terracotta behind */
+  background-color: rgba(from var(--white, #fff) r g b / 0.1);
+  border-radius: 6px;
+  max-width: 550px;
+   /* Using subtle transparent white border */
+  border: 1px solid rgba(from var(--white, #fff) r g b / 0.2);
+}
+
+.hero-seller-prompt p {
+  font-size: 0.95rem;
+  /* White text contrasts well on the tinted terracotta bg */
+  color: var(--white, #fff);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hero-seller-prompt .link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  /* White link contrasts well */
+  color: var(--white, #fff);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600; /* Make link slightly bolder */
+  transition: opacity 0.2s ease;
+}
+
+.hero-seller-prompt .link-button:hover {
+  /* Make slightly transparent on hover */
+  opacity: 0.85;
+}
+/* --- End Seller Prompt Styling --- */
+
+
+/* --- Responsive adjustments --- */
+@media (max-width: 992px) {
   .hero-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    padding: 0 1rem;
+    align-items: start;
   }
-  
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+   .hero-images {
+      top: 1rem; /* Example adjustment */
   }
-  
-  .hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #432C53;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
+  .hero-title { font-size: 3.0rem; }
+  .hero-text { font-size: 1.1rem; }
+}
+
+@media (max-width: 768px) {
+  .hero-section { padding: 3rem 0; }
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+    align-items: initial;
   }
-  
-  .hero-text {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    max-width: 500px;
+  .hero-content { align-items: center; }
+   .hero-images {
+     position: static; /* Reset positioning */
+     width: 100%;
+     max-width: 450px;
+     margin: 0 auto;
   }
-  
-  .hero-buttons {
-    display: flex;
-    gap: 1rem;
-  }
-  
-  .hero-images {
-    position: relative;
-  }
-  
-  .image-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 1rem;
-    height: 100%;
-  }
-  
-  .grid-item {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-  }
-  
-  .grid-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .tag {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
-  
-  .dots-decoration {
-    position: absolute;
-    bottom: -20px;
-    left: -20px;
-    z-index: -1;
-  }
-  
-  .dots {
-    width: 100px;
-    height: 100px;
-    background-image: radial-gradient(circle, #432C53 2px, transparent 2px);
-    background-size: 10px 10px;
-  }
-  
-  @media (max-width: 768px) {
-    .hero-container {
-      grid-template-columns: 1fr;
-    }
-    
-    .hero-title {
-      font-size: 2.5rem;
-    }
-    
-    .hero-buttons {
-      flex-direction: column;
-    }
-  }
+  /* Reset aspect ratio for mobile? Optional */
+  .grid-item { aspect-ratio: 4 / 3; }
+  .hero-text { max-width: 100%; font-size: 1.1rem; }
+  .hero-title { font-size: 2.6rem; }
+  .hero-buttons { flex-direction: column; width: 100%; max-width: 300px; }
+  .dots-decoration { display: none; }
+  .hero-seller-prompt { max-width: 95%; margin-top: 1.5rem; padding: 0.8rem; }
+  .hero-seller-prompt p { font-size: 0.9rem; }
+}

@@ -1,19 +1,23 @@
+/* In index.css */
 :root {
-  --primary-color: #A1CFC0;
-  --secondary-color: #B48C77;
-  --text-color: #333;
-  --light-purple: #E6D9F0;
-  --light-gray: #f8f8f8;
+  /* --- UPDATED: Artisan Marketplace Theme Colors --- */
+  --primary-color: #9556c8;    /* Deep Warm Brown */
+  --secondary-color: #D7CCC8;  /* Light Warm Grayish-Brown/Tan */
+  --text-color: #e8e7e7;       /* Dark Gray (Softer than black) */
+  --accent-background: #BF5A36; /* Earthy Terracotta */
+  --light-gray: #f9f9f9;       /* Off-White/Very Light Gray */
   --white: #ffffff;
-  
+  --border-color: #cccccc;     /* Medium Gray */
+  /* --- End of color definitions --- */
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  
-  color-scheme: light dark;
-  color: var(--text-color);
-  background-color: var(--white);
-  
+
+  color-scheme: light; /* Assuming main theme remains light */
+  color: var(--text-color); /* Uses new Dark Gray */
+  background-color: var(--white); /* Main page background is white */
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -52,4 +56,5 @@ a {
 img {
   max-width: 100%;
   height: auto;
+  display: block; /* Add display block for consistency */
 }

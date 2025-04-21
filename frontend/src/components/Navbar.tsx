@@ -94,7 +94,23 @@ const Navbar: React.FC = () => {
           {/* Standard navigation links */}
           <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
           <li className="nav-item"><Link to="products" className="nav-link">Products</Link></li>
-          <li className="nav-item"><a href="#about-us" className="nav-link">About Us</a></li>
+          <li className="nav-item">
+            <Link
+              to="/#about-us"
+              className="nav-link"
+              onClick={() => {
+                if (window.location.pathname !== '/') {
+                  window.location.href = '/#about-us';
+                } else {
+                  const el = document.getElementById('about-us');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              About Us
+            </Link>
+          </li>
+      
 
 
           {/* Conditional "Become a Seller" Button */}
@@ -161,21 +177,8 @@ const Navbar: React.FC = () => {
           )}
 
           {/* Other Icons (Search, Account, Cart) */}
-          <a href="#search" className="icon-link">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM16 16l4.5 4.5" />
-            </svg>
-          </a>
-          <a href="#account" className="icon-link">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 0v5m0 0v5" />
-            </svg>
-          </a>
-          <Link to="/cart" className="icon-link">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M2 4h4l3 9h8l3-9h4" />
-              <path fill="none" stroke="currentColor" strokeWidth="2" d="M7 13h10" />
-            </svg>
+          <a href="#account" className="icon-link">👤</a>
+          <Link to="/cart" className="icon-link">🛒
             </Link>
         </div>
       </div>

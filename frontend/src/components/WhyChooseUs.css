@@ -6,13 +6,13 @@
 .about-us-content {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgb(240, 235, 235);
 }
 
 .about-us-text {
   font-size: 1.1rem;
   line-height: 1.7;
-  color: #444;
+  color: #f9f9f9;
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
@@ -70,7 +70,7 @@
 
 .feature-description {
   font-size: 0.9rem;
-  color: #666;
+  color: #fdfcfc;
   line-height: 1.5;
 }
 
@@ -85,7 +85,7 @@
   height: 100%;
   object-fit: cover;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(27, 27, 27, 0.1);
 }
 
 /* Responsive styling */
