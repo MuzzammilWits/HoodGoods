@@ -14,9 +14,13 @@ import FeaturedProducts from './components/FeaturedProducts';
 import WhyChooseUs from './components/WhyChooseUs';
 import Footer from './components/Footer';
 import CartPage from './pages/CartPage';
+
+import ProductsPage from './pages/ProductsPage';
+
 import CreateYourStore from './pages/CreateYourStore';
 import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
+
 
 
 // Define a component to handle protected routes
@@ -72,7 +76,11 @@ const AppContent: React.FC = () => {
                   <WhyChooseUs />
                 </>
               } />
+
+              <Route path="/products" element={<ProductsPage />} />
+
               {/* Public Cart Route (can be protected if needed) */}
+
               <Route path="/cart" element={<CartPage />} />
 
               {/* Protected Routes */}
