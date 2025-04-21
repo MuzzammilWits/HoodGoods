@@ -36,9 +36,8 @@ const Hero: React.FC = () => {
       <div className="hero-container">
         <div className="hero-content">
           <h1 className="hero-title">
-            Find Your<br />
-            Kind of<br />
-            Handmade
+            Find Your Kind<br />
+            Of Handmade     
           </h1>
           <p className="hero-text">
             From bold and modern to cozy and traditional,

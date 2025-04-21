@@ -43,17 +43,16 @@
 }
 
 .nav-link {
+  all: unset; /* 👈 Reset all native button styles /
+  display: inline-block; / 👈 Make it behave like a link */
   color: var(--text-color, #333);
   font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s ease;
-  padding: 0.5rem 0.25rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  /* --- ADJUSTED: Increased font size --- */
   font-size: 1.05rem;
   font-family: inherit;
+  padding: 0.5rem 0.25rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .nav-link:hover,

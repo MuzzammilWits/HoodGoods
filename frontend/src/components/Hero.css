@@ -1,13 +1,12 @@
 /* In Hero.css */
+/* Using your styles as the base, only changing hero-seller-prompt margin-top */
 
-/* Class now uses the new variable defined in index.css */
-/* --- UPDATED COMMENT: Reflects new accent color --- */
-.light-purple-bg { /* Now uses --accent-background (Earthy Terracotta) */
-  background-color: var(--accent-background, #a899b5); /* Fallback is new Terracotta */
+.light-purple-bg { /* Uses --accent-background from index.css */
+  background-color: var(--accent-background, #a899b5); /* Fallback color may need update based on index.css */
 }
 
 .hero-section {
-  padding: 5rem 0;
+  padding: 9rem 0; /* Increased padding from previous step */
 }
 
 .hero-container {
@@ -17,24 +16,25 @@
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   padding: 0 1rem;
-  align-items: start;
+  align-items: start; /* Keep top alignment */
 }
 
 .hero-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* padding-top: 0.5rem; */ /* Adjust if needed */
+  /* Content alignment defaults to left/start */
 }
 
 .hero-title {
   font-size: 3.5rem;
   font-weight: 700;
-  /* --- White text still provides good contrast on new Terracotta bg --- */
-  color: var(--white, #fff);
+  /* Color based on your provided code */
+  color: var(--white, #432C53ff); /* Assuming this was correct for your chosen bg */
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
+  /* text-align defaults to left */
 }
 
 .hero-text {
@@ -42,19 +42,28 @@
   line-height: 1.7;
   margin-bottom: 2.5rem;
   max-width: 550px;
-  /* --- Lighter text still provides good contrast on new Terracotta bg --- */
-  color: rgba(from var(--white, #fff) r g b / 0.9); /* Slightly off-white */
+  /* Color based on your provided code */
+  color: rgba(from var(--white, #ffffff) r g b / 0.9); /* Assuming this was correct */
+  /* text-align defaults to left */
 }
 
 .hero-buttons {
-  display: flex;
-  gap: 1rem;
+  /* Center only this container */
+  align-self: center;
   margin-top: 1rem;
+  display: inline-block;
 }
 
-/* Buttons defined in App.css - should contrast ok */
+/* Rule to make the button bigger */
+.hero-buttons .btn-primary {
+  padding: 1rem 2.5rem;  /* Increased padding */
+  font-size: 1.15rem; /* Increased font size */
+  display: inline-block;
+}
+/* --- End Button Size Styles --- */
+
 .btn:focus-visible {
-  /* --- White outline provides good contrast on new Terracotta bg --- */
+  /* Outline color based on your provided code */
   outline: 2px solid var(--white, #fff);
   outline-offset: 2px;
 }
@@ -77,7 +86,7 @@
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  aspect-ratio: 1 / 1; /* Square images from previous step */
+  aspect-ratio: 1 / 1; /* Square images */
 }
 
 .grid-item img {
@@ -92,14 +101,13 @@
   transform: scale(1.05);
 }
 
-/* Tag style adjusted for new theme */
 .tag {
   position: absolute;
   top: 10px;
   left: 10px;
-  /* --- ADJUSTED: Use primary color (Deep Brown) with transparency --- */
-  background-color: rgba(from var(--primary-color, #6D4C41) r g b / 0.7); /* Translucent deep brown */
-  color: white; /* White text still contrasts well */
+  /* Tag background based on your provided code */
+  background-color: rgba(from var(--primary-color, #6D4C41) r g b / 0.7); /* Check if #6D4C41 is correct primary */
+  color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -112,32 +120,35 @@
   bottom: -30px;
   left: -25px;
   z-index: -1;
-  opacity: 0.4; /* Further reduced opacity */
+  opacity: 0.4;
 }
 
 .dots {
   width: 100px;
   height: 100px;
-  /* --- White dots provide good contrast on new Terracotta bg --- */
-  background-image: radial-gradient(circle, var(--white, #fff) 1.5px, transparent 1.5px); /* Made dots slightly smaller */
+  /* Dots color based on your provided code */
+  background-image: radial-gradient(circle, var(--white, #fff) 1.5px, transparent 1.5px);
   background-size: 12px 12px;
 }
 
-/* --- Seller Prompt Styling (Adjusted for Dark BG - Terracotta) --- */
+/* --- Seller Prompt Styling --- */
 .hero-seller-prompt {
-  margin-top: 2rem;
+  /* --- ADJUSTED: Increased margin-top for more space below button --- */
+  margin-top: 3.5rem; /* Increased from 2rem - Adjust value as needed */
+  /* --- End adjustment --- */
   padding: 1rem;
-  /* Using subtle transparent white background - shows terracotta behind */
+  /* Background based on your provided code */
   background-color: rgba(from var(--white, #fff) r g b / 0.1);
   border-radius: 6px;
   max-width: 550px;
-   /* Using subtle transparent white border */
+   /* Border based on your provided code */
   border: 1px solid rgba(from var(--white, #fff) r g b / 0.2);
+  /* text-align defaults to left */
 }
 
 .hero-seller-prompt p {
   font-size: 0.95rem;
-  /* White text contrasts well on the tinted terracotta bg */
+  /* Color based on your provided code */
   color: var(--white, #fff);
   line-height: 1.6;
   margin: 0;
@@ -148,16 +159,15 @@
   border: none;
   padding: 0;
   font: inherit;
-  /* White link contrasts well */
+  /* Color based on your provided code */
   color: var(--white, #fff);
   text-decoration: underline;
   cursor: pointer;
-  font-weight: 600; /* Make link slightly bolder */
+  font-weight: 600;
   transition: opacity 0.2s ease;
 }
 
 .hero-seller-prompt .link-button:hover {
-  /* Make slightly transparent on hover */
   opacity: 0.85;
 }
 /* --- End Seller Prompt Styling --- */
@@ -170,34 +180,50 @@
     gap: 2rem;
     align-items: start;
   }
-   .hero-images {
-      top: 1rem; /* Example adjustment */
-  }
+   .hero-images { top: 1rem; }
   .hero-title { font-size: 3.0rem; }
   .hero-text { font-size: 1.1rem; }
+   .hero-section {
+       padding: 7rem 0; /* Adjust padding for medium screens */
+   }
+   .hero-seller-prompt {
+       margin-top: 3rem; /* Adjust spacing for medium screens */
+   }
 }
 
 @media (max-width: 768px) {
-  .hero-section { padding: 3rem 0; }
+  .hero-section {
+      padding: 4rem 0; /* Adjust padding for small screens */
+   }
   .hero-container {
     grid-template-columns: 1fr;
     gap: 2.5rem;
-    text-align: center;
     align-items: initial;
   }
-  .hero-content { align-items: center; }
-   .hero-images {
-     position: static; /* Reset positioning */
-     width: 100%;
-     max-width: 450px;
-     margin: 0 auto;
+  .hero-content {
+     align-items: flex-start; /* Align items left */
+     text-align: left; /* Align text left */
   }
-  /* Reset aspect ratio for mobile? Optional */
-  .grid-item { aspect-ratio: 4 / 3; }
+   .hero-images { position: static; width: 100%; max-width: 450px; margin: 1rem auto 0; }
+  .grid-item { aspect-ratio: 4 / 3; } /* Revert aspect ratio */
   .hero-text { max-width: 100%; font-size: 1.1rem; }
   .hero-title { font-size: 2.6rem; }
-  .hero-buttons { flex-direction: column; width: 100%; max-width: 300px; }
+  .hero-buttons {
+      align-self: center; /* Keep centering button */
+   }
+   .hero-buttons .btn-primary {
+     padding: 0.8rem 2rem;
+     font-size: 1rem;
+   }
   .dots-decoration { display: none; }
-  .hero-seller-prompt { max-width: 95%; margin-top: 1.5rem; padding: 0.8rem; }
+  .hero-seller-prompt {
+      max-width: 95%;
+      margin-top: 2.5rem; /* Adjust spacing for small screens */
+      padding: 0.8rem;
+      align-self: stretch;
+      margin-left: 0;
+      margin-right: 0;
+      text-align: left;
+  }
   .hero-seller-prompt p { font-size: 0.9rem; }
 }
