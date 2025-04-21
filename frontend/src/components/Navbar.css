@@ -1,95 +1,183 @@
+/* In Navbar.css */
+
+/* Ensure variables are defined in index.css :root */
+
 .navbar {
-    background-color: var(--light-purple);
-    padding: 1rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  
-  .navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 1rem;
-  }
-  
-  .logo-container {
-    flex: 0 0 auto;
-  }
-  
-  .logo {
-    height: 60px;
-    width: 60px;
-  }
-  
+  background-color: var(--light-purple, #F9F6FD);
+  padding: 0.8rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.logo-container {
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 55px;
+  width: 55px;
+  display: block;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  color: var(--text-color, #333);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  /* --- ADJUSTED: Increased font size --- */
+  font-size: 1.05rem;
+  font-family: inherit;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--secondary-color, #B48C77);
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--primary-color, #432C53);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* --- Authentication Button Styling --- */
+.sign-in-btn,
+.sign-out-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.sign-in-btn {
+  background-color: var(--primary-color, #432C53);
+  color: var(--white, #fff);
+  border-color: var(--primary-color, #432C53);
+}
+
+.sign-in-btn:hover,
+.sign-in-btn:focus {
+  background-color: #362245;
+  border-color: #362245;
+}
+
+.auth-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-greeting {
+  font-size: 0.9rem;
+  color: var(--text-color, #333);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sign-out-btn {
+  background-color: var(--white, #fff);
+  color: var(--primary-color, #432C53);
+  border: 1px solid var(--primary-color, #432C53);
+}
+
+.sign-out-btn:hover,
+.sign-out-btn:focus {
+  background-color: #f8f8f8;
+  border-color: #362245;
+  color: #362245;
+}
+
+.sign-in-btn:focus-visible,
+.sign-out-btn:focus-visible {
+   outline: 2px solid var(--primary-color, #432C53);
+   outline-offset: 2px;
+}
+/* --- End Authentication Button Styling --- */
+
+
+/* --- Icon Link Styling --- */
+.icon-link {
+  color: var(--text-color, #333);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.icon-link:hover,
+.icon-link:focus {
+  color: var(--secondary-color, #B48C77);
+}
+
+.icon-link svg {
+  /* --- ADJUSTED: Increased icon size --- */
+  width: 25px;
+  height: 25px;
+}
+
+.icon-link:focus-visible {
+   outline: 2px solid var(--primary-color, #432C53);
+   outline-offset: 2px;
+   border-radius: 50%;
+}
+/* --- End Icon Link Styling --- */
+
+
+/* --- Responsive Styling --- */
+@media (max-width: 768px) {
   .nav-menu {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    display: none;
   }
-  
-  .nav-item {
-    margin: 0 1rem;
+
+  .navbar-container {
+    justify-content: space-between;
   }
-  
-  .nav-link {
-    color: var(--text-color);
-    font-weight: 500;
-    text-decoration: none;
-    transition: color 0.3s ease;
+
+  .user-greeting {
+    display: none;
   }
-  
-  .nav-link:hover {
-    color: var(--secondary-color);
+  .auth-user {
+    gap: 0.5rem;
   }
-  
   .nav-icons {
-    display: flex;
-    align-items: center;
+      gap: 0.8rem;
   }
-  
-  .sign-in-btn {
-    background-color: #432C53;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    margin-right: 1rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  .icon-link {
-    margin-left: 1rem;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .icon-link svg {
-    width: 20px;
-    height: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    .nav-menu {
-      display: none;
-    }
-    
-    .navbar-container {
-      justify-content: space-between;
-    }
-    
-    .logo-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-    }
-    
-    .nav-icons {
-      flex: 0 0 auto;
-    }
-  }
+}

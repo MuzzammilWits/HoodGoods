@@ -8,9 +8,6 @@ import './App.css';
 // Import Components and Pages
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ExploreShops from './components/ExploreShops';
-import SearchBar from './components/SearchBar';
-import FeaturedProducts from './components/FeaturedProducts';
 import WhyChooseUs from './components/WhyChooseUs';
 import Footer from './components/Footer';
 import CartPage from './pages/CartPage';
@@ -43,10 +40,7 @@ const AppContent: React.FC = () => {
     navigate(appState?.returnTo || window.location.pathname || '/');
   };
 
-  // Search handler (remains the same)
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
-  };
+  
 
   return (
     <Auth0Provider
@@ -70,9 +64,6 @@ const AppContent: React.FC = () => {
               <Route path="/" element={
                 <>
                   <Hero />
-                  <ExploreShops />
-                  <SearchBar onSearch={handleSearch} />
-                  <FeaturedProducts />
                   <WhyChooseUs />
                 </>
               } />

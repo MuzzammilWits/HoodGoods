@@ -1,85 +1,42 @@
-// This file centralizes all image imports and provides fallbacks
-//import React from 'react';
-import ImagePlaceholder from './ImagePlaceholder';
+// frontend/src/components/utils/ImageImports.tsx
+// import React from 'react'; // Import React is needed for JSX
 
-// IMPORTANT: Using relative paths from the assets directory
-// Replace these with your actual images when available
-import logo from '../../assets/logo.svg';
-
-// For all other images, we'll use placeholder components until you add them
-// Product images - you should update these paths once you have the actual images
-const abstractArtImg = 'placeholder-abstract-art';
-const ecoJewelleryImg = 'placeholder-eco-jewellery';
-const scarfImg = 'placeholder-scarf';
-const leatherBagImg = 'placeholder-leather-bag';
-
-// Shop images
-const wristLoversImg = 'placeholder-wrist-lovers';
-const amberBloomImg = 'placeholder-amber-bloom';
-const clayRootImg = 'placeholder-clay-root';
-const wovenWildsImg = 'placeholder-woven-wilds';
+// Logo import
+// This path goes up two levels (from utils -> components -> src) then into assets
+import logo from '../../assets/logo.svg'; // <-- CORRECTED PATH
 
 // Hero and section images
-const jewelleryImg = 'placeholder-jewellery';
-const flowerImg = 'placeholder-flowers';
-const honeyImg = 'placeholder-honey';
-const ceramicsImg = 'placeholder-ceramics';
-const interiorImg = 'placeholder-interior';
+// --- IMPORTANT ---
+// The paths below assume your image files are directly inside 'frontend/src/assets/'.
+// Make sure the filenames and extensions (.jpg, .png, .webp, etc.) are correct.
+import jewelleryImg from '../../assets/jewellery.jpg';  // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
+import flowerImg from '../../assets/flowers.jpg';     // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
+import honeyImg from '../../assets/honey.jpg';       // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
+import ceramicsImg from '../../assets/ceramics.jpg';    // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
+import marketplaceImg from '../../assets/marketplace.jpg';    // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
 
-// Function to use placeholders for images that don't exist yet
-const getImage = (src: string, alt: string, width = 300, height = 200) => {
-  // Check if this is a real image path or a placeholder identifier
-  const isPlaceholder = src.startsWith('placeholder-');
-  
-  if (!isPlaceholder && src) {
-    // If it's a real image path, try to use it
-    return <img src={src} alt={alt} />;
-  } else {
-    // Otherwise use a placeholder with a color based on the image name
-    const colorMap: {[key: string]: string} = {
-      'abstract-art': '#F0AB00',
-      'eco-jewellery': '#9EC862',
-      'scarf': '#FF7D62',
-      'leather-bag': '#A0522D',
-      'wrist-lovers': '#6EB5FF',
-      'amber-bloom': '#FFCB62',
-      'clay-root': '#9D8189',
-      'woven-wilds': '#FF9EAA',
-      'jewellery': '#C792EA',
-      'flowers': '#FF96CB',
-      'honey': '#FFD54F',
-      'ceramics': '#80DEEA',
-      'interior': '#BDBDBD',
-    };
-    
-    // Extract the image type from the placeholder name
-    const imageType = src.replace('placeholder-', '');
-    const bgColor = colorMap[imageType] || '#e0e0e0';
-    
-    return <ImagePlaceholder 
-      width={width} 
-      height={height} 
-      text={`${alt} (${imageType})`}
-      backgroundColor={bgColor}
-      textColor="#ffffff"
-    />;
-  }
+
+/**
+ * Renders an actual HTML image element using the imported image source.
+ *
+ * @param src - The imported image variable (which resolves to a path or data URI).
+ * @param alt - The alternative text for the image.
+ * @param width - Optional desired width for the image element.
+ * @param height - Optional desired height for the image element.
+ * @returns A React image element (JSX.Element).
+ */
+const getImage = (src: string, alt: string, width?: number, height?: number): JSX.Element => {
+  // Directly render an <img> tag using the imported image source.
+  return <img src={src} alt={alt} width={width} height={height} />;
 };
 
+// Export the logo, the imported image variables, and the getImage function
 export {
   logo,
-  abstractArtImg,
-  ecoJewelleryImg,
-  scarfImg,
-  leatherBagImg,
-  wristLoversImg,
-  amberBloomImg,
-  clayRootImg,
-  wovenWildsImg,
   jewelleryImg,
   flowerImg,
   honeyImg,
   ceramicsImg,
-  interiorImg,
+  marketplaceImg,
   getImage
 };

@@ -1,3 +1,15 @@
+/* Define global CSS variables */
+:root {
+  /* Define your theme colors here */
+  --primary-color: #432C53; /* Example: Using your main purple as primary */
+  --secondary-color: #432C53; /* --- DEFINED HERE (using same purple for now) --- */
+  /* You might want a different color for secondary, e.g., #8a6a9a */
+  --light-purple: #F9F6FD; /* Defined from Hero section */
+  --text-color: #333333; /* Default text color */
+  --border-color: #e0e0e0; /* Default border color */
+  /* Add any other global variables */
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -28,6 +40,7 @@ main {
 
 .view-all {
   font-size: 0.9rem;
+  /* Uses the defined secondary color */
   color: var(--secondary-color);
   text-decoration: underline;
 }
@@ -38,19 +51,24 @@ main {
   font-weight: 500;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  border: none; /* Added to ensure consistency */
+  cursor: pointer; /* Added */
 }
 
 .btn-primary {
-  background-color: #432C53;
+  /* Uses the defined primary color */
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover {
+  /* Consider using color-mix or a variable for the hover state */
   background-color: #362245;
 }
 
 .btn-secondary {
   background-color: white;
+  /* Uses the defined secondary color */
   color: var(--secondary-color);
   border: 1px solid var(--secondary-color);
 }
@@ -66,8 +84,12 @@ main {
 }
 
 .light-purple-bg {
+  /* Uses the defined light purple color */
   background-color: var(--light-purple);
 }
+
+/* === Cart Styles === */
+/* (Keeping cart styles as they were) */
 .cart-container {
   padding: 2rem 1rem;
   max-width: 1200px;
@@ -92,7 +114,7 @@ main {
 
 .cart-item {
   display: flex;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color, #ddd); /* Using variable */
   padding: 1rem 0;
   gap: 1rem;
   align-items: center;
@@ -159,10 +181,14 @@ main {
 .cart-summary {
   flex: 1;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd); /* Using variable */
   border-radius: 8px;
   background-color: #f9f9f9;
   max-width: 350px;
+  /* Added to make it stick if needed */
+  /* align-self: flex-start; */
+  /* position: sticky; */
+  /* top: 2rem; */
 }
 
 .summary-title {
@@ -200,7 +226,7 @@ main {
 }
 
 .checkout-btn {
-  background-color: #432C53;
+  background-color: var(--primary-color); /* Using variable */
   color: white;
 }
 
