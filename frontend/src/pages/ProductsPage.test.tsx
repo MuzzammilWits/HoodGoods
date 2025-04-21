@@ -1,11 +1,9 @@
-import React from 'react';
 // Import 'within' for scoped queries inside elements
 import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter, Routes, Route } from 'react-router-dom'; // Use MemoryRouter for useSearchParams
 import { vi } from 'vitest'; // Or import { jest } from '@jest/globals'; if using Jest
 import axios from 'axios'; // Import axios to mock it
-import { useCart } from '../context/ContextCart'; // Adjust path
 import ProductsPage from './ProductsPage'; // Adjust path
 
 // --- Mocks ---
