@@ -26,7 +26,7 @@ interface UpdateProductPayload {
 
 // Frontend interface for a Product object (as received from GET /stores/my-store)
 interface Product {
-    productID: number; // Assuming backend transforms prodId to productID for frontend
+    prodId: number; // Assuming backend transforms prodId to productID for frontend
     name: string;           // Changed from productName
     description: string;    // Changed from productDescription
     price: number;          // Changed from productPrice
@@ -333,7 +333,7 @@ const MyStore: React.FC = () => {
 
 
             // 3. Send PATCH request to backend
-            const response = await fetch(`${baseUrl}/stores/products/${editingProduct.productID}`, {
+            const response = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(cleanedPayload), // Send only changed fields
@@ -355,14 +355,14 @@ const MyStore: React.FC = () => {
 
 
     // Delete Product
-    const handleDeleteClick = (productId: number) => { if (window.confirm("Are you sure you want to delete this product? This cannot be undone.")) { confirmDelete(productId); } };
-    const confirmDelete = async (productId: number) => { /* ... same delete logic ... */
-        setDeletingProductId(productId); setActionError(null);
+    const handleDeleteClick = (prodId: number) => { if (window.confirm("Are you sure you want to delete this product? This cannot be undone.")) { confirmDelete(prodId); } };
+    const confirmDelete = async (prodId: number) => { /* ... same delete logic ... */
+        setDeletingProductId(prodId); setActionError(null);
         const token = sessionStorage.getItem('access_token') || await getToken(); if (!token) { setActionError("Authentication required to delete."); setDeletingProductId(null); return; }
         try {
             // Optional: Get image URL before deleting to clean up storage
 
-            const response = await fetch(`${baseUrl}/stores/products/${productId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch(`${baseUrl}/stores/products/${prodId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok && response.status !== 204) { // 204 No Content is also OK for DELETE
                  const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
                  throw new Error(errorData.message || `Failed to delete product (${response.status})`);
@@ -437,7 +437,7 @@ const MyStore: React.FC = () => {
                     <div className="products-grid">
                         {/* Use new property names for display */}
                         {store.products.map((product) => (
-                            <div key={product.productID} className="product-card">
+                            <div key={product.prodId} className="product-card">
                                 {/* Use imageUrl */}
                                 <div className="product-image">
                                     {product.imageUrl ? (
@@ -454,8 +454,8 @@ const MyStore: React.FC = () => {
                                     <p className="product-description">{product.description}</p>
                                     <div className="product-actions">
                                         <button className="edit-button" onClick={() => openEditModal(product)} disabled={deletingProductId !== null || isSavingEdit}>Edit</button>
-                                        <button className="delete-button" onClick={() => handleDeleteClick(product.productID)} disabled={deletingProductId === product.productID || isSavingEdit}>
-                                            {deletingProductId === product.productID ? 'Deleting...' : 'Delete'}
+                                        <button className="delete-button" onClick={() => handleDeleteClick(product.prodId)} disabled={deletingProductId === product.prodId || isSavingEdit}>
+                                            {deletingProductId === product.prodId ? 'Deleting...' : 'Delete'}
                                         </button>
                                     </div>
                                 </div>
