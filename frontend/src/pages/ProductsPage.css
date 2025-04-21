@@ -124,3 +124,17 @@
   .retry-button:hover {
     background-color: #2c5fb3;
   }
+
+  .filters {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+  }
+  
+  .filters select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 200px;
+  }

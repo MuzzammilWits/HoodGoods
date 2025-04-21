@@ -88,7 +88,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
     try {
       const token = await getAccessTokenSilently();
-      await api.post('/cart', {
+      const response = await api.post('/cart', {
         productId: item.productId,
         name: item.name,
         price: item.price,
