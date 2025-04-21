@@ -15,4 +15,16 @@ export class ProductsService {
       order: { prodId: 'ASC' }
     });
   }
+
+  async findAll(filters?: { category?: string }): Promise<Product[]> {
+    const query = this.productRepository.createQueryBuilder('product');
+    
+    if (filters?.category) {
+      query.andWhere('product.productCategory = :category', { 
+        category: filters.category 
+      });
+    }
+    
+    return query.getMany();
+  }
 }
