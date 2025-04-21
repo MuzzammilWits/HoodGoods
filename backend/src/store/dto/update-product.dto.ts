@@ -1,9 +1,11 @@
 // src/store/dto/update-product.dto.ts
 
 export interface UpdateProductDto {
-  productName?: string;
-  productDescription?: string;
-  productPrice?: number;
-  productCategory?: string;
-  imageURL?: string;
+  name?: string;                 // Changed from productName
+  description?: string;          // Changed from productDescription
+  price?: number;                // Changed from productPrice
+  category?: string;             // Changed from productCategory
+  imageUrl?: string;             // Changed from imageURL
+  // storeName is typically not updated individually here, but managed at the store level
+  // isActive might be handled by separate activate/deactivate endpoints
 }

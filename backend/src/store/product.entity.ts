@@ -1,36 +1,31 @@
-// src/store/product.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../auth/user.entity';
+import { Entity, PrimaryColumn, Column } from 'typeorm';
 
-@Entity('Products')
+@Entity('Products') // Match your exact table name
 export class Product {
-  @PrimaryGeneratedColumn({ name: 'productID' })
-  productID: number;
-
-  @Column({ name: 'productName' })
-  productName: string;
+  @PrimaryColumn({ name: 'productID', type: 'int' })
+  prodId: number;
+  
+  @Column({ name: 'productName', type: 'varchar' })
+  name: string;
 
   @Column({ name: 'productdescription', type: 'text' })
-  productDescription: string;
+  description: string;
 
-  @Column({ name: 'productcategory' })
-  productCategory: string;
+  @Column({ name: 'productcategory', type: 'varchar' })
+  category: string;
 
-  @Column({ name: 'productprice', type: 'float4' })
-  productPrice: number;
+  @Column({ name: 'productprice', type: 'float' })
+  price: number;
 
-  @Column({ name: 'userID' })
-  userID: string;
+  @Column({ name: 'userID', type: 'varchar' })
+  userId: string;
 
-  // --- ADD THIS BACK ---
-  @Column({ name: 'imageURL', type: 'varchar', length: 2048, nullable: true }) // Allow longer URLs, make nullable
-  imageURL: string | null; // Use string | null type
-  // --- END ADD ---
+  @Column({ name: 'imageURL', type: 'varchar' })
+  imageUrl: string;
 
-  @Column({ name: 'storeName' })
+  @Column({ name: 'storeName', type: 'varchar' })
   storeName: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userID' })
-  user: User;
+  @Column({ name: 'is_active', type: 'boolean' })
+  isActive: boolean;
 }
