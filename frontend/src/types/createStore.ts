@@ -14,7 +14,7 @@ export interface ProductFormData {
     productPrice: string; // Keep as string for input control, parse on submit
     productCategory: string;
     image: File | null; // File object for upload
-    imagePreview: string; // Data URL string for preview
+    imagePreview: string |null; // Data URL string for preview
     imageURL?: string; // Final URL from backend (added after upload)
 }
 
