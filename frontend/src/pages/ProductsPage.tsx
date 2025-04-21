@@ -24,6 +24,8 @@ interface Product {
 //   "storeName": "Testing Editing WIth Images",
 //   "isActive": true
 
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,7 +35,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/products');
+        const response = await axios.get(`${backendUrl}/products`);
 
         if (!Array.isArray(response.data)) {
           throw new Error('Invalid data format received from server');
