@@ -1,21 +1,21 @@
 // frontend/src/pages/MyStore.tsx
 import React, { useState, useEffect, useCallback, useRef, ChangeEvent } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import './myStore.css';
-// REMOVED incorrect backend DTO import
+import './myStore.css'; // Make sure this CSS file exists and is styled appropriately
 
 // --- Frontend Type Definitions (Matching Backend Structure) ---
-// Type for the data structure expected when adding a product via POST /stores/products
+
+// Payload for adding a product
 interface AddProductPayload {
     name: string;
     description: string;
     price: number;
     category: string;
-    imageUrl: string; // Correct key
-    storeName?: string; // Optional, backend can infer if needed
+    imageUrl: string; // Correct key from backend upload response
+    storeName?: string; // Optional, backend might infer from authenticated user
 }
 
-// Type for the data structure expected when updating a product via PATCH /stores/products/:id
+// Payload for updating a product (all fields optional for PATCH)
 interface UpdateProductPayload {
     name?: string;
     description?: string;
@@ -24,483 +24,841 @@ interface UpdateProductPayload {
     imageUrl?: string; // Correct key
 }
 
-// Frontend interface for a Product object (as received from GET /stores/my-store)
+// Frontend representation of a Product (as received from GET /stores/my-store)
 interface Product {
-    prodId: number; // Assuming backend transforms prodId to productID for frontend
-    name: string;           // Changed from productName
-    description: string;    // Changed from productDescription
-    price: number;          // Changed from productPrice
-    category: string;       // Changed from productCategory
-    imageUrl?: string | null; // Changed from imageURL
-    // Add other fields if the backend sends them (e.g., isActive, storeName)
-    storeName?: string;
-    isActive?: boolean;
+    prodId: number; // Matches backend Product entity primary key name
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    imageUrl?: string | null; // Matches backend Product entity field name
+    storeName?: string; // If backend includes it
+    isActive?: boolean; // If backend includes it
 }
 
+// Frontend representation of the Store
 interface Store {
     storeName: string;
-    products: Product[]; // Uses the updated Product interface
+    products: Product[]; // Array of products using the Product interface
 }
 
 // Types for form state management
-type EditableProductFields = Omit<Product, 'productID' | 'imageUrl' | 'storeName' | 'isActive'>; // Fields editable in the modal
-type NewProductFields = Partial<Omit<Product, 'productID' | 'imageUrl' | 'storeName' | 'isActive'>> & {
-    imageFile?: File | null;
-    imagePreviewUrl?: string | null; // Separate state for preview URL
+// Fields directly editable in the modal (excluding ID, image URL, etc.)
+type EditableProductFields = Omit<Product, 'prodId' | 'imageUrl' | 'storeName' | 'isActive'>;
+// Fields for the "Add New Product" form state
+type NewProductFields = Partial<Omit<Product, 'prodId' | 'imageUrl' | 'storeName' | 'isActive'>> & {
+    imageFile?: File | null; // To hold the selected image file
+    imagePreviewUrl?: string | null; // To hold the data URL for preview
 };
 
 // --- Component ---
 const MyStore: React.FC = () => {
+    // --- Hooks ---
     const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0();
-    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; // Get base URL from environment variables
 
     // --- State ---
-    const [checkingAuth, setCheckingAuth] = useState(true);
-    const [loading, setLoading] = useState(true);
-    const [store, setStore] = useState<Store | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [actionError, setActionError] = useState<string | null>(null);
+    // General loading/error state
+    const [checkingAuth, setCheckingAuth] = useState(true); // Initial auth check state
+    const [loading, setLoading] = useState(true); // Data loading state
+    const [store, setStore] = useState<Store | null>(null); // Holds the fetched store data
+    const [error, setError] = useState<string | null>(null); // For general fetch errors
+    const [actionError, setActionError] = useState<string | null>(null); // For errors during CRUD actions (add, edit, delete)
 
     // Add Product State
     const initialNewProductState: NewProductFields = { name: '', description: '', price: 0, category: '', imageFile: null, imagePreviewUrl: null };
-    const [isAddingProductFormVisible, setIsAddingProductFormVisible] = useState(false);
-    const [isAddingProductLoading, setIsAddingProductLoading] = useState(false);
-    const [newProduct, setNewProduct] = useState<NewProductFields>(initialNewProductState);
-    const addFileInputRef = useRef<HTMLInputElement>(null);
+    const [isAddingProductFormVisible, setIsAddingProductFormVisible] = useState(false); // Toggle for add form
+    const [isAddingProductLoading, setIsAddingProductLoading] = useState(false); // Loading state for add action
+    const [newProduct, setNewProduct] = useState<NewProductFields>(initialNewProductState); // State for the new product form fields
+    const addFileInputRef = useRef<HTMLInputElement>(null); // Ref to clear file input
 
     // Edit Product State
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [editFormData, setEditFormData] = useState<Partial<EditableProductFields>>({});
-    const [editProductImage, setEditProductImage] = useState<File | null>(null);
-    const [editProductPreview, setEditProductPreview] = useState<string>('');
-    const [isSavingEdit, setIsSavingEdit] = useState(false);
-    const editFileInputRef = useRef<HTMLInputElement>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Toggle for edit modal
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null); // Holds the product being edited
+    const [editFormData, setEditFormData] = useState<Partial<EditableProductFields>>({}); // State for the edit form fields
+    const [editProductImage, setEditProductImage] = useState<File | null>(null); // Holds the *new* image file selected during edit
+    const [editProductPreview, setEditProductPreview] = useState<string>(''); // Holds preview URL for current or new image in edit modal
+    const [isSavingEdit, setIsSavingEdit] = useState(false); // Loading state for save action
+    const editFileInputRef = useRef<HTMLInputElement>(null); // Ref to clear file input
 
     // Delete Product State
-    const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+    const [deletingProductId, setDeletingProductId] = useState<number | null>(null); // Tracks which product ID is currently being deleted (for loading state)
 
     // --- Constants ---
-    const PRODUCT_CATEGORIES = [ /* ... same categories ... */
+    // Product categories for dropdowns
+    const PRODUCT_CATEGORIES = [
         'Home & Living', 'Jewellery & Accessories', 'Clothing', 'Bags & Purses', 'Art',
         'Crafts & Collectibles', 'Beauty & Wellness', 'Kids & Baby', 'Pet Goods',
         'Stationery & Paper Goods', 'Food & Beverage', 'Other'
     ];
 
-    // --- Utility & Fetching ---
-    const getToken = useCallback(async () => { /* ... same getToken ... */
+    // --- Utility & Fetching Functions ---
+
+    /**
+     * Gets the Auth0 access token silently, storing it in session storage.
+     * Redirects to login if token acquisition fails and not already on callback.
+     */
+    const getToken = useCallback(async (): Promise<string | null> => {
       try {
           const token = await getAccessTokenSilently();
-          sessionStorage.setItem('access_token', token);
+          sessionStorage.setItem('access_token', token); // Store token for subsequent requests
           return token;
       } catch (e) {
-          console.error("Error getting access token silently", e);
-          // Avoid redirect loop if already trying to log in
+          console.error("Error getting access token silently:", e);
+          // Avoid redirect loop if Auth0 callback parameters are present
           if (!window.location.search.includes('code=') && !window.location.search.includes('state=')) {
-              loginWithRedirect({ appState: { returnTo: window.location.pathname } });
+              loginWithRedirect({ appState: { returnTo: window.location.pathname } }); // Redirect to login
           }
-          return null;
+          return null; // Return null if token couldn't be obtained
       }
-    }, [getAccessTokenSilently, loginWithRedirect]);
+    }, [getAccessTokenSilently, loginWithRedirect]); // Dependencies for useCallback
 
-    const uploadImageToBackend = async (file: File, token: string): Promise<string> => { /* ... same uploadImageToBackend ... */
-        const imgFormData = new FormData();
-        imgFormData.append('file', file);
-        const res = await fetch(`${baseUrl}/upload/image`, {
+    /**
+     * Uploads an image file to the backend /upload/image endpoint.
+     * @param file The image File object.
+     * @param token The Auth0 access token.
+     * @returns A promise resolving to the uploaded image URL.
+     * @throws If the upload fails or the response doesn't contain a URL.
+     */
+    const uploadImageToBackend = async (file: File, token: string): Promise<string> => {
+        const imgFormData = new FormData(); // Use FormData for file uploads
+        imgFormData.append('file', file); // 'file' should match the key expected by backend (@UploadedFile('file'))
+
+        const res = await fetch(`${baseUrl}/upload/image`, { // Target the image upload endpoint
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: {
+                'Authorization': `Bearer ${token}`, // Authentication header
+                // 'Content-Type' is automatically set by the browser for FormData
+            },
             body: imgFormData,
         });
+
         if (!res.ok) {
-            const errorData = await res.json().catch(() => ({ message: 'Failed to parse upload error' }));
+            // Try to parse error message from backend response
+            const errorData = await res.json().catch(() => ({ message: 'Failed to parse upload error response' }));
             throw new Error(`Image upload failed: ${errorData.message || res.statusText}`);
         }
-        const data = await res.json();
-        if (!data.url) throw new Error(`Upload succeeded but response missing URL.`);
-        console.log("Image uploaded, URL:", data.url);
-        return data.url;
+
+        const data = await res.json(); // Parse successful response
+        if (!data.url) {
+            // Ensure the expected URL property is present
+            throw new Error(`Image upload succeeded but response missing URL.`);
+        }
+        console.log("Image uploaded successfully, URL:", data.url);
+        return data.url; // Return the URL of the uploaded image
     };
 
-    const fetchStoreData = useCallback(async (currentToken?: string) => { /* ... same fetchStoreData logic ... */
-        console.log("Fetching store data...");
-        setLoading(true); setError(null); setActionError(null);
+    /**
+     * Fetches the user's store data (including products) from the backend.
+     * Handles authentication and potential 404 (store not found).
+     * @param currentToken Optional token to use; otherwise, gets from session or Auth0.
+     */
+    const fetchStoreData = useCallback(async (currentToken?: string) => {
+        console.log("Attempting to fetch store data...");
+        setLoading(true); // Set loading state
+        setError(null); // Clear previous general errors
+        setActionError(null); // Clear previous action errors
+
+        // Get token if not provided
         const token = currentToken || sessionStorage.getItem('access_token') || await getToken();
-        if (!token) { setError("Authentication required to view store."); setLoading(false); setCheckingAuth(false); return; }
+        if (!token) {
+            // If no token can be obtained, set error and stop
+            setError("Authentication required to view your store.");
+            setLoading(false);
+            setCheckingAuth(false); // Ensure auth check completes
+            return;
+        }
+
         try {
-            const response = await fetch(`${baseUrl}/stores/my-store`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const response = await fetch(`${baseUrl}/stores/my-store`, { // Target the endpoint for the user's own store
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
             if (!response.ok) {
-                if (response.status === 404) { console.log("Store not found, redirecting to create store."); window.location.href = '/create-store'; return; }
+                // Handle specific 404 error (store not created yet)
+                if (response.status === 404) {
+                    console.log("Store not found (404). User may need to create one.");
+                    // Redirect to create store page or show appropriate message
+                    window.location.href = '/create-store'; // Example redirect
+                    // Alternatively: setError("You haven't created a store yet."); setStore(null);
+                    return; // Stop further processing
+                }
+                // Handle other errors
                 const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
                 throw new Error(errorData.message || `Failed to fetch store data (${response.status})`);
             }
-            // Expecting backend to return data matching the updated `Store` and `Product` interfaces
+
+            // Parse the store data from the successful response
             const storeData: Store = await response.json();
-            if (storeData && !storeData.products) { storeData.products = []; } // Ensure products array exists
-            console.log("Fetched Store Data:", storeData); // Log fetched data to check structure
-            setStore(storeData);
+            // Ensure the products array exists, even if empty
+            if (storeData && !storeData.products) {
+                storeData.products = [];
+            }
+            console.log("Fetched Store Data:", storeData);
+            setStore(storeData); // Update state with fetched data
+
         } catch (err: any) {
             console.error('Error fetching store data:', err);
-            setError(err.message || 'Failed to load store data.');
-            setStore(null); // Clear potentially stale data on error
+            setError(err.message || 'Failed to load store data.'); // Set general error message
+            setStore(null); // Clear potentially stale store data on error
+        } finally {
+            setLoading(false); // Clear loading state
+            setCheckingAuth(false); // Mark auth check as complete
         }
-        finally { setLoading(false); setCheckingAuth(false); }
-    }, [baseUrl, getToken]); // Removed fetchStoreData from its own dependencies
+    }, [baseUrl, getToken]); // Dependencies for useCallback
 
-    useEffect(() => { /* ... same auth check/load useEffect logic ... */
+    // --- Effect for Initial Authentication Check and Data Load ---
+    useEffect(() => {
+      /**
+       * Checks Auth0 authentication status and fetches store data accordingly.
+       * Handles redirects for login if necessary.
+       */
       const checkAuthAndLoad = async () => {
-          console.log("Checking auth and loading store...");
-          setCheckingAuth(true);
-          const sessionToken = sessionStorage.getItem('access_token');
+          console.log("Running auth check and load effect...");
+          setCheckingAuth(true); // Start auth check
+          const sessionToken = sessionStorage.getItem('access_token'); // Check for existing token in session
 
-          if (isAuthenticated) { // If Auth0 says authenticated
-              const currentToken = sessionToken || await getToken(); // Get token (from session or fresh)
+          if (isAuthenticated) { // If Auth0 hook indicates user is authenticated
+              console.log("Auth0 authenticated. Getting token and fetching data...");
+              const currentToken = sessionToken || await getToken(); // Use session token or fetch a new one
               if (currentToken) {
-                  await fetchStoreData(currentToken); // Fetch data
+                  await fetchStoreData(currentToken); // Fetch data if token is available
               } else {
-                  // This case might happen if getToken fails despite isAuthenticated being true
-                  console.error("Authenticated but failed to get token.");
-                  setError("Authentication issue: Could not retrieve token.");
-                  setCheckingAuth(false);
+                  // Should be rare if isAuthenticated is true, but handle defensively
+                  console.error("Authenticated according to Auth0, but failed to get token.");
+                  setError("Authentication issue: Could not retrieve access token.");
+                  setCheckingAuth(false); // Stop loading indicators
+                  setLoading(false);
               }
-          } else if (!sessionToken) { // Not authenticated by Auth0 AND no session token
-              console.log("Not authenticated, redirecting to login.");
-              // Avoid redirect loop if already on callback path
+          } else if (!sessionToken) { // If not authenticated by Auth0 AND no token in session
+              console.log("Not authenticated and no session token. Redirecting to login...");
+              // Redirect to login, avoiding loops if already on callback URL
                if (!window.location.search.includes('code=') && !window.location.search.includes('state=')) {
                    loginWithRedirect({ appState: { returnTo: window.location.pathname } });
                } else {
-                   // If we are on the callback path but somehow not authenticated, show loading/error
-                   console.log("On callback path but not authenticated.");
-                   setCheckingAuth(false); // Stop infinite loading
-                   setError("Processing login..."); // Or a more specific error
+                   // On callback path but not authenticated? Show processing message.
+                   console.log("On Auth0 callback path but not authenticated state.");
+                   setError("Processing login callback...");
+                   setCheckingAuth(false); // Stop loading indicators
+                   setLoading(false);
                }
-          } else if (sessionToken) {
-              // Has session token, but maybe Auth0 session expired? Attempt fetch anyway.
-              // getToken might trigger redirect if refresh fails.
-              console.log("Has session token, attempting fetch...");
+          } else if (sessionToken) { // Has session token, but Auth0 state might be stale (e.g., expired)
+              // Attempt to fetch data using the session token.
+              // If the token is invalid, fetchStoreData -> getToken might trigger login redirect.
+              console.log("Auth0 not authenticated, but session token exists. Attempting fetch...");
               await fetchStoreData(sessionToken);
           } else {
-              // Fallback, should ideally not be reached
-              console.log("Auth check fallback case.");
-              setCheckingAuth(false);
+              // Fallback case - should not normally be reached
+              console.log("Auth check fell through to fallback case.");
+              setError("Could not determine authentication status.");
+              setCheckingAuth(false); // Stop loading indicators
+              setLoading(false);
           }
       };
       checkAuthAndLoad();
-  }, [isAuthenticated, loginWithRedirect, getToken, fetchStoreData]); // Dependencies
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, loginWithRedirect, getToken]); // Rerun effect if auth state changes
 
 
     // --- CRUD Handlers ---
 
-    // Add Product
+    // --- Add Product ---
+
+    /** Handles changes in the text/number/select inputs for the "Add New Product" form */
     const handleNewProductChange = (field: keyof Omit<NewProductFields, 'imageFile' | 'imagePreviewUrl'>, value: string | number) => {
-        // Use new property names: name, description, price, category
         setNewProduct(prev => ({ ...prev, [field]: value }));
     };
+
+    /** Handles the file input change for the "Add New Product" form */
     const handleNewProductImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        setNewProduct(prev => ({ ...prev, imageFile: file }));
-        // Generate preview
+        const file = e.target.files?.[0] || null; // Get the selected file
+        setNewProduct(prev => ({ ...prev, imageFile: file })); // Store the file object
+
+        // Generate and store a preview URL if a file is selected
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => setNewProduct(prev => ({ ...prev, imagePreviewUrl: reader.result as string }));
-            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                setNewProduct(prev => ({ ...prev, imagePreviewUrl: reader.result as string }));
+            };
+            reader.readAsDataURL(file); // Read file as Data URL for preview
         } else {
-            setNewProduct(prev => ({ ...prev, imagePreviewUrl: null })); // Clear preview
+            // Clear preview if no file is selected
+            setNewProduct(prev => ({ ...prev, imagePreviewUrl: null }));
         }
     };
+
+    /** Handles the submission of the "Add New Product" form */
     const handleAddProduct = async () => {
-        if (!store) return; setActionError(null); setIsAddingProductLoading(true);
-        // Validate using new property names
+        if (!store) return; // Should not happen if component rendered correctly
+        setActionError(null); // Clear previous action errors
+        setIsAddingProductLoading(true); // Set loading state for add button
+
+        // --- Validation ---
         if (!newProduct.name || !newProduct.description || !newProduct.price || newProduct.price <= 0 || !newProduct.category || !newProduct.imageFile) {
-            setActionError('All fields (Name, Description, Price > 0, Category) and an image are required.'); setIsAddingProductLoading(false); return;
+            setActionError('All fields (Name, Description, Price > 0, Category) and an image are required.');
+            setIsAddingProductLoading(false);
+            return;
         }
-        const token = sessionStorage.getItem('access_token') || await getToken(); if (!token) { setActionError("Authentication required to add product."); setIsAddingProductLoading(false); return; }
+
+        // --- Authentication ---
+        const token = sessionStorage.getItem('access_token') || await getToken();
+        if (!token) {
+            setActionError("Authentication required to add product.");
+            setIsAddingProductLoading(false);
+            return;
+        }
 
         try {
-            const imageUrl = await uploadImageToBackend(newProduct.imageFile, token); // Upload image
+            // --- Image Upload ---
+            console.log("Uploading new product image...");
+            const imageUrl = await uploadImageToBackend(newProduct.imageFile, token);
+            console.log("New product image uploaded, URL:", imageUrl);
 
-            // Prepare data matching backend AddProductPayload (uses name, description, imageUrl)
+            // --- Prepare Payload ---
+            // Ensure payload matches the backend DTO structure (AddProductDto)
             const productDataToSend: AddProductPayload = {
-                name: newProduct.name,                      // Use new property name
-                description: newProduct.description,        // Use new property name
-                price: newProduct.price,                    // Use new property name
-                category: newProduct.category,              // Use new property name
-                imageUrl: imageUrl,                         // Use correct key: imageUrl
-                storeName: store.storeName,                 // Include store name
-                // NO 'products: []' needed here for adding single product
+                name: newProduct.name,
+                description: newProduct.description,
+                price: newProduct.price,
+                category: newProduct.category,
+                imageUrl: imageUrl, // Use the URL returned from the upload
+                storeName: store.storeName, // Include store name if backend needs it
             };
 
-            console.log("Sending Add Product Payload:", productDataToSend);
+            console.log("Sending Add Product Payload:", JSON.stringify(productDataToSend));
 
-            const response = await fetch(`${baseUrl}/stores/products`, { // Send to POST /stores/products
-                method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(productDataToSend),
+            // --- API Call ---
+            const response = await fetch(`${baseUrl}/stores/products`, { // POST to the products endpoint
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' // Set content type for JSON payload
+                },
+                body: JSON.stringify(productDataToSend), // Send the prepared data
             });
+
             if (!response.ok) {
+                // Handle API errors
                 const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
                 throw new Error(errorData.message || `Failed to add product (${response.status})`);
             }
-            // Success
-            setIsAddingProductFormVisible(false); setNewProduct(initialNewProductState); // Reset form
-            if (addFileInputRef.current) addFileInputRef.current.value = ""; // Clear file input visually
-            await fetchStoreData(token); // Refresh store data
+
+            // --- Success ---
+            console.log("Product added successfully.");
+            setIsAddingProductFormVisible(false); // Hide the form
+            setNewProduct(initialNewProductState); // Reset form fields
+            if (addFileInputRef.current) addFileInputRef.current.value = ""; // Clear the file input visually
+            await fetchStoreData(token); // Refresh the store data to show the new product
+
         } catch (err: any) {
             console.error("Add product error:", err);
-            setActionError(`Add product failed: ${err.message || 'Unknown error'}`);
+            setActionError(`Add product failed: ${err.message || 'Unknown error'}`); // Show error message
+        } finally {
+            setIsAddingProductLoading(false); // Clear loading state
         }
-        finally { setIsAddingProductLoading(false); }
     };
 
-    // Edit Product
+    // --- Edit Product ---
+
+    /** Opens the edit modal and populates it with the selected product's data */
     const openEditModal = (product: Product) => {
-        setEditingProduct(product);
-        // Initialize form data using new property names from the product object
+        console.log("Opening edit modal for product:", product.prodId);
+        setEditingProduct(product); // Store the product being edited
+        // Pre-fill form data from the product object
         setEditFormData({
-            name: product.name,                     // Use new property name
-            description: product.description,       // Use new property name
-            price: product.price,                   // Use new property name
-            category: product.category              // Use new property name
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            category: product.category
         });
-        setEditProductImage(null); // Reset selected file state
-        setEditProductPreview(product.imageUrl || ''); // Show CURRENT image URL (use imageUrl)
-        setIsEditModalOpen(true); setActionError(null);
+        setEditProductImage(null); // Reset any previously selected new image file
+        setEditProductPreview(product.imageUrl || ''); // Set initial preview to the product's current image URL
+        setIsEditModalOpen(true); // Show the modal
+        setActionError(null); // Clear any previous action errors
     };
-    const closeEditModal = () => { /* ... same closeEditModal ... */
-        setIsEditModalOpen(false); setEditingProduct(null); setEditFormData({}); setEditProductImage(null); setEditProductPreview(''); setActionError(null); setIsSavingEdit(false);
+
+    /** Closes the edit modal and resets related state */
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingProduct(null);
+        setEditFormData({});
+        setEditProductImage(null);
+        setEditProductPreview('');
+        setActionError(null); // Clear errors specific to the modal
+        setIsSavingEdit(false); // Reset saving state
     };
+
+    /** Handles changes in the text/number/select inputs for the "Edit Product" modal */
     const handleEditFormChange = (field: keyof EditableProductFields, value: string | number) => {
-        // Update state using new property names: name, description, price, category
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
-    const handleEditImageChange = (e: ChangeEvent<HTMLInputElement>) => { /* ... same handleEditImageChange ... */
+
+    /** Handles the file input change for the "Edit Product" modal */
+    const handleEditImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-        setEditProductImage(file); // Store the selected file (or null)
-        if (file) { // If a file is selected, show its preview
+        setEditProductImage(file); // Store the *newly selected* file (or null if cleared)
+
+        // Update preview based on selection
+        if (file) {
+            // Show preview of the *new* file
             const reader = new FileReader();
-            reader.onloadend = () => setEditProductPreview(reader.result as string); // Update preview state
+            reader.onloadend = () => setEditProductPreview(reader.result as string);
             reader.readAsDataURL(file);
-        } else { // If selection is cancelled, revert preview to the original product image
-            setEditProductPreview(editingProduct?.imageUrl || ''); // Use imageUrl
+        } else {
+            // If file input is cleared, revert preview to the *original* product image
+            setEditProductPreview(editingProduct?.imageUrl || '');
         }
     };
-    const handleUpdateProduct = async () => {
-        if (!editingProduct) return; setActionError(null); setIsSavingEdit(true);
-        const token = sessionStorage.getItem('access_token') || await getToken(); if (!token) { setActionError("Authentication required to update."); setIsSavingEdit(false); return; }
 
-        // Validate using new property names from editFormData
+    /** Handles the submission of the "Edit Product" modal form */
+    const handleUpdateProduct = async () => {
+        if (!editingProduct) return; // Should not happen if modal is open correctly
+        setActionError(null); // Clear previous modal errors
+        setIsSavingEdit(true); // Set loading state for save button
+
+        // --- Authentication ---
+        const token = sessionStorage.getItem('access_token') || await getToken();
+        if (!token) {
+            setActionError("Authentication required to update product.");
+            setIsSavingEdit(false);
+            return;
+        }
+
+        // --- Validation ---
+        // Basic validation for required fields during edit
         if (!editFormData.name || !editFormData.description || !editFormData.price || editFormData.price <= 0 || !editFormData.category) {
-            setActionError('All fields (Name, Description, Price > 0, Category) are required during edit.'); setIsSavingEdit(false); return;
+            setActionError('All fields (Name, Description, Price > 0, Category) are required during edit.');
+            setIsSavingEdit(false);
+            return;
         }
 
         try {
-            let imageUrlToSave = editingProduct.imageUrl; // Default to existing image URL (use imageUrl)
+            let imageUrlToSave = editingProduct.imageUrl; // Start with the existing image URL
 
-            // 1. Check if a *new* image file was selected
-            if (editProductImage) {
-                console.log("New image selected for edit, uploading...");
-                imageUrlToSave = await uploadImageToBackend(editProductImage, token);
+            // --- Image Upload (if new image selected) ---
+            if (editProductImage) { // Check if a new file was actually selected
+                console.log("New image selected for update. Uploading...");
+                imageUrlToSave = await uploadImageToBackend(editProductImage, token); // Upload the new image
                 console.log("New image uploaded, URL:", imageUrlToSave);
-                // Optional: Add logic here to delete the OLD image (editingProduct.imageUrl) from storage if it existed.
+                // Optional: Implement backend logic to delete the OLD image (editingProduct.imageUrl) if desired
             } else {
                  console.log("No new image selected, keeping existing URL:", imageUrlToSave);
             }
 
-            // 2. Prepare payload matching backend UpdateProductPayload (uses name?, description?, imageUrl?)
+            // --- Prepare Payload ---
+            // Initial payload with all potentially changed fields
             const updatePayload: UpdateProductPayload = {
-                name: editFormData.name,                     // Use new property name
-                description: editFormData.description,       // Use new property name
-                price: editFormData.price,                   // Use new property name
-                category: editFormData.category,             // Use new property name
-                imageUrl: imageUrlToSave ?? undefined        // Use correct key: imageUrl. Send undefined if null/empty.
+                name: editFormData.name,
+                description: editFormData.description,
+                price: editFormData.price,
+                category: editFormData.category,
+                // Use the potentially updated image URL. Send undefined if it becomes null/empty.
+                imageUrl: imageUrlToSave ?? undefined
             };
 
-            // Clean payload: Remove unchanged fields compared to original 'editingProduct'
-            // This is optional but good practice for PATCH to only send changed data.
+            // --- Create Cleaned Payload (Send Only Changed Fields - Good Practice for PATCH) ---
              const cleanedPayload: UpdateProductPayload = {};
-             let hasChanges = false;
+             let hasChanges = false; // Flag to track if any field actually changed
+
+             // Compare each field in the form data/new image URL with the original product data
              if (updatePayload.name !== editingProduct.name) { cleanedPayload.name = updatePayload.name; hasChanges = true; }
              if (updatePayload.description !== editingProduct.description) { cleanedPayload.description = updatePayload.description; hasChanges = true; }
              if (updatePayload.price !== editingProduct.price) { cleanedPayload.price = updatePayload.price; hasChanges = true; }
              if (updatePayload.category !== editingProduct.category) { cleanedPayload.category = updatePayload.category; hasChanges = true; }
              if (updatePayload.imageUrl !== editingProduct.imageUrl) { cleanedPayload.imageUrl = updatePayload.imageUrl; hasChanges = true; }
 
+             // If no changes were detected, close the modal and inform the user (optional)
              if (!hasChanges) {
-                 console.log("No changes detected.");
-                 closeEditModal(); // Close modal if no changes were made
-                 setIsSavingEdit(false);
-                 return;
+                 console.log("No changes detected in edit form.");
+                 closeEditModal(); // Close modal as nothing needs saving
+                 // Optionally set a temporary success/info message
+                 // setActionError("No changes were made.");
+                 // setTimeout(() => setActionError(null), 3000);
+                 setIsSavingEdit(false); // Ensure loading state is reset
+                 return; // Stop execution
              }
 
-             console.log("Sending Update Payload:", cleanedPayload);
+             console.log("Sending Update Payload (changed fields only):", JSON.stringify(cleanedPayload));
 
-
-            // 3. Send PATCH request to backend
-            const response = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(cleanedPayload), // Send only changed fields
+            // --- API Call ---
+            const response = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, { // PATCH to specific product ID
+                method: 'PATCH', // Use PATCH for partial updates
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cleanedPayload), // Send only the properties that changed
             });
+
             if (!response.ok) {
+                // Handle API errors
                 const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
                 throw new Error(errorData.message || `Failed to update product (${response.status})`);
             }
 
-            // Success
-            closeEditModal(); await fetchStoreData(token); // Close modal and refresh data
+            // --- Success ---
+            console.log("Product updated successfully.");
+            closeEditModal(); // Close the modal
+            await fetchStoreData(token); // Refresh store data to show updated product
 
         } catch (err: any) {
             console.error('Error updating product:', err);
-            setActionError(`Update failed: ${err.message || 'Unknown error'}`);
-            // Keep modal open to show error
-        } finally { setIsSavingEdit(false); }
+            setActionError(`Update failed: ${err.message || 'Unknown error'}`); // Show error within the modal
+            // Keep modal open when error occurs so user can see the message
+        } finally {
+            setIsSavingEdit(false); // Clear loading state
+        }
     };
 
 
-    // Delete Product
-    const handleDeleteClick = (prodId: number) => { if (window.confirm("Are you sure you want to delete this product? This cannot be undone.")) { confirmDelete(prodId); } };
-    const confirmDelete = async (prodId: number) => { /* ... same delete logic ... */
-        setDeletingProductId(prodId); setActionError(null);
-        const token = sessionStorage.getItem('access_token') || await getToken(); if (!token) { setActionError("Authentication required to delete."); setDeletingProductId(null); return; }
-        try {
-            // Optional: Get image URL before deleting to clean up storage
+    // --- Delete Product ---
 
-            const response = await fetch(`${baseUrl}/stores/products/${prodId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            if (!response.ok && response.status !== 204) { // 204 No Content is also OK for DELETE
+    /**
+     * Initiates the delete process. Checks if it's the last product before confirming.
+     * @param prodId The ID of the product to delete.
+     */
+    const handleDeleteClick = (prodId: number) => {
+        // Clear any previous action errors first
+        setActionError(null);
+
+        // *** Check if it's the last product ***
+        // Use optional chaining for safety, though `store` and `store.products` should exist if cards are rendered
+        if (store?.products && store.products.length <= 1) {
+            // Prevent deletion if it's the only product left
+            console.warn(`Attempt blocked: Trying to delete the last product (ID: ${prodId}).`);
+            setActionError("You cannot delete the last product in your store. Add another product first.");
+             // Optionally clear the error after a delay
+             setTimeout(() => {
+                 // Only clear if this specific error is still showing
+                 if (actionError === "You cannot delete the last product in your store. Add another product first.") {
+                    setActionError(null);
+                 }
+             }, 7000); // Clear after 7 seconds
+            return; // Exit the function, do not show confirmation
+        }
+
+        // If not the last product, proceed with confirmation dialog
+        if (window.confirm("Are you sure you want to delete this product? This cannot be undone.")) {
+            confirmDelete(prodId); // Call the function that performs the API request
+        }
+    };
+
+    /**
+     * Performs the actual DELETE request to the backend after confirmation.
+     * @param prodId The ID of the product to delete.
+     */
+    const confirmDelete = async (prodId: number) => {
+        // Reset error at the beginning of the actual delete attempt
+        setActionError(null);
+        setDeletingProductId(prodId); // Set loading state for the specific product being deleted
+
+        // --- Authentication ---
+        const token = sessionStorage.getItem('access_token') || await getToken();
+        if (!token) {
+             setActionError("Authentication required to delete.");
+             setDeletingProductId(null); // Reset loading state
+             return;
+        }
+
+        try {
+            // Optional: Find product details *before* deleting if you need them (e.g., image URL for cleanup)
+            // const productToDelete = store?.products.find(p => p.prodId === prodId);
+            // const imageUrlToDelete = productToDelete?.imageUrl;
+
+            console.log(`Attempting to delete product with ID: ${prodId}`); // Log the ID being targeted
+
+            // --- API Call ---
+            const response = await fetch(`${baseUrl}/stores/products/${prodId}`, { // DELETE request to specific product ID
+                 method: 'DELETE',
+                 headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            // Check response status (200 OK or 204 No Content are usually success for DELETE)
+            if (!response.ok && response.status !== 204) {
+                 // Handle API errors
                  const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
-                 throw new Error(errorData.message || `Failed to delete product (${response.status})`);
+                 // Include product ID in error for easier debugging
+                 throw new Error(`Product ID ${prodId}: ${errorData.message || `Failed to delete product (${response.status})`}`);
             }
 
-            // If successful delete from DB, attempt to delete image from storage (implement backend endpoint if needed)
+            console.log(`Successfully deleted product ID: ${prodId} (Status: ${response.status})`);
+
+            // Optional: If delete from DB was successful, trigger image cleanup if needed
             // if (imageUrlToDelete) {
             //     console.log("Attempting to delete image from storage:", imageUrlToDelete);
-            //     // Example: await fetch(`${baseUrl}/upload/delete-image`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: imageUrlToDelete }) });
+            //     // Example: await fetch(`${baseUrl}/upload/delete-image`, { method: 'POST', ... body: { url: imageUrlToDelete } });
             // }
 
-            await fetchStoreData(token); // Refresh list
+            // --- Success ---
+            await fetchStoreData(token); // Refresh the store data to remove the deleted product from the list
+
         } catch (err: any) {
              console.error("Delete error:", err);
+             // Display the specific error message from the catch block
              setActionError(`Delete failed: ${err.message || 'Unknown error'}`);
         }
-        finally { setDeletingProductId(null); }
+        finally {
+            setDeletingProductId(null); // Ensure loading state is reset regardless of success/failure
+        }
     };
 
     // --- Render Logic ---
-    if (checkingAuth) { return <div className="loading-container">Checking Authentication...</div>; } // Separate message for auth check
-    if (loading) { return <div className="loading-container">Loading Store Data...</div>; }
-    if (error) { return ( <div className="store-error"><h2>Error Loading Store</h2><p>{error}</p><button onClick={()=>fetchStoreData()}>Try Again</button></div> ); }
-    if (!store && !checkingAuth && !loading) { return ( <div className="no-store"><h2>Store Not Found or Access Denied</h2><p>You might need to create a store or check your permissions.</p><a href="/create-store" className="button-link">Create a Store</a></div> ); }
-    if (!store) { return <div className="loading-container">Initializing...</div>; } // Fallback if store is null
+
+    // Display loading indicator during initial auth check
+    if (checkingAuth) {
+        return <div className="loading-container">Checking Authentication...</div>;
+    }
+    // Display loading indicator while fetching store data
+    if (loading) {
+        return <div className="loading-container">Loading Store Data...</div>;
+    }
+    // Display general error message if fetching failed
+    if (error) {
+        return (
+            <div className="store-error">
+                <h2>Error Loading Store</h2>
+                <p>{error}</p>
+                {/* Provide a way to retry fetching */}
+                <button onClick={() => fetchStoreData()}>Try Again</button>
+            </div>
+        );
+    }
+    // Handle case where store data is null after loading/auth checks (e.g., user needs to create store but wasn't redirected)
+    if (!store && !checkingAuth && !loading) {
+        return (
+            <div className="no-store">
+                <h2>Store Not Found or Access Denied</h2>
+                <p>You might need to create a store first, or check your permissions.</p>
+                <a href="/create-store" className="button-link">Create a Store</a>
+            </div>
+        );
+    }
+     // Fallback loading state (should ideally not be reached if logic above is sound)
+    if (!store) {
+        return <div className="loading-container">Initializing Store...</div>;
+    }
 
 
+    // --- Main Component JSX ---
     return (
-        <div className="my-store-container">
-            {/* Header */}
+        <div className="my-store-container"> {/* Main container for styling */}
+
+            {/* Store Header */}
             <div className="store-header">
-                <h1>{store.storeName}</h1>
-                <button className="add-product-button" onClick={() => { setIsAddingProductFormVisible(prev => !prev); setActionError(null); if (!isAddingProductFormVisible) { setNewProduct(initialNewProductState); if (addFileInputRef.current) addFileInputRef.current.value = ""; } }} disabled={isAddingProductLoading}>
+                <h1>{store.storeName}</h1> {/* Display store name */}
+                {/* Button to toggle the "Add Product" form */}
+                <button
+                    className="add-product-button"
+                    onClick={() => {
+                        setIsAddingProductFormVisible(prev => !prev); // Toggle visibility
+                        setActionError(null); // Clear errors when toggling
+                        // Reset form state only when opening the form
+                        if (!isAddingProductFormVisible) {
+                            setNewProduct(initialNewProductState);
+                            if (addFileInputRef.current) addFileInputRef.current.value = ""; // Clear file input
+                        }
+                    }}
+                    disabled={isAddingProductLoading} // Disable while adding
+                >
                     {isAddingProductFormVisible ? 'Cancel Add' : '+ Add Product'}
                 </button>
             </div>
 
-            {/* Action Errors */}
-            {actionError && !isEditModalOpen && !isAddingProductFormVisible && <div className="error-message action-error">{actionError}</div>}
+            {/* Area for displaying action errors (outside modal/add form) */}
+            {actionError && !isEditModalOpen && !isAddingProductFormVisible && (
+                <div className="error-message action-error">{actionError}</div>
+            )}
 
-            {/* Add Product Form */}
+            {/* Add Product Form (Conditional Rendering) */}
             {isAddingProductFormVisible && (
                 <div className="add-product-form">
                     <h2>Add New Product</h2>
+                    {/* Display add-specific errors within the form */}
                     {actionError && <div className="error-message action-error">{actionError}</div>}
-                    {/* Use new property names for value and onChange */}
-                    <div className="form-group"><label htmlFor="add-prod-name">Name</label><input id="add-prod-name" type="text" value={newProduct.name || ''} onChange={(e) => handleNewProductChange('name', e.target.value)} disabled={isAddingProductLoading} required/></div>
-                    <div className="form-group"><label htmlFor="add-prod-desc">Description</label><textarea id="add-prod-desc" value={newProduct.description || ''} onChange={(e) => handleNewProductChange('description', e.target.value)} disabled={isAddingProductLoading} required/></div>
+
+                    {/* Form Fields */}
+                    <div className="form-group">
+                        <label htmlFor="add-prod-name">Name *</label>
+                        <input id="add-prod-name" type="text" value={newProduct.name || ''} onChange={(e) => handleNewProductChange('name', e.target.value)} disabled={isAddingProductLoading} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="add-prod-desc">Description *</label>
+                        <textarea id="add-prod-desc" value={newProduct.description || ''} onChange={(e) => handleNewProductChange('description', e.target.value)} disabled={isAddingProductLoading} required />
+                    </div>
+                    {/* Row for Price and Category */}
                     <div className="form-row">
-                        <div className="form-group"><label htmlFor="add-prod-price">Price (R)</label><input id="add-prod-price" type="number" step="0.01" min="0.01" value={newProduct.price || ''} onChange={(e) => handleNewProductChange('price', parseFloat(e.target.value) || 0)} disabled={isAddingProductLoading} required/></div>
-                        <div className="form-group"><label htmlFor="add-prod-cat">Category</label><select id="add-prod-cat" value={newProduct.category || ''} onChange={(e) => handleNewProductChange('category', e.target.value)} disabled={isAddingProductLoading} required><option value="">Select</option>{PRODUCT_CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+                        <div className="form-group">
+                            <label htmlFor="add-prod-price">Price (R) *</label>
+                            <input id="add-prod-price" type="number" step="0.01" min="0.01" value={newProduct.price || ''} onChange={(e) => handleNewProductChange('price', parseFloat(e.target.value) || 0)} disabled={isAddingProductLoading} required />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="add-prod-cat">Category *</label>
+                            <select id="add-prod-cat" value={newProduct.category || ''} onChange={(e) => handleNewProductChange('category', e.target.value)} disabled={isAddingProductLoading} required>
+                                <option value="">Select Category</option>
+                                {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
                     </div>
                     {/* Image Input & Preview */}
                     <div className="form-group">
                         <label htmlFor="new-product-image">Image *</label>
                         <input id="new-product-image" type="file" ref={addFileInputRef} onChange={handleNewProductImageChange} accept="image/*" required disabled={isAddingProductLoading} />
-                        {/* Use the dedicated imagePreviewUrl state */}
-                        {newProduct.imagePreviewUrl && <div className="image-preview"><img src={newProduct.imagePreviewUrl} alt="New product preview"/></div>}
+                        {/* Show preview if available */}
+                        {newProduct.imagePreviewUrl && (
+                            <div className="image-preview add-preview">
+                                <img src={newProduct.imagePreviewUrl} alt="New product preview" />
+                            </div>
+                        )}
                     </div>
-                    {/* Actions */}
+
+                    {/* Form Actions (Add/Cancel Buttons) */}
                     <div className="form-actions">
                         <button type="button" className="cancel-button" onClick={() => setIsAddingProductFormVisible(false)} disabled={isAddingProductLoading}>Cancel</button>
-                        <button type="button" className="submit-button" onClick={handleAddProduct} disabled={isAddingProductLoading}>{isAddingProductLoading ? 'Adding...' : 'Add Product'}</button>
+                        <button type="button" className="submit-button" onClick={handleAddProduct} disabled={isAddingProductLoading}>
+                            {isAddingProductLoading ? 'Adding...' : 'Add Product'}
+                        </button>
                     </div>
                 </div>
             )}
 
-            {/* Product List */}
+            {/* Product List Section */}
             <div className="products-section">
                 <h2>Your Products</h2>
                 {(store.products && store.products.length > 0) ? (
+                    // Display grid if products exist
                     <div className="products-grid">
-                        {/* Use new property names for display */}
                         {store.products.map((product) => (
-                            <div key={product.prodId} className="product-card">
-                                {/* Use imageUrl */}
+                            // --- Product Card ---
+                            <div key={product.prodId} className="product-card"> {/* Use prodId for key */}
+                                {/* Product Image */}
                                 <div className="product-image">
                                     {product.imageUrl ? (
-                                        <img src={product.imageUrl} alt={product.name} onError={(e) => { e.currentTarget.style.display = 'none'; const placeholder = e.currentTarget.nextElementSibling as HTMLElement; if(placeholder) placeholder.style.display='flex';}} />
-                                    ) : null }
-                                    {/* Placeholder shown if imageUrl is missing or image fails */}
-                                    <div className="product-image-placeholder" style={{display: product.imageUrl ? 'none' : 'flex'}}><span>No Image</span></div>
+                                        <img
+                                            src={product.imageUrl}
+                                            alt={product.name}
+                                            // Basic fallback if image fails to load
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none'; // Hide broken image icon
+                                                const placeholder = e.currentTarget.nextElementSibling as HTMLElement; // Find placeholder div
+                                                if (placeholder) placeholder.style.display = 'flex'; // Show placeholder
+                                            }}
+                                        />
+                                    ) : null}
+                                    {/* Placeholder shown if imageUrl is null/empty OR if image onError triggers */}
+                                    <div className="product-image-placeholder" style={{ display: product.imageUrl ? 'none' : 'flex' }}>
+                                        <span>No Image</span>
+                                    </div>
                                 </div>
+                                {/* Product Details */}
                                 <div className="product-details">
-                                    {/* Use name, price, category, description */}
                                     <h3>{product.name}</h3>
-                                    <p className="product-price">R{product.price.toFixed(2)}</p>
+                                    <p className="product-price">R{product.price.toFixed(2)}</p> {/* Format price */}
                                     <p className="product-category">{product.category}</p>
                                     <p className="product-description">{product.description}</p>
+                                    {/* Action Buttons for Edit/Delete */}
                                     <div className="product-actions">
-                                        <button className="edit-button" onClick={() => openEditModal(product)} disabled={deletingProductId !== null || isSavingEdit}>Edit</button>
-                                        <button className="delete-button" onClick={() => handleDeleteClick(product.prodId)} disabled={deletingProductId === product.prodId || isSavingEdit}>
+                                        <button
+                                            className="edit-button"
+                                            onClick={() => openEditModal(product)}
+                                            // Disable edit if any delete or save is in progress
+                                            disabled={deletingProductId !== null || isSavingEdit}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="delete-button"
+                                            // Call the modified handler which checks for last product
+                                            onClick={() => handleDeleteClick(product.prodId)}
+                                            // Disable if this specific product is being deleted OR if an edit is being saved
+                                            disabled={deletingProductId === product.prodId || isSavingEdit}
+                                        >
+                                            {/* Show loading state specific to this button */}
                                             {deletingProductId === product.prodId ? 'Deleting...' : 'Delete'}
                                         </button>
                                     </div>
                                 </div>
                             </div>
+                            // --- End Product Card ---
                         ))}
                     </div>
-                ) : ( <div className="no-products"><p>You haven't added any products to your store yet.</p>{!isAddingProductFormVisible && <button className="add-first-product" onClick={() => {setIsAddingProductFormVisible(true); setNewProduct(initialNewProductState); }}>Add Your First Product</button>}</div> )}
+                ) : (
+                    // Display message if no products exist
+                    <div className="no-products">
+                        <p>You haven't added any products to your store yet.</p>
+                        {/* Show button to add first product only if the add form isn't already visible */}
+                        {!isAddingProductFormVisible && (
+                            <button
+                                className="add-first-product"
+                                onClick={() => {
+                                    setIsAddingProductFormVisible(true);
+                                    setNewProduct(initialNewProductState);
+                                    if (addFileInputRef.current) addFileInputRef.current.value = "";
+                                }}
+                            >
+                                Add Your First Product
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {/* Edit Product Modal */}
+            {/* Edit Product Modal (Conditional Rendering) */}
             {isEditModalOpen && editingProduct && (
+                // Modal backdrop for background dimming/click outside (optional)
                 <div className="modal-backdrop">
+                    {/* Actual modal content */}
                     <div className="modal-content">
-                        {/* Use name for title */}
-                        <h2>Edit: {editingProduct.name}</h2>
+                        <h2>Edit: {editingProduct.name}</h2> {/* Show product name being edited */}
+                        {/* Display edit-specific errors within the modal */}
                         {actionError && <div className="error-message modal-error">{actionError}</div>}
-                        {/* Use new property names for value and onChange */}
-                        <div className="form-group"><label htmlFor="edit-prod-name">Name</label><input id="edit-prod-name" type="text" value={editFormData.name || ''} onChange={(e) => handleEditFormChange('name', e.target.value)} disabled={isSavingEdit} required /></div>
-                        <div className="form-group"><label htmlFor="edit-prod-desc">Description</label><textarea id="edit-prod-desc" value={editFormData.description || ''} onChange={(e) => handleEditFormChange('description', e.target.value)} disabled={isSavingEdit} required/></div>
-                        <div className="form-row">
-                            <div className="form-group"><label htmlFor="edit-prod-price">Price (R)</label><input id="edit-prod-price" type="number" step="0.01" min="0.01" value={editFormData.price || ''} onChange={(e) => handleEditFormChange('price', parseFloat(e.target.value) || 0)} disabled={isSavingEdit} required/></div>
-                            <div className="form-group"><label htmlFor="edit-prod-cat">Category</label><select id="edit-prod-cat" value={editFormData.category || ''} onChange={(e) => handleEditFormChange('category', e.target.value)} disabled={isSavingEdit} required><option value="">Select</option>{PRODUCT_CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+
+                        {/* Edit Form Fields */}
+                        <div className="form-group">
+                            <label htmlFor="edit-prod-name">Name *</label>
+                            <input id="edit-prod-name" type="text" value={editFormData.name || ''} onChange={(e) => handleEditFormChange('name', e.target.value)} disabled={isSavingEdit} required />
                         </div>
-                        {/* Image Edit Input */}
+                        <div className="form-group">
+                            <label htmlFor="edit-prod-desc">Description *</label>
+                            <textarea id="edit-prod-desc" value={editFormData.description || ''} onChange={(e) => handleEditFormChange('description', e.target.value)} disabled={isSavingEdit} required />
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label htmlFor="edit-prod-price">Price (R) *</label>
+                                <input id="edit-prod-price" type="number" step="0.01" min="0.01" value={editFormData.price || ''} onChange={(e) => handleEditFormChange('price', parseFloat(e.target.value) || 0)} disabled={isSavingEdit} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="edit-prod-cat">Category *</label>
+                                <select id="edit-prod-cat" value={editFormData.category || ''} onChange={(e) => handleEditFormChange('category', e.target.value)} disabled={isSavingEdit} required>
+                                    <option value="">Select Category</option>
+                                    {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        {/* Image Edit Input & Preview */}
                         <div className="form-group">
                             <label htmlFor="edit-product-image">Replace Image (Optional)</label>
                             <input id="edit-product-image" type="file" ref={editFileInputRef} onChange={handleEditImageChange} accept="image/png, image/jpeg, image/webp, image/gif" disabled={isSavingEdit} />
-                            {/* Show preview */}
+                            {/* Show preview of current or newly selected image */}
                             {editProductPreview && (
                                 <div className="image-preview edit-preview">
                                     <p>Current/New Image Preview:</p>
-                                    <img src={editProductPreview} alt="Edit preview"/>
+                                    <img src={editProductPreview} alt="Edit preview" />
                                 </div>
                             )}
                         </div>
-                        {/* Actions */}
+
+                        {/* Modal Action Buttons (Save/Cancel) */}
                         <div className="form-actions modal-actions">
                             <button type="button" className="cancel-button" onClick={closeEditModal} disabled={isSavingEdit}>Cancel</button>
-                            <button type="button" className="submit-button" onClick={handleUpdateProduct} disabled={isSavingEdit}>{isSavingEdit ? 'Saving...' : 'Save Changes'}</button>
+                            <button type="button" className="submit-button" onClick={handleUpdateProduct} disabled={isSavingEdit}>
+                                {isSavingEdit ? 'Saving...' : 'Save Changes'}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </div> // End my-store-container
     );
 };
 
-export default MyStore;
+export default MyStore; // Export the component
