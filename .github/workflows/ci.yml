@@ -30,12 +30,6 @@ jobs:
     - name: Run frontend tests with coverage
       run: npm run coverage
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: frontend-coverage
-        path: ./frontend/coverage
-
   backend-tests:
     name: Run Backend Tests
     runs-on: ubuntu-latest
