@@ -1,6 +1,6 @@
 import { useCart } from '../context/ContextCart';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+//import { useEffect } from 'react';
 // import './CartPage.css'; // We'll create this
 
 const CartPage = () => {
@@ -10,14 +10,13 @@ const CartPage = () => {
     updateQuantity,
     totalPrice,
     clearCart,
-    loadDemoItems
+    //loadDemoItems
+    isLoading
   } = useCart();
 
-  useEffect(() => {
-    if (cartItems.length === 0) {
-      loadDemoItems();
-    }
-  }, [cartItems.length, loadDemoItems]);
+  if (isLoading) {
+    return <div>Loading cart...</div>;
+  }
 
   return (
     <main className="cart-container">
@@ -36,7 +35,7 @@ const CartPage = () => {
         <section className="cart-content">
           <section className="cart-items">
             {cartItems.map(item => (
-              <article key={item.id} className="cart-item">
+              <article key={item.productId} className="cart-item">
                 <figure className="item-image-container">
                   <img src={item.image} alt={item.name} className="item-image" />
                 </figure>
@@ -45,7 +44,7 @@ const CartPage = () => {
                   <p className="item-price">R{item.price.toFixed(2)}</p>
                   <section className="quantity-controls">
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                       disabled={item.quantity <= 1}
                       className="quantity-btn"
                     >
@@ -53,7 +52,7 @@ const CartPage = () => {
                     </button>
                     <span className="quantity">{item.quantity}</span>
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                       className="quantity-btn"
                     >
                       +
@@ -64,7 +63,7 @@ const CartPage = () => {
                   </p>
                 </section>
                 <button 
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.productId)}
                   className="remove-btn"
                   aria-label="Remove item"
                 >
