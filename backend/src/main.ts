@@ -13,12 +13,8 @@ async function bootstrap() {
     })
   );
 //
-app.enableCors({
-  origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true, // This fixes the credentials header issue
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-});
+app.enableCors()
+ ;
 // cart
 
   await app.listen(process.env.PORT ?? 3000);

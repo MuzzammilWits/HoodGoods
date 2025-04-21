@@ -1,16 +1,17 @@
 // src/store/dto/create-product.dto.ts
 
+// Define the shape for creating a single product
 export interface CreateProductDto {
-  productName: string;
-  productDescription: string;
-  productPrice: number;
-  productCategory: string;
-  imageURL: string;
-  storeName: string;
-  products: any[]; // You can refine this type
+  name: string;                  // Changed from productName
+  description: string;           // Changed from productDescription
+  price: number;                 // Changed from productPrice
+  category: string;              // Changed from productCategory
+  imageUrl: string;              // Changed from imageURL
+  storeName?: string;            // Remains the same, still optional here
 }
 
+// Define the shape for creating a store along with its initial products
 export interface CreateStoreWithProductsDto {
-  storeName: string;
-  products: CreateProductDto[];
+  storeName: string;             // Remains the same
+  products: CreateProductDto[];  // Uses the updated CreateProductDto
 }

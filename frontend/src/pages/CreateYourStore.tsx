@@ -160,6 +160,7 @@ const CreateYourStore: React.FC = () => {
     };
 
     // Handle the main form submission
+    // Handle the main form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); // Prevent default form submission
         setIsSubmitting(true); // Set submitting state
@@ -186,10 +187,10 @@ const CreateYourStore: React.FC = () => {
             // Loop through products for validation
             for (let i = 0; i < formData.products.length; i++) {
                 const p = formData.products[i];
-                if (!p.productName.trim()) throw new Error(`Product #${i + 1} name is required`);
-                if (!p.productDescription.trim()) throw new Error(`Product #${i + 1} description is required`);
-                if (!p.productPrice.trim() || isNaN(parseFloat(p.productPrice))) throw new Error(`Product #${i + 1} needs a valid price`);
-                if (!p.productCategory) throw new Error(`Product #${i + 1} category is required`);
+                if (!p.productName.trim()) throw new Error(`Product #${i + 1} name is required`); // Validation uses frontend state names
+                if (!p.productDescription.trim()) throw new Error(`Product #${i + 1} description is required`); // Validation uses frontend state names
+                if (!p.productPrice.trim() || isNaN(parseFloat(p.productPrice))) throw new Error(`Product #${i + 1} needs a valid price`); // Validation uses frontend state names
+                if (!p.productCategory) throw new Error(`Product #${i + 1} category is required`); // Validation uses frontend state names
                 if (!p.image) throw new Error(`Product #${i + 1} image is required`); // Ensure image file exists
             }
 
@@ -216,9 +217,10 @@ const CreateYourStore: React.FC = () => {
                     try {
                         console.log(`Uploading image for product ${index + 1}: ${product.image.name}`);
                         // Pass the retrieved token to the upload function
-                        const imageURL = await uploadImageToBackend(product.image, token);
-                        // Return the product data along with the successfully obtained image URL
-                        return { ...product, imageURL };
+                        const uploadedUrl = await uploadImageToBackend(product.image, token);
+                        // Return the original product data (using frontend names) plus the FINAL URL under 'imageURL' key for now
+                        // We will map to backend names in the next step
+                        return { ...product, imageURL: uploadedUrl }; // Adds 'imageURL' property to the product object
                     } catch (uploadError) {
                         // Log and re-throw upload errors to stop the entire submission
                         console.error(`Error uploading image for product #${index + 1}:`, uploadError);
@@ -229,33 +231,48 @@ const CreateYourStore: React.FC = () => {
             console.log("Image uploads completed.");
 
             // --- 4. Prepare final store data for backend ---
+            // **** THIS IS THE CORRECTED PART ****
             const storeData = {
                 storeName: formData.storeName,
-                // Map products to the format expected by the backend API
-                products: productsWithImageUrls.map(product => ({
-                    productName: product.productName,
-                    productDescription: product.productDescription,
-                    productPrice: parseFloat(product.productPrice), // Convert price string to number
-                    productCategory: product.productCategory,
-                    imageURL: product.imageURL, // Use the URL returned from the image upload
-                })),
+                // Map products to the format expected by the backend API (name, description, price, category, imageUrl)
+                products: productsWithImageUrls.map(product => {
+                     // Add a check here to ensure the imageURL was actually set by the upload process
+                     if (!product.imageURL) {
+                         console.error("CRITICAL: imageURL missing after upload step for product:", product.productName);
+                         // Use the name from the frontend state for the error message
+                         throw new Error(`Image URL failed to process for product: ${product.productName}. Cannot proceed.`);
+                     }
+                     return {
+                        name: product.productName,               // Map frontend productName to backend name
+                        description: product.productDescription, // Map frontend productDescription to backend description
+                        price: parseFloat(product.productPrice), // Map frontend productPrice to backend price (ensure it's a number)
+                        category: product.productCategory,       // Map frontend productCategory to backend category
+                        imageUrl: product.imageURL               // Map frontend imageURL to backend imageUrl <<-- CORRECTED KEY
+                     };
+                }),
             };
+            // **** END OF CORRECTION ****
+
 
             // --- 5. Send request to create the store ---
-            console.log("Sending store data to backend:", JSON.stringify(storeData, null, 2));
+            console.log("Sending store data to backend:", JSON.stringify(storeData, null, 2)); // Check console log to verify payload
             const createStoreResponse = await fetch(`${baseUrl}/stores`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`, // Use the retrieved token
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(storeData), // Send the prepared data
+                body: JSON.stringify(storeData), // Send the correctly formatted data
             });
 
             // Handle errors from the store creation endpoint
             if (!createStoreResponse.ok) {
                 const errorData = await createStoreResponse.json().catch(() => ({ message: 'Failed to parse store creation error response' }));
                 console.error("Store creation failed:", errorData);
+                // Check if the backend error message provides more clues
+                if (errorData.message && typeof errorData.message === 'string' && errorData.message.includes("Image URL is missing")) {
+                     throw new Error(`Failed to create store: Backend reported a missing image URL. Please check image uploads. (${errorData.message || createStoreResponse.statusText})`);
+                }
                 throw new Error(`Failed to create store: ${errorData.message || createStoreResponse.statusText}`);
             }
 
