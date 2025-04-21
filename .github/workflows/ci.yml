@@ -8,27 +8,33 @@ on:
 
 jobs:
   frontend-tests:
-    name: Run Frontend Tests
-    runs-on: ubuntu-latest
+   name: Run Frontend Tests
+   runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./frontend
+   defaults:
+    run:
+      working-directory: ./frontend
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
 
-      - name: Install dependencies
-        run: npm install
+    - name: Install dependencies
+      run: npm install
 
-      - name: Run frontend tests
-        run: npm run test
+    - name: Run frontend tests with coverage
+      run: npm run coverage
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-coverage
+        path: ./frontend/coverage
 
   backend-tests:
     name: Run Backend Tests
