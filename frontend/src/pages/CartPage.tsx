@@ -57,9 +57,9 @@ const CartPage = () => {
                     >
                       +
                     </button>
-                  </div>
+                  </section>
                   <p className="subtotal">Subtotal: R{(item.price * item.quantity).toFixed(2)}</p>
-                </div>
+                </section>
                 <button 
                   onClick={() => removeFromCart(item.productId)}
                   className="remove-btn"
