@@ -33,7 +33,7 @@ const TestCartConsumer: React.FC = () => {
     // Consume the cart context
     const {
         cartItems,
-        addToCart,
+        // addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
@@ -43,8 +43,8 @@ const TestCartConsumer: React.FC = () => {
     } = useCart();
 
     // Sample items for testing actions
-    const sampleItem = { productId: 'prod-123', name: 'Test Item', price: 10.00, image: 'img.jpg' };
-    const sampleItem2 = { productId: 'prod-456', name: 'Another Item', price: 25.50 };
+    // const sampleItem = { productId: 'prod-123', name: 'Test Item', price: 10.00, image: 'img.jpg' };
+    // const sampleItem2 = { productId: 'prod-456', name: 'Another Item', price: 25.50 };
 
     return (
         <div>
@@ -58,9 +58,9 @@ const TestCartConsumer: React.FC = () => {
             <div data-testid="cart-items">
                 {cartItems.map(item => (
                     <div key={item.productId} data-testid={`item-${item.productId}`}>
-                        <span>{item.name}</span>
+                        <span>{item.productId}</span>
                         <span>Qty: {item.quantity}</span>
-                        <span>Price: ${item.price.toFixed(2)}</span>
+                        <span>Price: ${item.productPrice.toFixed(2)}</span>
                         {/* Buttons to interact with individual items */}
                         <button onClick={() => updateQuantity(item.productId, item.quantity + 1)}>Inc Qty</button>
                         <button onClick={() => updateQuantity(item.productId, item.quantity - 1)}>Dec Qty</button>
@@ -69,8 +69,8 @@ const TestCartConsumer: React.FC = () => {
                 ))}
             </div>
             {/* Buttons to trigger general cart actions */}
-            <button onClick={() => addToCart(sampleItem)}>Add Item 1</button>
-            <button onClick={() => addToCart(sampleItem2)}>Add Item 2</button>
+            {/* <button onClick={() => addToCart(sampleItem)}>Add Item 1</button>
+            <button onClick={() => addToCart(sampleItem2)}>Add Item 2</button> */}
             <button onClick={() => clearCart()}>Clear Cart</button>
         </div>
     );

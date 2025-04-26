@@ -87,36 +87,37 @@ const ProductsPage = () => {
     setSearchParams(newParams, { replace: true }); // Use replace to avoid history clutter
   };
 
-  const handleAddToCart = async (product: Product) => {
-    try {
-      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
-        console.error('Attempted to add invalid product to cart:', product);
-        throw new Error('Product data is invalid or missing ID');
-      }
+// Inside ProductsPage component...
 
-      // Ensure price is a number before adding
-      const price = Number(product.price);
-      if (isNaN(price)) {
-         console.error('Product price is not a valid number:', product.price);
-         throw new Error('Product price is invalid');
-      }
-
-      const cartItem = {
-        productId: String(product.prodId), // Ensure productId is a string
-        name: product.name,
-        price: price, // Use validated price
-        image: product.imageUrl || '/placeholder-product.jpg' // Provide fallback image
-      };
-
-      await addToCart(cartItem);
-      // Consider a more user-friendly notification (e.g., a toast) instead of alert
-      alert(`${product.name} added to cart!`);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      // Display error to user if needed, maybe using a state variable
-      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+const handleAddToCart = async (product: Product) => {
+  try {
+    // ... (validation for product and price remains the same) ...
+    const price = Number(product.price);
+    if (isNaN(price)) {
+      throw new Error('Product price is invalid');
     }
-  };
+
+    // Prepare the item object for the context's addToCart function
+    const itemToAdd = {
+      productId: product.prodId,
+      productName: product.name, // Updated to match AddToCartItem type
+      productPrice: price,       // Updated to match AddToCartItem type
+      image: product.imageUrl || '/placeholder-product.jpg'
+    };
+
+    // Call the context function (which expects productId: number)
+    await addToCart(itemToAdd);
+
+    alert(`${product.name} added to cart!`);
+
+  } catch (error) {
+     console.error('Error adding to cart:', error);
+     // Display error to user (consider using the context's error state)
+     setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+  }
+};
+
+// ... rest of the component
 
   // Memoize category calculation if products list is large, otherwise fine as is
   const categories = [...new Set(products.map(product => product.category))];
