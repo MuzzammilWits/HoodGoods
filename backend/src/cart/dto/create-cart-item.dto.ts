@@ -1,21 +1,11 @@
-import { IsString, IsNumber, IsPositive, IsOptional } from 'class-validator';
+import { IsNumber, IsPositive, Min } from 'class-validator';
 
 export class CreateCartItemDto {
-  @IsString()
-  productId: string;
-
-  @IsString()
-  name: string;
+  @IsNumber()
+  productId: number; // Changed to number
 
   @IsNumber()
-  @IsPositive()
-  price: number;
-
-  @IsNumber()
-  @IsPositive()
+  @IsPositive() // Quantity must be at least 1
+  @Min(1)
   quantity: number;
-
-  @IsString()
-  @IsOptional()
-  image?: string;
 }
