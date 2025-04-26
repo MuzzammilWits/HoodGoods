@@ -144,19 +144,44 @@ const ProductsPage = () => {
     setSearchParams(newParams, { replace: true });
   };
 
+
+// Inside ProductsPage component...
+
   const handleAddToCart = async (product: Product) => {
     try {
-      if (!product || typeof product.prodId === 'undefined') {
+      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
         console.error('Attempted to add invalid product to cart:', product);
         throw new Error('Product data is invalid or missing ID');
       }
 
+      // Ensure price is a number before adding
       const price = Number(product.price);
       if (isNaN(price)) {
-        console.error('Product price is not a valid number:', product.price);
-        throw new Error('Product price is invalid');
+         console.error('Product price is not a valid number:', product.price);
+         throw new Error('Product price is invalid');
       }
 
+    // Prepare the item object for the context's addToCart function
+    const itemToAdd = {
+      productId: product.prodId,
+      productName: product.name, // Updated to match AddToCartItem type
+      productPrice: price,       // Updated to match AddToCartItem type
+      image: product.imageUrl || '/placeholder-product.jpg'
+    };
+
+    // Call the context function (which expects productId: number)
+    await addToCart(itemToAdd);
+
+    alert(`${product.name} added to cart!`);
+
+  } catch (error) {
+     console.error('Error adding to cart:', error);
+     // Display error to user (consider using the context's error state)
+     setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+  }
+};
+
+// ... rest of the component
       const cartItem = {
         productId: String(product.prodId),
         name: product.name,
@@ -171,6 +196,8 @@ const ProductsPage = () => {
       setError(error instanceof Error ? error.message : 'Failed to add item to cart');
     }
   };
+
+// ... rest of the component
 
   const categories = [...new Set(products.map(product => product.category))];
   const stores = [...new Set(products.map(product => product.storeName))]; // NEW: Store list
