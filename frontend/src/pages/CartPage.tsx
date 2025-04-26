@@ -1,39 +1,31 @@
-import React from 'react'; // Import React for FC type
-import { useCart } from '../context/ContextCart';
+import React from 'react';
+import { useCart } from '../context/ContextCart'; // Assuming path is correct
 import { Link } from 'react-router-dom';
-import './CartPage.css';
+import './CartPage.css'; // Assuming path is correct
 
-// Define an interface for a single cart item
-interface CartItem {
-  productId: string | number; // Use string | number unless you know the exact type
-  image?: string | undefined;
-  name: string;
-  price: number; // Assuming price is consistently a number from the context
+// Interface for item used *within this component*
+// Should match the CartItemUI from the context, including availableQuantity
+interface CartItemDisplay {
+  productId: number; // Use number
+  imageUrl?: string | undefined;
+  productName: string; // Use context's naming
+  productPrice: number; // Use context's naming (number)
   quantity: number;
-}
-
-// (Optional but recommended) Define an interface for the values returned by your hook
-// This might already be defined within your ContextCart file
-interface CartContextValue {
-  cartItems: CartItem[];
-  removeFromCart: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
-  totalPrice: number;
-  clearCart: () => void;
-  isLoading: boolean;
+  availableQuantity?: number; // <-- Add this field to match context state
 }
 
 // Type the component as a React Functional Component (React.FC)
 const CartPage: React.FC = () => {
-  // Explicitly type the destructured values from the hook
+  // Destructure values from the hook
+  // Ensure the hook returns the expected types (matching CartContextType)
   const {
-    cartItems,
+    cartItems, // This is CartItemUI[] from the context, now including availableQuantity
     removeFromCart,
     updateQuantity,
     totalPrice,
     clearCart,
     isLoading
-  }: CartContextValue = useCart(); // Assuming useCart returns CartContextValue
+  } = useCart();
 
   if (isLoading) {
     return <p>Loading cart...</p>;
@@ -48,48 +40,73 @@ const CartPage: React.FC = () => {
       {cartItems.length === 0 ? (
         <section className="empty-cart">
           <p className="empty-text">Your cart is empty</p>
-          <Link to="/products" className="continue-shopping-btn">
+          <Link to="/products" className="continue-shopping-btn"> {/* Adjust link as needed */}
             Browse Products
           </Link>
         </section>
       ) : (
         <section className="cart-content">
           <section className="cart-items">
-            {/* Explicitly type the 'item' parameter in the map function */}
-            {cartItems.map((item: CartItem) => (
+            {/* Map over cartItems. Ensure 'item' type includes availableQuantity */}
+            {cartItems.map((item: CartItemDisplay) => ( // Type item explicitly here
               <article key={item.productId} className="cart-item">
                 <figure className="item-image-container">
-                  <img src={item.image} alt={item.name} className="item-image" />
+                   {/* Use imageUrl and productName */}
+                   <img src={item.imageUrl || '/placeholder.png'} alt={item.productName} className="item-image" />
                 </figure>
                 <section className="item-details">
-                  <h3 className="item-name">{item.name}</h3>
-                  {/* Keep Number() if price might still be a string, otherwise remove */}
-                  <p className="item-price">R{Number(item.price).toFixed(2)}</p>
+                   {/* Use productName and productPrice */}
+                   <h3 className="item-name">{item.productName}</h3>
+                   <p className="item-price">R{Number(item.productPrice).toFixed(2)}</p>
                   <section className="quantity-controls">
                     <button
-                      onClick={() => updateQuantity(String(item.productId), item.quantity - 1)}
+                      // Pass productId (number) and updated quantity
+                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                       disabled={item.quantity <= 1}
                       className="quantity-btn"
+                      aria-label={`Decrease quantity of ${item.productName}`} // Accessibility
                     >
                       −
                     </button>
-                    <output className="quantity">{item.quantity}</output>
+                    <output className="quantity" aria-live="polite">{item.quantity}</output> {/* Accessibility */}
                     <button
-                      onClick={() => updateQuantity(String(item.productId), item.quantity + 1)}
+                      // Pass productId (number) and updated quantity
+                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                       // *** MODIFICATION START ***
+                       // Disable button if availableQuantity is known and quantity meets/exceeds it
+                      disabled={item.availableQuantity != null && item.quantity >= item.availableQuantity}
+                      // *** MODIFICATION END ***
                       className="quantity-btn"
+                      aria-label={`Increase quantity of ${item.productName}`} // Accessibility
                     >
                       +
                     </button>
                   </section>
+                  {/* Optional: Display available stock */}
+                  {item.availableQuantity != null && (
+                     <p style={{ fontSize: '0.8em', color: '#666' }}>
+                       {item.availableQuantity - item.quantity >= 0
+                          ? `${item.availableQuantity - item.quantity} more available`
+                          : `${item.availableQuantity} available (in stock)`
+                       }
+                     </p>
+                  )}
+                   {/* Optional: Display warning if quantity somehow exceeds stock */}
+                  {item.availableQuantity != null && item.quantity > item.availableQuantity && (
+                    <p style={{ color: 'red', fontSize: '0.8em', fontWeight: 'bold' }}>
+                        Warning: Quantity in cart exceeds available stock! ({item.availableQuantity} available)
+                    </p>
+                  )}
                   <p className="item-subtotal">
-                    {/* Keep Number() if price might still be a string, otherwise remove */}
-                    Subtotal: R{(Number(item.price) * item.quantity).toFixed(2)}
+                    {/* Use productPrice */}
+                    Subtotal: R{(Number(item.productPrice) * item.quantity).toFixed(2)}
                   </p>
                 </section>
                 <button
-                  onClick={() => removeFromCart(String(item.productId))}
+                  // Pass productId (number)
+                  onClick={() => removeFromCart(item.productId)}
                   className="remove-btn"
-                  aria-label="Remove item"
+                  aria-label={`Remove ${item.productName} from cart`} // Improve accessibility
                 >
                   ×
                 </button>
@@ -97,21 +114,20 @@ const CartPage: React.FC = () => {
             ))}
           </section>
 
+          {/* Footer remains the same */}
           <footer className="cart-summary">
-            <h3 className="summary-title">Order Summary</h3>
+             {/* ... rest of the footer ... */}
+             <h3 className="summary-title">Order Summary</h3>
             <dl className="summary-details">
               <dt>Subtotal:</dt>
               <dd>R{Number(totalPrice).toFixed(2)}</dd>
-
               <dt>Shipping:</dt>
-              <dd>Free</dd>
-
+              <dd>Free</dd> {/* Or calculate shipping */}
               <dt className="total-label">Total:</dt>
               <dd className="total-value">R{totalPrice.toFixed(2)}</dd>
             </dl>
-
             <section className="cart-actions">
-              <Link to="/checkout" className="checkout-btn">
+              <Link to="/checkout" className="checkout-btn"> {/* Adjust link as needed */}
                 Proceed to Checkout
               </Link>
               <button
