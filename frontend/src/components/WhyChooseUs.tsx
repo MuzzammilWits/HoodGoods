@@ -1,8 +1,5 @@
-// frontend/src/components/WhyChooseUs.tsx
-
 import React from 'react';
 import './WhyChooseUs.css';
-// Import marketplace image directly (ensure path is correct relative to this file)
 import { marketplaceImg } from './utils/ImageImports';
 
 interface FeatureProps {
@@ -13,34 +10,34 @@ interface FeatureProps {
 
 const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
   return (
-    <div className="feature">
-      <div className="feature-icon">
+    <article className="feature">
+      <figure className="feature-icon">
         {icon}
-      </div>
+      </figure>
       <h3 className="feature-title">{title}</h3>
       <p className="feature-description">{description}</p>
-    </div>
+    </article>
   );
 };
 
 const WhyChooseUs: React.FC = () => {
   return (
     <section id="about-us" className="why-choose-us light-purple-bg">
-      <div className="container">
+      <main className="container">
         {/* First row: About Us */}
-        <div className="about-us-content">
+        <article className="about-us-content">
           <h2 className="section-title">About Us</h2>
           <p className="about-us-text">
             HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
           </p>
-        </div>
+        </article>
 
         {/* Second row: Why Choose Us + Image */}
-        <div className="why-choose-us-row">
-          <div className="why-choose-us-content">
+        <section className="why-choose-us-row">
+          <article className="why-choose-us-content">
             <h2 className="section-title">Why Choose Us</h2>
 
-            <div className="features-grid">
+            <section className="features-grid">
               <Feature
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -58,7 +55,7 @@ const WhyChooseUs: React.FC = () => {
                   </svg>
                 }
                 title="24/7 Support"
-                description="Need help? We’re here for you anytime, day or night. Whether it’s a question or a concern, we’ve got your back."
+                description="Need help? We're here for you anytime, day or night. Whether it's a question or a concern, we've got your back."
               />
 
               <Feature
@@ -80,21 +77,17 @@ const WhyChooseUs: React.FC = () => {
                 title="Easy to Shop"
                 description="Browse, discover, and buy with ease. Our clean, simple interface makes finding something special a breeze."
               />
-            </div>
-          </div>
+            </section>
+          </article>
 
-          {/* --- CORRECTED IMAGE SECTION --- */}
-          <div className="why-choose-us-image"> {/* Changed class name */}
+          <figure className="why-choose-us-image">
             <img
               src={marketplaceImg}
-              alt="Artisan marketplace products display" 
-              // Class removed from img tag itself
+              alt="Artisan marketplace products display"
             />
-          </div>
-          {/* --- END OF CORRECTED IMAGE SECTION --- */}
-
-        </div>
-      </div>
+          </figure>
+        </section>
+      </main>
     </section>
   );
 };

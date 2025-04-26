@@ -1,7 +1,6 @@
-// frontend/src/components/UploadForm.tsx
 import { useState } from 'react';
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const UploadForm = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -29,11 +28,15 @@ const UploadForm = () => {
   };
 
   return (
-    <div>
+    <section>
       <input type="file" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
-      {previewUrl && <img src={previewUrl} alt="Uploaded" style={{ width: 200 }} />}
-    </div>
+      {previewUrl && (
+        <figure>
+          <img src={previewUrl} alt="Uploaded preview" style={{ width: 200 }} />
+        </figure>
+      )}
+    </section>
   );
 };
 

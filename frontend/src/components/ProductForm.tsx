@@ -1,7 +1,5 @@
-
-// src/components/ProductForm.tsx
 import React from 'react';
-import { ProductFormData } from '../types/createStore'; // Adjust path if needed
+import { ProductFormData } from '../types/createStore';
 
 interface ProductFormProps {
   product: ProductFormData;
@@ -25,11 +23,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
   canRemove,
 }) => {
   return (
-    <div className="product-section">
+    <section className="product-section">
       <h3>Product #{index + 1}</h3>
 
       {/* Product Name */}
-      <div className="form-group">
+      <fieldset className="form-group">
         <label htmlFor={`product-name-${index}`}>Product Name</label>
         <input
           type="text"
@@ -40,10 +38,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
           required
           disabled={isSubmitting}
         />
-      </div>
+      </fieldset>
 
       {/* Description */}
-      <div className="form-group">
+      <fieldset className="form-group">
         <label htmlFor={`product-description-${index}`}>Description</label>
         <textarea
           id={`product-description-${index}`}
@@ -54,11 +52,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
           required
           disabled={isSubmitting}
         />
-      </div>
+      </fieldset>
 
       {/* Price & Category Row */}
-      <div className="form-row">
-        <div className="form-group">
+      <article className="form-row">
+        <fieldset className="form-group">
           <label htmlFor={`product-price-${index}`}>Price (R)</label>
           <input
             type="number"
@@ -71,8 +69,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
             required
             disabled={isSubmitting}
           />
-        </div>
-        <div className="form-group">
+        </fieldset>
+        <fieldset className="form-group">
           <label htmlFor={`product-category-${index}`}>Category</label>
           <select
             id={`product-category-${index}`}
@@ -86,11 +84,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
-        </div>
-      </div>
+        </fieldset>
+      </article>
 
       {/* Image Upload */}
-      <div className="form-group">
+      <fieldset className="form-group">
         <label htmlFor={`product-image-${index}`}>Product Image *</label>
         <input
           type="file"
@@ -101,12 +99,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
           disabled={isSubmitting}
         />
         {product.imagePreview && (
-          <div className="image-preview">
+          <figure className="image-preview">
             <img src={product.imagePreview} alt={`Preview for product ${index + 1}`} />
-          </div>
+          </figure>
         )}
         {!product.image && !product.imagePreview && <small>Please select an image.</small>}
-      </div>
+      </fieldset>
 
       {/* Remove Button */}
       {canRemove && (
@@ -119,7 +117,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           Remove Product
         </button>
       )}
-    </div>
+    </section>
   );
 };
 

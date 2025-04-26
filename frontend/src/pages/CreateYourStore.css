@@ -1,4 +1,7 @@
-.create-store-container {
+/* src/pages/CreateYourStore.css */
+
+/* Styles for the main <section> container */
+section.create-store-container { /* Updated selector */
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
@@ -13,19 +16,23 @@
   color: #666;
 }
 
-.create-store-container h1 {
-  margin-bottom: 20px;
-  color: #333;
-  text-align: center;
+/* Styles for the <header> within the container */
+section.create-store-container > header { /* Updated selector */
+  margin-bottom: 30px;
+  text-align: center; /* Center header content */
 }
 
-.instructions {
-  margin-bottom: 30px;
+section.create-store-container > header h1 { /* Updated selector */
+  margin-bottom: 20px;
+  color: #333;
+}
+
+section.create-store-container > header .instructions { /* Updated selector */
   color: #666;
-  text-align: center;
   font-size: 1.1rem;
 }
 
+/* Error/Success messages (assuming SubmissionStatus renders these classes) */
 .error-message {
   background-color: #fee;
   border-left: 4px solid #d32f2f;
@@ -44,6 +51,8 @@
   border-radius: 4px;
 }
 
+/* Styles assuming StoreInfoForm/ProductList use these internally */
+/* These might need adjustment based on child component structure */
 .form-group {
   margin-bottom: 20px;
 }
@@ -88,38 +97,17 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
-/* Input type file styling no longer needed */
-/*
-input[type="file"] {
-  padding: 10px 0;
-}
-*/
-
-.store-info-section,
-.product-section {
+/* Styles assuming ProductList uses these internally */
+.store-info-section, /* Assuming this is inside StoreInfoForm */
+.product-section { /* Assuming this is inside ProductList/ProductForm */
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
   border: 1px solid #eaeaea;
 }
-.image-preview {
-  margin-top: 15px;
-  border: 1px solid #eaeaea;
-  border-radius: 4px;
-  overflow: hidden;
-  height: 200px;
-  width: 200px;
-}
 
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-
-.product-section h3 {
+.product-section h3 { /* Assuming this is inside ProductList/ProductForm */
   margin-top: 0;
   margin-bottom: 20px;
   padding-bottom: 10px;
@@ -127,9 +115,7 @@ input[type="file"] {
   color: #333;
 }
 
-/* Image preview styling REMOVED */
-/*
-.image-preview {
+.image-preview { /* Assuming this is inside ProductList/ProductForm */
   margin-top: 15px;
   border: 1px solid #eaeaea;
   border-radius: 4px;
@@ -138,15 +124,15 @@ input[type="file"] {
   width: 200px;
 }
 
-.image-preview img {
+.image-preview img { /* Assuming this is inside ProductList/ProductForm */
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-*/
 
-.add-product-btn,
-.remove-product-btn {
+
+.add-product-btn, /* Assuming this is inside ProductList */
+.remove-product-btn { /* Assuming this is inside ProductList/ProductForm */
   background: none;
   border: none;
   cursor: pointer;
@@ -156,7 +142,7 @@ input[type="file"] {
   transition: background-color 0.3s, color 0.3s; /* Added color transition */
 }
 
-.add-product-btn {
+.add-product-btn { /* Assuming this is inside ProductList */
   color: #4a90e2;
   border: 1px dashed #4a90e2;
   background-color: rgba(74, 144, 226, 0.05); /* Slightly less prominent */
@@ -165,12 +151,12 @@ input[type="file"] {
   text-align: center; /* Ensure text is centered */
 }
 
-.add-product-btn:hover {
+.add-product-btn:hover { /* Assuming this is inside ProductList */
   background-color: rgba(74, 144, 226, 0.1);
   color: #3a7bc8; /* Darker blue on hover */
 }
 
-.remove-product-btn {
+.remove-product-btn { /* Assuming this is inside ProductList/ProductForm */
   color: #d32f2f;
   display: block; /* Keep as block */
   margin-left: auto; /* Keep pushing to the right */
@@ -178,17 +164,19 @@ input[type="file"] {
   background-color: transparent; /* Ensure no background initially */
 }
 
-.remove-product-btn:hover {
+.remove-product-btn:hover { /* Assuming this is inside ProductList/ProductForm */
   background-color: rgba(211, 47, 47, 0.05); /* Subtle background on hover */
   color: #b71c1c; /* Darker red on hover */
 }
 
+/* Styles for the actions container (kept the div for now) */
 .actions {
   text-align: center;
   margin-top: 30px;
   margin-bottom: 20px;
 }
 
+/* Styles for the submit button */
 .create-store-btn {
   background-color: #4caf50;
   color: white;
@@ -210,21 +198,23 @@ input[type="file"] {
   cursor: not-allowed;
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
-  .create-store-container {
+  section.create-store-container { /* Updated selector */
     padding: 20px;
     margin: 20px;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 0; /* Remove gap if elements stack vertically */
   }
   /* Ensure stacked elements have margin */
   .form-row .form-group {
-     margin-bottom: 20px; 
+     margin-bottom: 20px;
   }
   .form-row .form-group:last-child {
      margin-bottom: 0; /* Remove margin from last item */
   }
 }
+
