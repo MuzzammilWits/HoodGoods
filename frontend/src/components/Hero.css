@@ -1,12 +1,17 @@
-/* In Hero.css */
-/* Using your styles as the base, only changing hero-seller-prompt margin-top */
+/* --- Reset semantic elements in Hero --- */
+section, article, aside, nav, main, header, figure, figcaption, ul, li {
+  all: unset;
+  display: block;
+}
+/* --- End reset --- */
 
-.light-purple-bg { /* Uses --accent-background from index.css */
-  background-color: var(--accent-background, #a899b5); /* Fallback color may need update based on index.css */
+/* Base styles and tweaks for hero section */
+.light-purple-bg {
+  background-color: var(--accent-background, #a899b5);
 }
 
 .hero-section {
-  padding: 9rem 0; /* Increased padding from previous step */
+  padding: 9rem 0;
 }
 
 .hero-container {
@@ -16,25 +21,22 @@
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   padding: 0 1rem;
-  align-items: start; /* Keep top alignment */
+  align-items: start;
 }
 
-.hero-content {
+.hero-header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* Content alignment defaults to left/start */
 }
 
 .hero-title {
   font-size: 3.5rem;
   font-weight: 700;
-  /* Color based on your provided code */
-  color: var(--white, #432C53ff); /* Assuming this was correct for your chosen bg */
+  color: var(--white, #432C53ff);
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
-  /* text-align defaults to left */
 }
 
 .hero-text {
@@ -42,35 +44,27 @@
   line-height: 1.7;
   margin-bottom: 2.5rem;
   max-width: 550px;
-  /* Color based on your provided code */
-  color: rgba(from var(--white, #ffffff) r g b / 0.9); /* Assuming this was correct */
-  /* text-align defaults to left */
+  color: rgba(from var(--white, #ffffff) r g b / 0.9);
 }
 
 .hero-buttons {
-  /* Center only this container */
-  align-self: center;
   margin-top: 1rem;
-  display: inline-block;
 }
 
-/* Rule to make the button bigger */
 .hero-buttons .btn-primary {
-  padding: 1rem 2.5rem;  /* Increased padding */
-  font-size: 1.15rem; /* Increased font size */
+  padding: 1rem 2.5rem;
+  font-size: 1.15rem;
   display: inline-block;
 }
-/* --- End Button Size Styles --- */
 
 .btn:focus-visible {
-  /* Outline color based on your provided code */
   outline: 2px solid var(--white, #fff);
   outline-offset: 2px;
 }
 
 .hero-images {
   position: relative;
-  top: 1.5rem; /* Nudge from previous step */
+  top: 1.5rem;
   min-width: 0;
 }
 
@@ -79,17 +73,18 @@
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 1rem;
+  list-style: none;
 }
 
-.grid-item {
+.image-grid li {
   position: relative;
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  aspect-ratio: 1 / 1; /* Square images */
+  aspect-ratio: 1 / 1;
 }
 
-.grid-item img {
+.image-grid img {
   display: block;
   width: 100%;
   height: 100%;
@@ -97,7 +92,7 @@
   transition: transform 0.3s ease;
 }
 
-.grid-item:hover img {
+.image-grid li:hover img {
   transform: scale(1.05);
 }
 
@@ -105,8 +100,7 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  /* Tag background based on your provided code */
-  background-color: rgba(from var(--primary-color, #6D4C41) r g b / 0.7); /* Check if #6D4C41 is correct primary */
+  background-color: rgba(from var(--primary-color, #6D4C41) r g b / 0.7);
   color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
@@ -123,32 +117,25 @@
   opacity: 0.4;
 }
 
-.dots {
+/* .dots {
   width: 100px;
   height: 100px;
-  /* Dots color based on your provided code */
   background-image: radial-gradient(circle, var(--white, #fff) 1.5px, transparent 1.5px);
   background-size: 12px 12px;
-}
+} */
 
 /* --- Seller Prompt Styling --- */
 .hero-seller-prompt {
-  /* --- ADJUSTED: Increased margin-top for more space below button --- */
-  margin-top: 3.5rem; /* Increased from 2rem - Adjust value as needed */
-  /* --- End adjustment --- */
+  margin-top: 3.5rem;
   padding: 1rem;
-  /* Background based on your provided code */
   background-color: rgba(from var(--white, #fff) r g b / 0.1);
   border-radius: 6px;
   max-width: 550px;
-   /* Border based on your provided code */
   border: 1px solid rgba(from var(--white, #fff) r g b / 0.2);
-  /* text-align defaults to left */
 }
 
 .hero-seller-prompt p {
   font-size: 0.95rem;
-  /* Color based on your provided code */
   color: var(--white, #fff);
   line-height: 1.6;
   margin: 0;
@@ -159,7 +146,6 @@
   border: none;
   padding: 0;
   font: inherit;
-  /* Color based on your provided code */
   color: var(--white, #fff);
   text-decoration: underline;
   cursor: pointer;
@@ -170,8 +156,6 @@
 .hero-seller-prompt .link-button:hover {
   opacity: 0.85;
 }
-/* --- End Seller Prompt Styling --- */
-
 
 /* --- Responsive adjustments --- */
 @media (max-width: 992px) {
@@ -180,50 +164,61 @@
     gap: 2rem;
     align-items: start;
   }
-   .hero-images { top: 1rem; }
+  .hero-images { top: 1rem; }
   .hero-title { font-size: 3.0rem; }
   .hero-text { font-size: 1.1rem; }
-   .hero-section {
-       padding: 7rem 0; /* Adjust padding for medium screens */
-   }
-   .hero-seller-prompt {
-       margin-top: 3rem; /* Adjust spacing for medium screens */
-   }
+  .hero-section {
+    padding: 7rem 0;
+  }
+  .hero-seller-prompt {
+    margin-top: 3rem;
+  }
 }
 
 @media (max-width: 768px) {
   .hero-section {
-      padding: 4rem 0; /* Adjust padding for small screens */
-   }
+    padding: 4rem 0;
+  }
   .hero-container {
     grid-template-columns: 1fr;
     gap: 2.5rem;
-    align-items: initial;
   }
-  .hero-content {
-     align-items: flex-start; /* Align items left */
-     text-align: left; /* Align text left */
+  .hero-header {
+    align-items: flex-start;
+    text-align: left;
   }
-   .hero-images { position: static; width: 100%; max-width: 450px; margin: 1rem auto 0; }
-  .grid-item { aspect-ratio: 4 / 3; } /* Revert aspect ratio */
-  .hero-text { max-width: 100%; font-size: 1.1rem; }
-  .hero-title { font-size: 2.6rem; }
+  .hero-images { 
+    position: static; 
+    width: 100%; 
+    max-width: 450px; 
+    margin: 1rem auto 0; 
+  }
+  .image-grid li { 
+    aspect-ratio: 4 / 3; 
+  }
+  .hero-text { 
+    max-width: 100%; 
+    font-size: 1.1rem; 
+  }
+  .hero-title { 
+    font-size: 2.6rem; 
+  }
   .hero-buttons {
-      align-self: center; /* Keep centering button */
-   }
-   .hero-buttons .btn-primary {
-     padding: 0.8rem 2rem;
-     font-size: 1rem;
-   }
+    align-self: center;
+  }
+  .hero-buttons .btn-primary {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
   .dots-decoration { display: none; }
   .hero-seller-prompt {
-      max-width: 95%;
-      margin-top: 2.5rem; /* Adjust spacing for small screens */
-      padding: 0.8rem;
-      align-self: stretch;
-      margin-left: 0;
-      margin-right: 0;
-      text-align: left;
+    max-width: 95%;
+    margin-top: 2.5rem;
+    padding: 0.8rem;
+    align-self: stretch;
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
   }
   .hero-seller-prompt p { font-size: 0.9rem; }
 }
