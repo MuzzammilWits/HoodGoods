@@ -1,59 +1,39 @@
-import React from 'react'; // No longer need useState, useEffect here
+import React from 'react';
 import './Hero.css';
 import { jewelleryImg, flowerImg, honeyImg, ceramicsImg, getImage } from './utils/ImageImports';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 
-
-// No longer need backendUrl or namespace constant here
-
 const Hero: React.FC = () => {
-  const {
-    isAuthenticated, // The primary status we need
-    loginWithRedirect,
-    isLoading,      // Still useful to prevent flashes of content
-    // user, // Not needed for this logic
-    // getAccessTokenSilently, // Not needed for this logic
-  } = useAuth0();
+  const { isAuthenticated, loginWithRedirect, isLoading } = useAuth0();
 
-  // Role state and fetching effect are removed
-
-  // --- Determine if the prompt should be shown ---
-  // Show the prompt ONLY if Auth0 is finished loading AND the user is NOT authenticated.
   const showPrompt = !isLoading && !isAuthenticated;
-  // --- End Prompt Logic ---
 
-  // Login handler remains the same
   const handleLoginPrompt = () => {
     loginWithRedirect({
-      appState: { returnTo: window.location.pathname }, // Optional: redirect back here after login
-      // screen_hint: 'signup' // Optional hint for Auth0
+      appState: { returnTo: window.location.pathname },
     });
   };
 
   return (
     <section className="hero-section light-purple-bg">
-      <div className="hero-container">
-        <div className="hero-content">
+      <article className="hero-container"> {/* Replaced div with article */}
+        <header className="hero-header">
           <h1 className="hero-title">
             Find Your Kind<br />
-            Of Handmade     
+            Of Handmade
           </h1>
           <p className="hero-text">
-            From bold and modern to cozy and traditional,
-            every shop here brings something unique. Browse
-            through passionate creators and find pieces that
-            match your style, your story, and your space.
+            From bold and modern to cozy and traditional, every shop here brings something unique.
+            Browse through passionate creators and find pieces that match your style, your story, and your space.
           </p>
-          <div className="hero-buttons">
-          <Link to="products" className="btn btn-primary">
-            Shop now
-          </Link>
-          </div>
-          {/* --- Conditional Seller Prompt --- */}
-          {/* Show this message ONLY if the user is logged out (and Auth0 is ready) */}
+          <nav className="hero-buttons">
+            <Link to="products" className="btn btn-primary">
+              Shop now
+            </Link>
+          </nav>
           {showPrompt && (
-            <div className="hero-seller-prompt">
+            <aside className="hero-seller-prompt">
               <p>
                 Ready to share your unique creations with the world?{' '}
                 <button onClick={handleLoginPrompt} className="link-button">
@@ -61,39 +41,53 @@ const Hero: React.FC = () => {
                 </button>
                 {' '}to become a seller on HoodsGoods!
               </p>
-            </div>
+            </aside>
           )}
-          {/* --- End Conditional Seller Prompt --- */}
+        </header>
 
-        </div>
+        <main className="hero-images">
+          <ul className="image-grid">
+            <li className="grid-item new">
+              <figure>
+                {getImage(jewelleryImg, "Jewelry", 200, 150)}
+                <figcaption className="tag">New</figcaption>
+              </figure>
+            </li>
+            <li className="grid-item featured">
+              <figure>
+                {getImage(flowerImg, "Flowers", 200, 150)}
+                <figcaption className="tag">Featured</figcaption>
+              </figure>
+            </li>
+            <li className="grid-item">
+              <figure>
+                {getImage(honeyImg, "Honey", 200, 150)}
+                <figcaption className="tag">Popular</figcaption>
+              </figure>
+            </li>
+            <li className="grid-item">
+              <figure>
+                {getImage(ceramicsImg, "Ceramics", 200, 150)}
+                <figcaption className="tag">Trending</figcaption>
+              </figure>
+            </li>
+          </ul>
 
-        {/* --- Hero Images (No Changes) --- */}
-        <div className="hero-images">
-           {/* ... rest of image grid ... */}
-           <div className="image-grid">
-             <div className="grid-item new">
-               {getImage(jewelleryImg, "Jewelry", 200, 150)}
-               <span className="tag">New</span>
-             </div>
-             <div className="grid-item featured">
-               {getImage(flowerImg, "Flowers", 200, 150)}
-               <span className="tag">Featured</span>
-             </div>
-             <div className="grid-item">
-               {getImage(honeyImg, "Honey", 200, 150)}
-               <span className="tag">Popular</span>
-             </div>
-             <div className="grid-item">
-               {getImage(ceramicsImg, "Ceramics", 200, 150)}
-               <span className="tag">Trending</span>
-             </div>
-           </div>
-           <div className="dots-decoration">
-             <div className="dots"></div>
-           </div>
-        </div>
-        {/* --- End Hero Images --- */}
-      </div>
+          <figure className="dots-decoration" aria-hidden="true"> {/* Replaced div with figure */}
+            <svg 
+              className="dots" 
+              width="100" 
+              height="100"
+              aria-hidden="true"
+            >
+              <pattern id="dots-pattern" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+                <circle cx="1.5" cy="1.5" r="1.5" fill="var(--white, #fff)"/>
+              </pattern>
+              <rect width="100" height="100" fill="url(#dots-pattern)" />
+            </svg>
+          </figure>
+        </main>
+      </article>
     </section>
   );
 };
