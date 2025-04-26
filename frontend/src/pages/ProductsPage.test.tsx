@@ -151,59 +151,67 @@ describe('ProductsPage Component', () => {
      // --- END FAILING TEST 1 --- */
 
 
-    test('filters products based on category selection', async () => {
+     test('filters products based on category selection', async () => {
         renderWithRouter();
-        await waitFor(() => {
-            expect(screen.queryByText(/Loading products.../i)).not.toBeInTheDocument();
-        });
 
-        // Initially shows all 4 products
-        expect(screen.getByText('Wooden Bowl')).toBeInTheDocument();
+        // --- FIX: Change the FIRST check to use findByText ---
+        // Wait for the first product to appear, ensuring data fetch and render are complete.
+        expect(await screen.findByText('Wooden Bowl')).toBeInTheDocument();
+
+        // Now that we've awaited the first one, the others fetched at the same time
+        // should also be present. We can use getByText for these subsequent checks
+        // in this initial state verification.
         expect(screen.getByText('Silver Necklace')).toBeInTheDocument();
         expect(screen.getByText('Canvas Print')).toBeInTheDocument();
         expect(screen.getByText('Leather Wallet')).toBeInTheDocument();
+        // --- End FIX ---
 
         // Select "Jewellery & Accessories" category
         const categorySelect = screen.getByLabelText(/Filter by Category/i);
         fireEvent.change(categorySelect, { target: { value: 'Jewellery & Accessories' } });
 
-        // Wait for re-render (useEffect updates filteredProducts)
+        // --- IMPROVEMENT: Use findBy/waitFor after filtering too for robustness ---
+        // Wait for an expected item to appear after filtering
+        expect(await screen.findByText('Silver Necklace')).toBeInTheDocument();
+        expect(screen.getByText('Leather Wallet')).toBeInTheDocument(); // Check other expected item
+
+        // Wait for unexpected items to disappear
         await waitFor(() => {
-            // Check for absence of items NOT in the selected category
             expect(screen.queryByText('Wooden Bowl')).not.toBeInTheDocument();
             expect(screen.queryByText('Canvas Print')).not.toBeInTheDocument();
         });
-        // Check for presence of items IN the selected category
-        expect(screen.getByText('Silver Necklace')).toBeInTheDocument();
-        expect(screen.getByText('Leather Wallet')).toBeInTheDocument();
         expect(categorySelect).toHaveValue('Jewellery & Accessories'); // Check select value updated
 
         // Select "All Categories"
         fireEvent.change(categorySelect, { target: { value: '' } });
 
         // Wait for re-render - use findByText to ensure they reappear
-         await screen.findByText('Wooden Bowl'); // Wait for one to reappear
-         expect(screen.getByText('Canvas Print')).toBeInTheDocument(); // Check others
+        expect(await screen.findByText('Wooden Bowl')); // Wait for one to reappear
+        // Check others are back
+        expect(screen.getByText('Canvas Print')).toBeInTheDocument();
         expect(screen.getByText('Silver Necklace')).toBeInTheDocument();
         expect(screen.getByText('Leather Wallet')).toBeInTheDocument();
         expect(categorySelect).toHaveValue(''); // Check select value updated
     });
 
-     test('filters products based on initial URL search parameter', async () => {
+    test('filters products based on initial URL search parameter', async () => {
         // Render with initial category in URL
         renderWithRouter(['/products?category=Art']);
 
+        // --- FIX: Wait specifically for the filtered product ---
+        // Wait for the "Art" product to appear. This implicitly waits for loading and filtering.
+        expect(await screen.findByText('Canvas Print')).toBeInTheDocument(); // Art product
+
+        // --- FIX: Wrap negative checks in waitFor to ensure they run after state settles ---
         await waitFor(() => {
-            expect(screen.queryByText(/Loading products.../i)).not.toBeInTheDocument();
+            // Check that other products are NOT visible
+            expect(screen.queryByText('Wooden Bowl')).not.toBeInTheDocument();
+            expect(screen.queryByText('Silver Necklace')).not.toBeInTheDocument();
+            expect(screen.queryByText('Leather Wallet')).not.toBeInTheDocument();
         });
 
-        // Only "Art" category product should be visible
-        expect(screen.queryByText('Wooden Bowl')).not.toBeInTheDocument();
-        expect(screen.queryByText('Silver Necklace')).not.toBeInTheDocument();
-        expect(screen.getByText('Canvas Print')).toBeInTheDocument(); // Art product
-        expect(screen.queryByText('Leather Wallet')).not.toBeInTheDocument();
-
-        // Check if select dropdown reflects the URL param
+        // Check if select dropdown reflects the URL param (this can usually be checked immediately after render if needed,
+        // but confirming after the content appears is also fine)
         expect(screen.getByLabelText(/Filter by Category/i)).toHaveValue('Art');
     });
 
@@ -239,23 +247,24 @@ describe('ProductsPage Component', () => {
        });
 
 
-    test('calls addToCart from context when "Add to Cart" button is clicked', async () => {
+       test('calls addToCart from context when "Add to Cart" button is clicked', async () => {
         renderWithRouter();
-        await waitFor(() => {
-            expect(screen.queryByText(/Loading products.../i)).not.toBeInTheDocument();
-        });
 
-        // Find the button specifically for "Wooden Bowl"
-        const productCard = screen.getByText('Wooden Bowl').closest('.product-card');
+        // --- FIX: Use findByText to wait for the specific product to render ---
+        // Wait for the "Wooden Bowl" product name to appear after fetching
+        const productNameElement = await screen.findByText('Wooden Bowl');
+
+        // Find the button specifically for "Wooden Bowl" using the found element
+        const productCard = productNameElement.closest('.product-card');
         expect(productCard).toBeInTheDocument(); // Ensure card was found
 
+        // Use within to scope the button search to the specific product card
         const addButton = within(productCard! as HTMLElement).getByRole('button', { name: /Add Wooden Bowl to cart/i });
 
-        // --- FIX: Wrap async function trigger in act ---
+        // Wrap async function trigger in act (already correctly done)
         await act(async () => {
             fireEvent.click(addButton);
         });
-        // --- End FIX ---
 
         // Verify mock addToCart was called with correct data
         expect(mockAddToCart).toHaveBeenCalledTimes(1);
