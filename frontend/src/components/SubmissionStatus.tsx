@@ -1,4 +1,3 @@
-// src/components/SubmissionStatus.tsx
 import React from 'react';
 
 interface SubmissionStatusProps {
@@ -11,8 +10,8 @@ const SubmissionStatus: React.FC<SubmissionStatusProps> = ({ error, success }) =
 
     return (
         <>
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
+            {error && <output className="error-message">{error}</output>}
+            {success && <output className="success-message">{success}</output>}
         </>
     );
 };

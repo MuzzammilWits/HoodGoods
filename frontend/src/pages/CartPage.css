@@ -1,0 +1,49 @@
+/* --- START: Replace previous flex rules with these Grid rules --- */
+
+.summary-details {
+    display: grid;                 /* USE GRID */
+    grid-template-columns: auto 1fr; /* Column 1 (label) sized by content, Column 2 (value) takes remaining space */
+    gap: 0.5rem 1rem;           /* 0.5rem space BETWEEN rows, 1rem space BETWEEN columns */
+    align-items: baseline;         /* Align text baselines vertically within each row */
+    margin: 0;                   /* Reset default dl margin */
+    padding: 0;                  /* Reset default dl padding */
+  }
+  
+  .summary-details dt {
+    grid-column: 1 / 2;          /* Explicitly place <dt> in the first column */
+    text-align: left;            /* Align label text left */
+    margin: 0;                   /* Reset any default margins */
+    padding: 0;                  /* Reset any default padding */
+    font-weight: normal;
+    /* No width or basis needed - grid handles sizing */
+  }
+  
+  .summary-details dd {
+    grid-column: 2 / 3;          /* Explicitly place <dd> in the second column */
+    text-align: right;           /* Align value text right */
+    margin: 0;                   /* IMPORTANT: Override default dd indentation (margin-left) */
+    padding: 0;                  /* Reset any default padding */
+    font-weight: normal;
+    /* No width or basis needed */
+  }
+  
+  /* Style the total row specifically (inherits grid placement) */
+  .summary-details .total-label,
+  .summary-details .total-value {
+    font-weight: bold;
+  }
+  
+  /* --- END: Grid rules --- */
+  
+  
+  /* Keep surrounding styles if they are working */
+  .cart-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+  }
+  
+  /* Optional: Ensure global box-sizing */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }

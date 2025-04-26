@@ -1,4 +1,3 @@
-// src/components/StoreInfoForm.tsx
 import React from 'react';
 
 interface StoreInfoFormProps {
@@ -13,9 +12,9 @@ const StoreInfoForm: React.FC<StoreInfoFormProps> = ({
   isSubmitting,
 }) => {
   return (
-    <div className="store-info-section">
+    <section className="store-info-section">
       <h2>Store Information</h2>
-      <div className="form-group">
+      <fieldset className="form-group">
         <label htmlFor="storeName">Store Name</label>
         <input
           type="text"
@@ -26,8 +25,8 @@ const StoreInfoForm: React.FC<StoreInfoFormProps> = ({
           required
           disabled={isSubmitting}
         />
-      </div>
-    </div>
+      </fieldset>
+    </section>
   );
 };
 

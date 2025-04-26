@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useCart } from '../context/ContextCart';
-import { useSearchParams } from 'react-router-dom';//change for filter
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import './ProductsPage.css';
+import './ProductsPage.css'; // Assuming this CSS file exists and styles the classes
 
 interface Product {
   prodId: number;
@@ -15,38 +15,38 @@ interface Product {
   storeName : string;
   isActive : boolean;
 }
-// "prodId": "10",
-//   "name": "Corn",
-//   "description": "WTF",
-//   "category": "Clothing",
-//   "price": 1000,
-//   "userId": "auth0|6802e4ee8773a9cc0ae23d94",
-//   "imageUrl": "https://euudlgzarnvbsvzlizcu.supabase.co/storage/v1/object/public/images/uploads/1745066194700-interior.jpg",
-//   "storeName": "Testing Editing WIth Images",
-//   "isActive": true
-
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]); //changes for filter
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams(); //changes for filter
+  const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
 
-  const selectedCategory = searchParams.get('category') || '';//changes for filter
+  const selectedCategory = searchParams.get('category') || '';
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoading(true); // Ensure loading state is set at the beginning
       try {
         const response = await axios.get(`${backendUrl}/products`);
 
+        // Basic validation of response data
         if (!Array.isArray(response.data)) {
-          throw new Error('Invalid data format received from server');
+           // Check if it's an object with a products array (adjust if backend structure differs)
+          if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
+            setProducts(response.data.products); // Example adjustment
+          } else {
+            console.error("Unexpected data format:", response.data);
+            throw new Error('Invalid data format received from server');
+          }
+        } else {
+           setProducts(response.data);
         }
 
-        setProducts(response.data);
         setError(null);
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
@@ -55,26 +55,27 @@ const ProductsPage = () => {
           ? err.message
           : 'Failed to load products';
 
+        console.error("Fetch products error:", errorMessage, err); // Log detailed error
         setError(errorMessage);
-        setProducts([]);
+        setProducts([]); // Clear products on error
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, []); // Removed dependency array cycle possibility for fetch
 
-//start changes for filter
+  // Effect for filtering products based on category or products changing
   useEffect(() => {
     if (selectedCategory) {
       setFilteredProducts(
         products.filter(product => product.category === selectedCategory)
       );
     } else {
-      setFilteredProducts(products);
+      setFilteredProducts(products); // Show all if no category selected
     }
-  }, [selectedCategory, products]);
+  }, [selectedCategory, products]); // Runs when category or products list changes
 
   const handleCategoryChange = (category: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -83,47 +84,64 @@ const ProductsPage = () => {
     } else {
       newParams.delete('category');
     }
-    setSearchParams(newParams);
+    setSearchParams(newParams, { replace: true }); // Use replace to avoid history clutter
   };
-//end changes for filter
-
 
   const handleAddToCart = async (product: Product) => {
     try {
-      if (!product.prodId) {
-        throw new Error('Product ID is missing');
+      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
+        console.error('Attempted to add invalid product to cart:', product);
+        throw new Error('Product data is invalid or missing ID');
       }
-  
+
+      // Ensure price is a number before adding
+      const price = Number(product.price);
+      if (isNaN(price)) {
+         console.error('Product price is not a valid number:', product.price);
+         throw new Error('Product price is invalid');
+      }
+
       const cartItem = {
-        productId: product.prodId.toString(),
+        productId: String(product.prodId), // Ensure productId is a string
         name: product.name,
-        price: product.price,
-        image: product.imageUrl
+        price: price, // Use validated price
+        image: product.imageUrl || '/placeholder-product.jpg' // Provide fallback image
       };
-      
+
       await addToCart(cartItem);
+      // Consider a more user-friendly notification (e.g., a toast) instead of alert
       alert(`${product.name} added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      // Display error to user if needed, maybe using a state variable
       setError(error instanceof Error ? error.message : 'Failed to add item to cart');
     }
   };
 
-  const categories = [...new Set(products.map(product => product.category))];//changes for filter
+  // Memoize category calculation if products list is large, otherwise fine as is
+  const categories = [...new Set(products.map(product => product.category))];
+
+  // --- Render Logic ---
 
   if (isLoading) {
-    return <div className="loading-spinner">Loading products...</div>;
+    // Using <p> for semantic text content
+    return <p className="loading-spinner">Loading products...</p>;
   }
 
   if (error) {
+    // Using <div> with role="alert" for accessibility of error messages
     return (
-      <div className="error-message">
-        {error}
+      <div className="error-message" role="alert">
+        <p>{error}</p> {/* Put error text in a paragraph */}
         <button
           onClick={() => {
-            setIsLoading(true);
+            // Trigger refetch by resetting state and letting useEffect run
             setError(null);
-            setProducts([]);
+            setProducts([]); // Clear potentially stale data
+            // setIsLoading(true); // Let useEffect handle loading state
+            // Trigger useEffect by changing a dependency if needed, or rely on mount/initial load
+             // Re-fetch logic is handled by the main useEffect
+             window.location.reload(); // Simple retry, consider more sophisticated state reset
           }}
           className="retry-button"
         >
@@ -133,12 +151,14 @@ const ProductsPage = () => {
     );
   }
 
+  // --- Main Render ---
+  // Using <main> for the primary content area of the page
   return (
-    <div className="products-container">
+    <main className="products-container">
       <h1>Artisan Products</h1>
 
-      {/* Category Filter */}
-      <div className="category-filter">
+      {/* Using <section> to group the filtering controls */}
+      <section className="category-filter filters"> {/* Added 'filters' class from your CSS */}
         <label htmlFor="category-select">Filter by Category:</label>
         <select
           id="category-select"
@@ -152,49 +172,69 @@ const ProductsPage = () => {
             </option>
           ))}
         </select>
-      </div>
+      </section>
 
-      <div className="products-grid">
+      {/* Using <ul> for the list of products, semantically correct */}
+      <ul className="products-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
-            <div key={product.prodId} className="product-card">
-              <div className="product-image-container">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="product-image"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-product.jpg';
-                    target.classList.add('placeholder');
-                  }}
-                />
-              </div>
-              <div className="product-details">
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-store">Sold by: {product.storeName}</p>
-                <p className="product-description">{product.description}</p>
-                <p className="product-category">Category: {product.category}</p>
-                <p className="product-price">R{product.price.toFixed(2)}</p>
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  className="add-to-cart-btn"
-                  aria-label={`Add ${product.name} to cart`}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            </div>
+            // Using <li> for each item in the product list
+            // Keeping product-card class on the <li> for styling continuity
+            <li key={product.prodId} className="product-card">
+              {/* Using <article> to represent each self-contained product */}
+              <article>
+                {/* Using <figure> for the product image */}
+                <figure className="product-image-container">
+                  <img
+                    src={product.imageUrl || '/placeholder-product.jpg'} // Fallback image URL
+                    alt={product.name || 'Product image'} // Fallback alt text
+                    className="product-image"
+                    // Basic error handling for images
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      // Prevent infinite loop if placeholder also fails
+                      if (target.src !== '/placeholder-product.jpg') {
+                         target.src = '/placeholder-product.jpg';
+                         target.alt = 'Placeholder image'; // Update alt text
+                         target.classList.add('placeholder');
+                      }
+                    }}
+                    loading="lazy" // Add lazy loading for images
+                  />
+                </figure>
+                {/* Using <section> for the group of product details */}
+                <section className="product-details">
+                  {/* Use <h2> for product name within the <article> scope */}
+                  <h2 className="product-name">{product.name}</h2>
+                  {/* Using <p> for discrete pieces of information */}
+                  <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                  <p className="product-description">{product.description}</p>
+                  <p className="product-category">Category: {product.category}</p>
+                  <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p> {/* Ensure price is number */}
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="add-to-cart-btn"
+                    aria-label={`Add ${product.name} to cart`}
+                    type="button" // Explicitly set button type
+                  >
+                    Add to Cart
+                  </button>
+                </section>
+              </article>
+            </li>
           ))
         ) : (
-          <div className="no-products">
-            {selectedCategory 
-              ? `No products found in ${selectedCategory} category`
-              : 'No products available'}
-          </div>
+          // Using <p> for the "no products" message
+          <li className="no-products"> {/* Wrap in <li> to be valid child of <ul> */}
+            <p>
+              {selectedCategory
+                ? `No products found in the "${selectedCategory}" category.` // Added quotes
+                : 'No products available at the moment.'}
+            </p>
+          </li>
         )}
-      </div>
-    </div>
+      </ul>
+    </main>
   );
 };
 
