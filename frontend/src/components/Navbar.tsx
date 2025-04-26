@@ -76,13 +76,16 @@ const Navbar: React.FC = () => {
             <Link
               to="/#about-us"
               className="nav-link"
-              onClick={() => {
-                if (window.location.pathname !== '/') {
-                  window.location.href = '/#about-us';
-                } else {
-                  const el = document.getElementById('about-us');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+              onClick={(e) => {
+                // If already on Home, scroll smoothly
+                if (window.location.pathname === '/') {
+                  e.preventDefault(); // Prevent default Link behavior
+                  const aboutSection = document.getElementById('about-us');
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }
+                // If not on Home, Link will handle navigation automatically
               }}
             >
               About Us
