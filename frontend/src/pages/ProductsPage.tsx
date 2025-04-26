@@ -14,6 +14,7 @@ interface Product {
   imageUrl: string;
   storeName : string;
   isActive : boolean;
+  productquantity : number;
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -89,30 +90,38 @@ const ProductsPage = () => {
 
 // Inside ProductsPage component...
 
+interface AddToCartItem {
+  productId: number;
+  productName: string;
+  productPrice: number;
+  imageUrl?: string;
+}
+
 const handleAddToCart = async (product: Product) => {
   try {
-    // ... (validation for product and price remains the same) ...
     const price = Number(product.price);
     if (isNaN(price)) {
       throw new Error('Product price is invalid');
     }
 
-    // Prepare the item object for the context's addToCart function
-    const itemToAdd = {
+    // Prepare the item object matching the AddToCartItem interface
+    const itemToAdd: AddToCartItem = { // Explicitly use the interface type (optional but good practice)
       productId: product.prodId,
-      productName: product.name, // Updated to match AddToCartItem type
-      productPrice: price,       // Updated to match AddToCartItem type
-      image: product.imageUrl || '/placeholder-product.jpg'
+      productName: product.name,
+      productPrice: price,
+      // --- FIX: Change 'image' to 'imageUrl' ---
+      imageUrl: product.imageUrl || undefined // Use undefined or omit if placeholder isn't desired here
+      // If product.imageUrl can be null/empty, sending undefined is fine.
+      // The context logic might handle adding a default if needed, or CartPage handles display fallback.
     };
 
-    // Call the context function (which expects productId: number)
+    // Now itemToAdd correctly has the imageUrl property
     await addToCart(itemToAdd);
 
     alert(`${product.name} added to cart!`);
 
   } catch (error) {
      console.error('Error adding to cart:', error);
-     // Display error to user (consider using the context's error state)
      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
   }
 };
