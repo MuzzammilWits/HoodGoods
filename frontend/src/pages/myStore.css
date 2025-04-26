@@ -1,11 +1,11 @@
-/* === Base and Layout Styles === */
-.my-store-container {
+/* === Base and Layout Styles (Updated for Semantic Tags) === */
+main.my-store-container { /* Targets the <main> element */
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
 }
 
-.store-header {
+header.store-header { /* Targets the <header> element */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,12 +14,13 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.store-header h1 {
+header.store-header h1 { /* Targets h1 within the <header> */
   font-size: 2.5rem;
   color: #333;
   margin: 0;
 }
 
+/* General button class, used in header */
 .add-product-button {
   background-color: #4caf50;
   color: white;
@@ -31,40 +32,45 @@
   transition: background-color 0.3s;
 }
 .add-product-button:disabled {
-    background-color: #a5d6a7; /* Lighter green when disabled */
-    cursor: not-allowed;
+  background-color: #a5d6a7;
+  cursor: not-allowed;
 }
 .add-product-button:hover:not(:disabled) {
   background-color: #388e3c;
 }
 
-/* === Messages and Loading States === */
-.error-message {
-  background-color: #ffebee; /* Lighter red background */
-  border: 1px solid #ef9a9a; /* Lighter red border */
-  border-left: 5px solid #d32f2f; /* Keep strong left border */
-  color: #c62828; /* Darker red text */
+/* === Messages and Loading States (Updated for Semantic Tags) === */
+p.error-message, /* Targets <p> elements with this class */
+[role="alert"].error-message { /* Catches elements explicitly marked as alerts */
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-left: 5px solid #d32f2f;
+  color: #c62828;
   padding: 12px 15px;
-  margin-top: 15px; /* Add top margin */
+  margin-top: 15px;
   margin-bottom: 20px;
   border-radius: 4px;
   font-size: 0.95em;
 }
-/* Removed empty ruleset for .action-error */
-.loading-container,
-.store-error,
-.no-store {
+
+/* Targets specific status elements like <p> or <section> */
+p.status-message.loading,
+section.store-error,
+section.no-store {
   text-align: center;
-  padding: 50px 20px; /* Add horizontal padding */
+  padding: 50px 20px;
   color: #666;
 }
-.store-error h2, .no-store h2 {
-    margin-bottom: 15px;
-    color: #444;
+section.store-error h2,
+section.no-store h2 {
+  margin-bottom: 15px;
+  color: #444;
 }
-.store-error button,
-.no-store .create-store-link,
-.no-products button { /* Style buttons consistently */
+
+/* Styles buttons within status sections */
+section.store-error button,
+section.no-store .button-link, /* Targets <a> styled as button */
+p.no-products button { /* Targets button within <p class="no-products"> */
   display: inline-block;
   background-color: #4a90e2;
   color: white;
@@ -77,112 +83,127 @@
   text-decoration: none;
   transition: background-color 0.3s;
 }
-.store-error button:hover,
-.no-store .create-store-link:hover,
-.no-products button:hover {
+section.store-error button:hover,
+section.no-store .button-link:hover,
+p.no-products button:hover {
   background-color: #3a7bc8;
 }
 
-
-/* === Add Product Form Styles === */
-.add-product-form {
-  background-color: #fdfdfd; /* Slightly off-white */
-  padding: 20px 25px; /* Adjust padding */
+/* === Add Product Form Styles (Updated for <form>) === */
+form.add-product-form { /* Targets the <form> element */
+  background-color: #fdfdfd;
+  padding: 20px 25px;
   border-radius: 8px;
-  margin-top: 20px; /* Space below header */
-  margin-bottom: 40px; /* Space above products */
+  margin-top: 20px;
+  margin-bottom: 40px;
   border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-.add-product-form h2 {
+form.add-product-form h2 { /* Targets h2 within the <form> */
   margin-top: 0;
-  margin-bottom: 25px; /* More space below title */
+  margin-bottom: 25px;
   color: #333;
   text-align: center;
-  font-size: 1.6rem; /* Slightly larger */
+  font-size: 1.6rem;
   font-weight: 600;
 }
 
-/* === General Form Element Styles === */
-.form-group {
-  margin-bottom: 18px; /* Consistent spacing */
-}
-.form-group label {
+/* === General Form Element Styles (Adapted for NO form-group/form-row wrappers) === */
+
+/* Style labels directly */
+/* Targets <label> inside the add form OR inside the dialog's form */
+form.add-product-form label,
+dialog.modal-content form label {
   display: block;
-  margin-bottom: 6px; /* Slightly less space */
+  margin-bottom: 6px; /* Space between label and input */
   font-weight: 600;
-  color: #444; /* Slightly softer black */
+  color: #444;
   font-size: 0.95em;
+  margin-top: 18px; /* Creates space BETWEEN form fields */
 }
-.form-row {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 18px;
+/* Remove extra top margin for the very first label */
+form.add-product-form label:first-of-type,
+dialog.modal-content form label:first-of-type {
+  margin-top: 0;
 }
-.form-row .form-group {
-  flex: 1;
-  margin-bottom: 0;
-}
-input[type="text"],
-input[type="number"],
-textarea,
-select,
-input[type="file"] /* Style file input */
-{
+
+/* Style inputs, textarea, select directly */
+/* Targets these elements inside the add form OR inside the dialog's form */
+form.add-product-form input[type="text"],
+form.add-product-form input[type="number"],
+form.add-product-form textarea,
+form.add-product-form select,
+form.add-product-form input[type="file"],
+dialog.modal-content form input[type="text"],
+dialog.modal-content form input[type="number"],
+dialog.modal-content form textarea,
+dialog.modal-content form select,
+dialog.modal-content form input[type="file"] {
   width: 100%;
-  padding: 10px 12px; /* Consistent padding */
-  border: 1px solid #ccc; /* Slightly darker border */
+  padding: 10px 12px;
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
   box-sizing: border-box;
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  /* Spacing is handled by margin-top on the label */
 }
-input[type="text"]:focus,
-input[type="number"]:focus,
-textarea:focus,
-select:focus {
-  border-color: #4a90e2; /* Highlight focus */
+
+/* Focus styles for form elements */
+form.add-product-form input:focus,
+form.add-product-form textarea:focus,
+form.add-product-form select:focus,
+dialog.modal-content form input:focus,
+dialog.modal-content form textarea:focus,
+dialog.modal-content form select:focus {
+  border-color: #4a90e2;
   outline: none;
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
-textarea {
+
+/* Textarea specific */
+form.add-product-form textarea,
+dialog.modal-content form textarea {
   min-height: 80px;
   vertical-align: top;
   line-height: 1.5;
 }
-input[type="file"] {
-    padding: 8px 12px; /* Adjust padding for file input */
-    background-color: #fff; /* Ensure background */
+
+/* File input specific */
+form.add-product-form input[type="file"],
+dialog.modal-content form input[type="file"] {
+  padding: 8px 12px;
+  background-color: #fff;
 }
-/* Style the file input button (browser dependent) */
-input[type="file"]::file-selector-button {
-    padding: 8px 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: background-color 0.2s;
+form.add-product-form input[type="file"]::file-selector-button,
+dialog.modal-content form input[type="file"]::file-selector-button {
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.2s;
 }
-input[type="file"]::file-selector-button:hover {
-    background-color: #eee;
+form.add-product-form input[type="file"]::file-selector-button:hover,
+dialog.modal-content form input[type="file"]::file-selector-button:hover {
+  background-color: #eee;
 }
 
-
-/* Form actions */
-.form-actions {
+/* Form actions (Targets <footer> within form or dialog) */
+footer.form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px; /* Slightly adjust gap */
-  margin-top: 25px; /* More space above actions */
-  padding-top: 15px; /* Add padding if border needed */
-  /* border-top: 1px solid #eee; Optional separator */
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 15px;
 }
+/* General button classes, can be used anywhere */
 .cancel-button {
   background-color: #f5f5f5;
-  color: #555; /* Darker grey text */
+  color: #555;
   border: 1px solid #ddd;
-  padding: 9px 18px; /* Slightly adjust padding */
+  padding: 9px 18px;
   font-size: 0.95rem;
   font-weight: 500;
   border-radius: 4px;
@@ -207,161 +228,190 @@ input[type="file"]::file-selector-button:hover {
 .submit-button:hover:not(:disabled) {
   background-color: #3a7bc8;
 }
-.submit-button:disabled { /* Style for disabled submit */
-  background-color: #a0c7e4; /* Lighter blue */
+.submit-button:disabled {
+  background-color: #a0c7e4;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-/* === Image Preview Styles (Used in Add Form & Edit Modal) === */
-.image-preview {
-  margin-top: 12px; /* Space above preview */
+/* === Image Preview Styles (Adjusted Selectors) === */
+/* Targets the <img> preview in the add form */
+form.add-product-form img.add-preview {
+  margin-top: 12px;
   max-width: 150px;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
-  background-color: #f0f0f0; /* Background if image doesn't load */
-  padding: 5px; /* Small padding around image */
-}
-.image-preview img {
-  display: block;
-  width: 100%;
-  height: auto; /* Maintain aspect ratio */
-  max-height: 140px; /* Limit height */
+  background-color: #f0f0f0;
+  padding: 5px;
+  display: block; /* Ensure img is block */
+  height: auto;
+  max-height: 140px;
   object-fit: contain;
 }
-.edit-preview p { /* Label for edit preview */
+/* Targets the <figure> preview in the edit dialog */
+dialog.modal-content figure.edit-preview {
+  margin: 12px 0 0 0; /* Reset margin, add top margin */
+  max-width: 150px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  padding: 5px;
+}
+dialog.modal-content figure.edit-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+}
+dialog.modal-content figure.edit-preview figcaption {
   font-size: 0.85em;
   margin-bottom: 5px;
   color: #666;
   text-align: left;
+  padding: 0;
 }
 
-/* === Products Display Section === */
-.products-section {
+/* === Products Display Section (Updated for <section>) === */
+section.products-section { /* Targets the <section> */
   margin-top: 40px;
 }
-.products-section h2 {
-  margin-bottom: 25px; /* More space */
+section.products-section h2 { /* Targets h2 within the <section> */
+  margin-bottom: 25px;
   color: #333;
   font-weight: 600;
-  border-bottom: 1px solid #eee; /* Separator */
+  border-bottom: 1px solid #eee;
   padding-bottom: 10px;
 }
-.no-products {
+p.no-products { /* Targets the <p> for no products message */
   text-align: center;
-  padding: 40px 20px; /* More padding */
+  padding: 40px 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
   color: #666;
-  border: 1px dashed #ddd; /* Dashed border */
+  border: 1px dashed #ddd;
 }
-.products-grid {
+ul.products-grid { /* Targets the <ul> grid container */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px; /* Slightly larger gap */
+  gap: 30px;
+  list-style: none; /* Remove list bullets */
+  padding: 0; /* Remove default list padding */
+  margin: 0; /* Remove default list margin */
 }
+/* Individual list items (<li>) don't usually need specific styles here */
+/* ul.products-grid > li { } */
 
-/* === Product Card Styles === */
-.product-card {
+/* === Product Card Styles (Updated for <article>) === */
+article.product-card { /* Targets the <article> element */
   border: 1px solid #e0e0e0;
-  border-radius: 6px; /* Slightly less rounded */
+  border-radius: 6px;
   overflow: hidden;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  height: 100%; /* Makes cards in the same row equal height */
+  box-sizing: border-box;
 }
-.product-card:hover {
-  transform: translateY(-4px); /* Less lift */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Adjusted shadow */
+article.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Product Image Display Styles */
-.product-image {
-  height: 220px; /* Adjust height */
+/* Product Image (targets <figure>) */
+figure.product-image {
+  height: 220px;
   overflow: hidden;
-  background-color: #f5f5f5; /* Lighter placeholder background */
+  background-color: #f5f5f5;
   position: relative;
-  display: flex; /* Use flex for placeholder centering */
+  display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0; /* Reset default figure margin */
 }
-.product-image img {
+figure.product-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease; /* Smooth zoom on hover */
+  transition: transform 0.3s ease;
 }
-.product-card:hover .product-image img {
-    transform: scale(1.05); /* Zoom image slightly on card hover */
+article.product-card:hover figure.product-image img {
+  transform: scale(1.05);
 }
-.product-image-placeholder {
-  display: flex; /* Keep using flex for centering */
+p.product-image-placeholder { /* Targets the <p> placeholder inside <figure> */
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: #b0b0b0; /* Softer grey */
+  color: #b0b0b0;
   font-size: 0.9em;
   text-align: center;
+  margin: 0; /* Reset default p margin */
 }
 
-/* Product Details & Actions */
-.product-details {
-  padding: 15px 18px; /* Adjust padding */
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+/* Product Details & Actions (Targets elements directly inside <article>) */
+/* Optional header inside article */
+article.product-card > header {
+  padding: 15px 18px 0;
+  margin-bottom: 8px; /* Space after header block */
 }
-.product-details h3 {
-  margin: 0 0 8px 0; /* Adjust spacing */
-  font-size: 1.1rem; /* Slightly adjust size */
-  font-weight: 600; /* Make bolder */
-  color: #222; /* Darker heading */
+article.product-card h3 { /* Targets h3, give padding if not using <header> */
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
   line-height: 1.3;
+  padding: 15px 0px 0; /* Add padding if no <header> is used */
 }
-.product-price {
-  font-weight: 700; /* Bolder price */
+article.product-card .product-price {
+  font-weight: 700;
   color: #388e3c;
-  margin: 4px 0;
-  font-size: 1.1em; /* Slightly larger */
+  margin: 0 0 4px 0; /* Adjust margin */
+  font-size: 1.1em;
+  padding: 0 px; /* Side padding */
 }
-.product-category {
-  color: #666; /* Slightly darker grey */
-  font-size: 0.85em; /* Smaller category text */
-  margin: 4px 0 8px 0; /* Adjust spacing */
-  text-transform: uppercase; /* Uppercase for style */
+article.product-card .product-category {
+  color: #666;
+  font-size: 0.85em;
+  margin: 0 0 8px 0; /* Adjust margin */
+  text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding: 0 18px; /* Side padding */
 }
-.product-description {
-  color: #444; /* Darker description text */
+article.product-card .product-description {
+  color: #444;
   font-size: 0.95em;
-  margin-top: 10px;
-  flex-grow: 1;
-  line-height: 1.5; /* Better line spacing */
-  margin-bottom: 15px; /* Ensure space before actions */
+  margin-top: 10px; /* Space above description */
+  flex-grow: 1; /* Allows description to take up space */
+  line-height: 1.5;
+  margin-bottom: 15px; /* Space before actions footer */
+  padding: 0 18px; /* Side padding */
 }
 
-/* Product Card Actions */
-.product-actions {
-  margin-top: auto; /* Push actions to bottom */
-  padding-top: 15px;
-  border-top: 1px solid #f0f0f0; /* Lighter separator */
+/* Product Card Actions (Targets <footer> inside <article>) */
+footer.product-actions {
+  margin-top: auto; /* Push to bottom */
+  padding: 15px 18px; /* Add padding */
+  border-top: 1px solid #f0f0f0;
   display: flex;
   justify-content: flex-end;
-  gap: 8px; /* Adjust gap */
+  gap: 8px;
   flex-shrink: 0;
 }
-.product-actions button {
-  padding: 5px 10px; /* Smaller buttons */
-  font-size: 0.85rem; /* Smaller font */
+footer.product-actions button { /* Targets buttons inside the footer */
+  padding: 5px 10px;
+  font-size: 0.85rem;
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid transparent;
   transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
 }
+/* General button classes */
 .edit-button {
   background-color: #f0f0f0;
   color: #444;
@@ -369,7 +419,7 @@ input[type="file"]::file-selector-button:hover {
 }
 .edit-button:hover:not(:disabled) { background-color: #e5e5e5; border-color: #d5d5d5; }
 .delete-button {
-  background-color: #fff1f0; /* Very light red */
+  background-color: #fff1f0;
   color: #d32f2f;
   border-color: #ffccc7;
 }
@@ -382,29 +432,29 @@ input[type="file"]::file-selector-button:hover {
   opacity: 0.7;
 }
 
-/* === Modal Styles === */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
+/* === Modal Styles (Updated for <dialog>) === */
+
+/* Styles the native backdrop pseudo-element */
+dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 20px;
+  /* Add transitions here if desired */
 }
-.modal-content {
+
+/* Styles the <dialog> element itself */
+dialog.modal-content {
   background-color: white;
   padding: 25px 30px;
   border-radius: 8px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
   width: 100%;
   max-width: 550px;
-  z-index: 1001;
   max-height: 90vh;
   overflow-y: auto;
+  border: none; /* Remove default dialog border */
+  /* Add transitions here if desired */
 }
-.modal-content h2 {
+
+dialog.modal-content h2 { /* Targets h2 inside the dialog */
   margin-top: 0;
   margin-bottom: 25px;
   color: #333;
@@ -412,30 +462,34 @@ input[type="file"]::file-selector-button:hover {
   text-align: center;
   font-weight: 600;
 }
-.modal-content .form-group { margin-bottom: 18px; }
-.modal-content .form-row { margin-bottom: 18px; }
-.modal-content .form-actions { margin-top: 30px; }
-.modal-error {
-  margin-bottom: 20px; /* More space */
-  text-align: center;
-  /* Inherits .error-message styles */
+/* Targets the footer inside the dialog's form */
+dialog.modal-content form footer.form-actions {
+  margin-top: 30px;
 }
 
-/* === Responsive Adjustments === */
+/* Targets error messages inside the dialog */
+dialog.modal-content p.modal-error {
+  margin-bottom: 20px;
+  text-align: center;
+  /* Inherits base .error-message styles */
+}
+
+/* === Responsive Adjustments (Updated Selectors) === */
 @media (max-width: 768px) {
-  .store-header { flex-direction: column; align-items: stretch; gap: 15px; } /* Stretch header content */
-  .store-header h1 { text-align: center; }
-  .add-product-button { width: 100%; } /* Full width add button */
-  .form-row { flex-direction: column; gap: 18px; } /* Keep gap */
-  .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  .modal-content { padding: 20px; }
+  header.store-header { flex-direction: column; align-items: stretch; gap: 15px; }
+  header.store-header h1 { text-align: center; }
+  .add-product-button { width: 100%; }
+  /* Form elements naturally stack now, no form-row fix needed */
+  ul.products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  dialog.modal-content { padding: 20px; }
 }
 @media (max-width: 480px) {
-  .products-grid { grid-template-columns: 1fr; }
-  .product-actions { flex-direction: row; justify-content: space-around; } /* Side by side on mobile */
-  .product-actions button { width: auto; flex-grow: 1; text-align: center; } /* Grow to fill space */
-  .modal-content { padding: 15px; max-height: 95vh; }
-  .modal-content h2 { font-size: 1.3rem; }
-  .form-actions { flex-direction: column; gap: 10px; }
-  .form-actions button { width: 100%; }
+  ul.products-grid { grid-template-columns: 1fr; } /* Single column */
+  footer.product-actions { flex-direction: row; justify-content: space-around; }
+  footer.product-actions button { width: auto; flex-grow: 1; text-align: center; }
+  dialog.modal-content { padding: 15px; max-height: 95vh; }
+  dialog.modal-content h2 { font-size: 1.3rem; }
+  /* Stack form actions buttons vertically */
+  footer.form-actions { flex-direction: column; gap: 10px; }
+  footer.form-actions button { width: 100%; }
 }
