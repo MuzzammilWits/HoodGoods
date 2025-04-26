@@ -43,7 +43,7 @@ const AppContent: React.FC = () => {
 
         <main>
           <Routes>
-            {/* Public Home Route */}
+            {/* Public Home Routes */}
             <Route path="/" element={
               <>
                 <section>
