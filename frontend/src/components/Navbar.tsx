@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Navbar.css'; // Ensure this path is correct
 import { logo } from './utils/ImageImports'; // Ensure this path is correct
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; // Fallback URL
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; 
 
 const Navbar: React.FC = () => {
   const {
