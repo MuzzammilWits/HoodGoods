@@ -144,7 +144,7 @@ const syncCart = useCallback(async (currentCartItems: CartItemUI[]) => {
       const timer = setTimeout(() => {
           // Pass the current state of cartItems directly to avoid closure issues
           syncCart(cartItems);
-      }, 1000); // Debounce time (e.g., 1 second)
+      }, 500); // Debounce time (e.g., 1 second)
 
       return () => clearTimeout(timer); // Cleanup timeout on unmount or change
   }, [cartItems, isLoading, isAuthenticated, isAuthLoading, user, syncCart]); // Dependencies

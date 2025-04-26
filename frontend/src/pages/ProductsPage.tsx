@@ -23,8 +23,10 @@ interface Product {
   price: number;
   userId: string;
   imageUrl: string;
-  storeName: string;
-  isActive: boolean;
+
+  storeName : string;
+  isActive : boolean;
+  productquantity : number;
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -147,55 +149,42 @@ const ProductsPage = () => {
 
 // Inside ProductsPage component...
 
-  const handleAddToCart = async (product: Product) => {
-    try {
-      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
-        console.error('Attempted to add invalid product to cart:', product);
-        throw new Error('Product data is invalid or missing ID');
-      }
+interface AddToCartItem {
+  productId: number;
+  productName: string;
+  productPrice: number;
+  imageUrl?: string;
+}
 
-      // Ensure price is a number before adding
-      const price = Number(product.price);
-      if (isNaN(price)) {
-         console.error('Product price is not a valid number:', product.price);
-         throw new Error('Product price is invalid');
-      }
+const handleAddToCart = async (product: Product) => {
+  try {
+    const price = Number(product.price);
+    if (isNaN(price)) {
+      throw new Error('Product price is invalid');
 
-    // Prepare the item object for the context's addToCart function
-    const itemToAdd = {
+    }
+
+    // Prepare the item object matching the AddToCartItem interface
+    const itemToAdd: AddToCartItem = { // Explicitly use the interface type (optional but good practice)
       productId: product.prodId,
-      productName: product.name, // Updated to match AddToCartItem type
-      productPrice: price,       // Updated to match AddToCartItem type
-      image: product.imageUrl || '/placeholder-product.jpg'
+      productName: product.name,
+      productPrice: price,
+      // --- FIX: Change 'image' to 'imageUrl' ---
+      imageUrl: product.imageUrl || undefined // Use undefined or omit if placeholder isn't desired here
+      // If product.imageUrl can be null/empty, sending undefined is fine.
+      // The context logic might handle adding a default if needed, or CartPage handles display fallback.
     };
 
-    // Call the context function (which expects productId: number)
+    // Now itemToAdd correctly has the imageUrl property
     await addToCart(itemToAdd);
 
     alert(`${product.name} added to cart!`);
 
   } catch (error) {
      console.error('Error adding to cart:', error);
-     // Display error to user (consider using the context's error state)
      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
   }
 };
-
-// ... rest of the component
-      const cartItem = {
-        productId: String(product.prodId),
-        name: product.name,
-        price: price,
-        image: product.imageUrl || '/placeholder-product.jpg'
-      };
-
-      await addToCart(cartItem);
-      alert(`${product.name} added to cart!`);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
-    }
-  };
 
 // ... rest of the component
 
@@ -208,8 +197,10 @@ const ProductsPage = () => {
 
   if (error) {
     return (
-      <section className="error-message" role="alert" aria-live="polite">
-        <p>{error}</p>
+
+      <section className="error-message" role="alert">
+        <p>{error}</p> {/* Put error text in a paragraph */}
+
         <button
           onClick={() => {
             setError(null);
