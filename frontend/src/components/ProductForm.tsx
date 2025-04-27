@@ -1,13 +1,22 @@
 import React from 'react';
-// Ensure ProductFormData from this import includes 'productQuantity: string;'
-import { ProductFormData } from '../types/createStore';
+// Ensure ProductFormData is the simplified version (no storeName/delivery)
+import { ProductFormData } from '../types/createStore'; // Adjust path if needed
 
 interface ProductFormProps {
-  product: ProductFormData;
+  product: ProductFormData; // Uses simplified ProductFormData
   index: number;
   productCategories: string[];
-  // Ensure the keyof type includes 'productQuantity'
-  onProductChange: (index: number, field: keyof Omit<ProductFormData, 'image' | 'imagePreview' | 'imageURL'>, value: string) => void;
+  // --- UPDATE the type for the 'field' parameter to match ProductList ---
+  onProductChange: (
+      index: number,
+      // Omit image fields AND delivery fields
+      field: keyof Omit<ProductFormData,
+          'image' | 'imagePreview' | 'imageURL' |
+          'standardPrice' | 'standardTime' | 'expressPrice' | 'expressTime'
+      >,
+      value: string
+  ) => void;
+  // --- End Update ---
   onImageChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (index: number) => void;
   isSubmitting: boolean;
@@ -18,14 +27,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
   product,
   index,
   productCategories,
-  onProductChange,
+  onProductChange, // Now expects the correctly restricted type
   onImageChange,
   onRemove,
   isSubmitting,
   canRemove,
 }) => {
   return (
-    // Using <section> which is semantic and not a div/span
     <section className="product-section">
       <h3>Product #{index + 1}</h3>
 
@@ -36,6 +44,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           type="text"
           id={`product-name-${index}`}
           value={product.productName}
+          // Calls onProductChange with 'productName' - this matches the updated Omit<> type
           onChange={(e) => onProductChange(index, 'productName', e.target.value)}
           placeholder="Enter product name"
           required
@@ -49,6 +58,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <textarea
           id={`product-description-${index}`}
           value={product.productDescription}
+          // Calls onProductChange with 'productDescription' - matches Omit<>
           onChange={(e) => onProductChange(index, 'productDescription', e.target.value)}
           placeholder="Describe your product..."
           rows={4}
@@ -58,7 +68,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </fieldset>
 
       {/* Price, Quantity & Category Row */}
-      {/* Using <article> which is semantic and not a div/span */}
       <article className="form-row">
         {/* Price Fieldset */}
         <fieldset className="form-group">
@@ -67,31 +76,32 @@ const ProductForm: React.FC<ProductFormProps> = ({
             type="number"
             id={`product-price-${index}`}
             value={product.productPrice}
+            // Calls onProductChange with 'productPrice' - matches Omit<>
             onChange={(e) => onProductChange(index, 'productPrice', e.target.value)}
             placeholder="0.00"
             step="0.01"
-            min="0.01" // Products usually have a price > 0
+            min="0.01"
             required
             disabled={isSubmitting}
           />
         </fieldset>
 
-        {/* --- Added Quantity Fieldset --- */}
+        {/* Quantity Fieldset */}
         <fieldset className="form-group">
           <label htmlFor={`product-quantity-${index}`}>Quantity Available</label>
           <input
             type="number"
             id={`product-quantity-${index}`}
             value={product.productQuantity}
+            // Calls onProductChange with 'productQuantity' - matches Omit<>
             onChange={(e) => onProductChange(index, 'productQuantity', e.target.value)}
             placeholder="0"
-            step="1" // Whole numbers for quantity
-            min="0"  // Quantity can be 0 or more
+            step="1"
+            min="0"
             required
             disabled={isSubmitting}
           />
         </fieldset>
-        {/* --- End Added Quantity Fieldset --- */}
 
         {/* Category Fieldset */}
         <fieldset className="form-group">
@@ -99,6 +109,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <select
             id={`product-category-${index}`}
             value={product.productCategory}
+            // Calls onProductChange with 'productCategory' - matches Omit<>
             onChange={(e) => onProductChange(index, 'productCategory', e.target.value)}
             required
             disabled={isSubmitting}
@@ -113,36 +124,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Image Upload */}
       <fieldset className="form-group">
-        <label htmlFor={`product-image-${index}`}>Product Image *</label>
-        <input
-          type="file"
-          id={`product-image-${index}`}
-          accept="image/png, image/jpeg, image/webp, image/gif"
-          onChange={(e) => onImageChange(index, e)}
-          required // Usually required, adjust if editing allows keeping old image
-          disabled={isSubmitting}
-        />
-        {/* Using <figure> and <img> which are semantic */}
-        {product.imagePreview && (
-          <figure className="image-preview">
-            <img src={product.imagePreview} alt={`Preview for product ${index + 1}`} />
-          </figure>
-        )}
-         {/* Using <small> which is semantic */}
-        {!product.image && !product.imagePreview && <small>Please select an image.</small>}
+         <label htmlFor={`product-image-${index}`}>Product Image *</label>
+         <input type="file" id={`product-image-${index}`} accept="image/*" onChange={(e) => onImageChange(index, e)} required disabled={isSubmitting} />
+         {product.imagePreview && ( <figure className="image-preview"><img src={product.imagePreview} alt={`Preview`} /></figure> )}
+         {!product.image && !product.imagePreview && <small>Please select an image.</small>}
       </fieldset>
 
       {/* Remove Button */}
-      {canRemove && (
-        <button
-          type="button"
-          className="remove-product-btn"
-          onClick={() => onRemove(index)}
-          disabled={isSubmitting}
-        >
-          Remove Product
-        </button>
-      )}
+      {canRemove && ( <button type="button" className="remove-product-btn" onClick={() => onRemove(index)} disabled={isSubmitting}> Remove Product </button> )}
     </section>
   );
 };

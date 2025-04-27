@@ -5,7 +5,7 @@ import { StoreService } from './store.service';
 import { Product } from './product.entity';
 import { User } from '../auth/user.entity';
 import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { UpdateProductDto } from '../products/dto/update-product.dto';
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 
 // Mock TypeORM Repository type

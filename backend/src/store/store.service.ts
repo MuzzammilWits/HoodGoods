@@ -2,186 +2,163 @@
 import {
   Injectable,
   NotFoundException,
+  InternalServerErrorException,
+  ConflictException,
+  ForbiddenException,
   BadRequestException,
-  ForbiddenException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from '../products/entities/product.entity'; // Adjusted path based on common NestJS structure
-import { User } from '../auth/user.entity'; // Assuming User entity definition is compatible
-import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Repository, EntityManager } from 'typeorm';
+import { Product } from '../products/entities/product.entity';
+import { Store } from './entities/store.entity';
+import { User } from '../auth/user.entity';
+import { CreateStoreDto } from './dto/create-store.dto';
+import { CreateProductDto } from '../products/dto/create-product.dto';
+import { UpdateProductDto } from '../products/dto/update-product.dto';
 
 @Injectable()
 export class StoreService {
   constructor(
-    // Assuming Product entity is defined in 'products' module now based on previous file path
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
-
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // Assuming User entity has a 'userID' property/column used for lookup
+    @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
+    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly entityManager: EntityManager,
   ) {}
 
-  // Create Store with initial products
-  async createStoreWithProducts(createStoreDto: CreateStoreWithProductsDto, userId: string): Promise<Product[]> {
-    const user = await this.userRepository.findOne({ where: { userID: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (user.role !== 'seller') {
-      throw new BadRequestException('User must be a seller to create products');
-    }
+  async createStoreWithProducts(createStoreDto: CreateStoreDto, userId: string): Promise<Store> {
+    return this.entityManager.transaction(async transactionalEntityManager => {
+      const storeRepo = transactionalEntityManager.getRepository(Store);
+      const productRepo = transactionalEntityManager.getRepository(Product);
+      const userRepo = transactionalEntityManager.getRepository(User);
 
-    if (!createStoreDto.storeName) {
-        throw new BadRequestException('Store name is required when creating a store with products.');
-    }
-
-    const productEntities = createStoreDto.products.map(productDto => {
-      if (!productDto.imageUrl) {
-        throw new BadRequestException(`Image URL is missing for product: ${productDto.name}`);
-      }
-      // --- Add validation for productquantity ---
-      if (productDto.productquantity === undefined || productDto.productquantity === null || productDto.productquantity < 0) {
-         throw new BadRequestException(`Valid product quantity is required for product: ${productDto.name}`);
-      }
-      // --- Include productquantity when creating entity ---
-      // --- Prepare data object and log before .create() ---
-       const productDataForDb = {
-           name: productDto.name,
-           description: productDto.description,
-           price: productDto.price,
-           category: productDto.category,
-           imageUrl: productDto.imageUrl,
-           productquantity: productDto.productquantity, // Check this value!
-           userId: userId,
-           storeName: createStoreDto.storeName,
-           isActive: true
-       };
-       // >>> ADD CONSOLE LOG HERE <<<
-       console.log(`SVC (createStore): Preparing entity data for product "${productDto.name}":`, JSON.stringify(productDataForDb, null, 2));
-       // >>> END CONSOLE LOG <<<
-
-       // Ensure you use the prepared object in the create call
-       return this.productRepository.create(productDataForDb);
-    });
-
-    // Save all prepared product entities
-    return this.productRepository.save(productEntities);
-  }
-
-  // Get Store Details by User ID
-  async getStoreByUserId(userId: string): Promise<{ storeName: string; products: Product[] }> {
-    const products = await this.productRepository.find({
-        where: { userId: userId },
-        order: { prodId: 'ASC' }
-    });
-
-    if (!products || products.length === 0) {
-      const user = await this.userRepository.findOne({ where: { userID: userId } });
+      const user = await userRepo.findOne({ where: { userID: userId } });
       if (!user) throw new NotFoundException('User not found');
-      throw new NotFoundException('No store or products found for this user.');
-    }
 
-    const storeName = products[0].storeName;
-    return {
-      storeName,
-      products
-    };
+      const existingStore = await storeRepo.findOne({ where: { userId: userId } });
+      if (existingStore) throw new ConflictException(`User already has a store named '${existingStore.storeName}'.`);
+
+      // Create Store
+      const newStore = storeRepo.create({
+        userId: userId,
+        storeName: createStoreDto.storeName, // Get storeName from DTO
+        standardPrice: createStoreDto.standardPrice,
+        standardTime: createStoreDto.standardTime,
+        expressPrice: createStoreDto.expressPrice,
+        expressTime: createStoreDto.expressTime,
+      });
+      const savedStore = await storeRepo.save(newStore);
+
+      // Prepare and Create Products
+      const productEntities = createStoreDto.products.map(productDto => {
+        return productRepo.create({
+          name: productDto.name,
+          description: productDto.description,
+          price: productDto.price,
+          category: productDto.category,
+          imageUrl: productDto.imageUrl,
+          productquantity: productDto.productquantity,
+          userId: userId,
+          storeId: savedStore.storeId,
+          storeName: savedStore.storeName, // <-- Add this line: Copy storeName from saved Store
+          isActive: true,
+        });
+      });
+
+      await productRepo.save(productEntities);
+
+      return await storeRepo.findOneOrFail({ where: { storeId: savedStore.storeId }});
+
+    }).catch(error => {
+        if (error instanceof ConflictException || error instanceof NotFoundException || error instanceof BadRequestException) {
+            throw error;
+        }
+        console.error("Transaction failed in createStoreWithProducts:", error);
+         // Log the detailed TypeORM error if available
+         if (error.driverError) {
+             console.error("Database Driver Error:", JSON.stringify(error.driverError, null, 2));
+         }
+        throw new InternalServerErrorException("Failed to create store due to an internal error.");
+    });
   }
 
-  // Add a Product to an existing store
+  // --- Method to get store remains the same ---
+  async getStoreByUserId(userId: string): Promise<{ store: Store; products: Product[] }> {
+     const store = await this.storeRepository.findOne({ where: { userId: userId }});
+     if (!store) {
+        const user = await this.userRepository.findOne({ where: { userID: userId } });
+        if (!user) throw new NotFoundException('User not found');
+        throw new NotFoundException(`No store found for this user.`);
+     }
+     const products = await this.productRepository.find({
+         where: { storeId: store.storeId },
+         order: { prodId: 'ASC' }
+     });
+     return { store, products };
+  }
+
+  // --- Method to add product needs storeName added ---
   async addProduct(userId: string, productDto: CreateProductDto): Promise<Product> {
-    const user = await this.userRepository.findOne({ where: { userID: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (user.role !== 'seller') {
-      throw new BadRequestException('User must be a seller to add products');
+    const store = await this.storeRepository.findOne({ where: { userId: userId } });
+    if (!store) {
+      throw new NotFoundException(`Cannot add product: No Store found for user ID ${userId}. Create a store first.`);
     }
 
-    let storeName = productDto.storeName;
-    if (!storeName) {
-      const existingProducts = await this.productRepository.find({ where: { userId: userId } });
-      if (existingProducts.length > 0) {
-        storeName = existingProducts[0].storeName;
-      } else {
-        throw new BadRequestException('Store name is required when adding the first product.');
-      }
-    }
+    const newProduct = this.productRepository.create({
+        name: productDto.name,
+        description: productDto.description,
+        price: productDto.price,
+        category: productDto.category,
+        imageUrl: productDto.imageUrl,
+        productquantity: productDto.productquantity,
+        userId: userId,
+        storeId: store.storeId,
+        storeName: store.storeName, // <-- Add this line: Copy storeName from fetched Store
+        isActive: true,
+    });
 
-    if (!productDto.imageUrl) {
-      throw new BadRequestException(`Image URL is missing for the new product.`);
-    }
-    // --- Add validation for productquantity ---
-    if (productDto.productquantity === undefined || productDto.productquantity === null || productDto.productquantity < 0) {
-       throw new BadRequestException(`Valid product quantity is required for the new product.`);
-    }
-
-    // --- productquantity is included via spread operator ...productDto ---
-    // --- Prepare data object and log before .create() ---
-     const productDataForDb = {
-       ...productDto, // Includes name, description, price, category, imageUrl, productquantity
-       userId: userId,
-       storeName: storeName,
-       isActive: true
-     };
-     // >>> ADD CONSOLE LOG HERE <<<
-     console.log(`SVC (addProduct): Preparing entity data:`, JSON.stringify(productDataForDb, null, 2));
-     // >>> END CONSOLE LOG <<<
-
-    const product = this.productRepository.create(productDataForDb);
-
-    // Log before save (optional but good)
-    console.log(`SVC (addProduct): Attempting to save product:`, JSON.stringify(product, null, 2));
-
-    return this.productRepository.save(product);
-  }
-
-  // Update an existing product
-  async updateProduct(productId: number, updateProductDto: UpdateProductDto, userId: string): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { prodId: productId } });
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${productId} not found`);
-    }
-
-    if (product.userId !== userId) {
-      throw new ForbiddenException('You are not authorized to update this product');
-    }
-
-    // --- Add validation if productquantity is being updated ---
-    if (updateProductDto.productquantity !== undefined && updateProductDto.productquantity !== null && updateProductDto.productquantity < 0) {
-        throw new BadRequestException('Product quantity cannot be negative.');
-    }
-
-    // >>> ADD CONSOLE LOG HERE <<<
-    console.log(`SVC (updateProduct): Merging DTO into entity ID ${productId}. DTO:`, JSON.stringify(updateProductDto, null, 2));
-    // >>> END CONSOLE LOG <<<
-
-    // Merge handles optional fields, including productquantity if present in DTO
-    this.productRepository.merge(product, updateProductDto);
-
-    // >>> ADD CONSOLE LOG HERE <<<
-    console.log(`SVC (updateProduct): Entity data after merge, before save:`, JSON.stringify(product, null, 2));
-    // >>> END CONSOLE LOG <<<
-
-    return this.productRepository.save(product);
-  }
-
-  // Delete a product
-  async deleteProduct(productId: number, userId: string): Promise<void> {
-    const product = await this.productRepository.findOne({ where: { prodId: productId } });
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${productId} not found`);
-    }
-
-    if (product.userId !== userId) {
-      throw new ForbiddenException('You are not authorized to delete this product');
-    }
-
-    const deleteResult = await this.productRepository.delete(productId);
-    if (deleteResult.affected === 0) {
-      throw new NotFoundException(`Product with ID ${productId} could not be deleted (might have been deleted already).`);
+    try {
+        const savedProduct = await this.productRepository.save(newProduct);
+        return savedProduct;
+    } catch (error) {
+         console.error("Error adding product:", error);
+          // Log the detailed TypeORM error if available
+         if (error.driverError) {
+             console.error("Database Driver Error:", JSON.stringify(error.driverError, null, 2));
+         }
+        throw new InternalServerErrorException("Failed to add product.");
     }
   }
+
+  // --- Update method doesn't need changes unless you want to update the redundant storeName ---
+   async updateProduct(productId: number, updateProductDto: UpdateProductDto, userId: string): Promise<Product> {
+     // If you ever allow store name changes, you'd need extra logic here
+     // to update the redundant storeName in all associated products.
+     // For now, we assume storeName in Products doesn't get updated after creation.
+     const product = await this.productRepository.findOne({ where: { prodId: productId } });
+     if (!product) throw new NotFoundException(`Product ID ${productId} not found`);
+     if (product.userId !== userId) throw new ForbiddenException('You are not authorized to update this product.');
+
+     // Only merge fields from UpdateProductDto (which shouldn't include storeName)
+     this.productRepository.merge(product, updateProductDto);
+
+     try {
+         return await this.productRepository.save(product);
+     } catch (error) {
+         console.error(`Error updating product ${productId}:`, error);
+          if (error.driverError) {
+             console.error("Database Driver Error:", JSON.stringify(error.driverError, null, 2));
+         }
+         throw new InternalServerErrorException("Failed to update product.");
+     }
+   }
+
+
+  // --- Delete method remains the same ---
+   async deleteProduct(productId: number, userId: string): Promise<void> {
+      const product = await this.productRepository.findOne({ where: { prodId: productId, userId: userId } });
+      if (!product) throw new NotFoundException(`Product ID ${productId} not found or you do not have permission to delete it.`);
+      const deleteResult = await this.productRepository.delete(productId);
+      if (deleteResult.affected === 0) throw new InternalServerErrorException(`Failed to delete product ID ${productId}.`);
+   }
+
 }

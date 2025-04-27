@@ -1,12 +1,23 @@
 // src/components/ProductList.tsx
 import React from 'react';
 import ProductForm from './ProductForm';
-import { ProductFormData } from '../types/createStore'; // Adjust path if needed
+// Ensure ProductFormData is the simplified version (no storeName/delivery)
+import { ProductFormData } from '../types/createStore';
 
 interface ProductListProps {
   products: ProductFormData[];
   productCategories: string[];
-  onProductChange: (index: number, field: keyof Omit<ProductFormData, 'image' | 'imagePreview' | 'imageURL'>, value: string) => void;
+  // --- UPDATE the type for the 'field' parameter ---
+  onProductChange: (
+      index: number,
+      // Omit image fields AND delivery fields
+      field: keyof Omit<ProductFormData,
+          'image' | 'imagePreview' | 'imageURL' |
+          'standardPrice' | 'standardTime' | 'expressPrice' | 'expressTime'
+      >,
+      value: string
+  ) => void;
+  // --- End Update ---
   onImageChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveProduct: (index: number) => void;
   onAddProduct: () => void;
@@ -16,24 +27,25 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({
   products,
   productCategories,
-  onProductChange,
+  onProductChange, // Now expects the correct type
   onImageChange,
   onRemoveProduct,
   onAddProduct,
   isSubmitting,
 }) => {
   return (
-    <>
+    // Using section for structure
+    <section className="product-list-section">
       <h2>Products</h2>
       <p>Add at least one product. Ensure all fields are filled and an image is selected.</p>
 
       {products.map((product, index) => (
         <ProductForm
           key={index} // Consider a more stable unique key if available/needed
-          product={product}
+          product={product} // Pass simplified ProductFormData
           index={index}
           productCategories={productCategories}
-          onProductChange={onProductChange}
+          onProductChange={onProductChange} // Pass down the correctly typed handler
           onImageChange={onImageChange}
           onRemove={onRemoveProduct}
           isSubmitting={isSubmitting}
@@ -49,7 +61,7 @@ const ProductList: React.FC<ProductListProps> = ({
       >
         + Add Another Product
       </button>
-    </>
+    </section>
   );
 };
 

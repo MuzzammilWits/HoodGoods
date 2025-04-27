@@ -1,106 +1,91 @@
 // src/store/store.controller.ts
 import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  UseGuards,
-  Req,
-  BadRequestException,
-  Param,
-  Patch, // Added
-  Delete, // Added
-  ParseIntPipe, // Added
-  HttpCode, // Added
-  HttpStatus // Added
+  Controller, Post, Body, Get, UseGuards, Req,
+  Param, Patch, Delete, ParseIntPipe, HttpCode, HttpStatus,
+  // Removed BadRequestException as user check might be handled by AuthGuard / Passport strategy
 } from '@nestjs/common';
 import { StoreService } from './store.service';
-import { AuthGuard } from '@nestjs/passport'; // Assuming default 'jwt' strategy
-import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto'; // Added
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller('stores')
+// --- Corrected DTO Imports ---
+import { CreateStoreDto } from './dto/create-store.dto'; // Use the main store DTO
+import { CreateProductDto } from '../products/dto/create-product.dto'; // Use the product DTO from products module
+import { UpdateProductDto } from '../products/dto/update-product.dto'; // Assuming path is correct
+// --- End DTO Imports ---
+
+import { Product } from '../products/entities/product.entity';
+import { Store } from './entities/store.entity';
+
+// Interface to represent the expected user structure from JWT payload
+interface RequestWithUser extends Request {
+  user: {
+    sub: string; // User ID from JWT subject
+    // Add other properties like email/role if they are in your JWT payload
+  };
+}
+
+@Controller('stores') // Base route for this controller
 export class StoreController {
-constructor(private readonly storeService: StoreService) {}
+  constructor(private readonly storeService: StoreService) {}
 
-// Create Store with initial products
-@UseGuards(AuthGuard('jwt'))
-@Post()
-async createStore(@Body() createStoreDto: CreateStoreWithProductsDto, @Req() req: any) {
-  // >>> ADD CONSOLE LOG HERE <<<
-  console.log('CTRL: Received CreateStore DTO:', JSON.stringify(createStoreDto, null, 2));
-  // >>> END CONSOLE LOG <<<
-
-  // Ensure user ID exists in the request (added by AuthGuard)
-  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
-  if (!req.user || !req.user.sub) {
-    throw new BadRequestException('User ID not found in token');
+  // POST /stores - Create Store with initial products
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  async createStore(
+    // Use the correct DTO class - ValidationPipe will validate this body
+    @Body() createStoreDto: CreateStoreDto,
+    @Req() req: RequestWithUser // Use typed request
+  ): Promise<Store> {
+    // The AuthGuard('jwt') should ensure req.user exists if authentication succeeds
+    // The JWT strategy should ensure req.user.sub exists
+    const userId = req.user.sub;
+    return this.storeService.createStoreWithProducts(createStoreDto, userId);
   }
-  return this.storeService.createStoreWithProducts(createStoreDto, req.user.sub);
-}
 
-// Get the user's own store details
-@UseGuards(AuthGuard('jwt'))
-@Get('my-store')
-async getMyStore(@Req() req: any) {
-  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
-  if (!req.user || !req.user.sub) {
-    throw new BadRequestException('User ID not found in token');
+  // GET /stores/my-store - Get the user's own store details AND products
+  @UseGuards(AuthGuard('jwt'))
+  @Get('my-store')
+  async getMyStore(@Req() req: RequestWithUser): Promise<{ store: Store; products: Product[] }> {
+    const userId = req.user.sub;
+    return this.storeService.getStoreByUserId(userId);
   }
-  return this.storeService.getStoreByUserId(req.user.sub);
-}
 
-// Add a new product to the user's existing store
-@UseGuards(AuthGuard('jwt'))
-@Post('products')
-async addProduct(@Body() productDto: CreateProductDto, @Req() req: any) {
-  // >>> ADD CONSOLE LOG HERE <<<
-  console.log('CTRL: Received AddProduct DTO:', JSON.stringify(productDto, null, 2));
-  // >>> END CONSOLE LOG <<<
-
-  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
-  if (!req.user || !req.user.sub) {
-    throw new BadRequestException('User ID not found in token');
+  // POST /stores/products - Add a new product to the user's existing store
+  @UseGuards(AuthGuard('jwt'))
+  @Post('products')
+  async addProduct(
+    // Use the correct DTO class here for ValidationPipe to work
+    // Note: Even though the service uses CreateProductDto, consider if a more specific AddProductDto is better long-term
+    @Body() productDto: CreateProductDto,
+    @Req() req: RequestWithUser
+  ): Promise<Product> {
+    const userId = req.user.sub;
+    // The service method 'addProduct' now expects CreateProductDto directly
+    return this.storeService.addProduct(userId, productDto);
   }
-  return this.storeService.addProduct(req.user.sub, productDto);
-}
 
-// --- NEW Endpoints for Edit/Delete ---
-
-// Update an existing product
-@UseGuards(AuthGuard('jwt'))
-@Patch('products/:id') // Use PATCH for partial updates
-async updateProduct(
-  @Param('id', ParseIntPipe) id: number, // Get product ID from URL param, ensure it's a number
-  @Body() updateProductDto: UpdateProductDto, // Get update data from request body
-  @Req() req: any, // Get user info from request
-) {
-  // >>> ADD CONSOLE LOG HERE <<<
-  console.log(`CTRL: Received UpdateProduct DTO for ID ${id}:`, JSON.stringify(updateProductDto, null, 2));
-  // >>> END CONSOLE LOG <<<
-
-  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
-  if (!req.user || !req.user.sub) {
-    throw new BadRequestException('User ID not found in token');
+  // PATCH /stores/products/:id - Update an existing product
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('products/:id')
+  async updateProduct(
+    @Param('id', ParseIntPipe) id: number, // Validate 'id' is an integer
+    @Body() updateProductDto: UpdateProductDto, // ValidationPipe validates this body
+    @Req() req: RequestWithUser,
+  ): Promise<Product> {
+    const userId = req.user.sub;
+    return this.storeService.updateProduct(id, updateProductDto, userId);
   }
-  // Delegate to the service, passing product ID, update data, and user ID for authorization check
-  return this.storeService.updateProduct(id, updateProductDto, req.user.sub);
-}
 
-// Delete a product
-@UseGuards(AuthGuard('jwt'))
-@Delete('products/:id')
-@HttpCode(HttpStatus.NO_CONTENT) // Return 204 No Content on successful deletion
-async deleteProduct(
-  @Param('id', ParseIntPipe) id: number, // Get product ID from URL param
-  @Req() req: any, // Get user info
-) {
-  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
-  if (!req.user || !req.user.sub) {
-    throw new BadRequestException('User ID not found in token');
+  // DELETE /stores/products/:id - Delete a product
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('products/:id')
+  @HttpCode(HttpStatus.NO_CONTENT) // Return 204 No Content on success
+  async deleteProduct(
+    @Param('id', ParseIntPipe) id: number, // Validate 'id' is an integer
+    @Req() req: RequestWithUser
+  ): Promise<void> {
+    const userId = req.user.sub;
+    await this.storeService.deleteProduct(id, userId);
+    // No explicit return needed due to Promise<void> and @HttpCode
   }
-  // Delegate deletion to the service, passing product ID and user ID for authorization check
-  await this.storeService.deleteProduct(id, req.user.sub);
-  // No explicit return needed due to @HttpCode decorator
-}
 }
