@@ -33,8 +33,10 @@ interface CartContextType {
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;
-  cartLoaded: boolean;
+  cartLoaded: boolean; // NEW
   fetchCart: () => Promise<void>;
+  cartError?: string; // Added cartError as an optional property
+
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -43,7 +45,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const { user, getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading } = useAuth0();
   const [cartItems, setCartItems] = useState<CartItemUI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [cartLoaded, setCartLoaded] = useState(false);
+  const [cartLoaded, setCartLoaded] = useState(false); // NEW
   const [isSyncing, setIsSyncing] = useState(false);
 
   const api = axios.create({
@@ -54,7 +56,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
     if (!isAuthenticated || isAuthLoading || !user) {
       if (!isAuthLoading) {
         setIsLoading(false);
-        setCartLoaded(true);
+        setCartLoaded(true); // Mark cart as "done" loading even if user not logged in
       }
       return;
     }
@@ -66,14 +68,6 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // ***** Log raw response *****
-      console.log('--- Frontend ContextCart.tsx ---');
-      console.log('Raw response.data received from API:', JSON.stringify(response.data, null, 2));
-      console.log('--- End Frontend Log ---');
-      // ***** End Log *****
-
-
-      // ***** START CHANGE HERE *****
       const fetchedItems: CartItemUI[] = response.data.map((item: any) => ({
         cartID: item.cartID,
         productId: item.productId,
@@ -135,16 +129,14 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
   }, [isAuthenticated, isAuthLoading, user, fetchCart]);
 
   useEffect(() => {
-    // Only run sync if not loading, authenticated, cart loaded, and not already syncing
-    if (isLoading || !isAuthenticated || isAuthLoading || !user || !cartLoaded || isSyncing) return;
+    if (isLoading || !isAuthenticated || isAuthLoading || !user) return;
 
     const timer = setTimeout(() => {
-       syncCart(cartItems); // Pass current cartItems to sync
-    }, 1000); // 1 second debounce
+      syncCart(cartItems);
+    }, 1000); // optional: 1 second debounce
 
     return () => clearTimeout(timer);
-    // Dependencies for the sync effect
-  }, [cartItems, isLoading, isAuthenticated, isAuthLoading, user, cartLoaded, syncCart, isSyncing]);
+  }, [cartItems, isLoading, isAuthenticated, isAuthLoading, user, syncCart]);
 
   const addToCart = async (itemToAdd: AddToCartItem) => {
     if (!isAuthenticated) return;
@@ -158,12 +150,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
             : i
         );
       } else {
-        // Ensure the item being added has storeName
-        return [...prev, {
-            ...itemToAdd, // Includes productId, productName, productPrice, storeName, etc.
-            quantity: 1,
-            cartID: undefined
-        }];
+        return [...prev, { ...itemToAdd, quantity: 1 }];
       }
     });
   };
@@ -202,7 +189,7 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
       totalItems,
       totalPrice,
       isLoading,
-      cartLoaded,
+      cartLoaded, // expose this too
       fetchCart
     }}>
       {children}
