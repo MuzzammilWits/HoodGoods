@@ -1,4 +1,4 @@
-// src/store/dto/update-product.dto.ts
+// src/products/dto/update-product.dto.ts
 
 export interface UpdateProductDto {
   name?: string;                 // Changed from productName
