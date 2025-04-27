@@ -13,6 +13,7 @@ export interface CartItemWithProductDetails extends Omit<CartItem, 'user' | 'pro
     productPrice: number;
     imageUrl: string | null;
     availableQuantity: number;
+    storeName: string;
 }
 
 
@@ -62,10 +63,12 @@ export class CartService {
                 productPrice: product.price,
                 imageUrl: product.imageUrl,
                 availableQuantity: product.productquantity,
+                storeName: product.storeName,
             };
         }).filter(item => item !== null) as CartItemWithProductDetails[];
 
-        return cartWithDetails;
+        return cartWithDetails as CartItemWithProductDetails[]; // Your existing return line
+       
 
     } catch (error) {
         // Consider more specific error logging in production if needed

@@ -23,6 +23,7 @@ interface Product {
   price: number;
   userId: string;
   imageUrl: string;
+  storeId: number;
 
   storeName : string;
   isActive : boolean;
@@ -154,6 +155,8 @@ interface AddToCartItem {
   productName: string;
   productPrice: number;
   imageUrl?: string;
+  storeId: number;   // Add storeId
+  storeName: string;  // Add storeName
 }
 
 const handleAddToCart = async (product: Product) => {
@@ -169,6 +172,8 @@ const handleAddToCart = async (product: Product) => {
       productId: product.prodId,
       productName: product.name,
       productPrice: price,
+      storeId: product.storeId,
+      storeName: product.storeName,
       // --- FIX: Change 'image' to 'imageUrl' ---
       imageUrl: product.imageUrl || undefined // Use undefined or omit if placeholder isn't desired here
       // If product.imageUrl can be null/empty, sending undefined is fine.
