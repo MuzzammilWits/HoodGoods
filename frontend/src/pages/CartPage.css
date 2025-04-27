@@ -41,13 +41,45 @@
     animation: spin 1s linear infinite; /* Animation definition */
     margin-bottom: 1rem; /* Space between spinner and text */
   }
+
+  /* Spinner container (you already have loading-container) */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; /* or 100vh if you want fullscreen */
+    text-align: center;
+  }
   
-  /* Spinner Animation */
+  /* The Spinner itself */
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #ccc;
+    border-top-color: #007bff; /* Primary blue color */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px; /* Space below spinner */
+    animation: spin 0.7s linear infinite; /* faster spin */
+    border-top-color: #97c9ba; /* a nice green instead of blue */
+
+  }
+  
+  /* The spin animation */
   @keyframes spin {
     to {
       transform: rotate(360deg);
     }
   }
+  
+  /* Loading text */
+  .loading-container p {
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  
   
   /* Style the loading text if needed */
   .loading-container p {
@@ -56,10 +88,7 @@
   }
   
   /* Ensure other cart styles don't interfere negatively */
-  .cart-container {
-    /* Your existing styles */
-  }
-  
+
   /* ... rest of your CartPage.css styles ... */
   
   .summary-details dd {
