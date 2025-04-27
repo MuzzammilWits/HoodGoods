@@ -7,6 +7,7 @@ export interface CreateProductDto {
   price: number;                 // Changed from productPrice
   category: string;              // Changed from productCategory
   imageUrl: string;              // Changed from imageURL
+  productquantity: number;       // Added product quantity field
   storeName?: string;            // Remains the same, still optional here
 }
 

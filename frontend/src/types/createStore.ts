@@ -12,6 +12,7 @@ export interface ProductFormData {
     productName: string;
     productDescription: string;
     productPrice: string; // Keep as string for input control, parse on submit
+    productQuantity: string; // Added: Keep as string for input control, parse on submit
     productCategory: string;
     image: File | null; // File object for upload
     imagePreview: string |null; // Data URL string for preview

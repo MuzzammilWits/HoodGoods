@@ -17,6 +17,10 @@ export class Product {
   @Column({ name: 'productprice', type: 'float' })
   price: number;
 
+  // Add the new quantity field
+  @Column({ name: 'productquantity', type: 'int' }) // Assuming the DB column is 'productquantity' and type is integer
+  productquantity: number;
+
   @Column({ name: 'userID', type: 'varchar' })
   userId: string;
 

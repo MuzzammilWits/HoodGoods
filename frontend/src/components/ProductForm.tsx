@@ -1,10 +1,12 @@
 import React from 'react';
+// Ensure ProductFormData from this import includes 'productQuantity: string;'
 import { ProductFormData } from '../types/createStore';
 
 interface ProductFormProps {
   product: ProductFormData;
   index: number;
   productCategories: string[];
+  // Ensure the keyof type includes 'productQuantity'
   onProductChange: (index: number, field: keyof Omit<ProductFormData, 'image' | 'imagePreview' | 'imageURL'>, value: string) => void;
   onImageChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (index: number) => void;
@@ -23,6 +25,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   canRemove,
 }) => {
   return (
+    // Using <section> which is semantic and not a div/span
     <section className="product-section">
       <h3>Product #{index + 1}</h3>
 
@@ -54,8 +57,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
         />
       </fieldset>
 
-      {/* Price & Category Row */}
+      {/* Price, Quantity & Category Row */}
+      {/* Using <article> which is semantic and not a div/span */}
       <article className="form-row">
+        {/* Price Fieldset */}
         <fieldset className="form-group">
           <label htmlFor={`product-price-${index}`}>Price (R)</label>
           <input
@@ -65,11 +70,30 @@ const ProductForm: React.FC<ProductFormProps> = ({
             onChange={(e) => onProductChange(index, 'productPrice', e.target.value)}
             placeholder="0.00"
             step="0.01"
-            min="0.01"
+            min="0.01" // Products usually have a price > 0
             required
             disabled={isSubmitting}
           />
         </fieldset>
+
+        {/* --- Added Quantity Fieldset --- */}
+        <fieldset className="form-group">
+          <label htmlFor={`product-quantity-${index}`}>Quantity Available</label>
+          <input
+            type="number"
+            id={`product-quantity-${index}`}
+            value={product.productQuantity}
+            onChange={(e) => onProductChange(index, 'productQuantity', e.target.value)}
+            placeholder="0"
+            step="1" // Whole numbers for quantity
+            min="0"  // Quantity can be 0 or more
+            required
+            disabled={isSubmitting}
+          />
+        </fieldset>
+        {/* --- End Added Quantity Fieldset --- */}
+
+        {/* Category Fieldset */}
         <fieldset className="form-group">
           <label htmlFor={`product-category-${index}`}>Category</label>
           <select
@@ -95,14 +119,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
           id={`product-image-${index}`}
           accept="image/png, image/jpeg, image/webp, image/gif"
           onChange={(e) => onImageChange(index, e)}
-          required
+          required // Usually required, adjust if editing allows keeping old image
           disabled={isSubmitting}
         />
+        {/* Using <figure> and <img> which are semantic */}
         {product.imagePreview && (
           <figure className="image-preview">
             <img src={product.imagePreview} alt={`Preview for product ${index + 1}`} />
           </figure>
         )}
+         {/* Using <small> which is semantic */}
         {!product.image && !product.imagePreview && <small>Please select an image.</small>}
       </fieldset>
 

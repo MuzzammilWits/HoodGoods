@@ -27,7 +27,12 @@ constructor(private readonly storeService: StoreService) {}
 @UseGuards(AuthGuard('jwt'))
 @Post()
 async createStore(@Body() createStoreDto: CreateStoreWithProductsDto, @Req() req: any) {
+  // >>> ADD CONSOLE LOG HERE <<<
+  console.log('CTRL: Received CreateStore DTO:', JSON.stringify(createStoreDto, null, 2));
+  // >>> END CONSOLE LOG <<<
+
   // Ensure user ID exists in the request (added by AuthGuard)
+  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
   if (!req.user || !req.user.sub) {
     throw new BadRequestException('User ID not found in token');
   }
@@ -38,6 +43,7 @@ async createStore(@Body() createStoreDto: CreateStoreWithProductsDto, @Req() req
 @UseGuards(AuthGuard('jwt'))
 @Get('my-store')
 async getMyStore(@Req() req: any) {
+  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
   if (!req.user || !req.user.sub) {
     throw new BadRequestException('User ID not found in token');
   }
@@ -48,6 +54,11 @@ async getMyStore(@Req() req: any) {
 @UseGuards(AuthGuard('jwt'))
 @Post('products')
 async addProduct(@Body() productDto: CreateProductDto, @Req() req: any) {
+  // >>> ADD CONSOLE LOG HERE <<<
+  console.log('CTRL: Received AddProduct DTO:', JSON.stringify(productDto, null, 2));
+  // >>> END CONSOLE LOG <<<
+
+  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
   if (!req.user || !req.user.sub) {
     throw new BadRequestException('User ID not found in token');
   }
@@ -64,6 +75,11 @@ async updateProduct(
   @Body() updateProductDto: UpdateProductDto, // Get update data from request body
   @Req() req: any, // Get user info from request
 ) {
+  // >>> ADD CONSOLE LOG HERE <<<
+  console.log(`CTRL: Received UpdateProduct DTO for ID ${id}:`, JSON.stringify(updateProductDto, null, 2));
+  // >>> END CONSOLE LOG <<<
+
+  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
   if (!req.user || !req.user.sub) {
     throw new BadRequestException('User ID not found in token');
   }
@@ -79,6 +95,7 @@ async deleteProduct(
   @Param('id', ParseIntPipe) id: number, // Get product ID from URL param
   @Req() req: any, // Get user info
 ) {
+  // Adjust req.user.sub if your token payload uses a different field (e.g., req.user.userId)
   if (!req.user || !req.user.sub) {
     throw new BadRequestException('User ID not found in token');
   }
