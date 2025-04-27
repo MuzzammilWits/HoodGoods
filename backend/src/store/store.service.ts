@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from './product.entity'; // Uses the provided entity definition
+import { Product } from '../products/entities/product.entity'; // Adjusted path based on common NestJS structure
 import { User } from '../auth/user.entity'; // Assuming User entity definition is compatible
 import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -15,6 +15,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 @Injectable()
 export class StoreService {
   constructor(
+    // Assuming Product entity is defined in 'products' module now based on previous file path
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
 
@@ -24,8 +25,7 @@ export class StoreService {
 
   // Create Store with initial products
   async createStoreWithProducts(createStoreDto: CreateStoreWithProductsDto, userId: string): Promise<Product[]> {
-    // Find the user (Assuming User entity has userID as primary key)
-    const user = await this.userRepository.findOne({ where: { userID: userId } }); // Adjust 'userID' if User entity uses a different property name
+    const user = await this.userRepository.findOne({ where: { userID: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -37,46 +37,53 @@ export class StoreService {
         throw new BadRequestException('Store name is required when creating a store with products.');
     }
 
-    // Create product entities using the new property names
     const productEntities = createStoreDto.products.map(productDto => {
-      // --- Ensure imageUrl is included ---
-      if (!productDto.imageUrl) { // Changed from imageURL
-        throw new BadRequestException(`Image URL is missing for product: ${productDto.name}`); // Changed from productName
+      if (!productDto.imageUrl) {
+        throw new BadRequestException(`Image URL is missing for product: ${productDto.name}`);
       }
-      return this.productRepository.create({
-        name: productDto.name,                 // Changed from productName
-        description: productDto.description,   // Changed from productDescription
-        price: productDto.price,               // Changed from productPrice
-        category: productDto.category,         // Changed from productCategory
-        imageUrl: productDto.imageUrl,         // Changed from imageURL
-        userId: userId,                        // Changed from userID (matches entity property)
-        storeName: createStoreDto.storeName,   // Matches entity property
-        isActive: true                         // Matches entity property
-      });
+      // --- Add validation for productquantity ---
+      if (productDto.productquantity === undefined || productDto.productquantity === null || productDto.productquantity < 0) {
+         throw new BadRequestException(`Valid product quantity is required for product: ${productDto.name}`);
+      }
+      // --- Include productquantity when creating entity ---
+      // --- Prepare data object and log before .create() ---
+       const productDataForDb = {
+           name: productDto.name,
+           description: productDto.description,
+           price: productDto.price,
+           category: productDto.category,
+           imageUrl: productDto.imageUrl,
+           productquantity: productDto.productquantity, // Check this value!
+           userId: userId,
+           storeName: createStoreDto.storeName,
+           isActive: true
+       };
+       // >>> ADD CONSOLE LOG HERE <<<
+       console.log(`SVC (createStore): Preparing entity data for product "${productDto.name}":`, JSON.stringify(productDataForDb, null, 2));
+       // >>> END CONSOLE LOG <<<
+
+       // Ensure you use the prepared object in the create call
+       return this.productRepository.create(productDataForDb);
     });
 
+    // Save all prepared product entities
     return this.productRepository.save(productEntities);
   }
 
   // Get Store Details by User ID
   async getStoreByUserId(userId: string): Promise<{ storeName: string; products: Product[] }> {
-    // Find products using the 'userId' property name from the Product entity
     const products = await this.productRepository.find({
-        where: { userId: userId },          // Use entity property 'userId'
-        order: { prodId: 'ASC' }            // Use entity property 'prodId'
+        where: { userId: userId },
+        order: { prodId: 'ASC' }
     });
 
     if (!products || products.length === 0) {
-      // Check if user exists to differentiate between 'no user' and 'user with no store'
-      const user = await this.userRepository.findOne({ where: { userID: userId } }); // Adjust 'userID' if User entity uses a different property name
+      const user = await this.userRepository.findOne({ where: { userID: userId } });
       if (!user) throw new NotFoundException('User not found');
       throw new NotFoundException('No store or products found for this user.');
     }
 
-    // All products for a user should belong to the same store
     const storeName = products[0].storeName;
-
-    // The 'products' array automatically contains entities with the updated property names
     return {
       storeName,
       products
@@ -85,8 +92,7 @@ export class StoreService {
 
   // Add a Product to an existing store
   async addProduct(userId: string, productDto: CreateProductDto): Promise<Product> {
-    // Find the user (Assuming User entity has userID as primary key)
-    const user = await this.userRepository.findOne({ where: { userID: userId } }); // Adjust 'userID' if User entity uses a different property name
+    const user = await this.userRepository.findOne({ where: { userID: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -94,73 +100,87 @@ export class StoreService {
       throw new BadRequestException('User must be a seller to add products');
     }
 
-    // Infer storeName if not provided in DTO
     let storeName = productDto.storeName;
     if (!storeName) {
-      const existingProducts = await this.productRepository.find({ where: { userId: userId } }); // Use entity property 'userId'
+      const existingProducts = await this.productRepository.find({ where: { userId: userId } });
       if (existingProducts.length > 0) {
-        storeName = existingProducts[0].storeName; // Use existing store name
+        storeName = existingProducts[0].storeName;
       } else {
-        // This case implies a user is adding their *very first* product via this endpoint
-        // instead of createStoreWithProducts. Require storeName explicitly here.
         throw new BadRequestException('Store name is required when adding the first product.');
       }
     }
 
-    // --- Ensure imageUrl is included ---
-    if (!productDto.imageUrl) { // Changed from imageURL
+    if (!productDto.imageUrl) {
       throw new BadRequestException(`Image URL is missing for the new product.`);
     }
+    // --- Add validation for productquantity ---
+    if (productDto.productquantity === undefined || productDto.productquantity === null || productDto.productquantity < 0) {
+       throw new BadRequestException(`Valid product quantity is required for the new product.`);
+    }
 
-    // Create and save the new product using the new property names
-    const product = this.productRepository.create({
-      // Spread properties from DTO (name, description, price, category, imageUrl)
-      ...productDto,
-      userId: userId,         // Changed from userID (matches entity property)
-      storeName: storeName,   // Ensure inferred or provided storeName is set
-      isActive: true          // Default to active, matches entity property
-    });
+    // --- productquantity is included via spread operator ...productDto ---
+    // --- Prepare data object and log before .create() ---
+     const productDataForDb = {
+       ...productDto, // Includes name, description, price, category, imageUrl, productquantity
+       userId: userId,
+       storeName: storeName,
+       isActive: true
+     };
+     // >>> ADD CONSOLE LOG HERE <<<
+     console.log(`SVC (addProduct): Preparing entity data:`, JSON.stringify(productDataForDb, null, 2));
+     // >>> END CONSOLE LOG <<<
+
+    const product = this.productRepository.create(productDataForDb);
+
+    // Log before save (optional but good)
+    console.log(`SVC (addProduct): Attempting to save product:`, JSON.stringify(product, null, 2));
 
     return this.productRepository.save(product);
   }
 
   // Update an existing product
   async updateProduct(productId: number, updateProductDto: UpdateProductDto, userId: string): Promise<Product> {
-    // Find product using 'prodId' property name from the Product entity
-    const product = await this.productRepository.findOne({ where: { prodId: productId } }); // Use entity property 'prodId'
+    const product = await this.productRepository.findOne({ where: { prodId: productId } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
-    // Authorization check using 'userId' property from Product entity
-    if (product.userId !== userId) { // Use entity property 'userId'
+    if (product.userId !== userId) {
       throw new ForbiddenException('You are not authorized to update this product');
     }
 
-    // Merge automatically handles optional fields from the updated DTO
-    // It maps updateProductDto properties (name, description, etc.) to product properties
+    // --- Add validation if productquantity is being updated ---
+    if (updateProductDto.productquantity !== undefined && updateProductDto.productquantity !== null && updateProductDto.productquantity < 0) {
+        throw new BadRequestException('Product quantity cannot be negative.');
+    }
+
+    // >>> ADD CONSOLE LOG HERE <<<
+    console.log(`SVC (updateProduct): Merging DTO into entity ID ${productId}. DTO:`, JSON.stringify(updateProductDto, null, 2));
+    // >>> END CONSOLE LOG <<<
+
+    // Merge handles optional fields, including productquantity if present in DTO
     this.productRepository.merge(product, updateProductDto);
+
+    // >>> ADD CONSOLE LOG HERE <<<
+    console.log(`SVC (updateProduct): Entity data after merge, before save:`, JSON.stringify(product, null, 2));
+    // >>> END CONSOLE LOG <<<
 
     return this.productRepository.save(product);
   }
 
   // Delete a product
   async deleteProduct(productId: number, userId: string): Promise<void> {
-    // Find product using 'prodId' property name from the Product entity
-    const product = await this.productRepository.findOne({ where: { prodId: productId } }); // Use entity property 'prodId'
+    const product = await this.productRepository.findOne({ where: { prodId: productId } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
-    // Authorization check using 'userId' property from Product entity
-    if (product.userId !== userId) { // Use entity property 'userId'
+    if (product.userId !== userId) {
       throw new ForbiddenException('You are not authorized to delete this product');
     }
 
-    // Delete uses the primary key value, which TypeORM maps correctly
     const deleteResult = await this.productRepository.delete(productId);
     if (deleteResult.affected === 0) {
-      // Should ideally not happen if findOne succeeded, but good practice to check
       throw new NotFoundException(`Product with ID ${productId} could not be deleted (might have been deleted already).`);
     }
   }

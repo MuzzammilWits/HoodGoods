@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useCart } from '../context/ContextCart';
+import { useCart } from '../context/ContextCart'; // Ensure path is correct
 import { useSearchParams } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react'; // Import useAuth0
 import axios from 'axios';
-import './ProductsPage.css'; // Assuming this CSS file exists and styles the classes
-
+import './ProductsPage.css'; 
+// Interface includes userId and productquantity
 interface Product {
   prodId: number;
   name: string;
   description: string;
   category: string;
   price: number;
-  userId: string;
-  imageUrl: string;
+  productquantity: number; // Added productquantity
+  userId: string; // Needed for ownership check
+  imageUrl: string; 
   storeName : string;
   isActive : boolean;
 }
@@ -25,28 +27,38 @@ const ProductsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const { user, isAuthenticated } = useAuth0(); // Get user info and auth status
 
   const selectedCategory = searchParams.get('category') || '';
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setIsLoading(true); // Ensure loading state is set at the beginning
+      setIsLoading(true);
       try {
-        const response = await axios.get(`${backendUrl}/products`);
+        // Fetch includes userId and productquantity now
+        const response = await axios.get<{ products: Product[] } | Product[]>(`${backendUrl}/products`); // Added type hint for response
 
-        // Basic validation of response data
-        if (!Array.isArray(response.data)) {
-           // Check if it's an object with a products array (adjust if backend structure differs)
-          if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
-            setProducts(response.data.products); // Example adjustment
-          } else {
-            console.error("Unexpected data format:", response.data);
-            throw new Error('Invalid data format received from server');
-          }
+        let fetchedProducts: Product[] = [];
+
+        // Handle potential variations in backend response structure
+        if (Array.isArray(response.data)) {
+            fetchedProducts = response.data;
+        } else if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
+             // Example: if backend wraps products in an object { products: [...] }
+             fetchedProducts = response.data.products;
         } else {
-           setProducts(response.data);
+             console.error("Unexpected data format:", response.data);
+             throw new Error('Invalid data format received from server');
         }
 
+        // Validate fetched product data (basic check)
+        if (fetchedProducts.some(p => typeof p.prodId === 'undefined' || typeof p.name === 'undefined')) {
+             console.warn("Some fetched products might be missing required fields.");
+             // Optionally filter out invalid products or handle differently
+        }
+        console.log("Fetched Products (check for userId):", fetchedProducts); // Check if userId is present
+
+        setProducts(fetchedProducts);
         setError(null);
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
@@ -55,7 +67,7 @@ const ProductsPage = () => {
           ? err.message
           : 'Failed to load products';
 
-        console.error("Fetch products error:", errorMessage, err); // Log detailed error
+        console.error("Fetch products error:", errorMessage, err);
         setError(errorMessage);
         setProducts([]); // Clear products on error
       } finally {
@@ -64,7 +76,7 @@ const ProductsPage = () => {
     };
 
     fetchProducts();
-  }, []); // Removed dependency array cycle possibility for fetch
+  }, []); // Empty dependency array means fetch runs once on mount
 
   // Effect for filtering products based on category or products changing
   useEffect(() => {
@@ -75,48 +87,68 @@ const ProductsPage = () => {
     } else {
       setFilteredProducts(products); // Show all if no category selected
     }
-  }, [selectedCategory, products]); // Runs when category or products list changes
+  }, [selectedCategory, products]);
 
   const handleCategoryChange = (category: string) => {
+    // ... (implementation unchanged)
     const newParams = new URLSearchParams(searchParams);
     if (category) {
       newParams.set('category', category);
     } else {
       newParams.delete('category');
     }
-    setSearchParams(newParams, { replace: true }); // Use replace to avoid history clutter
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleAddToCart = async (product: Product) => {
-    try {
-      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
-        console.error('Attempted to add invalid product to cart:', product);
-        throw new Error('Product data is invalid or missing ID');
-      }
+    // ... (implementation unchanged, including stock check)
+     try {
+       if (!product || typeof product.prodId === 'undefined') {
+         console.error('Attempted to add invalid product to cart:', product);
+         throw new Error('Product data is invalid or missing ID');
+       }
 
-      // Ensure price is a number before adding
-      const price = Number(product.price);
-      if (isNaN(price)) {
-         console.error('Product price is not a valid number:', product.price);
-         throw new Error('Product price is invalid');
-      }
+       const price = Number(product.price);
+       if (isNaN(price)) {
+          console.error('Product price is not a valid number:', product.price);
+          throw new Error('Product price is invalid');
+       }
 
-      const cartItem = {
-        productId: String(product.prodId), // Ensure productId is a string
-        name: product.name,
-        price: price, // Use validated price
-        image: product.imageUrl || '/placeholder-product.jpg' // Provide fallback image
-      };
+       if (product.productquantity <= 0) {
+           alert(`${product.name} is currently out of stock.`);
+           return;
+       }
 
-      await addToCart(cartItem);
-      // Consider a more user-friendly notification (e.g., a toast) instead of alert
-      alert(`${product.name} added to cart!`);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      // Display error to user if needed, maybe using a state variable
-      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
-    }
+       // Check if user owns the product before adding (redundant if button disabled, but good practice)
+       if (isAuthenticated && user?.sub === product.userId) {
+           alert("You cannot add your own product to the cart.");
+           return;
+       }
+
+
+       const cartItem = {
+         productId: String(product.prodId),
+         name: product.name,
+         price: price,
+         image: product.imageUrl || '/placeholder-product.jpg'
+       };
+
+       await addToCart(cartItem);
+       alert(`${product.name} added to cart!`); // Consider using a less intrusive notification
+     } catch (error) {
+       console.error('Error adding to cart:', error);
+       setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+       // Auto-clear error after a delay
+      setTimeout(() => {
+           if (error instanceof Error && error.message === (error as Error).message) {
+                setError(null);
+           } else if (typeof error === 'string' && error === 'Failed to add item to cart') {
+                setError(null);
+           }
+       }, 5000);
+     }
   };
+
 
   // Memoize category calculation if products list is large, otherwise fine as is
   const categories = [...new Set(products.map(product => product.category))];
@@ -124,42 +156,35 @@ const ProductsPage = () => {
   // --- Render Logic ---
 
   if (isLoading) {
-    // Using <p> for semantic text content
     return <p className="loading-spinner">Loading products...</p>;
   }
 
-  if (error) {
-    // Using <div> with role="alert" for accessibility of error messages
-    return (
-      <div className="error-message" role="alert">
-        <p>{error}</p> {/* Put error text in a paragraph */}
-        <button
-          onClick={() => {
-            // Trigger refetch by resetting state and letting useEffect run
-            setError(null);
-            setProducts([]); // Clear potentially stale data
-            // setIsLoading(true); // Let useEffect handle loading state
-            // Trigger useEffect by changing a dependency if needed, or rely on mount/initial load
-             // Re-fetch logic is handled by the main useEffect
-             window.location.reload(); // Simple retry, consider more sophisticated state reset
-          }}
-          className="retry-button"
-        >
-          Retry
-        </button>
-      </div>
-    );
+  if (error && !isLoading) { // Ensure error is only shown when not loading
+     // ... (error display unchanged)
+     return (
+       <section className="error-message" role="alert" aria-live="assertive"> {/* Using section and aria-live */}
+         <h2>Error Loading Products</h2> {/* More specific heading */}
+         <p>{error}</p>
+         <button
+           onClick={() => window.location.reload()} // Simple reload for retry
+           className="retry-button"
+         >
+           Retry
+         </button>
+       </section>
+     );
   }
 
+
   // --- Main Render ---
-  // Using <main> for the primary content area of the page
   return (
     <main className="products-container">
       <h1>Artisan Products</h1>
 
-      {/* Using <section> to group the filtering controls */}
-      <section className="category-filter filters"> {/* Added 'filters' class from your CSS */}
-        <label htmlFor="category-select">Filter by Category:</label>
+      {/* Category Filter Section (Unchanged) */}
+      <section className="category-filter filters">
+        {/* ... (filter unchanged) ... */}
+         <label htmlFor="category-select">Filter by Category:</label>
         <select
           id="category-select"
           value={selectedCategory}
@@ -174,61 +199,70 @@ const ProductsPage = () => {
         </select>
       </section>
 
-      {/* Using <ul> for the list of products, semantically correct */}
+      {/* Products Grid */}
       <ul className="products-grid">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            // Using <li> for each item in the product list
-            // Keeping product-card class on the <li> for styling continuity
-            <li key={product.prodId} className="product-card">
-              {/* Using <article> to represent each self-contained product */}
-              <article>
-                {/* Using <figure> for the product image */}
-                <figure className="product-image-container">
-                  <img
-                    src={product.imageUrl || '/placeholder-product.jpg'} // Fallback image URL
-                    alt={product.name || 'Product image'} // Fallback alt text
-                    className="product-image"
-                    // Basic error handling for images
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      // Prevent infinite loop if placeholder also fails
-                      if (target.src !== '/placeholder-product.jpg') {
-                         target.src = '/placeholder-product.jpg';
-                         target.alt = 'Placeholder image'; // Update alt text
-                         target.classList.add('placeholder');
-                      }
-                    }}
-                    loading="lazy" // Add lazy loading for images
-                  />
-                </figure>
-                {/* Using <section> for the group of product details */}
-                <section className="product-details">
-                  {/* Use <h2> for product name within the <article> scope */}
-                  <h2 className="product-name">{product.name}</h2>
-                  {/* Using <p> for discrete pieces of information */}
-                  <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
-                  <p className="product-description">{product.description}</p>
-                  <p className="product-category">Category: {product.category}</p>
-                  <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p> {/* Ensure price is number */}
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="add-to-cart-btn"
-                    aria-label={`Add ${product.name} to cart`}
-                    type="button" // Explicitly set button type
-                  >
-                    Add to Cart
-                  </button>
-                </section>
-              </article>
-            </li>
-          ))
+          filteredProducts.map((product) => {
+            // *** Check if the current user is the owner ***
+            const isOwner = isAuthenticated && product.userId === user?.sub;
+            // *** Determine button state and text ***
+            const isOutOfStock = product.productquantity <= 0;
+            const isDisabled = isOutOfStock || isOwner;
+            const buttonText = isOwner ? 'Your Product' : (isOutOfStock ? 'Out of Stock' : 'Add to Cart');
+
+            return (
+              <li key={product.prodId} className="product-card">
+                <article>
+                  <figure className="product-image-container">
+                    <img
+                      src={product.imageUrl || '/placeholder-product.jpg'}
+                      alt={product.name || 'Product image'}
+                      className="product-image"
+                      onError={(e) => { /* Error handling unchanged */
+                         const target = e.target as HTMLImageElement;
+                         if (target.src !== '/placeholder-product.jpg') {
+                            target.src = '/placeholder-product.jpg';
+                            target.alt = 'Placeholder image';
+                            target.classList.add('placeholder');
+                         }
+                      }}
+                      loading="lazy"
+                    />
+                  </figure>
+                  <section className="product-details">
+                    <h2 className="product-name">{product.name}</h2>
+                    <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                    <p className="product-description">{product.description}</p>
+                    <p className="product-category">Category: {product.category}</p>
+                    <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
+                    {/* Quantity Display */}
+                    <p className="product-quantity">
+                      {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                    </p>
+                    {/* --- UPDATE Add to Cart Button --- */}
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="add-to-cart-btn"
+                      // Update aria-label based on owner status
+                      aria-label={isOwner ? `Cannot add own product ${product.name}` : `Add ${product.name} to cart`}
+                      type="button"
+                      // Disable if out of stock OR if user owns it
+                      disabled={isDisabled}
+                    >
+                      {buttonText} {/* Display dynamic text */}
+                    </button>
+                    {/* --- End Update --- */}
+                  </section>
+                </article>
+              </li>
+            );
+          })
         ) : (
-          // Using <p> for the "no products" message
-          <li className="no-products"> {/* Wrap in <li> to be valid child of <ul> */}
+          // No products message (unchanged)
+          <li className="no-products">
             <p>
               {selectedCategory
-                ? `No products found in the "${selectedCategory}" category.` // Added quotes
+                ? `No products found in the "${selectedCategory}" category.`
                 : 'No products available at the moment.'}
             </p>
           </li>
@@ -238,4 +272,4 @@ const ProductsPage = () => {
   );
 };
 
-export default ProductsPage;
+export default ProductsPage; 
