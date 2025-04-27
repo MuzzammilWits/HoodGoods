@@ -197,7 +197,6 @@ const handleAddToCart = async (product: Product) => {
 
   if (error) {
     return (
-
       <section className="error-message" role="alert">
         <p>{error}</p> {/* Put error text in a paragraph */}
 
