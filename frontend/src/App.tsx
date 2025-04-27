@@ -16,6 +16,7 @@ import CreateYourStore from './pages/CreateYourStore';
 import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import CheckoutPage from './pages/CheckoutPage';
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -66,6 +67,12 @@ const AppContent: React.FC = () => {
             <Route path="/cart" element={
               <section>
                 <CartPage />
+              </section>
+            } />
+
+            <Route path="/checkout" element={
+              <section>
+                <CheckoutPage />
               </section>
             } />
 

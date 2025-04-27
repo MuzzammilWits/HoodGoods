@@ -141,7 +141,7 @@ const handleAddToCart = async (product: Product) => {
   if (error) {
     // Using <div> with role="alert" for accessibility of error messages
     return (
-      <div className="error-message" role="alert">
+      <section className="error-message" role="alert">
         <p>{error}</p> {/* Put error text in a paragraph */}
         <button
           onClick={() => {
@@ -157,7 +157,7 @@ const handleAddToCart = async (product: Product) => {
         >
           Retry
         </button>
-      </div>
+      </section>
     );
   }
 
