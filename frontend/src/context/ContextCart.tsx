@@ -31,6 +31,8 @@ interface CartContextType {
   isLoading: boolean;
   cartLoaded: boolean; // NEW
   fetchCart: () => Promise<void>;
+  cartError?: string; // Added cartError as an optional property
+
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);

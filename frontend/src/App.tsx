@@ -16,13 +16,16 @@ import CreateYourStore from './pages/CreateYourStore';
 import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import CheckoutPage from './pages/CheckoutPage';
+// import CheckoutPage from './pages/CheckoutPage'; // Removed unused import
+import PayPage from './pages/PayPage'; // Ensure this path is correct
+import OrderConfirmationPage from './pages/OrderConfirmationPage'; // *** Import the new page ***
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState?: AppState) => {
     console.log("Auth0 onRedirectCallback triggered. AppState:", appState);
+    // Navigate to the intended route after login, or fallback to current path/home
     navigate(appState?.returnTo || window.location.pathname || '/');
   };
 
@@ -70,15 +73,23 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
-            <Route path="/checkout" element={
+            {/* --- Updated Checkout/Pay Route --- */}
+            <Route path="/checkout" element={ // Keep the path as /checkout
               <section>
-                <CheckoutPage />
+                <PayPage /> {/* Render the PayPage component */}
+              </section>
+            } />
+
+            {/* --- Added Order Confirmation Route --- */}
+            <Route path="/order-confirmation" element={
+              <section>
+                <OrderConfirmationPage />
               </section>
             } />
 
             {/* Protected Routes */}
             <Route path="/create-store" element={
-              <ProtectedRoute allowedRoles={['buyer']}>
+              <ProtectedRoute allowedRoles={['buyer']}> {/* Adjust roles as needed */}
                 <article>
                   <CreateYourStore />
                 </article>
@@ -86,7 +97,7 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/my-store" element={
-              <ProtectedRoute allowedRoles={['seller']}>
+              <ProtectedRoute allowedRoles={['seller']}> {/* Adjust roles as needed */}
                 <article>
                   <MyStore />
                 </article>
@@ -94,12 +105,15 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/admin-dashboard" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
                 <article>
                   <AdminDashboard />
                 </article>
               </ProtectedRoute>
             } />
+
+            {/* Add other routes as needed */}
+
           </Routes>
         </main>
 
@@ -111,6 +125,7 @@ const AppContent: React.FC = () => {
   );
 }
 
+// Keep the structure if AppContent is necessary for context providers
 function App() {
   return <AppContent />;
 }

@@ -9,6 +9,7 @@ import { ValidationPipe } from '@nestjs/common';// new for cart
 import { ProductsModule } from './products/products.module';
 import { StoreModule } from './store/store.module';
 import { UploadModule } from './upload/upload.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { UploadModule } from './upload/upload.module';
     StoreModule,
     UploadModule, 
     CartModule,
-    ProductsModule, // Add the StoreModule here
+    ProductsModule,
+    PaymentsModule, // Add the StoreModule here
   ],
   
 
