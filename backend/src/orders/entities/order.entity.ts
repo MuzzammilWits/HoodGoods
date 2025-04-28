@@ -1,48 +1,54 @@
 // src/orders/entities/order.entity.ts
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { User } from '../../auth/user.entity'; // Corrected path relative to src/orders/entities/
-import { SellerOrder } from './seller-order.entity'; // Relation to SellerOrder entity (will create next)
+import { User } from '../../auth/user.entity'; // Adjust path if needed
+import { SellerOrder } from './seller-order.entity';
 
-@Entity('Orders') // Using table name from your schema diagram
+@Entity('Orders') // Matches table name in screenshot
 export class Order {
-  @PrimaryGeneratedColumn() // Assuming you want an auto-incrementing number PK for orders
-  order_id: number;
 
-  // Foreign Key to Users table
-  @Column({ type: 'varchar' }) // Matches User.userID type (varchar)
-  userID: string; // Stores the Auth0 'sub' string (e.g., 'auth0|xxxxxx')
+  // Matches #order_id int4 PK in screenshot
+  @PrimaryGeneratedColumn({ name: 'order_id', type: 'int' })
+  orderId: number; // JS/TS property name
 
-  // Define the relationship to the User entity
-  @ManyToOne(() => User) // No need for inverse relation in User entity unless desired
-  @JoinColumn({ name: 'userID' }) // Specifies the FK column in this table
-  user: User; // Property to access the related User object
+  // Matches userID varchar FK in screenshot
+  @Column({ name: 'userID', type: 'varchar' })
+  userId: string; // JS/TS property name
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  order_date: Date;
+  // Relationship to User (Buyer)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userID', referencedColumnName: 'userID' }) // FK column name in this table, PK property name in User entity
+  user: User;
 
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Final total charged to buyer' })
-  grand_total: number;
+  // Matches order_date date in screenshot
+  @Column({ name: 'order_date', type: 'date' }) // Use 'date' type
+  orderDate: Date;
 
-  @Column({ length: 255, nullable: true, comment: 'Pickup location area chosen by buyer' })
-  pickup_area: string;
+  // Matches grand_total float4 in screenshot
+  @Column({ name: 'grand_total', type: 'float4' }) // Use 'float4' type (maps to number)
+  grandTotal: number;
 
-  @Column({ length: 255, nullable: true, comment: 'Specific pickup point chosen by buyer' })
-  pickup_point: string;
+  // Matches pickup_area varchar in screenshot
+  @Column({ name: 'pickup_area', type: 'varchar', length: 255, nullable: true })
+  pickupArea: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  // Matches pickup_point varchar in screenshot
+  @Column({ name: 'pickup_point', type: 'varchar', length: 255, nullable: true })
+  pickupPoint: string;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  // Matches created_at timestamp in screenshot
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
 
-  // Relationship: An Order can have multiple SellerOrders
-  // 'sellerOrders' is the property name on this (Order) side
-  // 'order' is the property name on the other (SellerOrder) side that links back here
+  // Matches updated_at timestamp in screenshot
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  updatedAt: Date;
+
+  // Relationship to SellerOrder
   @OneToMany(() => SellerOrder, sellerOrder => sellerOrder.order)
   sellerOrders: SellerOrder[];
 
-  // Optional but Recommended: Add Yoco Payment Ref if needed later
-  // @Column({ name: 'yoco_charge_id', length: 255, nullable: true, unique: true, comment: 'Yoco charge ID for reconciliation' })
+  // Optional Yoco ID (using snake_case column name if added)
+  // @Column({ name: 'yoco_charge_id', type: 'varchar', length: 255, nullable: true, unique: true })
   // yocoChargeId: string;
 }

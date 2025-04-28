@@ -70,7 +70,7 @@ import {
     try {
       this.logger.log(`Controller: Attempting to call OrdersService.createOrder for user: ${buyerUserId}`); // <<< ADD
       const createdOrder = await this.ordersService.createOrder(createOrderDto, buyerUserId);
-      this.logger.log(`Controller: OrdersService.createOrder SUCCEEDED. Order ID: ${createdOrder.order_id}`); // <<< ADD
+      this.logger.log(`Controller: OrdersService.createOrder SUCCEEDED. Order ID: ${createdOrder.orderId}`); // <<< ADD
       return createdOrder;
     } catch (error) {
       // This catch block handles errors thrown FROM the service call
@@ -91,7 +91,7 @@ import {
       // Pass the validated DTO and the extracted buyer user ID to the service
       try {
           const createdOrder = await this.ordersService.createOrder(createOrderDto, buyerUserId);
-          this.logger.log(`Successfully created Order ID: ${createdOrder.order_id} for user ${buyerUserId}`);
+          this.logger.log(`Successfully created Order ID: ${createdOrder.orderId} for user ${buyerUserId}`);
           return createdOrder; // Return the newly created order object
        } catch (error) {
            // Log the error from the service before it's sent to the client
