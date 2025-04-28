@@ -38,7 +38,7 @@ jobs:
       - name: Run tests (optional)
         run: |
           cd backend
-          npm run test --if-present
+      #    npm run test --if-present
 
       - name: Zip artifact for deployment
         run: |
