@@ -2,132 +2,182 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 
-interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
+// Interfaces (same as you have)
+interface CartItemUI {
+  cartID?: number;
+  productId: number;
+  productName: string;
+  productPrice: number;
   quantity: number;
-  image?: string;
+  storeId?: number;   // Optional storeId
+  storeName: string;
+  imageUrl?: string;
+  availableQuantity?: number;
+}
+
+interface AddToCartItem {
+  productId: number;
+  productName: string;
+  productPrice: number;
+  storeId?: number;   // Optional storeId
+  storeName: string;
+  imageUrl?: string;
 }
 
 interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  cartItems: CartItemUI[];
+  addToCart: (item: AddToCartItem) => Promise<void>;
+  removeFromCart: (productId: number) => Promise<void>;
+  updateQuantity: (productId: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;
+  cartLoaded: boolean; // NEW
+  fetchCart: () => Promise<void>;
+  cartError?: string; // Added cartError as an optional property
+
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { user, getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading } = useAuth0();
+  const [cartItems, setCartItems] = useState<CartItemUI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cartLoaded, setCartLoaded] = useState(false); // NEW
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const api = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
-    withCredentials: false,
   });
 
   const fetchCart = useCallback(async () => {
-    if (!isAuthenticated) return;
-    
+    if (!isAuthenticated || isAuthLoading || !user) {
+      if (!isAuthLoading) {
+        setIsLoading(false);
+        setCartLoaded(true); // Mark cart as "done" loading even if user not logged in
+      }
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const token = await getAccessTokenSilently();
       const response = await api.get('/cart', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCartItems(response.data);
+
+      const fetchedItems: CartItemUI[] = response.data.map((item: any) => ({
+        cartID: item.cartID,
+        productId: item.productId,
+        productName: item.productName,
+        productPrice: item.productPrice,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl,
+        availableQuantity: item.availableQuantity,
+        storeName: item.storeName, // <<< THIS LINE IS NOW ADDED
+        // storeId: item.storeId, // Still leave this out until backend sends it
+      }));
+      // ***** END CHANGE HERE *****
+
+
+      setCartItems(fetchedItems);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
+      setCartItems([]); // Safe fallback
     } finally {
       setIsLoading(false);
+      setCartLoaded(true); // Always set this
     }
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, isAuthLoading, user, getAccessTokenSilently]);
 
-  const syncCart = useCallback(async () => {
-    if (!isAuthenticated) return;
-    
+  const syncCart = useCallback(async (currentCartItems: CartItemUI[]) => {
+    if (!isAuthenticated || isAuthLoading || !user || isSyncing || isLoading) return;
+
+    setIsSyncing(true);
+
     try {
       const token = await getAccessTokenSilently();
-      const response = await api.post('/cart/sync', {
-        items: cartItems.map(item => ({
+      const payload = {
+        items: currentCartItems.map(item => ({
           productId: item.productId,
-          name: item.name,
-          price: Number(item.price), // Ensure number
-          quantity: Number(item.quantity), // Ensure number
-          image: item.image || null
+          quantity: Number(item.quantity)
         }))
-      }, {
+      };
+      await api.post('/cart/sync', payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
     } catch (error) {
-      throw error;
+      console.error('Failed to sync cart:', error);
+    } finally {
+      setIsSyncing(false);
     }
-  }, [cartItems, isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, isAuthLoading, user, getAccessTokenSilently, isSyncing, isLoading]); // Removed cartItems dependency from syncCart itself
 
   useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+    if (isAuthenticated && !isAuthLoading && user) {
+      fetchCart();
+    } else if (!isAuthenticated && !isAuthLoading) {
+      setCartItems([]);
+      setIsLoading(false);
+      setCartLoaded(true);
+    }
+  }, [isAuthenticated, isAuthLoading, user, fetchCart]);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      const timer = setTimeout(syncCart, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [cartItems, isLoading, isAuthenticated, syncCart]);
+    if (isLoading || !isAuthenticated || isAuthLoading || !user) return;
 
-  const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
-    try {
-      const token = await getAccessTokenSilently();
-      await api.post('/cart', {
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        quantity: 1 // Default quantity
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-  
-      // Update local state
-      setCartItems(prev => {
-        const existing = prev.find(i => i.productId === item.productId);
-        return existing 
-          ? prev.map(i => i.productId === item.productId 
-              ? { ...i, quantity: i.quantity + 1 } 
-              : i)
-          : [...prev, { ...item, quantity: 1 }];
-      });
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-    }
+    const timer = setTimeout(() => {
+      syncCart(cartItems);
+    }, 1000); // optional: 1 second debounce
+
+    return () => clearTimeout(timer);
+  }, [cartItems, isLoading, isAuthenticated, isAuthLoading, user, syncCart]);
+
+  const addToCart = async (itemToAdd: AddToCartItem) => {
+    if (!isAuthenticated) return;
+
+    setCartItems(prev => {
+      const existingItem = prev.find(i => i.productId === itemToAdd.productId);
+      if (existingItem) {
+        return prev.map(i =>
+          i.productId === itemToAdd.productId
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
+        );
+      } else {
+        return [...prev, { ...itemToAdd, quantity: 1 }];
+      }
+    });
   };
 
-  const removeFromCart = async (productId: string) => {
+  const removeFromCart = async (productId: number) => {
     setCartItems(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const updateQuantity = async (productId: string, quantity: number) => {
-    setCartItems(prev => prev.map(item => 
-      item.productId === productId ? { ...item, quantity } : item
-    ).filter(item => item.quantity > 0));
+  const updateQuantity = async (productId: number, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+    } else {
+      setCartItems(prev =>
+        prev.map(item =>
+          item.productId === productId ? { ...item, quantity } : item
+        )
+      );
+    }
   };
 
   const clearCart = async () => {
     setCartItems([]);
+    // Add backend clear logic here if needed
   };
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (Number(item.productPrice || 0) * Number(item.quantity || 0)), 0);
 
   return (
     <CartContext.Provider value={{
@@ -138,7 +188,9 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
       clearCart,
       totalItems,
       totalPrice,
-      isLoading
+      isLoading,
+      cartLoaded, // expose this too
+      fetchCart
     }}>
       {children}
     </CartContext.Provider>
