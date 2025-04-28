@@ -2,47 +2,45 @@
 import {
   Controller, Post, Body, Get, UseGuards, Req,
   Param, Patch, Delete, ParseIntPipe, HttpCode, HttpStatus,
-  // Removed BadRequestException as user check might be handled by AuthGuard / Passport strategy
+  // Removed BadRequestException
 } from '@nestjs/common';
-import { StoreService } from './store.service';
-import { AuthGuard } from '@nestjs/passport';
+import { StoreService, StoreDeliveryDetails } from './store.service'; // <<< Import StoreDeliveryDetails
+import { AuthGuard } from '@nestjs/passport'; // Assuming JWT guard
 
-// --- Corrected DTO Imports ---
-import { CreateStoreDto } from './dto/create-store.dto'; // Use the main store DTO
-import { CreateProductDto } from '../products/dto/create-product.dto'; // Use the product DTO from products module
-import { UpdateProductDto } from '../products/dto/update-product.dto'; // Assuming path is correct
+// --- DTO Imports ---
+import { CreateStoreDto } from './dto/create-store.dto';
+import { CreateProductDto } from '../products/dto/create-product.dto';
+import { UpdateProductDto } from '../products/dto/update-product.dto';
+import { GetDeliveryOptionsDto } from './dto/get-delivery-options.dto'; // <<< Import the new DTO
 // --- End DTO Imports ---
 
 import { Product } from '../products/entities/product.entity';
 import { Store } from './entities/store.entity';
 
-// Interface to represent the expected user structure from JWT payload
+// Interface for Request object with user payload
 interface RequestWithUser extends Request {
   user: {
     sub: string; // User ID from JWT subject
-    // Add other properties like email/role if they are in your JWT payload
   };
 }
 
-@Controller('stores') // Base route for this controller
+@Controller('stores')
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
-  // POST /stores - Create Store with initial products
+  // --- Existing Endpoints ---
+  // POST /stores - Create Store
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async createStore(
-    // Use the correct DTO class - ValidationPipe will validate this body
     @Body() createStoreDto: CreateStoreDto,
-    @Req() req: RequestWithUser // Use typed request
+    @Req() req: RequestWithUser
   ): Promise<Store> {
-    // The AuthGuard('jwt') should ensure req.user exists if authentication succeeds
-    // The JWT strategy should ensure req.user.sub exists
     const userId = req.user.sub;
     return this.storeService.createStoreWithProducts(createStoreDto, userId);
   }
 
-  // GET /stores/my-store - Get the user's own store details AND products
+  // GET /stores/my-store - Get User's Store & Products
   @UseGuards(AuthGuard('jwt'))
   @Get('my-store')
   async getMyStore(@Req() req: RequestWithUser): Promise<{ store: Store; products: Product[] }> {
@@ -50,42 +48,58 @@ export class StoreController {
     return this.storeService.getStoreByUserId(userId);
   }
 
-  // POST /stores/products - Add a new product to the user's existing store
+  // POST /stores/products - Add Product to Store
   @UseGuards(AuthGuard('jwt'))
   @Post('products')
   async addProduct(
-    // Use the correct DTO class here for ValidationPipe to work
-    // Note: Even though the service uses CreateProductDto, consider if a more specific AddProductDto is better long-term
     @Body() productDto: CreateProductDto,
     @Req() req: RequestWithUser
   ): Promise<Product> {
     const userId = req.user.sub;
-    // The service method 'addProduct' now expects CreateProductDto directly
     return this.storeService.addProduct(userId, productDto);
   }
 
-  // PATCH /stores/products/:id - Update an existing product
+  // PATCH /stores/products/:id - Update Product
   @UseGuards(AuthGuard('jwt'))
   @Patch('products/:id')
   async updateProduct(
-    @Param('id', ParseIntPipe) id: number, // Validate 'id' is an integer
-    @Body() updateProductDto: UpdateProductDto, // ValidationPipe validates this body
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
     @Req() req: RequestWithUser,
   ): Promise<Product> {
     const userId = req.user.sub;
     return this.storeService.updateProduct(id, updateProductDto, userId);
   }
 
-  // DELETE /stores/products/:id - Delete a product
+  // DELETE /stores/products/:id - Delete Product
   @UseGuards(AuthGuard('jwt'))
   @Delete('products/:id')
-  @HttpCode(HttpStatus.NO_CONTENT) // Return 204 No Content on success
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteProduct(
-    @Param('id', ParseIntPipe) id: number, // Validate 'id' is an integer
+    @Param('id', ParseIntPipe) id: number,
     @Req() req: RequestWithUser
   ): Promise<void> {
     const userId = req.user.sub;
     await this.storeService.deleteProduct(id, userId);
-    // No explicit return needed due to Promise<void> and @HttpCode
   }
+  // --- End Existing Endpoints ---
+
+
+  // ***** START: NEW ENDPOINT *****
+  /**
+   * Endpoint to fetch delivery options for multiple stores based on their IDs.
+   * Expects a POST request with a body like: { "storeIds": ["1", "5", "10"] }
+   * @param getDeliveryOptionsDto - DTO containing the array of store IDs.
+   * @returns An object mapping store IDs to their delivery details.
+   */
+  @UseGuards(AuthGuard('jwt')) // Keep authentication for now
+  @Post('delivery-options') // Route: POST /stores/delivery-options
+  async getDeliveryOptions(
+    @Body() getDeliveryOptionsDto: GetDeliveryOptionsDto // Use the DTO and ValidationPipe (if enabled globally)
+  ): Promise<Record<string, StoreDeliveryDetails>> {
+    // The DTO ensures body has { storeIds: ["id1", "id2", ...] }
+    return this.storeService.getDeliveryOptionsForStores(getDeliveryOptionsDto.storeIds);
+  }
+  // ***** END: NEW ENDPOINT *****
+
 }
