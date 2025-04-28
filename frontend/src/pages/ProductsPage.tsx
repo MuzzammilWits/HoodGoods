@@ -2,7 +2,18 @@ import { useEffect, useState } from 'react';
 import { useCart } from '../context/ContextCart';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import './ProductsPage.css'; // Assuming this CSS file exists and styles the classes
+import './ProductsPage.css';
+
+// NEW: Search normalizer function
+const normalizeSearchTerm = (term: string) => {
+  return term
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^\w\s]/g, '')  // Remove punctuation
+    .replace(/\b(s|es|ies|ing|ed|er)\b/g, '')  // Better suffix stripping
+    .replace(/\s+/g, ' ')  // Collapse multiple spaces
+    .trim();
+};
 
 interface Product {
   prodId: number;
@@ -12,8 +23,11 @@ interface Product {
   price: number;
   userId: string;
   imageUrl: string;
+  storeId: number;
+
   storeName : string;
   isActive : boolean;
+  productquantity : number;
 }
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -26,27 +40,27 @@ const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
 
+  // NEW: Added store and search URL params
   const selectedCategory = searchParams.get('category') || '';
+  const selectedStore = searchParams.get('store') || '';
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setIsLoading(true); // Ensure loading state is set at the beginning
+      setIsLoading(true);
       try {
         const response = await axios.get(`${backendUrl}/products`);
-
-        // Basic validation of response data
+        
         if (!Array.isArray(response.data)) {
-           // Check if it's an object with a products array (adjust if backend structure differs)
           if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
-            setProducts(response.data.products); // Example adjustment
+            setProducts(response.data.products);
           } else {
             console.error("Unexpected data format:", response.data);
             throw new Error('Invalid data format received from server');
           }
         } else {
-           setProducts(response.data);
+          setProducts(response.data);
         }
-
         setError(null);
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
@@ -54,28 +68,51 @@ const ProductsPage = () => {
           : err instanceof Error
           ? err.message
           : 'Failed to load products';
-
-        console.error("Fetch products error:", errorMessage, err); // Log detailed error
+        console.error("Fetch products error:", errorMessage, err);
         setError(errorMessage);
-        setProducts([]); // Clear products on error
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, []); // Removed dependency array cycle possibility for fetch
+  }, []);
 
-  // Effect for filtering products based on category or products changing
+  // NEW: Updated filtering logic for category + store + search
   useEffect(() => {
+    let result = [...products];
+    
+    // Category filter (unchanged)
     if (selectedCategory) {
-      setFilteredProducts(
-        products.filter(product => product.category === selectedCategory)
-      );
-    } else {
-      setFilteredProducts(products); // Show all if no category selected
+      result = result.filter(product => product.category === selectedCategory);
     }
-  }, [selectedCategory, products]); // Runs when category or products list changes
+    
+    // Store filter (unchanged)
+    if (selectedStore) {
+      result = result.filter(product => product.storeName === selectedStore);
+    }
+    
+    // NEW improved search
+    if (searchQuery) {
+      const normalizedQuery = normalizeSearchTerm(searchQuery);
+      result = result.filter(product => {
+        const searchFields = [
+          product.name,
+          product.description,
+          product.storeName,
+          product.category
+        ].map(field => normalizeSearchTerm(field));
+  
+        return searchFields.some(field => 
+          field.includes(normalizedQuery) || 
+          normalizedQuery.includes(field)
+        );
+      });
+    }
+  
+    setFilteredProducts(result);
+  }, [selectedCategory, selectedStore, searchQuery, products]);
 
   const handleCategoryChange = (category: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -84,81 +121,121 @@ const ProductsPage = () => {
     } else {
       newParams.delete('category');
     }
-    setSearchParams(newParams, { replace: true }); // Use replace to avoid history clutter
+    // newParams.delete('store'); // NEW: Reset store when changing category
+    setSearchParams(newParams, { replace: true });
   };
 
-  const handleAddToCart = async (product: Product) => {
-    try {
-      if (!product || typeof product.prodId === 'undefined') { // Added check for product existence
-        console.error('Attempted to add invalid product to cart:', product);
-        throw new Error('Product data is invalid or missing ID');
-      }
-
-      // Ensure price is a number before adding
-      const price = Number(product.price);
-      if (isNaN(price)) {
-         console.error('Product price is not a valid number:', product.price);
-         throw new Error('Product price is invalid');
-      }
-
-      const cartItem = {
-        productId: String(product.prodId), // Ensure productId is a string
-        name: product.name,
-        price: price, // Use validated price
-        image: product.imageUrl || '/placeholder-product.jpg' // Provide fallback image
-      };
-
-      await addToCart(cartItem);
-      // Consider a more user-friendly notification (e.g., a toast) instead of alert
-      alert(`${product.name} added to cart!`);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      // Display error to user if needed, maybe using a state variable
-      setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+  // NEW: Store filter handler
+  const handleStoreChange = (store: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (store) {
+      newParams.set('store', store);
+    } else {
+      newParams.delete('store');
     }
+    setSearchParams(newParams, { replace: true });
   };
 
-  // Memoize category calculation if products list is large, otherwise fine as is
-  const categories = [...new Set(products.map(product => product.category))];
+  // NEW: Search handler
+  const handleSearchChange = (query: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (query) {
+      newParams.set('search', query);
+    } else {
+      newParams.delete('search');
+    }
+    setSearchParams(newParams, { replace: true });
+  };
 
-  // --- Render Logic ---
+
+// Inside ProductsPage component...
+
+interface AddToCartItem {
+  productId: number;
+  productName: string;
+  productPrice: number;
+  imageUrl?: string;
+  storeId: number;   // Add storeId
+  storeName: string;  // Add storeName
+}
+
+const handleAddToCart = async (product: Product) => {
+  try {
+    const price = Number(product.price);
+    if (isNaN(price)) {
+      throw new Error('Product price is invalid');
+
+    }
+
+    // Prepare the item object matching the AddToCartItem interface
+    const itemToAdd: AddToCartItem = { // Explicitly use the interface type (optional but good practice)
+      productId: product.prodId,
+      productName: product.name,
+      productPrice: price,
+      storeId: product.storeId,
+      storeName: product.storeName,
+      // --- FIX: Change 'image' to 'imageUrl' ---
+      imageUrl: product.imageUrl || undefined // Use undefined or omit if placeholder isn't desired here
+      // If product.imageUrl can be null/empty, sending undefined is fine.
+      // The context logic might handle adding a default if needed, or CartPage handles display fallback.
+    };
+
+    // Now itemToAdd correctly has the imageUrl property
+    await addToCart(itemToAdd);
+
+    alert(`${product.name} added to cart!`);
+
+  } catch (error) {
+     console.error('Error adding to cart:', error);
+     setError(error instanceof Error ? error.message : 'Failed to add item to cart');
+  }
+};
+
+// ... rest of the component
+
+  const categories = [...new Set(products.map(product => product.category))];
+  const stores = [...new Set(products.map(product => product.storeName))]; // NEW: Store list
 
   if (isLoading) {
-    // Using <p> for semantic text content
     return <p className="loading-spinner">Loading products...</p>;
   }
 
   if (error) {
-    // Using <div> with role="alert" for accessibility of error messages
     return (
-      <div className="error-message" role="alert">
+      <section className="error-message" role="alert">
         <p>{error}</p> {/* Put error text in a paragraph */}
+
         <button
           onClick={() => {
-            // Trigger refetch by resetting state and letting useEffect run
             setError(null);
-            setProducts([]); // Clear potentially stale data
-            // setIsLoading(true); // Let useEffect handle loading state
-            // Trigger useEffect by changing a dependency if needed, or rely on mount/initial load
-             // Re-fetch logic is handled by the main useEffect
-             window.location.reload(); // Simple retry, consider more sophisticated state reset
+            setProducts([]);
+            window.location.reload();
           }}
           className="retry-button"
         >
           Retry
         </button>
-      </div>
+      </section>
     );
   }
 
-  // --- Main Render ---
-  // Using <main> for the primary content area of the page
   return (
     <main className="products-container">
       <h1>Artisan Products</h1>
 
-      {/* Using <section> to group the filtering controls */}
-      <section className="category-filter filters"> {/* Added 'filters' class from your CSS */}
+      {/* NEW: Search bar section */}
+      <section className="search-bar filters">
+        <label htmlFor="product-search">Search Products:</label>
+        <input
+          id="product-search"
+          type="text"
+          placeholder="Search by name, description, or store..."
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+        />
+      </section>
+
+      <section className="category-filter filters">
         <label htmlFor="category-select">Filter by Category:</label>
         <select
           id="category-select"
@@ -174,48 +251,55 @@ const ProductsPage = () => {
         </select>
       </section>
 
-      {/* Using <ul> for the list of products, semantically correct */}
+      {/* NEW: Store filter section */}
+      <section className="store-filter filters">
+        <label htmlFor="store-select">Filter by Store:</label>
+        <select
+          id="store-select"
+          value={selectedStore}
+          onChange={(e) => handleStoreChange(e.target.value)}
+        >
+          <option value="">All Stores</option>
+          {stores.map(store => (
+            <option key={store} value={store}>
+              {store}
+            </option>
+          ))}
+        </select>
+      </section>
+
       <ul className="products-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
-            // Using <li> for each item in the product list
-            // Keeping product-card class on the <li> for styling continuity
             <li key={product.prodId} className="product-card">
-              {/* Using <article> to represent each self-contained product */}
               <article>
-                {/* Using <figure> for the product image */}
                 <figure className="product-image-container">
                   <img
-                    src={product.imageUrl || '/placeholder-product.jpg'} // Fallback image URL
-                    alt={product.name || 'Product image'} // Fallback alt text
+                    src={product.imageUrl || '/placeholder-product.jpg'}
+                    alt={product.name || 'Product image'}
                     className="product-image"
-                    // Basic error handling for images
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      // Prevent infinite loop if placeholder also fails
                       if (target.src !== '/placeholder-product.jpg') {
-                         target.src = '/placeholder-product.jpg';
-                         target.alt = 'Placeholder image'; // Update alt text
-                         target.classList.add('placeholder');
+                        target.src = '/placeholder-product.jpg';
+                        target.alt = 'Placeholder image';
+                        target.classList.add('placeholder');
                       }
                     }}
-                    loading="lazy" // Add lazy loading for images
+                    loading="lazy"
                   />
                 </figure>
-                {/* Using <section> for the group of product details */}
                 <section className="product-details">
-                  {/* Use <h2> for product name within the <article> scope */}
                   <h2 className="product-name">{product.name}</h2>
-                  {/* Using <p> for discrete pieces of information */}
                   <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
                   <p className="product-description">{product.description}</p>
                   <p className="product-category">Category: {product.category}</p>
-                  <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p> {/* Ensure price is number */}
+                  <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
                   <button
                     onClick={() => handleAddToCart(product)}
                     className="add-to-cart-btn"
                     aria-label={`Add ${product.name} to cart`}
-                    type="button" // Explicitly set button type
+                    type="button"
                   >
                     Add to Cart
                   </button>
@@ -224,11 +308,10 @@ const ProductsPage = () => {
             </li>
           ))
         ) : (
-          // Using <p> for the "no products" message
-          <li className="no-products"> {/* Wrap in <li> to be valid child of <ul> */}
+          <li className="no-products">
             <p>
-              {selectedCategory
-                ? `No products found in the "${selectedCategory}" category.` // Added quotes
+              {selectedCategory || selectedStore || searchQuery
+                ? 'No products found matching your criteria.'
                 : 'No products available at the moment.'}
             </p>
           </li>
