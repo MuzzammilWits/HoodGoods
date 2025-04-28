@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { StoreModule } from './store/store.module';
 import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module'; // <<< Import the new module
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PaymentsModule } from './payments/payments.module';
     CartModule,
     ProductsModule,
     PaymentsModule, // Add the StoreModule here
+    OrdersModule,
   ],
   
 
