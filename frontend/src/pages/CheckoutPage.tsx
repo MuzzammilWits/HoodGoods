@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo
 import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
 import './CheckoutPage.css'; // Make sure this CSS file exists and is linked
 import { useCart } from '../context/ContextCart';
 import { useAuth0 } from '@auth0/auth0-react'; // Added useAuth0
-import axios, { AxiosError } from 'axios'; // Added axios and AxiosError
+import axios from 'axios'; // Added axios and AxiosError
 
 // Interface for items displayed within this component
 type CartItemDisplay = {
