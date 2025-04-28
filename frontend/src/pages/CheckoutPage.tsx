@@ -1,4 +1,3 @@
-// Add useRef to the import
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './CheckoutPage.css'; // Ensure CSS is linked
@@ -33,15 +32,26 @@ interface InitiatePaymentResponse {
 }
 // --- End Interfaces ---
 
+// --- NEW: Define Pickup Locations Data Structure ---
+const pickupLocationsData: Record<string, string[]> = {
+    "Area1": ["Area 1 - Pickup Point Alpha", "Area 1 - Pickup Point Beta"],
+    "Area2": ["Area 2 - Pickup Point Gamma", "Area 2 - Pickup Point Delta", "Area 2 - Pickup Point Epsilon"],
+    "Area3": ["Area 3 - Pickup Point Zeta", "Area 3 - Pickup Point Eta", "Area 3 - Pickup Point Theta"]
+};
+// --- End Pickup Locations Data ---
+
 export default function CheckoutPage() {
   // --- Hooks ---
   const { cartItems, clearCart, cartError: contextCartError } = useCart();
   const { user, getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading } = useAuth0();
   const navigate = useNavigate();
 
-  // --- State --- (Keep state as it is)
-  const [streetAddress, setStreetAddress] = useState('');
-  const [deliveryArea, setDeliveryArea] = useState('');
+  // --- State ---
+  // REMOVED: streetAddress state
+  // MODIFIED: deliveryArea renamed to selectedArea
+  const [selectedArea, setSelectedArea] = useState('');
+  // NEW: State for the selected pickup point
+  const [selectedPickupPoint, setSelectedPickupPoint] = useState('');
   const [deliverySelectionState, setDeliverySelectionState] = useState<Record<string, 'standard' | 'express'>>({});
   const [storeDeliveryOptions, setStoreDeliveryOptions] = useState<DeliveryOptionsResponse>({});
   const [isLoadingDeliveryOptions, setIsLoadingDeliveryOptions] = useState(false);
@@ -49,7 +59,7 @@ export default function CheckoutPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  // --- Add Ref for Timeout ---
+  // --- Ref for Timeout ---
   const paymentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Axios instance
@@ -111,7 +121,7 @@ export default function CheckoutPage() {
           // Ensure we don't lose selections for stores that might temporarily disappear/reappear if cart changes
           Object.keys(prev).forEach(id => {
              if (uniqueStoreIds.includes(id) && fetchedOptions[id] && !newSelectionState[id]) {
-                  newSelectionState[id] = prev[id];
+                 newSelectionState[id] = prev[id];
              }
           });
           return newSelectionState;
@@ -129,16 +139,15 @@ export default function CheckoutPage() {
     fetchOptions();
   }, [uniqueStoreIds, isAuthenticated, getAccessTokenSilently]); // Keep dependencies
 
-  // --- Add Effect for Timeout Cleanup on Unmount ---
+  // Effect for Timeout Cleanup on Unmount (Keep as is)
   useEffect(() => {
-    // This function runs when the component unmounts
     return () => {
       if (paymentTimeoutRef.current) {
         console.log("CheckoutPage unmounting, clearing payment timeout.");
         clearTimeout(paymentTimeoutRef.current);
       }
     };
-  }, []); // Empty dependency array ensures this runs only on mount and unmount
+  }, []);
 
   // --- Calculation Functions --- (Keep these as they are)
   const calculateStoreSubtotal = (items: CartItemDisplay[]): number => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -149,13 +158,11 @@ export default function CheckoutPage() {
       const storeOptions = storeDeliveryOptions[storeId];
       if (!selectedOptionType || !storeOptions) return sum;
       const price = selectedOptionType === 'standard' ? storeOptions.standardPrice : storeOptions.expressPrice;
-      // Ensure price is treated as a number, default to 0 if invalid
       return sum + (Number(price) || 0);
     }, 0);
   };
 
   const grandTotal = useMemo(() => {
-    // Ensure cartItems is an array before reducing
     const itemsSubtotal = Array.isArray(cartItems)
         ? cartItems.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0)
         : 0;
@@ -170,15 +177,23 @@ export default function CheckoutPage() {
     }
   };
 
-  // Modified handlePayment with Timeout
+  // NEW: Handler for Area change
+  const handleAreaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newArea = event.target.value;
+      setSelectedArea(newArea);
+      setSelectedPickupPoint(''); // Reset pickup point when area changes
+  };
+
+  // Modified handlePayment with Timeout (Updated Validation)
   const handlePayment = async () => {
-    // Basic validation (Keep as is)
+    // Basic validation
     if (!isAuthenticated || !user || cartItems.length === 0) {
         setPaymentError("Cannot proceed to payment. Ensure you are logged in and have items in your cart.");
         return;
     }
-    if (!streetAddress || !deliveryArea) {
-        setPaymentError("Please fill in your delivery address and select an area.");
+    // UPDATED VALIDATION: Check for selected area and pickup point
+    if (!selectedArea || !selectedPickupPoint) {
+        setPaymentError("Please select your delivery area and pickup point.");
         return;
     }
     // Ensure delivery option selected for all stores
@@ -187,11 +202,10 @@ export default function CheckoutPage() {
         return;
      }
 
-
     setIsProcessingPayment(true);
     setPaymentError(null);
 
-    // --- Clear any previous lingering timeout ---
+    // Clear any previous lingering timeout
     if (paymentTimeoutRef.current) {
         clearTimeout(paymentTimeoutRef.current);
         paymentTimeoutRef.current = null;
@@ -206,7 +220,11 @@ export default function CheckoutPage() {
             {
                 amount: Math.round(grandTotal * 100), // Send amount in cents
                 currency: 'ZAR',
-                // Optionally send more details
+                // Optionally send more details (like selectedPickupPoint if needed)
+                // metadata: {
+                //  pickupArea: selectedArea,
+                //  pickupPoint: selectedPickupPoint
+                // }
             },
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -225,15 +243,14 @@ export default function CheckoutPage() {
             checkoutId: checkoutId,
             amountInCents: Math.round(grandTotal * 100),
             currency: 'ZAR',
-            // customer: { email: user.email, ... },
+            // customer: { email: user.email, ... }, // Consider adding customer details
             callback: async (result: any) => {
-                // --- START: Clear timeout inside callback ---
+                // Clear timeout inside callback
                 if (paymentTimeoutRef.current) {
                     console.log("Yoco callback triggered, clearing payment timeout.");
                     clearTimeout(paymentTimeoutRef.current);
                     paymentTimeoutRef.current = null;
                 }
-                // --- END: Clear timeout ---
 
                 console.log("--- Yoco SDK Callback START ---");
                 console.log("Received Yoco Result:", JSON.stringify(result, null, 2));
@@ -242,7 +259,6 @@ export default function CheckoutPage() {
                 let shouldNavigate = false;
                 let clearCartErrorOccurred = false;
 
-                // Using try/finally within callback for robustness
                 try {
                     if (result.error) {
                         console.error("Yoco Payment Error:", result.error);
@@ -257,7 +273,6 @@ export default function CheckoutPage() {
                         } catch (clearError) {
                             console.error("Error clearing cart on frontend:", clearError);
                             clearCartErrorOccurred = true;
-                            // Append to existing error or set new one
                             outcomeError = (outcomeError ? outcomeError + " " : "") + "Additionally, failed to clear cart automatically.";
                         }
                     } else if (result.status === 'failed') {
@@ -273,11 +288,10 @@ export default function CheckoutPage() {
 
                     if (outcomeError) {
                         console.log("Setting payment error state:", outcomeError);
-                        setPaymentError(outcomeError); // Set any accumulated error message
+                        setPaymentError(outcomeError);
                     }
                     if (clearCartErrorOccurred) {
                         console.log("Handling cart clear error occurrence (message set above).");
-                        /* Additional handling if needed */
                     }
                     if (shouldNavigate) {
                         console.log("Navigating to /order-confirmation");
@@ -288,7 +302,6 @@ export default function CheckoutPage() {
                     console.error("--- Error INSIDE Yoco Callback Logic ---:", callbackError);
                     setPaymentError("An internal error occurred after payment interaction. Please check your order status or contact support.");
                 } finally {
-                    // This *always* runs if the callback is entered, after try/catch
                     console.log("--- Yoco SDK Callback FINALLY block ---");
                     console.log("Resetting isProcessingPayment to false via callback.");
                     setIsProcessingPayment(false); // Reset processing state
@@ -297,61 +310,60 @@ export default function CheckoutPage() {
             } // end callback
         }); // end showPopup
 
-        // --- START: Set the timeout AFTER showing the popup ---
+        // Set the timeout AFTER showing the popup
         console.log("Setting payment timeout fallback (45s).");
         paymentTimeoutRef.current = setTimeout(() => {
             console.warn("Payment timeout reached (popup likely closed manually or timed out).");
-            // Use functional update to safely check the *current* state
             setIsProcessingPayment(currentProcessingState => {
-                if (currentProcessingState) { // Only act if it's still true
+                if (currentProcessingState) {
                     console.log("Resetting processing state due to timeout.");
                     setPaymentError("Payment process was cancelled or timed out.");
-                    return false; // Set state to false
+                    return false;
                 }
-                // If already false, callback must have run just before timeout
                 console.log("Timeout fired, but processing state already false (callback likely ran).");
-                return false; // Keep it false
+                return false;
             });
-            paymentTimeoutRef.current = null; // Clear ref after timeout runs
-        }, 450); // 45 seconds - adjust duration as needed
-        // --- END: Set timeout ---
+            paymentTimeoutRef.current = null;
+        }, 45000); // 45 seconds
 
     } catch (error) {
         console.error("Failed to initiate payment:", error);
         const errorMsg = axios.isAxiosError(error) ? error.response?.data?.message || error.message : 'Payment initiation failed';
         setPaymentError(errorMsg);
 
-        // --- START: Clear timeout on initiation error ---
+        // Clear timeout on initiation error
         if (paymentTimeoutRef.current) {
             console.log("Clearing payment timeout due to initiation error.");
             clearTimeout(paymentTimeoutRef.current);
             paymentTimeoutRef.current = null;
         }
-        // --- END: Clear timeout ---
         setIsProcessingPayment(false); // Reset processing state on error
     }
   }; // end handlePayment
 
-
-  // --- Render Logic --- (Keep render logic as is)
+  // --- Render Logic ---
   if (isAuthLoading) return <p>Loading authentication...</p>;
   if (!isAuthenticated) return ( <main className="checkout-container"><h1>Checkout</h1><p>Please log in to view checkout.</p></main> );
-  // Handle cartItems possibly being null during initial load from context
   if (cartItems === null) return <p>Loading cart...</p>;
   if (cartItems.length > 0 && isLoadingDeliveryOptions) { return <p>Loading checkout details...</p>; }
   if (cartItems.length === 0) return ( <main className="checkout-container"><h1>Checkout</h1><p>Your cart is empty.</p><Link to="/products" className="back-link">Continue Shopping</Link></main> );
 
-  // Ensure grandTotal is a valid number for display/payment
   const displayGrandTotal = typeof grandTotal === 'number' && !isNaN(grandTotal) ? grandTotal : 0;
-  // Disable button if grand total is zero or invalid (e.g., cart empty after loading)
-  const isCheckoutReady = !isProcessingPayment && !isLoadingDeliveryOptions && !deliveryOptionsError && streetAddress && deliveryArea && uniqueStoreIds.length > 0 && !uniqueStoreIds.some(id => !deliverySelectionState[id]) && displayGrandTotal > 0;
-
+  // UPDATED: Checkout readiness check
+  const isCheckoutReady = !isProcessingPayment &&
+                         !isLoadingDeliveryOptions &&
+                         !deliveryOptionsError &&
+                         selectedArea && // Check selected area
+                         selectedPickupPoint && // Check selected pickup point
+                         uniqueStoreIds.length > 0 &&
+                         !uniqueStoreIds.some(id => !deliverySelectionState[id]) &&
+                         displayGrandTotal > 0;
 
   return (
     <main className="checkout-container">
       <header>
         <h1>Checkout</h1>
-        <p className="instructions">Please enter delivery details and review your order.</p>
+        <p className="instructions">Please select your pickup location and review your order.</p> {/* Updated instruction */}
         {/* Display relevant errors */}
         {contextCartError && <p className="error-message">Cart Notice: {contextCartError}</p>}
         {deliveryOptionsError && <p className="error-message">Delivery Error: {deliveryOptionsError}</p>}
@@ -360,33 +372,58 @@ export default function CheckoutPage() {
 
       <div className="checkout-layout">
 
-        {/* Delivery Address Section */}
-        <section className="form-section delivery-address-section" aria-labelledby="delivery-address-heading">
-           <h2 id="delivery-address-heading">Delivery Address</h2>
-           <p className="form-field">
-             <label htmlFor="street-address">Street Address</label>
-             <input id="street-address" type="text" className="form-input" value={streetAddress} onChange={(e) => setStreetAddress(e.target.value)} required autoComplete="street-address"/>
-           </p>
-           <p className="form-field">
-             <label htmlFor="delivery-area">Delivery Area</label>
-             <select id="delivery-area" className="form-input" value={deliveryArea} onChange={(e) => setDeliveryArea(e.target.value)} required>
-               <option value="" disabled>Select an area...</option>
-               {/* Populate with actual areas */}
-               <option value="Area1">Area 1</option>
-               <option value="Area2">Area 2</option>
-             </select>
-           </p>
-         </section>
+        {/* MODIFIED: Delivery Address Section -> Pickup Location Section */}
+        <section className="form-section pickup-location-section" aria-labelledby="pickup-location-heading">
+            <h2 id="pickup-location-heading">Pickup Location</h2>
 
-        {/* Order Summary Section */}
+            {/* Area Selection Dropdown */}
+            <p className="form-field">
+              <label htmlFor="delivery-area">Select Area</label>
+              <select
+                id="delivery-area"
+                className="form-input"
+                value={selectedArea}
+                onChange={handleAreaChange} // Use specific handler
+                required
+              >
+                <option value="" disabled>Select an area...</option>
+                {Object.keys(pickupLocationsData).map(area => (
+                    <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </p>
+
+            {/* Pickup Point Selection Dropdown */}
+            <p className="form-field">
+              <label htmlFor="pickup-point">Select Pickup Point</label>
+              <select
+                id="pickup-point"
+                className="form-input"
+                value={selectedPickupPoint}
+                onChange={(e) => setSelectedPickupPoint(e.target.value)}
+                required
+                disabled={!selectedArea} // Disable until an area is chosen
+              >
+                <option value="" disabled>Select a pickup point...</option>
+                {selectedArea && pickupLocationsData[selectedArea] && // Check if area and points exist
+                    pickupLocationsData[selectedArea].map(point => (
+                        <option key={point} value={point}>{point}</option>
+                ))}
+              </select>
+              {!selectedArea && <small className="field-hint">Please select an area first.</small>}
+            </p>
+         </section>
+        {/* END MODIFIED SECTION */}
+
+        {/* Order Summary Section (Remains the same) */}
         <section className="form-section order-summary-section" aria-labelledby="order-summary-heading">
           <h2 id="order-summary-heading">Order Summary</h2>
           {uniqueStoreIds.map(storeId => {
             const items = groupedItemsByStoreId[storeId];
             const deliveryDetails = storeDeliveryOptions[storeId];
-            const currentSelection = deliverySelectionState[storeId]; // Will be 'standard' or 'express' once loaded
+            const currentSelection = deliverySelectionState[storeId];
 
-            if (!items || items.length === 0) return null; // Should not happen if uniqueStoreIds is derived correctly
+            if (!items || items.length === 0) return null;
             const storeName = items[0]?.storeName || `Store ID: ${storeId}`;
 
             return (
@@ -397,19 +434,17 @@ export default function CheckoutPage() {
                 <div className="delivery-option form-field">
                   <label htmlFor={`delivery-${storeId}`}>Delivery Option</label>
                   {isLoadingDeliveryOptions ? (
-                       "Loading options..." // Show loading text while fetching
-                  ) : !deliveryDetails ? (
-                       <span className="error-message">Unavailable</span> // Show if options failed to load for this store
+                       "Loading options..."
+                   ) : !deliveryDetails ? (
+                       <span className="error-message">Unavailable</span>
                    ) : (
                     <select
                         id={`delivery-${storeId}`}
                         className="form-input"
-                        value={currentSelection || ''} // Ensure value is controlled, default to '' if somehow undefined
+                        value={currentSelection || ''}
                         onChange={(e) => handleDeliveryOptionChange(storeId, e.target.value)}
-                        required // Make selection required
+                        required
                     >
-                        {/* Provide a default disabled option if no selection yet? Or rely on initial state? */}
-                        {/* <option value="" disabled>Select delivery...</option> */}
                         <option value="standard">Standard - R{deliveryDetails.standardPrice.toFixed(2)} ({deliveryDetails.standardTime})</option>
                         <option value="express">Express - R{deliveryDetails.expressPrice.toFixed(2)} ({deliveryDetails.expressTime})</option>
                     </select>
@@ -437,23 +472,21 @@ export default function CheckoutPage() {
           </footer>
         </section>
 
-        {/* Payment Button Section */}
+        {/* Payment Button Section (Updated disabled logic check) */}
         <section className="payment-section">
-          {/* Payment error display moved to header */}
           <button
             type="button"
             onClick={handlePayment}
-            // Update disabled logic for clarity and completeness
-            disabled={!isCheckoutReady || isProcessingPayment}
+            disabled={!isCheckoutReady || isProcessingPayment} // Uses updated isCheckoutReady
             className="yoco-pay-button"
           >
             {isProcessingPayment ? 'Processing...' : `Pay R${displayGrandTotal.toFixed(2)} with Yoco`}
           </button>
-           {/* Optional: Show detailed disable reason for debugging */}
-           {/* {!isCheckoutReady && <p style={{fontSize: '0.8em', color: 'grey'}}>Please complete address and delivery options.</p>} */}
+           {/* Optional: Show detailed disable reason */}
+           {!isCheckoutReady && !isProcessingPayment && <p style={{fontSize: '0.8em', color: 'grey', marginTop: '5px'}}>Please select area, pickup point, and delivery options.</p>}
         </section>
 
-        {/* Actions Menu */}
+        {/* Actions Menu (Remains the same) */}
         <menu className="actions">
           <li>
             <Link to="/cart" className="back-link">Back to Cart</Link>
