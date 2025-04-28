@@ -1,405 +1,465 @@
-import { useState, useEffect, useMemo } from 'react'; // Added useMemo
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
-import './CheckoutPage.css'; // Make sure this CSS file exists and is linked
+// Add useRef to the import
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './CheckoutPage.css'; // Ensure CSS is linked
 import { useCart } from '../context/ContextCart';
-import { useAuth0 } from '@auth0/auth0-react'; // Added useAuth0
-import axios from 'axios'; // Added axios and AxiosError
+import { useAuth0 } from '@auth0/auth0-react';
+import axios, { AxiosError } from 'axios';
 
-// Interface for items displayed within this component
+// --- Interfaces --- (Keep interfaces as they are)
 type CartItemDisplay = {
-  id: string; // Product ID as string
+  id: string;
   name: string;
   price: number;
   quantity: number;
   storeName: string;
+  storeId: string;
 };
 
-// Define the structure for delivery options
-type DeliveryOption = {
-  id: string;
-  name: string;
-  price: number;
-  days: string;
-};
+interface StoreDeliveryDetails {
+    storeId: string;
+    standardPrice: number;
+    standardTime: string;
+    expressPrice: number;
+    expressTime: string;
+    storeName?: string;
+}
 
-// Interface for the expected response from your backend's initiate endpoint
+type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
+
+declare const YocoSDK: any;
 interface InitiatePaymentResponse {
   checkoutId: string;
 }
+// --- End Interfaces ---
 
-// Yoco SDK Declaration
-// ** IMPORTANT: Add Yoco SDK script to your public/index.html **
-// <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
-declare const YocoSDK: any; // Basic declaration
-
-// Renamed back to CheckoutPage
 export default function CheckoutPage() {
   // --- Hooks ---
-  // Hooks from original CheckoutPage
-  const { cartItems, clearCart, cartError: contextCartError } = useCart(); // Added clearCart and contextCartError
-
-  // Hooks needed for Payment Logic (from PayPage)
-  const { user, getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading } = useAuth0(); // isAuthLoading for initial auth check
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false); // Renamed state for clarity
-  const [paymentError, setPaymentError] = useState<string | null>(null); // Local state for payment-specific errors
+  const { cartItems, clearCart, cartError: contextCartError } = useCart();
+  const { user, getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading } = useAuth0();
   const navigate = useNavigate();
 
-  // State from original CheckoutPage
+  // --- State --- (Keep state as it is)
   const [streetAddress, setStreetAddress] = useState('');
   const [deliveryArea, setDeliveryArea] = useState('');
+  const [deliverySelectionState, setDeliverySelectionState] = useState<Record<string, 'standard' | 'express'>>({});
+  const [storeDeliveryOptions, setStoreDeliveryOptions] = useState<DeliveryOptionsResponse>({});
+  const [isLoadingDeliveryOptions, setIsLoadingDeliveryOptions] = useState(false);
+  const [deliveryOptionsError, setDeliveryOptionsError] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  // Axios instance (from PayPage)
+  // --- Add Ref for Timeout ---
+  const paymentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Axios instance
   const api = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
   });
 
-  // --- Data Processing (from original CheckoutPage) ---
-
-  // Hardcoded delivery areas and options
-  const deliveryAreas = ['Area 1', 'Area 2', 'Area 3'];
-  const deliveryOptions: DeliveryOption[] = [
-    { id: 'standard', name: 'Standard Delivery', price: 50, days: '3-5 business days' },
-    { id: 'express', name: 'Express Delivery', price: 100, days: '1-2 business days' }
-  ];
-
-  // Get unique store names from cart items using useMemo
-  const storeNames = useMemo(() =>
-    [...new Set(cartItems.map(item => item.storeName || 'Unknown Store'))]
+  // --- Data Processing & Memos --- (Keep these as they are)
+  const uniqueStoreIds = useMemo(() =>
+    [...new Set(cartItems.map(item => item.storeId).filter(id => id && id !== 'unknown'))]
   , [cartItems]);
 
-  // Group items by store name using useMemo
-  const groupedItems = useMemo(() =>
+  const groupedItemsByStoreId = useMemo(() =>
     cartItems.reduce((groups, item) => {
-      const key = item.storeName || 'Unknown Store';
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      // Map CartItemUI to CartItemDisplay
+      const key = item.storeId;
+      if (!key || key === 'unknown') return groups;
+      if (!groups[key]) groups[key] = [];
       groups[key].push({
-        id: item.productId.toString(), // Convert productId to string id
+        id: item.productId.toString(),
         name: item.productName,
         price: item.productPrice,
         quantity: item.quantity,
-        storeName: key
+        storeName: item.storeName || 'Unknown Store',
+        storeId: key
       });
       return groups;
     }, {} as Record<string, CartItemDisplay[]>)
   , [cartItems]);
 
-  // Initialize delivery option state for each store
-  const [deliveryOptionState, setDeliveryOptionState] = useState<Record<string, string>>(() =>
-    storeNames.reduce((acc, storeName) => {
-      acc[storeName] = 'standard'; // Default to standard
-      return acc;
-    }, {} as Record<string, string>)
-  );
+  // --- Effects ---
 
-  // Update delivery state if storeNames change (e.g., item removed from cart)
+  // Effect for fetching delivery options (Keep as is)
   useEffect(() => {
-    setDeliveryOptionState(prev => {
-      const newState = { ...prev };
-      let changed = false;
-      // Add default for new stores
-      storeNames.forEach(name => {
-        if (!(name in newState)) {
-          newState[name] = 'standard';
-          changed = true;
-        }
-      });
-      // Remove entries for stores no longer in cart
-      Object.keys(newState).forEach(name => {
-        if (!storeNames.includes(name)) {
-          delete newState[name];
-          changed = true;
-        }
-      });
-      return changed ? newState : prev;
-    });
-  }, [storeNames]);
+    if (!isAuthenticated || uniqueStoreIds.length === 0) {
+      setStoreDeliveryOptions({});
+      setDeliverySelectionState({});
+      return;
+    }
+    const fetchOptions = async () => {
+      setIsLoadingDeliveryOptions(true);
+      setDeliveryOptionsError(null);
+      try {
+        const token = await getAccessTokenSilently();
+        const response = await api.post<DeliveryOptionsResponse>(
+          '/stores/delivery-options',
+          { storeIds: uniqueStoreIds },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const fetchedOptions = response.data || {};
+        setStoreDeliveryOptions(fetchedOptions);
+        // Initialize/preserve delivery selections
+        setDeliverySelectionState(prev => {
+          const newSelectionState: Record<string, 'standard' | 'express'> = {};
+          uniqueStoreIds.forEach(id => {
+            if (fetchedOptions[id]) { // Only add if options exist for store
+              newSelectionState[id] = prev[id] || 'standard'; // Default or keep existing
+            }
+          });
+          // Ensure we don't lose selections for stores that might temporarily disappear/reappear if cart changes
+          Object.keys(prev).forEach(id => {
+             if (uniqueStoreIds.includes(id) && fetchedOptions[id] && !newSelectionState[id]) {
+                  newSelectionState[id] = prev[id];
+             }
+          });
+          return newSelectionState;
+       });
+      } catch (error) {
+        console.error("Failed to fetch delivery options:", error);
+        const errorMsg = error instanceof AxiosError ? error.response?.data?.message || error.message : 'Could not load delivery options.';
+        setDeliveryOptionsError(errorMsg);
+        setStoreDeliveryOptions({});
+        setDeliverySelectionState({});
+      } finally {
+        setIsLoadingDeliveryOptions(false);
+      }
+    };
+    fetchOptions();
+  }, [uniqueStoreIds, isAuthenticated, getAccessTokenSilently]); // Keep dependencies
 
+  // --- Add Effect for Timeout Cleanup on Unmount ---
+  useEffect(() => {
+    // This function runs when the component unmounts
+    return () => {
+      if (paymentTimeoutRef.current) {
+        console.log("CheckoutPage unmounting, clearing payment timeout.");
+        clearTimeout(paymentTimeoutRef.current);
+      }
+    };
+  }, []); // Empty dependency array ensures this runs only on mount and unmount
 
-  // --- Calculation Functions (from original CheckoutPage) ---
-
-  const calculateStoreSubtotal = (items: CartItemDisplay[]): number => {
-    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  };
+  // --- Calculation Functions --- (Keep these as they are)
+  const calculateStoreSubtotal = (items: CartItemDisplay[]): number => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const calculateTotalDelivery = (): number => {
-    return storeNames.reduce((sum, storeName) => {
-      const selectedOptionId = deliveryOptionState[storeName];
-      const option = deliveryOptions.find(opt => opt.id === selectedOptionId);
-      return sum + (option?.price || 0);
+    return Object.keys(deliverySelectionState).reduce((sum, storeId) => {
+      const selectedOptionType = deliverySelectionState[storeId];
+      const storeOptions = storeDeliveryOptions[storeId];
+      if (!selectedOptionType || !storeOptions) return sum;
+      const price = selectedOptionType === 'standard' ? storeOptions.standardPrice : storeOptions.expressPrice;
+      // Ensure price is treated as a number, default to 0 if invalid
+      return sum + (Number(price) || 0);
     }, 0);
   };
 
-  // Use useMemo for grand total calculation
   const grandTotal = useMemo(() => {
-    const itemsSubtotal = Object.values(groupedItems)
-                              .flat()
-                              .reduce((sum, item) => sum + item.price * item.quantity, 0);
+    // Ensure cartItems is an array before reducing
+    const itemsSubtotal = Array.isArray(cartItems)
+        ? cartItems.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0)
+        : 0;
     const deliveryTotal = calculateTotalDelivery();
     return itemsSubtotal + deliveryTotal;
-  }, [groupedItems, deliveryOptionState]); // Recalculate when items or delivery options change
-
+  }, [cartItems, deliverySelectionState, storeDeliveryOptions]);
 
   // --- Event Handlers ---
-
-  // Delivery option change handler (from original CheckoutPage)
-  const handleDeliveryOptionChange = (storeName: string, optionId: string) => {
-    setDeliveryOptionState(prev => ({
-      ...prev,
-      [storeName]: optionId
-    }));
+  const handleDeliveryOptionChange = (storeId: string, selection: string) => {
+    if (selection === 'standard' || selection === 'express') {
+        setDeliverySelectionState(prev => ({ ...prev, [storeId]: selection }));
+    }
   };
 
-  // Payment handler (adapted from PayPage)
+  // Modified handlePayment with Timeout
   const handlePayment = async () => {
-    // Basic validation
+    // Basic validation (Keep as is)
     if (!isAuthenticated || !user || cartItems.length === 0) {
-      setPaymentError("Cannot proceed to payment. Ensure you are logged in and have items in your cart.");
-      return;
+        setPaymentError("Cannot proceed to payment. Ensure you are logged in and have items in your cart.");
+        return;
     }
     if (!streetAddress || !deliveryArea) {
         setPaymentError("Please fill in your delivery address and select an area.");
         return;
     }
+    // Ensure delivery option selected for all stores
+     if (uniqueStoreIds.some(id => !deliverySelectionState[id])) {
+        setPaymentError("Please select a delivery option for all store groups.");
+        return;
+     }
+
 
     setIsProcessingPayment(true);
     setPaymentError(null);
 
+    // --- Clear any previous lingering timeout ---
+    if (paymentTimeoutRef.current) {
+        clearTimeout(paymentTimeoutRef.current);
+        paymentTimeoutRef.current = null;
+    }
+
     try {
-      const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently();
 
-      // 1. Call backend to initiate payment
-      console.log("Initiating payment with backend...");
-      const response = await api.post<InitiatePaymentResponse>('/payments/initiate-yoco',
-        {
-          // Use the calculated grandTotal
-          amount: Math.round(grandTotal * 100), // Send amount in cents
-          currency: 'ZAR',
-          // Optionally send more details if needed by backend
-          // address: { street: streetAddress, area: deliveryArea },
-          // deliveryOptions: deliveryOptionState,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        // 1. Call backend to initiate payment (Keep as is)
+        console.log("Initiating payment with backend...");
+        const response = await api.post<InitiatePaymentResponse>('/payments/initiate-yoco',
+            {
+                amount: Math.round(grandTotal * 100), // Send amount in cents
+                currency: 'ZAR',
+                // Optionally send more details
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      const { checkoutId } = response.data;
-      console.log("Received checkoutId:", checkoutId);
-      if (!checkoutId) throw new Error("Missing checkoutId from backend.");
+        const { checkoutId } = response.data;
+        console.log("Received checkoutId:", checkoutId);
+        if (!checkoutId) throw new Error("Missing checkoutId from backend.");
 
-      // 2. Initialize Yoco SDK
-      const yoco = new YocoSDK({
-        publicKey: 'pk_test_ed3c54a6gOol69qa7f45', // Use Test Public Key
-      });
+        // 2. Initialize Yoco SDK (Keep as is)
+        const yoco = new YocoSDK({
+            publicKey: 'pk_test_ed3c54a6gOol69qa7f45', // Use Test Public Key
+        });
 
-      console.log("Showing Yoco popup...");
-      yoco.showPopup({
-        checkoutId: checkoutId,
-        amountInCents: Math.round(grandTotal * 100),
-        currency: 'ZAR',
-        // You can add customer details here if desired
-        // customer: { email: user.email, firstName: user.given_name, lastName: user.family_name },
-        callback: async (result: any) => {
-          console.log("Yoco SDK Callback Result:", result);
+        console.log("Showing Yoco popup...");
+        yoco.showPopup({
+            checkoutId: checkoutId,
+            amountInCents: Math.round(grandTotal * 100),
+            currency: 'ZAR',
+            // customer: { email: user.email, ... },
+            callback: async (result: any) => {
+                // --- START: Clear timeout inside callback ---
+                if (paymentTimeoutRef.current) {
+                    console.log("Yoco callback triggered, clearing payment timeout.");
+                    clearTimeout(paymentTimeoutRef.current);
+                    paymentTimeoutRef.current = null;
+                }
+                // --- END: Clear timeout ---
 
-          let outcomeError: string | null = null;
-          let shouldNavigate = false;
-          let clearCartErrorOccurred = false;
+                console.log("--- Yoco SDK Callback START ---");
+                console.log("Received Yoco Result:", JSON.stringify(result, null, 2));
 
-          if (result.error) {
-            console.error("Yoco Payment Error:", result.error);
-            outcomeError = `Payment failed: ${result.error.message || 'Please try again.'}`;
-          } else if (result.status === 'successful' || result.status === 'pending' || result.status === 'charge_ready') {
-             console.log(`Yoco Payment Status on Frontend: ${result.status}`);
-             shouldNavigate = true;
-             try {
-                console.log("Clearing cart on frontend...");
-                await clearCart(); // Use clearCart from context
-                console.log("Frontend cart cleared.");
-             } catch (clearError) {
-                console.error("Error clearing cart on frontend:", clearError);
-                clearCartErrorOccurred = true;
-             }
-          } else if (result.status === 'failed') {
-             console.warn("Yoco Payment explicitly failed.");
-             outcomeError = "Payment failed. Please check your details or try another card.";
-          } else if (result.status === 'cancelled') {
-             console.warn("Yoco Payment was cancelled by the user.");
-             outcomeError = "Payment was cancelled.";
-          } else {
-             console.warn("Yoco Payment resulted in unexpected status:", result.status);
-             outcomeError = "Payment outcome uncertain. Please check your confirmation or contact support.";
-          }
+                let outcomeError: string | null = null;
+                let shouldNavigate = false;
+                let clearCartErrorOccurred = false;
 
-          if (outcomeError) setPaymentError(outcomeError);
-          if (clearCartErrorOccurred) { /* Optionally handle cart clear error */ }
-          if (shouldNavigate) navigate('/order-confirmation');
+                // Using try/finally within callback for robustness
+                try {
+                    if (result.error) {
+                        console.error("Yoco Payment Error:", result.error);
+                        outcomeError = `Payment failed: ${result.error.message || 'Please try again.'}`;
+                    } else if (result.status === 'successful' || result.status === 'pending' || result.status === 'charge_ready') {
+                        console.log(`Yoco Payment Status on Frontend: ${result.status}`);
+                        shouldNavigate = true;
+                        try {
+                            console.log("Clearing cart on frontend...");
+                            await clearCart(); // Use clearCart from context
+                            console.log("Frontend cart cleared.");
+                        } catch (clearError) {
+                            console.error("Error clearing cart on frontend:", clearError);
+                            clearCartErrorOccurred = true;
+                            // Append to existing error or set new one
+                            outcomeError = (outcomeError ? outcomeError + " " : "") + "Additionally, failed to clear cart automatically.";
+                        }
+                    } else if (result.status === 'failed') {
+                        console.warn("Yoco Payment explicitly failed.");
+                        outcomeError = "Payment failed. Please check your details or try another card.";
+                    } else if (result.status === 'cancelled') {
+                        console.warn("Yoco Payment was cancelled (status: 'cancelled').");
+                        outcomeError = "Payment was cancelled.";
+                    } else {
+                        console.warn("Yoco Payment resulted in unexpected status:", result.status, "Full result:", result);
+                        outcomeError = "Payment outcome uncertain. Please check your confirmation or contact support.";
+                    }
 
-          setIsProcessingPayment(false); // Reset processing state
-        }
-      });
+                    if (outcomeError) {
+                        console.log("Setting payment error state:", outcomeError);
+                        setPaymentError(outcomeError); // Set any accumulated error message
+                    }
+                    if (clearCartErrorOccurred) {
+                        console.log("Handling cart clear error occurrence (message set above).");
+                        /* Additional handling if needed */
+                    }
+                    if (shouldNavigate) {
+                        console.log("Navigating to /order-confirmation");
+                        navigate('/order-confirmation');
+                    }
+
+                } catch (callbackError) {
+                    console.error("--- Error INSIDE Yoco Callback Logic ---:", callbackError);
+                    setPaymentError("An internal error occurred after payment interaction. Please check your order status or contact support.");
+                } finally {
+                    // This *always* runs if the callback is entered, after try/catch
+                    console.log("--- Yoco SDK Callback FINALLY block ---");
+                    console.log("Resetting isProcessingPayment to false via callback.");
+                    setIsProcessingPayment(false); // Reset processing state
+                    console.log("--- Yoco SDK Callback END ---");
+                }
+            } // end callback
+        }); // end showPopup
+
+        // --- START: Set the timeout AFTER showing the popup ---
+        console.log("Setting payment timeout fallback (45s).");
+        paymentTimeoutRef.current = setTimeout(() => {
+            console.warn("Payment timeout reached (popup likely closed manually or timed out).");
+            // Use functional update to safely check the *current* state
+            setIsProcessingPayment(currentProcessingState => {
+                if (currentProcessingState) { // Only act if it's still true
+                    console.log("Resetting processing state due to timeout.");
+                    setPaymentError("Payment process was cancelled or timed out.");
+                    return false; // Set state to false
+                }
+                // If already false, callback must have run just before timeout
+                console.log("Timeout fired, but processing state already false (callback likely ran).");
+                return false; // Keep it false
+            });
+            paymentTimeoutRef.current = null; // Clear ref after timeout runs
+        }, 450); // 45 seconds - adjust duration as needed
+        // --- END: Set timeout ---
 
     } catch (error) {
-      console.error("Failed to initiate payment:", error);
-      const errorMsg = axios.isAxiosError(error) ? error.response?.data?.message || error.message : 'Payment initiation failed';
-      setPaymentError(errorMsg);
-      setIsProcessingPayment(false); // Reset processing state on error
+        console.error("Failed to initiate payment:", error);
+        const errorMsg = axios.isAxiosError(error) ? error.response?.data?.message || error.message : 'Payment initiation failed';
+        setPaymentError(errorMsg);
+
+        // --- START: Clear timeout on initiation error ---
+        if (paymentTimeoutRef.current) {
+            console.log("Clearing payment timeout due to initiation error.");
+            clearTimeout(paymentTimeoutRef.current);
+            paymentTimeoutRef.current = null;
+        }
+        // --- END: Clear timeout ---
+        setIsProcessingPayment(false); // Reset processing state on error
     }
-  };
+  }; // end handlePayment
 
 
-  // --- Render Logic ---
+  // --- Render Logic --- (Keep render logic as is)
+  if (isAuthLoading) return <p>Loading authentication...</p>;
+  if (!isAuthenticated) return ( <main className="checkout-container"><h1>Checkout</h1><p>Please log in to view checkout.</p></main> );
+  // Handle cartItems possibly being null during initial load from context
+  if (cartItems === null) return <p>Loading cart...</p>;
+  if (cartItems.length > 0 && isLoadingDeliveryOptions) { return <p>Loading checkout details...</p>; }
+  if (cartItems.length === 0) return ( <main className="checkout-container"><h1>Checkout</h1><p>Your cart is empty.</p><Link to="/products" className="back-link">Continue Shopping</Link></main> );
 
-  // Show loading if Auth0 is loading OR if cart items haven't loaded yet (and user is authenticated)
-  if (isAuthLoading || (!cartItems && isAuthenticated)) {
-     return (
-        <div className="loading-container"> {/* Use spinner styles if defined */}
-          <div className="spinner"></div>
-          <p>Loading checkout...</p>
-        </div>
-      );
-  }
+  // Ensure grandTotal is a valid number for display/payment
+  const displayGrandTotal = typeof grandTotal === 'number' && !isNaN(grandTotal) ? grandTotal : 0;
+  // Disable button if grand total is zero or invalid (e.g., cart empty after loading)
+  const isCheckoutReady = !isProcessingPayment && !isLoadingDeliveryOptions && !deliveryOptionsError && streetAddress && deliveryArea && uniqueStoreIds.length > 0 && !uniqueStoreIds.some(id => !deliverySelectionState[id]) && displayGrandTotal > 0;
 
-  if (!isAuthenticated) {
-      return (
-          <main className="checkout-container">
-              <h1>Checkout</h1>
-              <p>Please log in to proceed with checkout.</p>
-              {/* Optionally add login button here */}
-          </main>
-      );
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <main className="checkout-container">
-        <h1>Checkout</h1>
-        <p>Your cart is empty.</p>
-        <Link to="/products" className="back-link">Continue Shopping</Link>
-      </main>
-    );
-  }
 
   return (
     <main className="checkout-container">
       <header>
         <h1>Checkout</h1>
-        <p className="instructions">Please enter your delivery details and review your order.</p>
-        {/* Display general cart errors from context */}
-        {contextCartError && <p style={{ color: 'orange', fontWeight: 'bold' }}>Cart Notice: {contextCartError}</p>}
+        <p className="instructions">Please enter delivery details and review your order.</p>
+        {/* Display relevant errors */}
+        {contextCartError && <p className="error-message">Cart Notice: {contextCartError}</p>}
+        {deliveryOptionsError && <p className="error-message">Delivery Error: {deliveryOptionsError}</p>}
+        {paymentError && <p className="error-message">Payment Error: {paymentError}</p>}
       </header>
 
-      {/* Use a div instead of form if payment button handles submission */}
-      <div className="checkout-form">
+      <div className="checkout-layout">
 
+        {/* Delivery Address Section */}
         <section className="form-section delivery-address-section" aria-labelledby="delivery-address-heading">
-          <h2 id="delivery-address-heading">Delivery Address</h2>
-          <p className="form-field">
-            <label htmlFor="street-address">Street Address</label>
-            <input
-              id="street-address"
-              type="text"
-              className="form-input"
-              value={streetAddress}
-              onChange={(e) => setStreetAddress(e.target.value)}
-              required
-              autoComplete="street-address"
-            />
-          </p>
-          <p className="form-field">
-            <label htmlFor="delivery-area">Delivery Area</label>
-            <select
-              id="delivery-area"
-              className="form-input"
-              value={deliveryArea}
-              onChange={(e) => setDeliveryArea(e.target.value)}
-              required
-            >
-              <option value="" disabled>Select an area...</option>
-              {deliveryAreas.map(area => (
-                <option key={area} value={area}>{area}</option>
-              ))}
-            </select>
-          </p>
-        </section>
+           <h2 id="delivery-address-heading">Delivery Address</h2>
+           <p className="form-field">
+             <label htmlFor="street-address">Street Address</label>
+             <input id="street-address" type="text" className="form-input" value={streetAddress} onChange={(e) => setStreetAddress(e.target.value)} required autoComplete="street-address"/>
+           </p>
+           <p className="form-field">
+             <label htmlFor="delivery-area">Delivery Area</label>
+             <select id="delivery-area" className="form-input" value={deliveryArea} onChange={(e) => setDeliveryArea(e.target.value)} required>
+               <option value="" disabled>Select an area...</option>
+               {/* Populate with actual areas */}
+               <option value="Area1">Area 1</option>
+               <option value="Area2">Area 2</option>
+             </select>
+           </p>
+         </section>
 
+        {/* Order Summary Section */}
         <section className="form-section order-summary-section" aria-labelledby="order-summary-heading">
           <h2 id="order-summary-heading">Order Summary</h2>
+          {uniqueStoreIds.map(storeId => {
+            const items = groupedItemsByStoreId[storeId];
+            const deliveryDetails = storeDeliveryOptions[storeId];
+            const currentSelection = deliverySelectionState[storeId]; // Will be 'standard' or 'express' once loaded
 
-          {storeNames.map(storeName => {
-            const items = groupedItems[storeName];
-            if (!items || items.length === 0) return null;
-
-            const selectedOptionId = deliveryOptionState[storeName] || 'standard';
-            const selectedOption = deliveryOptions.find(opt => opt.id === selectedOptionId);
+            if (!items || items.length === 0) return null; // Should not happen if uniqueStoreIds is derived correctly
+            const storeName = items[0]?.storeName || `Store ID: ${storeId}`;
 
             return (
-              <article key={storeName} className="store-group" aria-labelledby={`store-heading-${storeName}`}>
-                <h3 id={`store-heading-${storeName}`} className="store-name">{storeName}</h3>
+              <article key={storeId} className="store-group" aria-labelledby={`store-heading-${storeId}`}>
+                <h3 id={`store-heading-${storeId}`} className="store-name">{storeName}</h3>
 
-                <p className="delivery-option form-field">
-                    <label htmlFor={`delivery-${storeName}`}>Delivery Option</label>
+                {/* Delivery Options Dropdown */}
+                <div className="delivery-option form-field">
+                  <label htmlFor={`delivery-${storeId}`}>Delivery Option</label>
+                  {isLoadingDeliveryOptions ? (
+                       "Loading options..." // Show loading text while fetching
+                  ) : !deliveryDetails ? (
+                       <span className="error-message">Unavailable</span> // Show if options failed to load for this store
+                   ) : (
                     <select
-                      id={`delivery-${storeName}`}
-                      className="form-input"
-                      value={selectedOptionId}
-                      onChange={(e) => handleDeliveryOptionChange(storeName, e.target.value)}
+                        id={`delivery-${storeId}`}
+                        className="form-input"
+                        value={currentSelection || ''} // Ensure value is controlled, default to '' if somehow undefined
+                        onChange={(e) => handleDeliveryOptionChange(storeId, e.target.value)}
+                        required // Make selection required
                     >
-                      {deliveryOptions.map(option => (
-                        <option key={option.id} value={option.id}>
-                          {option.name} - R{option.price.toFixed(2)} ({option.days})
-                        </option>
-                      ))}
+                        {/* Provide a default disabled option if no selection yet? Or rely on initial state? */}
+                        {/* <option value="" disabled>Select delivery...</option> */}
+                        <option value="standard">Standard - R{deliveryDetails.standardPrice.toFixed(2)} ({deliveryDetails.standardTime})</option>
+                        <option value="express">Express - R{deliveryDetails.expressPrice.toFixed(2)} ({deliveryDetails.expressTime})</option>
                     </select>
-                </p>
+                  )}
+                </div>
 
+                {/* Items List */}
                 <ul className="order-items" aria-label={`Items from ${storeName}`}>
-                  {items.map(item => (
-                    <li key={`${item.id}-${item.storeName}`} className="order-item">
-                      {item.name} - R{item.price.toFixed(2)} × {item.quantity}
-                    </li>
-                  ))}
+                  {items.map(item => ( <li key={`${item.id}-${storeId}`} className="order-item">{item.name} - R{item.price.toFixed(2)} × {item.quantity}</li> ))}
                 </ul>
 
+                {/* Store Summary Footer */}
                 <footer className="store-summary">
                   <p>Subtotal: R{calculateStoreSubtotal(items).toFixed(2)}</p>
-                  <p>Delivery: R{(selectedOption?.price || 0).toFixed(2)}</p>
+                  {deliveryDetails && currentSelection && (
+                     <p>Delivery: R{(currentSelection === 'standard' ? deliveryDetails.standardPrice : deliveryDetails.expressPrice).toFixed(2)}</p>
+                   )}
                 </footer>
               </article>
             );
           })}
-
+          {/* Grand Total Section */}
           <footer className="order-totals">
-            <p className="grand-total">
-                Grand Total: R{grandTotal.toFixed(2)}
-            </p>
+            <p className="grand-total">Grand Total: R{displayGrandTotal.toFixed(2)}</p>
           </footer>
         </section>
 
-        {/* --- Payment Section (from PayPage) --- */}
+        {/* Payment Button Section */}
         <section className="payment-section">
-          {/* Display payment-specific error */}
-          {paymentError && <p style={{ color: 'red' }}>Payment Error: {paymentError}</p>}
+          {/* Payment error display moved to header */}
           <button
+            type="button"
             onClick={handlePayment}
-            // Disable if processing, cart empty, not logged in, or address incomplete
-            disabled={isProcessingPayment || cartItems.length === 0 || !isAuthenticated || !streetAddress || !deliveryArea}
-            className="yoco-pay-button" // Style this button
+            // Update disabled logic for clarity and completeness
+            disabled={!isCheckoutReady || isProcessingPayment}
+            className="yoco-pay-button"
           >
-            {isProcessingPayment ? 'Processing...' : `Pay R${grandTotal.toFixed(2)} with Yoco`}
+            {isProcessingPayment ? 'Processing...' : `Pay R${displayGrandTotal.toFixed(2)} with Yoco`}
           </button>
+           {/* Optional: Show detailed disable reason for debugging */}
+           {/* {!isCheckoutReady && <p style={{fontSize: '0.8em', color: 'grey'}}>Please complete address and delivery options.</p>} */}
         </section>
 
-        {/* Actions Menu (Optional - Keep Back to Cart?) */}
+        {/* Actions Menu */}
         <menu className="actions">
           <li>
-            <Link to="/cart" className="back-link">
-              Back to Cart
-            </Link>
+            <Link to="/cart" className="back-link">Back to Cart</Link>
           </li>
         </menu>
-      </div>
+      </div> {/* End checkout-layout wrapper */}
     </main>
   );
 }
