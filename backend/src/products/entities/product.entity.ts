@@ -16,7 +16,7 @@ export class Product {
   @Column({ name: 'productcategory', type: 'varchar', length: 100, nullable: false })
   category: string;
 
-  @Column({ name: 'productprice', type: 'real', nullable: false }) // Using 'real' (float4) as decided
+  @Column({ name: 'productprice', type: 'real', nullable: false })
   price: number;
 
   @Column({ name: 'productquantity', type: 'int', nullable: false })
@@ -28,23 +28,23 @@ export class Product {
   @Column({ name: 'imageURL', type: 'varchar', length: 1024, nullable: true })
   imageUrl: string;
 
-  // --- Re-added storeName ---
-  @Column({ name: 'storeName', type: 'varchar', length: 255, nullable: false }) // Match DB column, ensure nullable: false
+  @Column({ name: 'storeName', type: 'varchar', length: 255, nullable: false })
   storeName: string;
-  // --- End Re-added storeName ---
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
-
   @Column({ name: 'store_id', type: 'bigint', nullable: false })
-  storeId: string;
+  storeId: string; // Property name remains 'storeId', type is string
 
+
+  // --- Relationship Definition ---
   @ManyToOne(() => Store, store => store.products, { nullable: false, eager: false })
-  @JoinColumn({ name: 'store_id', referencedColumnName: 'storeId' })
+  @JoinColumn({
+      name: 'store_id', // Foreign key column name in this (Products) table
+      referencedColumnName: 'storeId' // <<< CORRECTED: Property name of the PK in the Store entity
+  })
   store: Store;
-
-  
-
+  // --- End Relationship ---
 
 }
