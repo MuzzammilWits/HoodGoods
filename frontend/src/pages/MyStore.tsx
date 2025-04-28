@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, ChangeEvent, Fragment } from 'react'; // Added Fragment
 import { useAuth0 } from '@auth0/auth0-react'; // Assuming useAuth0 provides getAccessTokenSilently
 import './myStore.css'; // Your component's CSS
+import { PRODUCT_CATEGORIES } from '../types/createStore';
 
 // --- Frontend Type Definitions ---
 
@@ -82,7 +83,7 @@ const MyStore: React.FC = () => {
     const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
 
     // --- Constants --- (Assuming PRODUCT_CATEGORIES is defined/imported)
-    const PRODUCT_CATEGORIES = [ 'Home & Living', 'Jewellery & Accessories', /* ... other categories */ ];
+    // const PRODUCT_CATEGORIES = [ 'Home & Living', 'Jewellery & Accessories', /* ... other categories */ ];
 
     // --- Utility & Fetching Functions ---
     const getToken = useCallback(async (): Promise<string | null> => {
