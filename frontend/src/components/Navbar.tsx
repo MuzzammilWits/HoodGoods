@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';  // Import useNavigate
 import './Navbar.css';
 import { logo } from './utils/ImageImports';
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const Navbar: React.FC = () => {
   const {
@@ -18,6 +18,8 @@ const Navbar: React.FC = () => {
 
   const [role, setRole] = useState<string | null>(null);
   const [isRoleLoading, setIsRoleLoading] = useState<boolean>(true);
+
+  const navigate = useNavigate();  // useNavigate hook to programmatically navigate
 
   useEffect(() => {
     const fetchTokenAndRole = async () => {
@@ -60,11 +62,17 @@ const Navbar: React.FC = () => {
     fetchTokenAndRole();
   }, [isAuthenticated, getAccessTokenSilently, isLoading, backendUrl]);
 
+  // Handle cart icon click to refresh the cart page
+  const handleCartClick = () => {
+    navigate('/cart');  // Navigate to cart page
+    window.location.reload();  // Reload the page to refresh the cart
+  };
+
   return (
     <nav className="navbar">
-      <header className="navbar-container"> {/* Changed div to header */}
+      <header className="navbar-container">
         {/* Logo Section */}
-        <figure className="logo-container"> {/* Changed div to figure */}
+        <figure className="logo-container">
           <img src={logo} alt="Hood Goods" className="logo" />
         </figure>
 
@@ -76,13 +84,16 @@ const Navbar: React.FC = () => {
             <Link
               to="/#about-us"
               className="nav-link"
-              onClick={() => {
-                if (window.location.pathname !== '/') {
-                  window.location.href = '/#about-us';
-                } else {
-                  const el = document.getElementById('about-us');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+              onClick={(e) => {
+                // If already on Home, scroll smoothly
+                if (window.location.pathname === '/') {
+                  e.preventDefault(); // Prevent default Link behavior
+                  const aboutSection = document.getElementById('about-us');
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }
+                // If not on Home, Link will handle navigation automatically
               }}
             >
               About Us
@@ -109,32 +120,32 @@ const Navbar: React.FC = () => {
         </ul>
 
         {/* Icons and Authentication Section */}
-        <section className="nav-icons"> {/* Changed div to section */}
+        <section className="nav-icons">
           {isLoading ? null : (
-             !isAuthenticated ? (
-               <button
-                 className="sign-in-btn"
-                 onClick={() => loginWithRedirect()}
-               >
-                 Sign in
-               </button>
-             ) : (
-               <article className="auth-user"> {/* Changed div to article */}
-                 <span className="user-greeting">Hi, {user?.given_name ?? user?.name ?? 'User'}</span>
-                 <button
-                   className="sign-out-btn"
-                   onClick={() => logout({
-                     logoutParams: { returnTo: window.location.origin }
-                   })}
-                 >
-                   Sign out
-                 </button>
-               </article>
-             )
+            !isAuthenticated ? (
+              <button
+                className="sign-in-btn"
+                onClick={() => loginWithRedirect()}
+              >
+                Sign in
+              </button>
+            ) : (
+              <article className="auth-user">
+                <span className="user-greeting">Hi, {user?.given_name ?? user?.name ?? 'User'}</span>
+                <button
+                  className="sign-out-btn"
+                  onClick={() => logout({
+                    logoutParams: { returnTo: window.location.origin }
+                  })}
+                >
+                  Sign out
+                </button>
+              </article>
+            )
           )}
 
           <a href="#account" className="icon-link">👤</a>
-          <Link to="/cart" className="icon-link">🛒</Link>
+          <Link to="/cart" className="icon-link" onClick={handleCartClick}>🛒</Link>  {/* Add handleCartClick here */}
         </section>
       </header>
     </nav>

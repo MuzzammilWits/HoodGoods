@@ -1,40 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Product } from '../../products/entities/product.entity'; // Assuming you have a Product entity
+import { User } from '../../auth/user.entity'; // Corrected path to User entity
 
 @Entity('cart_item')
 export class CartItem {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn() // Defaults to auto-incrementing integer PRIMARY KEY
+  cartID: number; // Matches schema: cartID int4 Primary key
 
-  @Column({ name: 'userid', type: 'varchar' })
+  @Column({ name: 'userID', type: 'varchar' }) // Matches schema: userID varchar Foreign key
   userId: string;
 
-  @Column({ name: 'productid', type: 'varchar' })
-  productId: string;
+  @Column({ name: 'productID', type: 'int4' }) // Matches schema: productID int4 Foreign key
+  productId: number; // Changed to number
 
-  @Column('varchar')
-  name: string;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
-
-  @Column('int')
+  @Column({ type: 'int4' }) // Matches schema: quantity int4
   quantity: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  image: string | null;
 
-  @Column({ 
-    name: 'createdat',
-    type: 'timestamp', 
-    default: () => 'CURRENT_TIMESTAMP' 
-  })
-  createdAt: Date;
+  // --- Relationships (Optional but Recommended for TypeORM) ---
+  // These help TypeORM understand the foreign keys
 
-  @Column({ 
-    name: 'updatedat',
-    type: 'timestamp', 
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
-  })
-  updatedAt: Date;
-} 
+  // Link to User
+
+}

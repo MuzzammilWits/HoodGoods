@@ -28,4 +28,8 @@ export class Product {
 
   @Column({ name: 'is_active', type: 'boolean' })
   isActive: boolean;
+  
+  @Column({ type: 'int4', default: 0 }) // Assuming integer, default to 0 if not specified
+  productquantity: number;
+
 }
