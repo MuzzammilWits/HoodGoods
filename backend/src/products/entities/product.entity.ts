@@ -36,10 +36,16 @@ export class Product {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+
   @Column({ name: 'store_id', type: 'bigint', nullable: false })
   storeId: string;
 
   @ManyToOne(() => Store, store => store.products, { nullable: false, eager: false })
   @JoinColumn({ name: 'store_id', referencedColumnName: 'storeId' })
   store: Store;
+
+  
+  @Column({ type: 'int4', default: 0 }) // Assuming integer, default to 0 if not specified
+  productquantity: number;
+
 }
