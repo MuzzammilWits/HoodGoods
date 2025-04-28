@@ -1,80 +1,68 @@
 // src/orders/entities/seller-order.entity.ts
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { Order } from './order.entity'; // Relation to Order entity
-import { User } from '../../auth/user.entity'; // Relation to User entity (for the Seller)
-import { SellerOrderItem } from './seller-order-item.entity'; // Relation to SellerOrderItem entity (will create next)
-// Optional: Import Store if you decide to link SellerOrder directly to Store
-// import { Store } from '../../store/entities/store.entity';
+import { Order } from './order.entity';
+import { User } from '../../auth/user.entity'; // Adjust path if needed
+import { SellerOrderItem } from './seller-order-item.entity';
 
-@Entity('SellerOrders') // Using table name from your schema diagram
+@Entity('SellerOrders') // Matches table name in screenshot
 export class SellerOrder {
-  @PrimaryGeneratedColumn()
-  seller_order_id: number;
 
-  // Foreign Key to Orders table
-  @Column() // TypeORM infers type from relation, or set explicitly: { type: 'int' }
-  order_id: number; // Matches Order.order_id type
+  // Matches #seller_order_id int4 PK in screenshot
+  @PrimaryGeneratedColumn({ name: 'seller_order_id', type: 'int' })
+  sellerOrderId: number; // JS/TS property name
 
-  // Define relationship back to the main Order
-  // 'order' is the property name on this side
-  // 'sellerOrders' is the property name on the Order side
+  // Matches order_id int4 FK in screenshot
+  @Column({ name: 'order_id', type: 'int' })
+  orderId: number; // JS/TS property name
+
+  // Relationship to Order
   @ManyToOne(() => Order, order => order.sellerOrders)
-  @JoinColumn({ name: 'order_id' }) // Specifies the FK column in this table
+  @JoinColumn({ name: 'order_id', referencedColumnName: 'orderId' }) // FK column name in this table, PK property name in Order entity
   order: Order;
 
-  // Foreign Key to Users table (for the Seller)
-  @Column({ type: 'varchar' }) // Matches User.userID type (varchar)
-  userID: string; // Stores the Seller's Auth0 'sub' string
+  // Matches userID varchar FK in screenshot (Seller's User ID)
+  @Column({ name: 'userID', type: 'varchar' })
+  userId: string; // JS/TS property name
 
-  // Define relationship to the Seller's User record
-  @ManyToOne(() => User) // No need for inverse relation in User entity unless desired
-  @JoinColumn({ name: 'userID' }) // Specifies the FK column in this table
-  seller: User; // Property to access the related Seller User object
+  // Relationship to User (Seller)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userID', referencedColumnName: 'userID' }) // FK column name in this table, PK property name in User entity
+  seller: User;
 
-  // --- Delivery Details Snapshotted from Store/Checkout State ---
-  @Column({ length: 100, comment: 'Chosen delivery method (e.g., standard, express)' })
-  delivery_method: string;
+  // Matches delivery_method varchar in screenshot
+  @Column({ name: 'delivery_method', type: 'varchar', length: 100 })
+  deliveryMethod: string;
 
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Delivery price charged for this seller' })
-  delivery_price: number;
+  // Matches delivery_price float4 in screenshot
+  @Column({ name: 'delivery_price', type: 'float4' }) // Use 'float4' type
+  deliveryPrice: number;
 
-  @Column({ length: 255, nullable: true, comment: 'Estimated delivery time snapshot' })
-  delivery_time_estimate: string;
-  // --- End Delivery Details ---
+  // Matches delivery_time_estimate varchar in screenshot
+  @Column({ name: 'delivery_time_estimate_snapshot', type: 'varchar', length: 255, nullable: true })
+  deliveryTimeEstimate: string;
 
-  // --- Financials for this Seller's portion of the Order ---
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Subtotal of items from this seller' })
-  items_subtotal: number;
+  // Matches items_subtotal float4 in screenshot
+  @Column({ name: 'items_subtotal', type: 'float4' }) // Use 'float4' type
+  itemsSubtotal: number;
 
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Total charged for this seller (items_subtotal + delivery_price)' })
-  seller_total: number;
-  // --- End Financials ---
+  // Matches seller_total float4 in screenshot
+  @Column({ name: 'seller_total', type: 'float4' }) // Use 'float4' type
+  sellerTotal: number;
 
-  @Column({ length: 50, default: 'Processing', comment: 'Status of this part of the order (e.g., Processing, Shipped, Delivered)' })
+  // Matches status varchar in screenshot
+  @Column({ name: 'status', type: 'varchar', length: 50, default: 'Processing' })
   status: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  // Matches created_at timestamp in screenshot
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  // Matches updated_at timestamp in screenshot
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  updatedAt: Date;
 
-  // Relationship: A SellerOrder has multiple SellerOrderItems
-  // 'items' is the property name on this (SellerOrder) side
-  // 'sellerOrder' is the property name on the SellerOrderItem side linking back
+  // Relationship to SellerOrderItem
   @OneToMany(() => SellerOrderItem, item => item.sellerOrder)
   items: SellerOrderItem[];
-
-  // --- Optional: Direct Link to Store ---
-  // If you find you often need the Store info when you have a SellerOrder,
-  // you could add a direct foreign key here. The Seller's userID already
-  // links to the User who owns the Store, but a direct link can sometimes
-  // simplify queries if needed. Assess based on your query patterns.
-  // @Column({ type: 'bigint' }) // Matches Product.storeId type? Check Store PK type
-  // store_id: string; // Or number
-  // @ManyToOne(() => Store)
-  // @JoinColumn({ name: 'store_id', referencedColumnName: 'storeId' /* <<< CHECK Store PK property name */ })
-  // store: Store;
-  // --- End Optional Link ---
 }

@@ -1,48 +1,49 @@
 // src/orders/entities/seller-order-item.entity.ts
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { SellerOrder } from './seller-order.entity'; // Relation to SellerOrder entity
-import { Product } from '../../products/entities/product.entity'; // Relation to Product entity
+import { SellerOrder } from './seller-order.entity';
+import { Product } from '../../products/entities/product.entity'; // Adjust path if needed
 
-@Entity('SellerOrderItems') // Using table name from your schema diagram
+@Entity('SellerOrderItems') // Matches table name in screenshot
 export class SellerOrderItem {
-  @PrimaryGeneratedColumn()
-  seller_order_item_id: number;
 
-  // Foreign Key to SellerOrders table
-  @Column() // TypeORM infers type, or use { type: 'int' }
-  seller_order_id: number; // Matches SellerOrder.seller_order_id type
+  // Matches #seller_order_item_id int4 PK in screenshot
+  @PrimaryGeneratedColumn({ name: 'seller_order_item_id', type: 'int' })
+  sellerOrderItemId: number; // JS/TS property name
 
-  // Define relationship back to the parent SellerOrder
-  // 'sellerOrder' is the property name on this side
-  // 'items' is the property name on the SellerOrder side
+  // Matches seller_order_id int4 FK in screenshot
+  @Column({ name: 'seller_order_id', type: 'int' })
+  sellerOrderId: number; // JS/TS property name
+
+  // Relationship to SellerOrder
   @ManyToOne(() => SellerOrder, sellerOrder => sellerOrder.items)
-  @JoinColumn({ name: 'seller_order_id' }) // Specifies the FK column in this table
+  @JoinColumn({ name: 'seller_order_id', referencedColumnName: 'sellerOrderId' }) // FK column name in this table, PK property name in SellerOrder entity
   sellerOrder: SellerOrder;
 
-  // Foreign Key to Products table
-  @Column() // TypeORM infers type, or use { type: 'int' } to match Product.prodId
-  productID: number; // Matches Product.prodId type
+  // Matches productID int4 FK in screenshot
+  @Column({ name: 'productID', type: 'int' })
+  productId: number; // JS/TS property name
 
-  // Define relationship to the Product ordered
-  @ManyToOne(() => Product) // No need for inverse relation in Product unless desired
-  @JoinColumn({ name: 'productID', referencedColumnName: 'prodId' }) // FK col in this table, PK property name in Product entity
-  product: Product; // Property to access the related Product object
+  // Relationship to Product
+  // Ensure Product entity's PK property name is 'prodId' as defined previously
+  @ManyToOne(() => Product)
+  @JoinColumn({ name: 'productID', referencedColumnName: 'prodId' }) // FK column name in this table, PK property name in Product entity
+  product: Product;
 
-  @Column({ type: 'int', comment: 'Quantity of this product ordered from this seller' })
-  quantity_ordered: number;
+  // Matches quantity_ordered int4 in screenshot
+  @Column({ name: 'quantity_ordered', type: 'int' })
+  quantityOrdered: number;
 
-  // Price snapshot at time of purchase
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Price per unit at the time of purchase' })
-  price_per_unit: number;
+  // Matches price_per_unit float4 in screenshot
+  @Column({ name: 'price_per_unit', type: 'float4' }) // Use 'float4' type
+  pricePerUnit: number;
 
-  // Product name snapshot at time of purchase (optional but good practice)
-  @Column({ length: 255, nullable: true, comment: 'Product name at the time of purchase' })
-  product_name_snapshot: string;
+  // Matches product_name_snapshot varchar in screenshot
+  @Column({ name: 'product_name_snapshot', type: 'varchar', length: 255, nullable: true })
+  productNameSnapshot: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  // Matches created_at timestamp in screenshot
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
 }
