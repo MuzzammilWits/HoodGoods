@@ -18,7 +18,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
 // import CheckoutPage from './pages/CheckoutPage'; // Removed unused import
-import PayPage from './pages/PayPage'; // Ensure this path is correct
 import OrderConfirmationPage from './pages/OrderConfirmationPage'; // *** Import the new page ***
 
 const AppContent: React.FC = () => {
@@ -80,12 +79,7 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
-            {/* --- Updated Checkout/Pay Route --- */}
-            <Route path="/pay" element={ // Adjust path if needed
-              <section>
-                <PayPage /> {/* Render the PayPage component */}
-              </section>
-            } />
+ 
 
             {/* --- Added Order Confirmation Route --- */}
             <Route path="/order-confirmation" element={
