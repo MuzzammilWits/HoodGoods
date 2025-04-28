@@ -1,51 +1,156 @@
-/* === Base and Layout Styles (Updated for Semantic Tags) === */
-main.my-store-container { /* Targets the <main> element */
+/* === Base and Layout Styles === */
+main.my-store-container {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
+  font-family: sans-serif; /* Added a basic font */
+  color: #333;
 }
 
-header.store-header { /* Targets the <header> element */
+header.store-header {
   display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* Align items to the top */
+  gap: 20px; /* Space between items */
   margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e0e0e0;
 }
 
-header.store-header h1 { /* Targets h1 within the <header> */
+header.store-header h1 {
   font-size: 2.5rem;
   color: #333;
   margin: 0;
+  flex-grow: 1; /* Allow h1 to take available space */
 }
 
-/* General button class, used in header */
-.add-product-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
+/* === Delivery Info Section Styles === */
+section.delivery-info-display {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 15px 20px;
+  margin-top: 10px; /* Space below h1/button */
+  width: 100%; /* Take full width when wrapped */
+  box-sizing: border-box;
+}
+
+section.delivery-info-display h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+section.delivery-info-display dl {
+  margin: 0;
+  display: grid; /* Use grid for simple term/description layout */
+  grid-template-columns: auto 1fr; /* Term takes auto width, description takes rest */
+  gap: 8px 15px; /* Row gap, Column gap */
+  font-size: 0.95em;
+}
+
+section.delivery-info-display dt {
+  font-weight: 600;
+  color: #495057;
+  grid-column: 1; /* Explicitly place in first column */
+}
+
+section.delivery-info-display dd {
+  margin: 0; /* Reset browser default */
+  color: #212529;
+  grid-column: 2; /* Explicitly place in second column */
+}
+
+p.info-text { /* Style the small info text below delivery details */
+  font-size: 0.85em;
+  color: #6c757d;
+  margin-top: 15px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+
+/* === General Button Styles === */
+/* Base styles for all buttons */
+button, .button-link { /* Apply base to button and link styled as button */
+  display: inline-block; /* Or inline-flex for icon alignment */
   padding: 10px 20px;
   font-size: 16px;
+  font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid transparent; /* Base border */
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  line-height: 1.4; /* Ensure consistent line height */
 }
-.add-product-button:disabled {
-  background-color: #a5d6a7;
+button:disabled, .button-link:disabled {
   cursor: not-allowed;
-}
-.add-product-button:hover:not(:disabled) {
-  background-color: #388e3c;
+  opacity: 0.65;
 }
 
-/* === Messages and Loading States (Updated for Semantic Tags) === */
-p.error-message, /* Targets <p> elements with this class */
-[role="alert"].error-message { /* Catches elements explicitly marked as alerts */
+/* Primary action button (Add Product Toggle in header, Create Store etc) */
+.button-primary {
+  background-color: #97c9ba; /* Example primary color */
+  color: white;
+  border-color: #97c9ba;
+}
+.button-primary:hover:not(:disabled) { background-color: #432C53; border-color: #432C53; }
+.button-primary:disabled { background-color: #6c757d; border-color: #6c757d; }
+
+/* Confirm action button (Add in form, Save in modal) */
+.button-confirm {
+  background-color: #97c9ba; /* Example success color */
+  color: white;
+  border-color: #97c9ba;
+}
+.button-confirm:hover:not(:disabled) { background-color: #97c9ba; border-color: #97c9ba; }
+.button-confirm:disabled { background-color: #97c9ba; border-color: #97c9ba; }
+
+
+/* Cancel action button */
+.button-cancel {
+  background-color: #6c757d; /* Example secondary/grey color */
+  color: white;
+  border-color: #6c757d;
+}
+.button-cancel:hover:not(:disabled) { background-color: #5a6268; border-color: #545b62; }
+
+/* Edit action button */
+.button-edit {
+  background-color: #97c9ba; /* Example warning/edit color */
+  color: #212529;
+  border-color: #97c9ba;
+   padding: 5px 10px; /* Smaller padding for card actions */
+  font-size: 0.85rem;
+}
+.button-edit:hover:not(:disabled) { background-color: #432C53; border-color: #432C53; }
+.button-edit:disabled { background-color: #97c9ba; border-color: #97c9ba; color: #97c9ba;}
+
+/* Delete action button */
+.button-delete {
+  background-color: #97c9ba; /* Example danger color */
+  color: rgba(11, 11, 11, 0.997);
+  border-color: #97c9ba;
+   padding: 5px 10px; /* Smaller padding for card actions */
+  font-size: 0.85rem;
+}
+.button-delete:hover:not(:disabled) { background-color: #432C53; border-color: #432C53; }
+.button-delete:disabled { background-color: #f5c6cb; border-color: #f5c6cb; color: #721c24;}
+
+
+/* === Messages and Loading States === */
+p.error-message, /* Used in forms/actions */
+section.my-store-error p /* Used for page load error */ {
   background-color: #ffebee;
-  border: 1px solid #ef9a9a;
-  border-left: 5px solid #d32f2f;
-  color: #c62828;
+  border: 1px solid #97c9ba;
+  border-left: 5px solid #97c9ba;
+  color: #97c9ba;
   padding: 12px 15px;
   margin-top: 15px;
   margin-bottom: 20px;
@@ -53,53 +158,38 @@ p.error-message, /* Targets <p> elements with this class */
   font-size: 0.95em;
 }
 
-/* Targets specific status elements like <p> or <section> */
-p.status-message.loading,
-section.store-error,
+p.status-message.loading, /* Not currently used in JSX */
+section.my-store-error,
 section.no-store {
   text-align: center;
   padding: 50px 20px;
   color: #666;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
 }
-section.store-error h2,
+section.my-store-error h2,
 section.no-store h2 {
+  margin-top: 0;
   margin-bottom: 15px;
   color: #444;
 }
-
-/* Styles buttons within status sections */
-section.store-error button,
-section.no-store .button-link, /* Targets <a> styled as button */
-p.no-products button { /* Targets button within <p class="no-products"> */
-  display: inline-block;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-top: 15px;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.3s;
-}
-section.store-error button:hover,
-section.no-store .button-link:hover,
-p.no-products button:hover {
-  background-color: #3a7bc8;
+section.my-store-error button,
+section.no-store a.button-primary { /* Match button style */
+  margin-top: 20px;
 }
 
-/* === Add Product Form Styles (Updated for <form>) === */
-form.add-product-form { /* Targets the <form> element */
+/* === Add/Edit Form Styles === */
+section.add-product-form-section {
   background-color: #fdfdfd;
   padding: 20px 25px;
   border-radius: 8px;
-  margin-top: 20px;
+  margin-top: 30px;
   margin-bottom: 40px;
   border: 1px solid #e0e0e0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-form.add-product-form h2 { /* Targets h2 within the <form> */
+section.add-product-form-section h2 {
   margin-top: 0;
   margin-bottom: 25px;
   color: #333;
@@ -108,37 +198,35 @@ form.add-product-form h2 { /* Targets h2 within the <form> */
   font-weight: 600;
 }
 
-/* === General Form Element Styles (Adapted for NO form-group/form-row wrappers) === */
+/* Targets form inside the add section OR inside the dialog */
+section.add-product-form-section form,
+dialog.edit-product-modal form {
+  display: flex;
+  flex-direction: column; /* Stack label/input vertically */
+  gap: 5px; /* Small gap between label and its input */
+}
 
-/* Style labels directly */
-/* Targets <label> inside the add form OR inside the dialog's form */
-form.add-product-form label,
-dialog.modal-content form label {
-  display: block;
-  margin-bottom: 6px; /* Space between label and input */
+/* Targets labels inside the forms */
+section.add-product-form-section form label,
+dialog.edit-product-modal form label {
+  display: block; /* Takes full width */
   font-weight: 600;
   color: #444;
   font-size: 0.95em;
-  margin-top: 18px; /* Creates space BETWEEN form fields */
+  margin-top: 15px; /* Creates space BETWEEN form fields */
 }
-/* Remove extra top margin for the very first label */
-form.add-product-form label:first-of-type,
-dialog.modal-content form label:first-of-type {
+section.add-product-form-section form label:first-of-type,
+dialog.edit-product-modal form label:first-of-type {
   margin-top: 0;
 }
 
-/* Style inputs, textarea, select directly */
-/* Targets these elements inside the add form OR inside the dialog's form */
-form.add-product-form input[type="text"],
-form.add-product-form input[type="number"],
-form.add-product-form textarea,
-form.add-product-form select,
-form.add-product-form input[type="file"],
-dialog.modal-content form input[type="text"],
-dialog.modal-content form input[type="number"],
-dialog.modal-content form textarea,
-dialog.modal-content form select,
-dialog.modal-content form input[type="file"] {
+/* Targets inputs, textarea, select inside the forms */
+section.add-product-form-section form input,
+section.add-product-form-section form textarea,
+section.add-product-form-section form select,
+dialog.edit-product-modal form input,
+dialog.edit-product-modal form textarea,
+dialog.edit-product-modal form select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ccc;
@@ -146,146 +234,83 @@ dialog.modal-content form input[type="file"] {
   font-size: 1rem;
   box-sizing: border-box;
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  /* Spacing is handled by margin-top on the label */
 }
 
-/* Focus styles for form elements */
-form.add-product-form input:focus,
-form.add-product-form textarea:focus,
-form.add-product-form select:focus,
-dialog.modal-content form input:focus,
-dialog.modal-content form textarea:focus,
-dialog.modal-content form select:focus {
-  border-color: #4a90e2;
+section.add-product-form-section form input:focus,
+section.add-product-form-section form textarea:focus,
+section.add-product-form-section form select:focus,
+dialog.edit-product-modal form input:focus,
+dialog.edit-product-modal form textarea:focus,
+dialog.edit-product-modal form select:focus {
+  border-color: #007bff;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-/* Textarea specific */
-form.add-product-form textarea,
-dialog.modal-content form textarea {
+section.add-product-form-section form textarea,
+dialog.edit-product-modal form textarea {
   min-height: 80px;
-  vertical-align: top;
   line-height: 1.5;
 }
 
-/* File input specific */
-form.add-product-form input[type="file"],
-dialog.modal-content form input[type="file"] {
-  padding: 8px 12px;
-  background-color: #fff;
+/* Specific style for file inputs */
+section.add-product-form-section form input[type="file"],
+dialog.edit-product-modal form input[type="file"] {
+    padding: 5px; /* Adjust padding */
 }
-form.add-product-form input[type="file"]::file-selector-button,
-dialog.modal-content form input[type="file"]::file-selector-button {
-  padding: 8px 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f8f8f8;
-  cursor: pointer;
-  margin-right: 10px;
-  transition: background-color 0.2s;
+section.add-product-form-section form input[type="file"]::file-selector-button,
+dialog.edit-product-modal form input[type="file"]::file-selector-button {
+  /* Style the button part of the file input */
+   padding: 8px 15px;
+   margin-right: 10px;
+   border-radius: 4px;
+   border: 1px solid #ced4da;
+   background-color: #e9ecef;
+   color: #495057;
+   cursor: pointer;
+   transition: background-color 0.2s;
 }
-form.add-product-form input[type="file"]::file-selector-button:hover,
-dialog.modal-content form input[type="file"]::file-selector-button:hover {
-  background-color: #eee;
+section.add-product-form-section form input[type="file"]::file-selector-button:hover,
+dialog.edit-product-modal form input[type="file"]::file-selector-button:hover {
+   background-color: #dee2e6;
 }
 
-/* Form actions (Targets <footer> within form or dialog) */
-footer.form-actions {
+/* Form actions footer */
+section.add-product-form-section form footer, /* Assuming you might add a footer */
+dialog.edit-product-modal form footer.modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 25px;
-  padding-top: 15px;
-}
-/* General button classes, can be used anywhere */
-.cancel-button {
-  background-color: #f5f5f5;
-  color: #555;
-  border: 1px solid #ddd;
-  padding: 9px 18px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-.cancel-button:hover:not(:disabled) {
-  background-color: #e8e8e8;
-  border-color: #ccc;
-}
-.submit-button {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-}
-.submit-button:hover:not(:disabled) {
-  background-color: #3a7bc8;
-}
-.submit-button:disabled {
-  background-color: #a0c7e4;
-  cursor: not-allowed;
-  opacity: 0.7;
+  padding-top: 20px;
+  border-top: 1px solid #eee; /* Add separator line */
 }
 
-/* === Image Preview Styles (Adjusted Selectors) === */
-/* Targets the <img> preview in the add form */
-form.add-product-form img.add-preview {
-  margin-top: 12px;
-  max-width: 150px;
+/* === Image Preview Styles === */
+img.image-preview { /* General preview style */
+  margin-top: 10px;
+  max-width: 120px; /* Slightly smaller preview */
+  max-height: 120px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  overflow: hidden;
-  background-color: #f0f0f0;
-  padding: 5px;
-  display: block; /* Ensure img is block */
-  height: auto;
-  max-height: 140px;
-  object-fit: contain;
-}
-/* Targets the <figure> preview in the edit dialog */
-dialog.modal-content figure.edit-preview {
-  margin: 12px 0 0 0; /* Reset margin, add top margin */
-  max-width: 150px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-  background-color: #f0f0f0;
-  padding: 5px;
-}
-dialog.modal-content figure.edit-preview img {
   display: block;
-  width: 100%;
-  height: auto;
-  max-height: 140px;
-  object-fit: contain;
-}
-dialog.modal-content figure.edit-preview figcaption {
-  font-size: 0.85em;
-  margin-bottom: 5px;
-  color: #666;
-  text-align: left;
-  padding: 0;
+  object-fit: cover; /* Changed from contain */
+  background-color: #f8f9fa;
 }
 
-/* === Products Display Section (Updated for <section>) === */
-section.products-section { /* Targets the <section> */
+
+/* === Products Display Section === */
+section.products-section {
   margin-top: 40px;
 }
-section.products-section h2 { /* Targets h2 within the <section> */
+section.products-section h2 {
   margin-bottom: 25px;
   color: #333;
   font-weight: 600;
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
 }
-p.no-products { /* Targets the <p> for no products message */
+p.no-products {
   text-align: center;
   padding: 40px 20px;
   background-color: #f9f9f9;
@@ -293,203 +318,95 @@ p.no-products { /* Targets the <p> for no products message */
   color: #666;
   border: 1px dashed #ddd;
 }
-ul.products-grid { /* Targets the <ul> grid container */
+
+ul.product-list { /* Changed class name from grid for clarity */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
-  list-style: none; /* Remove list bullets */
-  padding: 0; /* Remove default list padding */
-  margin: 0; /* Remove default list margin */
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-/* Individual list items (<li>) don't usually need specific styles here */
-/* ul.products-grid > li { } */
+li.product-list-item { /* Style the list item if needed (e.g., for transitions) */
+    transition: all 0.3s ease; /* Example style for smooth transitions */
+}
 
-/* === Product Card Styles (Updated for <article>) === */
-article.product-card { /* Targets the <article> element */
+/* === Product Card Styles === */
+article.product-card {
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 8px; /* Slightly more rounded */
   overflow: hidden;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  height: 100%; /* Makes cards in the same row equal height */
+  height: 100%; /* Ensure cards align in grid */
   box-sizing: border-box;
 }
 article.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px); /* Slightly more lift */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Product Image (targets <figure>) */
-figure.product-image {
-  height: 220px;
-  overflow: hidden;
-  background-color: #f5f5f5;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0; /* Reset default figure margin */
-}
-figure.product-image img {
+/* Card Image */
+.product-image img { /* Simplified selector */
   width: 100%;
-  height: 100%;
+  height: 220px; /* Fixed height for image area */
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  border-bottom: 1px solid #eee; /* Separator */
+  background-color: #f8f9fa; /* Placeholder bg */
 }
-article.product-card:hover figure.product-image img {
-  transform: scale(1.05);
-}
-p.product-image-placeholder { /* Targets the <p> placeholder inside <figure> */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #b0b0b0;
-  font-size: 0.9em;
-  text-align: center;
-  margin: 0; /* Reset default p margin */
+/* Placeholder text removed, assume img src is always present or shows alt text */
+
+/* Card Content Body */
+.product-details {
+    padding: 15px;
+    flex-grow: 1; /* Allows this section to grow */
+    display: flex;
+    flex-direction: column;
 }
 
-/* Product Details & Actions (Targets elements directly inside <article>) */
-/* Optional header inside article */
-article.product-card > header {
-  padding: 15px 18px 0;
-  margin-bottom: 8px; /* Space after header block */
-}
-article.product-card h3 { /* Targets h3, give padding if not using <header> */
+.product-details h3 {
   margin: 0 0 8px 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: #222;
   line-height: 1.3;
-  padding: 15px 0px 0; /* Add padding if no <header> is used */
 }
-article.product-card .product-price {
-  font-weight: 700;
-  color: #388e3c;
-  margin: 0 0 4px 0; /* Adjust margin */
-  font-size: 1.1em;
-  padding: 0 px; /* Side padding */
-}
-article.product-card .product-category {
-  color: #666;
-  font-size: 0.85em;
-  margin: 0 0 8px 0; /* Adjust margin */
+.product-details .product-category {
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin: 0 0 10px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0 18px; /* Side padding */
 }
-article.product-card .product-description {
-  color: #444;
-  font-size: 0.95em;
-  margin-top: 10px; /* Space above description */
-  flex-grow: 1; /* Allows description to take up space */
-  line-height: 1.5;
-  margin-bottom: 15px; /* Space before actions footer */
-  padding: 0 18px; /* Side padding */
+.product-details .product-price {
+  font-weight: 700;
+  color: #28a745; /* Use success color */
+  margin: 0 0 4px 0;
+  font-size: 1.1em;
+}
+.product-details .product-quantity {
+   color: #495057;
+   font-size: 0.9em;
+   margin: 0 0 10px 0;
 }
 
-/* Product Card Actions (Targets <footer> inside <article>) */
+.product-details .product-description {
+  color: #495057;
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin-top: auto; /* Pushes description down if content is short */
+  margin-bottom: 10px; /* Consistent bottom margin */
+}
+
+/* Card Actions Footer */
 footer.product-actions {
-  margin-top: auto; /* Push to bottom */
-  padding: 15px 18px; /* Add padding */
+  padding: 10px 15px; /* Slightly less padding */
   border-top: 1px solid #f0f0f0;
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-shrink: 0;
-}
-footer.product-actions button { /* Targets buttons inside the footer */
-  padding: 5px 10px;
-  font-size: 0.85rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
-}
-/* General button classes */
-.edit-button {
-  background-color: #f0f0f0;
-  color: #444;
-  border-color: #e0e0e0;
-}
-.edit-button:hover:not(:disabled) { background-color: #e5e5e5; border-color: #d5d5d5; }
-.delete-button {
-  background-color: #fff1f0;
-  color: #d32f2f;
-  border-color: #ffccc7;
-}
-.delete-button:hover:not(:disabled) { background-color: #ffebee; border-color: #ffcdd2; }
-.delete-button:disabled, .edit-button:disabled {
-  background-color: #f5f5f5;
-  color: #bdbdbd;
-  border-color: #eeeeee;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* === Modal Styles (Updated for <dialog>) === */
-
-/* Styles the native backdrop pseudo-element */
-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
-  /* Add transitions here if desired */
-}
-
-/* Styles the <dialog> element itself */
-dialog.modal-content {
-  background-color: white;
-  padding: 25px 30px;
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  max-width: 550px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border: none; /* Remove default dialog border */
-  /* Add transitions here if desired */
-}
-
-dialog.modal-content h2 { /* Targets h2 inside the dialog */
-  margin-top: 0;
-  margin-bottom: 25px;
-  color: #333;
-  font-size: 1.5rem;
-  text-align: center;
-  font-weight: 600;
-}
-/* Targets the footer inside the dialog's form */
-dialog.modal-content form footer.form-actions {
-  margin-top: 30px;
-}
-
-/* Targets error messages inside the dialog */
-dialog.modal-content p.modal-error {
-  margin-bottom: 20px;
-  text-align: center;
-  /* Inherits base .error-message styles */
-}
-
-/* === Responsive Adjustments (Updated Selectors) === */
-@media (max-width: 768px) {
-  header.store-header { flex-direction: column; align-items: stretch; gap: 15px; }
-  header.store-header h1 { text-align: center; }
-  .add-product-button { width: 100%; }
-  /* Form elements naturally stack now, no form-row fix needed */
-  ul.products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  dialog.modal-content { padding: 20px; }
-}
-@media (max-width: 480px) {
-  ul.products-grid { grid-template-columns: 1fr; } /* Single column */
-  footer.product-actions { flex-direction: row; justify-content: space-around; }
-  footer.product-actions button { width: auto; flex-grow: 1; text-align: center; }
-  dialog.modal-content { padding: 15px; max-height: 95vh; }
-  dialog.modal-content h2 { font-size: 1.3rem; }
-  /* Stack form actions buttons vertically */
-  footer.form-actions { flex-direction: column; gap: 10px; }
-  footer.form-actions button { width: 100%; }
+  justify-content: flex-end; /* Align buttons right */
+  gap: 10px;
+  background-color: #f8f9fa; /* Example light gray background */
 }

@@ -1,47 +1,59 @@
 // src/pages/CreateYourStore.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import supabase from '../supabaseClient'; // Ensure path is correct
-import StoreInfoForm from '../components/StoreInfoForm'; // Ensure path is correct
-import ProductList from '../components/ProductList'; // Ensure path is correct
-import SubmissionStatus from '../components/SubmissionStatus'; // Ensure path is correct
-import ImageGalleryDisplay from '../components/ImageGalleryDisplay'; // Ensure path is correct (Optional)
-import { ProductFormData, StoreFormData, PRODUCT_CATEGORIES } from '../types/createStore'; // Ensure path is correct
-import './CreateYourStore.css'; // Ensure path is correct
+import React, { useState, useEffect, useCallback, Fragment } from 'react'; // Added Fragment
+import supabase from '../supabaseClient';
+import StoreInfoForm from '../components/StoreInfoForm';
+import ProductList from '../components/ProductList';
+import SubmissionStatus from '../components/SubmissionStatus';
+import ImageGalleryDisplay from '../components/ImageGalleryDisplay';
+// Import types including the new delivery time constants
+import {
+    ProductFormData,
+    StoreFormData,
+    PRODUCT_CATEGORIES,
+    STANDARD_DELIVERY_TIMES, // <-- Import standard times
+    EXPRESS_DELIVERY_TIMES   // <-- Import express times
+} from '../types/createStore';
+import './CreateYourStore.css';
 
-// Initial state for a new product form entry
+// Initial product state includes quantity
 const initialProductState: ProductFormData = {
     productName: '',
     productDescription: '',
     productPrice: '',
+    productQuantity: '', // Added quantity field
     productCategory: '',
     image: null,
-    imagePreview: ''
+    imagePreview: null, // Corrected initial type
 };
 
-const CreateYourStore: React.FC = () => {
-    // Base URL for backend API calls
-    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; // Fallback URL
+// --- Initial Store state including delivery options ---
+const initialStoreState: StoreFormData = {
+    storeName: '',
+    standardPrice: '', // Initialize as string
+    standardTime: STANDARD_DELIVERY_TIMES[0], // Default to first option
+    expressPrice: '', // Initialize as string
+    expressTime: EXPRESS_DELIVERY_TIMES[0], // Default to first option
+    products: [initialProductState]
+};
+// --- End Initial Store state ---
 
-    // State variables (as before)
+const CreateYourStore: React.FC = () => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
     const [galleryImages, setGalleryImages] = useState<string[]>([]);
-    const [formData, setFormData] = useState<StoreFormData>({
-        storeName: '',
-        products: [initialProductState]
-    });
+    // Use the updated initialStoreState
+    const [formData, setFormData] = useState<StoreFormData>(initialStoreState);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    // useEffect for fetching gallery images (as before)
+    // Fetch gallery images (unchanged)
     useEffect(() => {
         const fetchImages = async () => {
-            const { data, error } = await supabase.storage.from('images').list('uploads', {
+            const { data, error: fetchError } = await supabase.storage.from('images').list('uploads', {
                 limit: 100, sortBy: { column: 'created_at', order: 'desc' }
             });
-            if (error) {
-                console.error('Error fetching gallery images:', error.message);
-                return;
-            }
+            if (fetchError) { console.error('Error fetching gallery images:', fetchError.message); return; }
             const urls = data?.map((file) =>
                 supabase.storage.from('images').getPublicUrl(`uploads/${file.name}`).data.publicUrl
             ) || [];
@@ -50,44 +62,62 @@ const CreateYourStore: React.FC = () => {
         fetchImages();
     }, []);
 
-    // Form State Update Handlers (as before)
+    // --- Form State Update Handlers ---
     const handleStoreNameChange = useCallback((name: string) => {
         setFormData(prev => ({ ...prev, storeName: name }));
+    }, []);
+
+    // Generic handler for top-level store form fields (including delivery)
+    const handleStoreFieldChange = useCallback((field: keyof Omit<StoreFormData, 'products'>, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
     }, []);
 
     const handleProductChange = useCallback((index: number, field: keyof Omit<ProductFormData, 'image' | 'imagePreview' | 'imageURL'>, value: string) => {
         setFormData(prev => {
             const updatedProducts = [...prev.products];
-            updatedProducts[index] = { ...updatedProducts[index], [field]: value };
+            // Ensure the product exists at the index before updating
+            if(updatedProducts[index]) {
+                 updatedProducts[index] = { ...updatedProducts[index], [field]: value };
+            }
             return { ...prev, products: updatedProducts };
         });
     }, []);
 
+
     const handleImageUpload = useCallback((index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) {
-            setFormData(prev => {
-                const prods = [...prev.products];
-                prods[index] = { ...prods[index], image: null, imagePreview: '', imageURL: undefined };
-                return { ...prev, products: prods };
-            });
-            return;
-        }
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData(prev => {
-                const prods = [...prev.products];
-                prods[index] = {
-                    ...prods[index],
-                    image: file,
-                    imagePreview: reader.result as string,
-                    imageURL: undefined
+         const file = e.target.files?.[0];
+         setFormData(prev => {
+            const prods = [...prev.products];
+            if (!prods[index]) return prev; // Safety check
+
+            if (!file) {
+                // Clear image if no file selected
+                prods[index] = { ...prods[index], image: null, imagePreview: null, imageURL: undefined };
+            } else {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    // Need to update state *inside* onloadend to use reader.result
+                    setFormData(currentFormData => {
+                        const updatedProds = [...currentFormData.products];
+                        if(updatedProds[index]){
+                            updatedProds[index] = {
+                                ...updatedProds[index],
+                                image: file,
+                                imagePreview: reader.result as string,
+                                imageURL: undefined
+                            };
+                        }
+                        return { ...currentFormData, products: updatedProds };
+                    });
                 };
-                return { ...prev, products: prods };
-            });
-        };
-        reader.readAsDataURL(file);
+                reader.readAsDataURL(file);
+                // Return previous state immediately, update happens asynchronously in onloadend
+                return prev;
+            }
+            return { ...prev, products: prods };
+        });
     }, []);
+
 
     const addProduct = useCallback(() => {
         setFormData(prev => ({
@@ -108,9 +138,9 @@ const CreateYourStore: React.FC = () => {
         }));
     }, [formData.products.length]);
 
-    // Backend Interaction Logic (uploadImageToBackend, handleSubmit - as before)
+    // Upload image logic (unchanged)
     const uploadImageToBackend = async (file: File, token: string): Promise<string> => {
-        const imgFormData = new FormData();
+         const imgFormData = new FormData();
         imgFormData.append('file', file);
         const res = await fetch(`${baseUrl}/upload/image`, {
             method: 'POST',
@@ -119,15 +149,12 @@ const CreateYourStore: React.FC = () => {
         });
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({ message: 'Failed to parse upload error response' }));
-            console.error("Image upload failed:", errorData);
             throw new Error(`Failed to upload image ${file.name}: ${errorData.message || res.statusText}`);
         }
         const data = await res.json();
         if (!data.url) {
-            console.error("Image upload response missing URL:", data);
             throw new Error(`Image upload for ${file.name} succeeded but response did not contain a URL.`);
         }
-        console.log(`Image ${file.name} uploaded, URL:`, data.url);
         return data.url;
     };
 
@@ -139,68 +166,95 @@ const CreateYourStore: React.FC = () => {
         const token = sessionStorage.getItem('access_token');
         if (!token) {
             setError('Authentication error: No token found. Please log in again.');
-            console.error("Submit Error: No access token found in sessionStorage.");
             setIsSubmitting(false);
             return;
         }
 
         try {
-            // 1. Validation
+            // --- 1. Frontend Validation (Includes Delivery Options) ---
             if (!formData.storeName.trim()) throw new Error('Store name is required');
+
+            // Delivery price validation
+            const standardPriceNum = parseFloat(formData.standardPrice);
+            if (isNaN(standardPriceNum) || standardPriceNum < 0) throw new Error('Valid standard delivery price required.');
+            const expressPriceNum = parseFloat(formData.expressPrice);
+             if (isNaN(expressPriceNum) || expressPriceNum < 0) throw new Error('Valid express delivery price required.');
+
+             // Delivery time validation (ensure a selection was made - check against default if needed, but IsIn backend handles specific values)
+             if (!formData.standardTime) throw new Error('Standard delivery time selection is required.');
+             if (!formData.expressTime) throw new Error('Express delivery time selection is required.');
+
+            // Product validation (unchanged loop)
             if (formData.products.length === 0) throw new Error('At least one product is required');
             for (let i = 0; i < formData.products.length; i++) {
                 const p = formData.products[i];
+                const price = parseFloat(p.productPrice);
+                const quantity = parseInt(p.productQuantity, 10);
                 if (!p.productName.trim()) throw new Error(`Product #${i + 1} name is required`);
                 if (!p.productDescription.trim()) throw new Error(`Product #${i + 1} description is required`);
-                if (!p.productPrice.trim() || isNaN(parseFloat(p.productPrice))) throw new Error(`Product #${i + 1} needs a valid price`);
+                if (!p.productPrice.trim() || isNaN(price) || price <= 0) throw new Error(`Product #${i + 1} needs a valid positive price`);
+                if (!p.productQuantity.trim() || isNaN(quantity) || quantity < 0) throw new Error(`Product #${i + 1} needs a valid non-negative quantity`);
                 if (!p.productCategory) throw new Error(`Product #${i + 1} category is required`);
                 if (!p.image) throw new Error(`Product #${i + 1} image is required`);
             }
+            // --- End Validation ---
 
-            // 2. Promote (optional)
+            // --- 2. Promote User (Consider moving this to backend post-creation) ---
+             // This call remains here but consider the implications if store creation fails after promotion.
             const promoteRes = await fetch(`${baseUrl}/auth/promote-to-seller`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
-            if (!promoteRes.ok && promoteRes.status !== 400) {
-                console.warn('Promotion to seller might have failed. Status:', promoteRes.status);
-            } else {
-                console.log("User promoted or already seller.");
-            }
+            // Logging based on response status (unchanged)
+             if (!promoteRes.ok && promoteRes.status !== 400) { console.warn('Promotion to seller might have failed. Status:', promoteRes.status); }
+             else if (promoteRes.ok) { console.log("User promoted to seller."); }
+             else { console.log("User already a seller or promotion not applicable."); }
+             // --- End Promote User ---
 
-            // 3. Upload Images
-            console.log("Starting image uploads...");
+            // 3. Upload Images (unchanged logic)
             const productsWithImageUrls = await Promise.all(
                 formData.products.map(async (product, index) => {
                     if (!product.image) throw new Error(`Product #${index + 1} is missing an image file for upload.`);
                     try {
                         const uploadedUrl = await uploadImageToBackend(product.image, token);
+                        // Pass the full product data from state, including quantity string
                         return { ...product, imageURL: uploadedUrl };
                     } catch (uploadError) {
-                        console.error(`Error uploading image for product #${index + 1}:`, uploadError);
-                        throw new Error(`Failed to upload image for product "${product.productName || `Product #${index + 1}`}". ${uploadError instanceof Error ? uploadError.message : 'Unknown upload error'}`);
+                         throw new Error(`Failed to upload image for product "${product.productName || `Product #${index + 1}`}". ${uploadError instanceof Error ? uploadError.message : 'Unknown upload error'}`);
                     }
                 })
             );
-            console.log("Image uploads completed.");
 
-            // 4. Prepare final data
+            // --- 4. Prepare final data (Matches CreateStoreDto) ---
             const storeData = {
                 storeName: formData.storeName,
+                // Add delivery fields, parsing prices to numbers
+                standardPrice: parseFloat(formData.standardPrice),
+                standardTime: formData.standardTime,
+                expressPrice: parseFloat(formData.expressPrice),
+                expressTime: formData.expressTime,
+                // Map products (unchanged logic, already parses price/quantity)
                 products: productsWithImageUrls.map(product => {
-                    if (!product.imageURL) throw new Error(`Image URL failed to process for product: ${product.productName}. Cannot proceed.`);
+                    if (!product.imageURL) throw new Error(`Image URL missing for product: ${product.productName}.`);
+                    const price = parseFloat(product.productPrice);
+                    const quantity = parseInt(product.productQuantity, 10);
+                     if (isNaN(price) || isNaN(quantity)) {
+                         throw new Error(`Invalid number format for price or quantity in product: ${product.productName}`);
+                     }
                     return {
                         name: product.productName,
                         description: product.productDescription,
-                        price: parseFloat(product.productPrice),
+                        price: price,
                         category: product.productCategory,
-                        imageUrl: product.imageURL // Correct key
+                        imageUrl: product.imageURL,
+                        productquantity: quantity
                     };
                 }),
             };
+            // --- End Data Preparation ---
 
-            // 5. Create Store
-            console.log("Sending store data to backend:", JSON.stringify(storeData, null, 2));
+            // 5. Create Store API call (unchanged logic)
+            console.log("Sending Create Store Payload:", JSON.stringify(storeData, null, 2));
             const createStoreResponse = await fetch(`${baseUrl}/stores`, {
                 method: 'POST',
                 headers: {
@@ -211,11 +265,10 @@ const CreateYourStore: React.FC = () => {
             });
             if (!createStoreResponse.ok) {
                 const errorData = await createStoreResponse.json().catch(() => ({ message: 'Failed to parse store creation error response' }));
-                console.error("Store creation failed:", errorData);
                 throw new Error(`Failed to create store: ${errorData.message || createStoreResponse.statusText}`);
             }
 
-            // 6. Success
+            // 6. Success handling (unchanged)
             const createdStore = await createStoreResponse.json();
             console.log("Store created successfully:", createdStore);
             setSuccess('Your store has been created successfully!');
@@ -230,37 +283,99 @@ const CreateYourStore: React.FC = () => {
         }
     };
 
-    // --- Render Logic ---
-    const isSubmitDisabled = isSubmitting || !formData.storeName || formData.products.some(p => !p.image || !p.productName || !p.productPrice || !p.productCategory);
+    // --- Updated Submit Disabled Check ---
+    const isSubmitDisabled = isSubmitting || !formData.storeName ||
+        !formData.standardPrice || !formData.standardTime || // Check delivery fields
+        !formData.expressPrice || !formData.expressTime ||   // Check delivery fields
+        formData.products.some(
+            p => !p.image || !p.productName || !p.productPrice || !p.productQuantity || !p.productCategory
+        );
+    // --- End Updated Check ---
 
     return (
-        // Use <section> as the main container for the page content
+        // Using semantic elements and avoiding unnecessary divs/spans
         <section className="create-store-container">
-            {/* Use <header> for the main heading and introductory text */}
             <header>
                 <h1>Create Your Artisan Store</h1>
                 <p className="instructions">
-                    Set up your store information and add your products below. An image is required for each product.
+                    Set up your store information, delivery options, and add your initial products below.
                 </p>
             </header>
 
-            {/* Submission status remains */}
-            <SubmissionStatus error={error} success={success} />
-
-            {/* Optional Image Gallery remains */}
             <ImageGalleryDisplay galleryImages={galleryImages} />
 
-            {/* The <form> element is semantic */}
             <form onSubmit={handleSubmit}>
-                {/* StoreInfoForm component (assuming internal semantics) */}
+                {/* Component for Store Name */}
                 <StoreInfoForm
                     storeName={formData.storeName}
                     onStoreNameChange={handleStoreNameChange}
                     isSubmitting={isSubmitting}
                 />
 
-                {/* ProductList component (assuming internal semantics) */}
-                {/* Consider wrapping ProductList in a <fieldset> if appropriate */}
+                {/* --- Placeholder: Add Delivery Options Inputs/Selects Here --- */}
+                <fieldset className="delivery-options"> {/* Use fieldset for grouping */}
+                     <legend>Delivery Options</legend> {/* Provide context */}
+
+                     {/* Standard Delivery */}
+                     <label htmlFor="standardPrice">Standard Delivery Price:</label>
+                     <input
+                         type="number"
+                         id="standardPrice"
+                         name="standardPrice"
+                         value={formData.standardPrice}
+                         onChange={(e) => handleStoreFieldChange('standardPrice', e.target.value)}
+                         placeholder="e.g., 5.00"
+                         min="0" // HTML5 validation
+                         step="0.01" // Allow cents
+                         required // HTML5 validation
+                         disabled={isSubmitting}
+                     />
+                     <label htmlFor="standardTime">Standard Delivery Time:</label>
+                     <select
+                         id="standardTime"
+                         name="standardTime"
+                         value={formData.standardTime}
+                         onChange={(e) => handleStoreFieldChange('standardTime', e.target.value)}
+                         required // HTML5 validation
+                         disabled={isSubmitting}
+                     >
+                         {STANDARD_DELIVERY_TIMES.map(time => (
+                             <option key={`std-${time}`} value={time}>{time} Days</option>
+                         ))}
+                     </select>
+
+                     {/* Express Delivery */}
+                     <label htmlFor="expressPrice">Express Delivery Price:</label>
+                     <input
+                         type="number"
+                         id="expressPrice"
+                         name="expressPrice"
+                         value={formData.expressPrice}
+                         onChange={(e) => handleStoreFieldChange('expressPrice', e.target.value)}
+                         placeholder="e.g., 10.00"
+                          min="0"
+                          step="0.01"
+                         required
+                         disabled={isSubmitting}
+                     />
+                     <label htmlFor="expressTime">Express Delivery Time:</label>
+                     <select
+                         id="expressTime"
+                         name="expressTime"
+                         value={formData.expressTime}
+                         onChange={(e) => handleStoreFieldChange('expressTime', e.target.value)}
+                         required
+                         disabled={isSubmitting}
+                     >
+                         {EXPRESS_DELIVERY_TIMES.map(time => (
+                             <option key={`exp-${time}`} value={time}>{time} Days</option>
+                         ))}
+                     </select>
+                 </fieldset>
+                 {/* --- End Delivery Options Section --- */}
+
+
+                {/* Component for Product Inputs */}
                 <ProductList
                     products={formData.products}
                     productCategories={PRODUCT_CATEGORIES}
@@ -271,9 +386,9 @@ const CreateYourStore: React.FC = () => {
                     isSubmitting={isSubmitting}
                 />
 
-                {/* Actions - Using a fragment instead of div */}
-                {/* If specific layout needed, a div might be required by the CSS */}
-                <div className="actions"> {/* Kept div for potential CSS targeting */}
+                {/* Actions section using Fragment instead of div */}
+                <Fragment> {/* Replaced div */}
+                    <SubmissionStatus error={error} success={success} />
                     <button
                         type="submit"
                         className="create-store-btn"
@@ -281,7 +396,7 @@ const CreateYourStore: React.FC = () => {
                     >
                         {isSubmitting ? 'Creating Store...' : 'Create Your Store'}
                     </button>
-                </div>
+                </Fragment> {/* Replaced div */}
             </form>
         </section>
     );
