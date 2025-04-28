@@ -3,7 +3,7 @@ import { StoreController } from './store.controller';
 import { StoreService } from './store.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { UpdateProductDto } from '../products/dto/update-product.dto';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 
 // Mock Type for StoreService
