@@ -324,7 +324,7 @@ const CreateYourStore: React.FC = () => {
                          name="standardPrice"
                          value={formData.standardPrice}
                          onChange={(e) => handleStoreFieldChange('standardPrice', e.target.value)}
-                         placeholder="e.g., 5.00"
+                         placeholder="e.g., 50.00"
                          min="0" // HTML5 validation
                          step="0.01" // Allow cents
                          required // HTML5 validation
@@ -352,7 +352,7 @@ const CreateYourStore: React.FC = () => {
                          name="expressPrice"
                          value={formData.expressPrice}
                          onChange={(e) => handleStoreFieldChange('expressPrice', e.target.value)}
-                         placeholder="e.g., 10.00"
+                         placeholder="e.g., 100.00"
                           min="0"
                           step="0.01"
                          required
