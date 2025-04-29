@@ -7,7 +7,7 @@ import {
   BadRequestException,
   ConflictException,
   Logger,
-  ForbiddenException // Added for ownership checks
+  ForbiddenException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -18,8 +18,7 @@ import { Product } from '../products/entities/product.entity';
 import { Store } from '../store/entities/store.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { CreateOrderDto, CartItemDto } from './dto/create-order.dto';
-// Import DTO for status update (will create later)
-// import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 
 @Injectable()
@@ -27,7 +26,7 @@ export class OrdersService {
   constructor(
     private dataSource: DataSource,
     @InjectRepository(Order)
-    private ordersRepository: Repository<Order>,
+    private ordersRepository: Repository<Order>, // Need Order repo for buyer orders
     @InjectRepository(CartItem)
     private cartItemsRepository: Repository<CartItem>,
     @InjectRepository(SellerOrder)
@@ -50,7 +49,7 @@ export class OrdersService {
 
   // ... (createOrder method - keep as is) ...
   async createOrder(createOrderDto: CreateOrderDto, buyerUserId: string): Promise<Order> {
-      // ... (implementation from previous steps) ...
+      // ... (implementation) ...
         // --- Log Entry Point ---
         this.logger.log(`--- Service: createOrder method entered for user: ${buyerUserId} ---`);
 
@@ -150,8 +149,7 @@ export class OrdersService {
             itemsSubtotal: itemsSubtotal,
             sellerTotal: sellerTotal,
             status: 'Processing',
-            // createdAt and updatedAt will be handled by decorators if present,
-            // otherwise set manually if needed (but usually not required for @Create/@UpdateDateColumn)
+            // createdAt and updatedAt handled by decorators
             });
 
         } // End store loop
@@ -300,7 +298,8 @@ export class OrdersService {
 
   // --- findSellerOrders method (Keep as is) ---
   async findSellerOrders(sellerUserId: string): Promise<SellerOrder[]> {
-    this.logger.log(`Finding seller orders for seller user ID: ${sellerUserId}`);
+    // ... (implementation) ...
+     this.logger.log(`Finding seller orders for seller user ID: ${sellerUserId}`);
     try {
       const sellerOrders = await this.sellerOrdersRepository.find({
         where: { userId: sellerUserId },
@@ -315,9 +314,10 @@ export class OrdersService {
     }
   }
 
-  // --- IMPLEMENTED calculateSellerEarnings ---
+  // --- calculateSellerEarnings method (Keep as is) ---
   async calculateSellerEarnings(sellerUserId: string, status?: string): Promise<{ totalEarnings: number }> {
-    this.logger.log(`Calculating earnings for seller: ${sellerUserId}, status filter: ${status ?? 'None'}`);
+    // ... (implementation) ...
+     this.logger.log(`Calculating earnings for seller: ${sellerUserId}, status filter: ${status ?? 'None'}`);
     try {
       // Start building the query using the repository
       const queryBuilder = this.sellerOrdersRepository.createQueryBuilder('sellerOrder');
@@ -338,10 +338,19 @@ export class OrdersService {
 
       // Execute the query and get the raw result (which contains the sum)
       const result = await queryBuilder.getRawOne(); // Use getRawOne for aggregate results
+      this.logger.debug(`Raw earnings result for seller ${sellerUserId} (status: ${status ?? 'All'}): ${JSON.stringify(result)}`); // Log the raw object
 
       // The sum might be null if no matching orders are found, default to 0
-      // The result['totalEarnings'] might be a string, parse it to a float
-      const totalEarnings = result && result.totalEarnings ? parseFloat(result.totalEarnings) : 0;
+      // The result['totalEarnings'] might be a string, null, or number depending on DB/driver
+      const rawSum = result?.totalEarnings; // Use optional chaining
+      const totalEarnings = (rawSum !== null && rawSum !== undefined) ? parseFloat(String(rawSum)) : 0; // Convert to string before parseFloat for safety, handle null/undefined
+
+      // Check for NaN after parsing
+      if (isNaN(totalEarnings)) {
+          this.logger.error(`Failed to parse earnings sum. Raw value was: ${rawSum}. Setting earnings to 0.`);
+          return { totalEarnings: 0 }; // Return 0 if parsing failed
+      }
+
 
       this.logger.log(`Calculated earnings for seller ${sellerUserId} (status: ${status ?? 'All'}): ${totalEarnings}`);
       return { totalEarnings };
@@ -352,23 +361,89 @@ export class OrdersService {
     }
   }
 
-  // --- Placeholder for updateSellerOrderStatus ---
-  async updateSellerOrderStatus(sellerOrderId: number, sellerUserId: string, newStatus: string): Promise<SellerOrder> {
-      this.logger.log(`Attempting to update status for sellerOrder ID: ${sellerOrderId} by seller: ${sellerUserId} to status: ${newStatus}`);
-      // TODO: Implement findOneOrFail with ownership check, then update logic here
-      // Find the order ensuring it belongs to the seller
-      // Update the status
-      // Save and return the updated order
-      this.logger.warn('updateSellerOrderStatus method is not fully implemented yet.');
-      // Placeholder return - replace with actual logic
-      const order = await this.sellerOrdersRepository.findOne({ where: { sellerOrderId, userId: sellerUserId }});
-      if (!order) {
-          throw new NotFoundException(`Seller order with ID ${sellerOrderId} not found or not owned by seller ${sellerUserId}.`);
-      }
-      order.status = newStatus; // Update status
-      // Potentially use queryRunner for update within a transaction if needed
-      // Add logic here to prevent invalid status transitions if necessary
-      return this.sellerOrdersRepository.save(order);
+  // --- updateSellerOrderStatus method (Keep as is) ---
+  async updateSellerOrderStatus(
+      sellerOrderId: number,
+      sellerUserId: string,
+      updateOrderStatusDto: UpdateOrderStatusDto // Use the DTO here
+  ): Promise<SellerOrder> {
+    // ... (implementation) ...
+     const { status: newStatus } = updateOrderStatusDto; // Extract status from DTO
+    this.logger.log(`Attempting to update status for sellerOrder ID: ${sellerOrderId} by seller: ${sellerUserId} to status: ${newStatus}`);
+
+    // 1. Find the specific SellerOrder by its ID
+    // We include the userId in the where clause for an initial ownership check
+    const sellerOrder = await this.sellerOrdersRepository.findOne({
+        where: {
+            sellerOrderId: sellerOrderId, // Use the correct property name
+            userId: sellerUserId        // Ensure the order belongs to this seller
+        }
+    });
+
+    // 2. Check if the order was found and belongs to the seller
+    if (!sellerOrder) {
+        this.logger.warn(`SellerOrder with ID ${sellerOrderId} not found or not owned by seller ${sellerUserId}.`);
+        // Throw NotFoundException - ForbiddenException might be better if found but owned by someone else,
+        // but NotFound is simpler if the query just returns null.
+        throw new NotFoundException(`Seller order with ID ${sellerOrderId} not found or access denied.`);
+    }
+
+    // 3. Optional: Add logic for valid status transitions
+    // Example: Prevent changing status from 'Shipped' back to 'Processing'
+    // if (sellerOrder.status === 'Shipped' && newStatus === 'Processing') {
+    //     throw new BadRequestException('Cannot change status from Shipped back to Processing.');
+    // }
+    // Add more rules as needed for your workflow
+
+    // 4. Update the status property
+    sellerOrder.status = newStatus;
+    // The updatedAt field should be updated automatically by the @UpdateDateColumn decorator
+
+    // 5. Save the updated entity
+    try {
+        const updatedOrder = await this.sellerOrdersRepository.save(sellerOrder);
+        this.logger.log(`Successfully updated status for sellerOrder ID: ${sellerOrderId} to ${newStatus}`);
+        return updatedOrder;
+    } catch (error) {
+        this.logger.error(`Failed to save updated status for sellerOrder ID: ${sellerOrderId}. Error: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Failed to update order status.');
+    }
+  }
+
+  // --- NEW METHOD: Find orders for a specific buyer ---
+  async findBuyerOrders(buyerUserId: string): Promise<Order[]> {
+    this.logger.log(`Finding orders for buyer user ID: ${buyerUserId}`);
+    try {
+      // Use the Order repository to find main orders
+      const orders = await this.ordersRepository.find({
+        where: {
+          userId: buyerUserId // Filter by the buyer's user ID property
+        },
+        // Specify relations to load along with the Order
+        // This structure matches the buyer's view requirements
+        relations: [
+          'sellerOrders',              // Load the SellerOrders associated with this Order
+          'sellerOrders.items',        // Load the Items within each SellerOrder
+          'sellerOrders.items.product',// Load the Product details for each Item
+          // Optional: Load seller info if needed for display (e.g., Store Name)
+          // 'sellerOrders.seller',    // Loads the User entity for the seller
+          // If you need Store Name, you might need a relation from SellerOrder to Store or User to Store
+          // Or fetch Store info separately if needed. Let's keep it simpler for now.
+        ],
+        // Order by creation date (or order date), newest first
+        order: {
+          // Use 'orderDate' or 'createdAt' depending on preference
+          orderDate: 'DESC',
+          // Optional secondary sort if dates are identical
+          // orderId: 'DESC'
+        }
+      });
+      this.logger.log(`Found ${orders.length} orders for buyer user ID: ${buyerUserId}`);
+      return orders;
+    } catch (error) {
+      this.logger.error(`Failed to find orders for buyer user ID: ${buyerUserId}. Error: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve buyer orders.');
+    }
   }
 
 } // End OrdersService class
