@@ -42,14 +42,7 @@ export class SellerOrderItem {
   @Column({ name: 'product_name_snapshot', type: 'varchar', length: 255, nullable: true })
   productNameSnapshot: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
 
-  // *** MODIFIED: Added default value ***
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-  @Column({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }) // onUpdate might also help
-  updatedAt: Date;
 
 
 
