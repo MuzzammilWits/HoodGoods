@@ -1,6 +1,6 @@
 // src/pages/MyOrdersPage.tsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
 import { Link } from 'react-router-dom'; // For potential links
@@ -67,7 +67,7 @@ const statusClassMap: Record<string, string> = {
 
 
 export default function MyOrdersPage() {
-    const { user, isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
+    const { isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
     const [orders, setOrders] = useState<BuyerOrderDetails[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

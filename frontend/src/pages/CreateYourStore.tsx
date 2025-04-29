@@ -386,8 +386,8 @@ const CreateYourStore: React.FC = () => {
                     isSubmitting={isSubmitting}
                 />
 
-                {/* Actions section using Fragment instead of div */}
-                <Fragment> {/* Replaced div */}
+                {/* Actions section using Fragment instead of divs */}
+                <Fragment> 
                     <SubmissionStatus error={error} success={success} />
                     <button
                         type="submit"
@@ -396,7 +396,7 @@ const CreateYourStore: React.FC = () => {
                     >
                         {isSubmitting ? 'Creating Store...' : 'Create Your Store'}
                     </button>
-                </Fragment> {/* Replaced div */}
+                </Fragment> 
             </form>
         </section>
     );

@@ -68,27 +68,31 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
-            {/* Public Cart Route */}
-            <Route path="/cart" element={
+          {/* --- MODIFIED: Cart Route (Protected) --- */}
+          <Route path="/cart" element={
               <section>
-                <CartPage />
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
+                  <CartPage />
+                </ProtectedRoute>
               </section>
             } />
 
             {/* Checkout Route (Protected) */}
             <Route path="/checkout" element={
               <section>
-                 <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}> {/* Example: Allow all logged-in */}
+                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Example: Allow all logged-in */}
                     <CheckoutPage />
                  </ProtectedRoute>
               </section>
             } />
 
 
-            {/* Order Confirmation Route (Public) */}
+            {/* --- MODIFIED: Order Confirmation Route (Protected) --- */}
             <Route path="/order-confirmation" element={
               <section>
-                <OrderConfirmationPage />
+                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
+                   <OrderConfirmationPage />
+                 </ProtectedRoute>
               </section>
             } />
 
@@ -127,7 +131,7 @@ const AppContent: React.FC = () => {
 
             {/* *** ADDED My Orders Route (for any logged-in user) *** */}
             <Route path="/my-orders" element={
-              <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}> {/* Or just 'buyer' if preferred */}
+              <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Or just 'buyer' if preferred */}
                 <article>
                   <MyOrdersPage />
                 </article>
