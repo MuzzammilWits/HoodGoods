@@ -266,7 +266,6 @@ export default function CheckoutPage() {
               console.log("Received Yoco Result:", JSON.stringify(result, null, 2)); // Log the full result to check structure
 
               let outcomeError: string | null = null;
-              let backendErrorOccurred = false;
               let shouldClearCartAndNavigate = false;
 
               try {
@@ -322,7 +321,6 @@ export default function CheckoutPage() {
                       } catch (backendError) {
                           // --- Backend Order Creation FAILED! ---
                           console.error("--- Backend /orders/create FAILED ---:", backendError);
-                          backendErrorOccurred = true;
                           if (axios.isAxiosError(backendError)) {
                               const errorMsg = backendError.response?.data?.message || backendError.message;
                               // Provide specific message based on potential backend errors
