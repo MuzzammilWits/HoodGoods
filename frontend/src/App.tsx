@@ -17,8 +17,9 @@ import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
-// import CheckoutPage from './pages/CheckoutPage'; // Removed unused import
-import OrderConfirmationPage from './pages/OrderConfirmationPage'; // *** Import the new page ***
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
+// *** Import the Seller Dashboard Page ***
+import SellerDashboardPage from './pages/SellerDashboardPage'; // Adjust path if needed
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -73,22 +74,26 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
+            {/* Checkout Route (Should likely be protected) */}
+             {/* Consider wrapping CheckoutPage in ProtectedRoute if needed */}
             <Route path="/checkout" element={
               <section>
-                <CheckoutPage />
+                 <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}> {/* Example: Allow all logged-in */}
+                    <CheckoutPage />
+                 </ProtectedRoute>
               </section>
             } />
 
- 
 
-            {/* --- Added Order Confirmation Route --- */}
+            {/* Order Confirmation Route (Public or Protected?) */}
+            {/* Usually public after redirect, but could be protected */}
             <Route path="/order-confirmation" element={
               <section>
                 <OrderConfirmationPage />
               </section>
             } />
 
-            {/* Protected Routes */}
+            {/* --- Protected Routes --- */}
             <Route path="/create-store" element={
               <ProtectedRoute allowedRoles={['buyer']}> {/* Adjust roles as needed */}
                 <article>
@@ -109,6 +114,15 @@ const AppContent: React.FC = () => {
               <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
                 <article>
                   <AdminDashboard />
+                </article>
+              </ProtectedRoute>
+            } />
+
+            {/* *** ADDED Seller Dashboard Route *** */}
+            <Route path="/seller-dashboard" element={
+              <ProtectedRoute allowedRoles={['seller']}> {/* Protect for sellers */}
+                <article>
+                  <SellerDashboardPage />
                 </article>
               </ProtectedRoute>
             } />
