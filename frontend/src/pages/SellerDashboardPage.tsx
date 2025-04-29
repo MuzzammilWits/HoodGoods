@@ -266,10 +266,10 @@ export default function SellerDashboardPage() {
                                  >
                                      <option value="Processing">Processing</option>
                                      <option value="Packaging">Packaging</option>
-                                     <option value="Ready for Pickup">Ready for Pickup</option>
                                      <option value="Shipped">Shipped</option>
-                                     <option value="Delivered">Delivered</option>
-                                     <option value="Cancelled">Cancelled</option>
+                                     <option value="Ready for Pickup">Ready for Pickup</option>
+                                     
+                                     
                                  </select>
                                  {updatingStatusOrderId === sellerOrder.sellerOrderId && <span className="updating-indicator"> Updating...</span>}
                              </div>
