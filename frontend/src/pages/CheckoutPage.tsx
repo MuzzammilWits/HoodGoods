@@ -15,6 +15,21 @@ type CartItemDisplay = {
   storeId: string;
 };
 
+interface CartItemForPayload {
+  productId: number;
+  quantity: number;
+  pricePerUnitSnapshot: number;
+  storeId: string;
+}
+interface OrderPayload {
+  cartItems: CartItemForPayload[];
+  deliverySelections: Record<string, 'standard' | 'express'>;
+  selectedArea: string;
+  selectedPickupPoint: string;
+  yocoChargeId: string;
+  frontendGrandTotal: number;
+}
+
 interface StoreDeliveryDetails {
     storeId: string;
     standardPrice: number;
@@ -184,23 +199,22 @@ export default function CheckoutPage() {
       setSelectedPickupPoint(''); // Reset pickup point when area changes
   };
 
-  // Modified handlePayment with Timeout (Updated Validation)
+  // --- MODIFIED handlePayment function ---
   const handlePayment = async () => {
-    // Basic validation
+    // --- Step 1: Frontend Validation (Keep existing validation) ---
     if (!isAuthenticated || !user || cartItems.length === 0) {
         setPaymentError("Cannot proceed to payment. Ensure you are logged in and have items in your cart.");
         return;
     }
-    // UPDATED VALIDATION: Check for selected area and pickup point
     if (!selectedArea || !selectedPickupPoint) {
         setPaymentError("Please select your delivery area and pickup point.");
         return;
     }
-    // Ensure delivery option selected for all stores
      if (uniqueStoreIds.some(id => !deliverySelectionState[id])) {
         setPaymentError("Please select a delivery option for all store groups.");
         return;
      }
+     // --- End Frontend Validation ---
 
     setIsProcessingPayment(true);
     setPaymentError(null);
@@ -212,134 +226,193 @@ export default function CheckoutPage() {
     }
 
     try {
-        const token = await getAccessTokenSilently();
+      // --- Step 2: Initiate Yoco Payment with Backend (Keep existing logic) ---
+      const token = await getAccessTokenSilently();
+      console.log("Initiating payment with backend...");
+      // Assuming 'api' is your preconfigured Axios instance
+      const response = await api.post<InitiatePaymentResponse>('/payments/initiate-yoco',
+          {
+              amount: Math.round(grandTotal * 100), // Send amount in cents
+              currency: 'ZAR',
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        // 1. Call backend to initiate payment (Keep as is)
-        console.log("Initiating payment with backend...");
-        const response = await api.post<InitiatePaymentResponse>('/payments/initiate-yoco',
-            {
-                amount: Math.round(grandTotal * 100), // Send amount in cents
-                currency: 'ZAR',
-                // Optionally send more details (like selectedPickupPoint if needed)
-                // metadata: {
-                //  pickupArea: selectedArea,
-                //  pickupPoint: selectedPickupPoint
-                // }
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
+      const { checkoutId } = response.data;
+      console.log("Received checkoutId:", checkoutId);
+      if (!checkoutId) throw new Error("Missing checkoutId from backend.");
+      // --- End Yoco Initiation ---
 
-        const { checkoutId } = response.data;
-        console.log("Received checkoutId:", checkoutId);
-        if (!checkoutId) throw new Error("Missing checkoutId from backend.");
 
-        // 2. Initialize Yoco SDK (Keep as is)
-        const yoco = new YocoSDK({
-            publicKey: 'pk_test_ed3c54a6gOol69qa7f45', // Use Test Public Key
-        });
+      // --- Step 3: Show Yoco Popup ---
+      const yoco = new YocoSDK({ publicKey: 'pk_test_ed3c54a6gOol69qa7f45' }); // Use your actual public key
 
-        console.log("Showing Yoco popup...");
-        yoco.showPopup({
-            checkoutId: checkoutId,
-            amountInCents: Math.round(grandTotal * 100),
-            currency: 'ZAR',
-            // customer: { email: user.email, ... }, // Consider adding customer details
-            callback: async (result: any) => {
-                // Clear timeout inside callback
-                if (paymentTimeoutRef.current) {
-                    console.log("Yoco callback triggered, clearing payment timeout.");
-                    clearTimeout(paymentTimeoutRef.current);
-                    paymentTimeoutRef.current = null;
-                }
+      console.log("Showing Yoco popup...");
+      yoco.showPopup({
+          checkoutId: checkoutId,
+          amountInCents: Math.round(grandTotal * 100),
+          currency: 'ZAR',
+          // customer: { email: user.email }, // Optional: Pass customer details
+          callback: async (result: any) => { // <<< Make callback async
+              // --- Step 4: Handle Yoco Callback ---
+              // Clear timeout inside callback
+              if (paymentTimeoutRef.current) {
+                  console.log("Yoco callback triggered, clearing payment timeout.");
+                  clearTimeout(paymentTimeoutRef.current);
+                  paymentTimeoutRef.current = null;
+              }
 
-                console.log("--- Yoco SDK Callback START ---");
-                console.log("Received Yoco Result:", JSON.stringify(result, null, 2));
+              console.log("--- Yoco SDK Callback START ---");
+              console.log("Received Yoco Result:", JSON.stringify(result, null, 2)); // Log the full result to check structure
 
-                let outcomeError: string | null = null;
-                let shouldNavigate = false;
-                let clearCartErrorOccurred = false;
+              let outcomeError: string | null = null;
+              let backendErrorOccurred = false;
+              let shouldClearCartAndNavigate = false;
 
-                try {
-                    if (result.error) {
-                        console.error("Yoco Payment Error:", result.error);
-                        outcomeError = `Payment failed: ${result.error.message || 'Please try again.'}`;
-                    } else if (result.status === 'successful' || result.status === 'pending' || result.status === 'charge_ready') {
-                        console.log(`Yoco Payment Status on Frontend: ${result.status}`);
-                        shouldNavigate = true;
-                        try {
-                            console.log("Clearing cart on frontend...");
-                            await clearCart(); // Use clearCart from context
-                            console.log("Frontend cart cleared.");
-                        } catch (clearError) {
-                            console.error("Error clearing cart on frontend:", clearError);
-                            clearCartErrorOccurred = true;
-                            outcomeError = (outcomeError ? outcomeError + " " : "") + "Additionally, failed to clear cart automatically.";
-                        }
-                    } else if (result.status === 'failed') {
-                        console.warn("Yoco Payment explicitly failed.");
-                        outcomeError = "Payment failed. Please check your details or try another card.";
-                    } else if (result.status === 'cancelled') {
-                        console.warn("Yoco Payment was cancelled (status: 'cancelled').");
-                        outcomeError = "Payment was cancelled.";
-                    } else {
-                        console.warn("Yoco Payment resulted in unexpected status:", result.status, "Full result:", result);
-                        outcomeError = "Payment outcome uncertain. Please check your confirmation or contact support.";
-                    }
+              try {
+                  // --- Step 4a: Check Yoco Result Status ---
+                  if (result.error) {
+                      console.error("Yoco Payment Error:", result.error);
+                      outcomeError = `Payment failed: ${result.error.message || 'Please try again.'}`;
+                  } else if (result.status === 'successful' || result.status === 'pending' || result.status === 'charge_ready') {
+                      // --- PAYMENT SUCCEEDED (or pending confirmation) via Yoco ---
+                      console.log(`Yoco Payment Status: ${result.status}. Attempting backend order creation...`);
 
-                    if (outcomeError) {
-                        console.log("Setting payment error state:", outcomeError);
-                        setPaymentError(outcomeError);
-                    }
-                    if (clearCartErrorOccurred) {
-                        console.log("Handling cart clear error occurrence (message set above).");
-                    }
-                    if (shouldNavigate) {
-                        console.log("Navigating to /order-confirmation");
-                        navigate('/order-confirmation');
-                    }
+                      // --- Step 4b: Prepare Payload for Backend /orders/create ---
+                      // IMPORTANT: Inspect the logged 'result' object to find the correct Yoco charge ID property!
+                      const yocoChargeId = result.id || result.chargeId || result.paymentId || 'yoco_id_not_found'; // <<< ADJUST THIS based on actual Yoco result object
+                      if (yocoChargeId === 'yoco_id_not_found') {
+                          console.warn("Could not find Yoco Charge/Payment ID in result object:", result);
+                      }
 
-                } catch (callbackError) {
-                    console.error("--- Error INSIDE Yoco Callback Logic ---:", callbackError);
-                    setPaymentError("An internal error occurred after payment interaction. Please check your order status or contact support.");
-                } finally {
-                    console.log("--- Yoco SDK Callback FINALLY block ---");
-                    console.log("Resetting isProcessingPayment to false via callback.");
-                    setIsProcessingPayment(false); // Reset processing state
-                    console.log("--- Yoco SDK Callback END ---");
-                }
-            } // end callback
-        }); // end showPopup
+                      // Map frontend cart items to the structure expected by the backend DTO
+                      const backendCartItems: CartItemForPayload[] = cartItems.map(item => ({
+                          productId: item.productId, // Ensure this is the correct numeric ID
+                          quantity: item.quantity,
+                          pricePerUnitSnapshot: item.productPrice, // Price used during checkout
+                          storeId: item.storeId.toString(), // Ensure storeId is string if needed by backend
+                      }));
 
-        // Set the timeout AFTER showing the popup
-        console.log("Setting payment timeout fallback (45s).");
-        paymentTimeoutRef.current = setTimeout(() => {
-            console.warn("Payment timeout reached (popup likely closed manually or timed out).");
-            setIsProcessingPayment(currentProcessingState => {
-                if (currentProcessingState) {
-                    console.log("Resetting processing state due to timeout.");
-                    setPaymentError("Payment process was cancelled or timed out.");
-                    return false;
-                }
-                console.log("Timeout fired, but processing state already false (callback likely ran).");
-                return false;
-            });
-            paymentTimeoutRef.current = null;
-        }, 45000); // 45 seconds
+                      const orderPayload: OrderPayload = {
+                          cartItems: backendCartItems,
+                          deliverySelections: deliverySelectionState,
+                          selectedArea: selectedArea,
+                          selectedPickupPoint: selectedPickupPoint,
+                          yocoChargeId: yocoChargeId,
+                          frontendGrandTotal: grandTotal,
+                      };
+                      // --- End Prepare Payload ---
 
-    } catch (error) {
+
+                      // --- Step 4c: Call Backend /orders/create Endpoint ---
+                      try {
+                          // Get token again just in case it expired during payment interaction
+                          const backendToken = await getAccessTokenSilently();
+                          console.log("Calling backend POST /orders/create endpoint...");
+
+                          // Use your Axios instance 'api'
+                          await api.post('/orders/create', orderPayload, {
+                              headers: { Authorization: `Bearer ${backendToken}` },
+                          });
+
+                          console.log("Backend successfully created the order.");
+                          // Set flag to clear cart and navigate AFTER the callback logic finishes
+                          shouldClearCartAndNavigate = true;
+
+                      } catch (backendError) {
+                          // --- Backend Order Creation FAILED! ---
+                          console.error("--- Backend /orders/create FAILED ---:", backendError);
+                          backendErrorOccurred = true;
+                          if (axios.isAxiosError(backendError)) {
+                              const errorMsg = backendError.response?.data?.message || backendError.message;
+                              // Provide specific message based on potential backend errors
+                              let displayMsg = `Order Placement Failed: ${errorMsg}.`;
+                              if (backendError.response?.status === 409) { // Example: Conflict (e.g., stock)
+                                   displayMsg = `Order Placement Issue: ${errorMsg}. Please adjust your cart or try again.`
+                              }
+                               outcomeError = `${displayMsg} Payment MAY have been processed (Yoco Status: ${result.status}). Please contact support with Payment Reference: ${yocoChargeId}.`;
+                          } else {
+                              outcomeError = `An unexpected error occurred while placing your order. Payment MAY have been processed (Yoco Status: ${result.status}). Please contact support with Payment Reference: ${yocoChargeId}.`;
+                          }
+                          // --- DO NOT clear cart or navigate here ---
+                      }
+                      // --- End Backend Call ---
+
+                  } else if (result.status === 'failed') {
+                      console.warn("Yoco Payment explicitly failed.");
+                      outcomeError = "Payment failed. Please check your details or try another card.";
+                  } else if (result.status === 'cancelled') {
+                      console.warn("Yoco Payment was cancelled (status: 'cancelled').");
+                      outcomeError = "Payment was cancelled.";
+                  } else {
+                      // Handle other unexpected statuses
+                      console.warn("Yoco Payment resulted in unexpected status:", result.status, "Full result:", result);
+                      outcomeError = "Payment outcome uncertain. Please check your confirmation or contact support.";
+                  }
+
+                  // --- Step 4d: Handle Callback Outcome ---
+                  if (outcomeError) {
+                      console.log("Setting payment error state:", outcomeError);
+                      setPaymentError(outcomeError); // Display error to the user
+                  }
+
+                  if (shouldClearCartAndNavigate) {
+                      // --- Order successfully created on backend ---
+                      try {
+                          console.log("Clearing cart on frontend...");
+                          await clearCart(); // Use clearCart from context
+                          console.log("Frontend cart cleared.");
+                          console.log("Navigating to /order-confirmation");
+                          navigate('/order-confirmation'); // Navigate only after backend success
+                      } catch (clearError) {
+                          console.error("Error clearing cart on frontend after successful order creation:", clearError);
+                          // Minor issue: Order created, but frontend cart didn't clear.
+                           setPaymentError("Order created successfully, but failed to clear local cart. Please refresh if items still appear.");
+                           // Still navigate as the order IS placed.
+                           navigate('/order-confirmation');
+                      }
+                  }
+                  // --- End Handle Callback Outcome ---
+
+              } catch (callbackLogicError) {
+                  // --- Error within the callback logic itself ---
+                  console.error("--- Error INSIDE Yoco Callback Logic ---:", callbackLogicError);
+                  setPaymentError("An internal error occurred after payment processing. Please check your order history or contact support.");
+                  // Avoid clearing cart or navigating if the flow logic failed
+              } finally {
+                  // --- Always reset processing state ---
+                  console.log("Resetting isProcessingPayment to false via callback.");
+                  setIsProcessingPayment(false);
+                  console.log("--- Yoco SDK Callback END ---");
+              }
+              // --- End Step 4: Handle Yoco Callback ---
+          } // end callback
+      }); // end showPopup
+
+      // --- Step 5: Set Timeout Fallback (Keep existing logic) ---
+      console.log("Setting payment timeout fallback (45s).");
+      paymentTimeoutRef.current = setTimeout(() => {
+          console.warn("Payment timeout reached.");
+          // Only set error if still processing (i.e., callback hasn't completed/run)
+          if (isProcessingPayment) {
+                setIsProcessingPayment(false);
+                setPaymentError("Payment process was cancelled or timed out before completing.");
+          }
+          paymentTimeoutRef.current = null;
+      }, 45000); // 45 seconds
+      // --- End Timeout Fallback ---
+
+    } catch (error) { // Catch errors during Yoco initiation step
         console.error("Failed to initiate payment:", error);
         const errorMsg = axios.isAxiosError(error) ? error.response?.data?.message || error.message : 'Payment initiation failed';
         setPaymentError(errorMsg);
-
-        // Clear timeout on initiation error
-        if (paymentTimeoutRef.current) {
-            console.log("Clearing payment timeout due to initiation error.");
-            clearTimeout(paymentTimeoutRef.current);
-            paymentTimeoutRef.current = null;
+        if (paymentTimeoutRef.current) { // Clear timeout if initiation failed
+             clearTimeout(paymentTimeoutRef.current);
+             paymentTimeoutRef.current = null;
         }
-        setIsProcessingPayment(false); // Reset processing state on error
+        setIsProcessingPayment(false); // Reset processing state on initiation error
     }
-  }; // end handlePayment
+  }; // --- END MODIFIED handlePayment ---
 
   // --- Render Logic ---
   if (isAuthLoading) return <p>Loading authentication...</p>;

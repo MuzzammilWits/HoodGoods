@@ -144,8 +144,23 @@ const Navbar: React.FC = () => {
             )
           )}
 
-          <a href="#account" className="icon-link">👤</a>
-          <Link to="/cart" className="icon-link" onClick={handleCartClick}>🛒</Link>  {/* Add handleCartClick here */}
+
+          {/* --- MODIFIED: Orders Icon Link --- */}
+          {/* Show Orders icon only if authenticated */}
+          {isAuthenticated && (
+            <Link to="/my-orders" className="icon-link" title="My Orders">
+              📋 {/* Orders Icon (Clipboard) */}
+            </Link>
+          )}
+          {/* --- END MODIFICATION --- */}
+
+          {/* Cart Icon Link */}
+          {/* Consider showing cart only if authenticated or based on role */}
+          {isAuthenticated && ( // Example: Show cart only when logged in
+             <Link to="/cart" className="icon-link" title="Cart" onClick={handleCartClick}>
+               🛒 {/* Cart Icon */}
+             </Link>
+          )}
         </section>
       </header>
     </nav>
