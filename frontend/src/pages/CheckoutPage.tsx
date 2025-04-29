@@ -315,7 +315,7 @@ export default function CheckoutPage() {
                           });
 
                           console.log("Backend successfully created the order.");
-                          // Set flag to clear cart and navigate AFTER the callback logic finishes
+                          // Set flag to clear cart and navigate AFTER the 
                           shouldClearCartAndNavigate = true;
 
                       } catch (backendError) {
