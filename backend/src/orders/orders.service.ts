@@ -12,7 +12,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Order } from './entities/order.entity';
-import { SellerOrder } from './entities/seller-order.entity'; // Import SellerOrder
+import { SellerOrder } from './entities/seller-order.entity';
 import { SellerOrderItem } from './entities/seller-order-item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Store } from '../store/entities/store.entity';
@@ -30,25 +30,23 @@ export class OrdersService {
     private ordersRepository: Repository<Order>,
     @InjectRepository(CartItem)
     private cartItemsRepository: Repository<CartItem>,
-    // *** ADDED: Inject SellerOrder repository ***
     @InjectRepository(SellerOrder)
     private sellerOrdersRepository: Repository<SellerOrder>,
   ) {}
 
   private readonly logger = new Logger(OrdersService.name);
 
-  // ... (groupItemsByStore method) ...
+  // ... (groupItemsByStore method - keep as is) ...
   private groupItemsByStore(items: CartItemDto[]): Record<string, CartItemDto[]> {
-    // ... (implementation) ...
-    return items.reduce((acc, item) => {
-        const storeId = item.storeId.toString();
-        if (!acc[storeId]) {
-            acc[storeId] = [];
-        }
-        acc[storeId].push(item);
-        return acc;
-        }, {} as Record<string, CartItemDto[]>);
-    }
+      return items.reduce((acc, item) => {
+          const storeId = item.storeId.toString();
+          if (!acc[storeId]) {
+              acc[storeId] = [];
+          }
+          acc[storeId].push(item);
+          return acc;
+          }, {} as Record<string, CartItemDto[]>);
+      }
 
   // ... (createOrder method - keep as is) ...
   async createOrder(createOrderDto: CreateOrderDto, buyerUserId: string): Promise<Order> {
@@ -152,7 +150,6 @@ export class OrdersService {
             itemsSubtotal: itemsSubtotal,
             sellerTotal: sellerTotal,
             status: 'Processing',
-            
             // createdAt and updatedAt will be handled by decorators if present,
             // otherwise set manually if needed (but usually not required for @Create/@UpdateDateColumn)
             });
@@ -174,14 +171,13 @@ export class OrdersService {
             pickupArea: selectedArea,
             pickupPoint: selectedPickupPoint,
             // createdAt/updatedAt handled by decorators
-            
 
 
         });
         savedOrder = await queryRunner.manager.save(Order, newOrder);
         const orderId = savedOrder.orderId; // Use property name
         this.logger.log(`Created Order ID: ${orderId} for user ${buyerUserId}`);
-        // *** ADDED LOGGING FOR TIMESTAMPS ***
+        // *** Logging for Timestamps (Keep for debugging if needed) ***
         this.logger.debug(`Saved Order Timestamps - Created: ${savedOrder.createdAt?.toISOString()}, Updated: ${savedOrder.updatedAt?.toISOString()}`);
 
 
@@ -200,7 +196,7 @@ export class OrdersService {
             });
             const savedSellerOrder = await queryRunner.manager.save(SellerOrder, newSellerOrder);
             const sellerOrderId = savedSellerOrder.sellerOrderId; // Use property name
-            // *** ADDED LOGGING FOR TIMESTAMPS ***
+            // *** Logging for Timestamps (Keep for debugging if needed) ***
             this.logger.debug(`Saved SellerOrder ${sellerOrderId} Timestamps - Created: ${savedSellerOrder.createdAt?.toISOString()}, Updated: ${savedSellerOrder.updatedAt?.toISOString()}`);
 
 
@@ -236,11 +232,11 @@ export class OrdersService {
             // Save all items for the current seller order
             const savedItems = await queryRunner.manager.save(SellerOrderItem, sellerOrderItemsToCreate);
             this.logger.log(`Saved ${savedItems.length} items for SellerOrder ID: ${sellerOrderId}`);
-            // *** ADDED LOGGING FOR TIMESTAMPS (Optional: log first item) ***
+            // *** Logging for Timestamps (Keep for debugging if needed) ***
             if (savedItems.length > 0) {
                 // Use optional chaining and nullish coalescing for safety
                 const firstItem = savedItems[0];
-               // this.logger.debug(`Saved SellerOrderItem ${firstItem.sellerOrderItemId} Timestamps - Created: ${firstItem.createdAt?.toISOString() ?? 'N/A'}, Updated: ${firstItem.updatedAt?.toISOString() ?? 'N/A'}`);
+                this.logger.debug(`Saved SellerOrderItem ${firstItem.sellerOrderItemId} Timestamps - Created: ${firstItem.createdAt?.toISOString() ?? 'N/A'}, Updated: ${firstItem.updatedAt?.toISOString() ?? 'N/A'}`);
             }
 
         } // End seller loop
@@ -302,26 +298,14 @@ export class OrdersService {
 
     } // End createOrder method
 
-
-  // --- NEW METHOD: Find orders for a specific seller ---
+  // --- findSellerOrders method (Keep as is) ---
   async findSellerOrders(sellerUserId: string): Promise<SellerOrder[]> {
     this.logger.log(`Finding seller orders for seller user ID: ${sellerUserId}`);
     try {
-      // Use the injected repository to find SellerOrders
       const sellerOrders = await this.sellerOrdersRepository.find({
-        where: {
-          userId: sellerUserId // Filter by the seller's user ID property
-        },
-        // Specify relations to load along with the SellerOrder
-        relations: [
-          'order',              // Load the main Order details (for pickup location)
-          'items',              // Load the SellerOrderItems for this SellerOrder
-          'items.product'       // Load the Product details for each item
-        ],
-        // Order by creation date, newest first
-        order: {
-          createdAt: 'DESC'
-        }
+        where: { userId: sellerUserId },
+        relations: ['order', 'items', 'items.product'],
+        order: { createdAt: 'DESC' } // Assuming createdAt exists and works eventually
       });
       this.logger.log(`Found ${sellerOrders.length} seller orders for seller user ID: ${sellerUserId}`);
       return sellerOrders;
@@ -331,14 +315,41 @@ export class OrdersService {
     }
   }
 
-  // --- Placeholder for calculateSellerEarnings ---
+  // --- IMPLEMENTED calculateSellerEarnings ---
   async calculateSellerEarnings(sellerUserId: string, status?: string): Promise<{ totalEarnings: number }> {
-      this.logger.log(`Calculating earnings for seller: ${sellerUserId}, status filter: ${status ?? 'None'}`);
-      // TODO: Implement query builder logic here
-      // SELECT SUM(sellerOrder.sellerTotal) ... WHERE userId = sellerUserId AND status = status (if provided)
-      const totalEarnings = 0; // Placeholder value
-      this.logger.warn('calculateSellerEarnings method is not fully implemented yet.');
+    this.logger.log(`Calculating earnings for seller: ${sellerUserId}, status filter: ${status ?? 'None'}`);
+    try {
+      // Start building the query using the repository
+      const queryBuilder = this.sellerOrdersRepository.createQueryBuilder('sellerOrder');
+
+      // Select the SUM of the 'sellerTotal' column and alias it as 'totalEarnings'
+      // Use the JS property name 'sellerTotal' here
+      queryBuilder.select('SUM(sellerOrder.sellerTotal)', 'totalEarnings');
+
+      // Filter by the seller's user ID
+      // Use the JS property name 'userId' here
+      queryBuilder.where('sellerOrder.userId = :sellerUserId', { sellerUserId });
+
+      // Optionally filter by status if provided
+      if (status) {
+        // Use the JS property name 'status' here
+        queryBuilder.andWhere('sellerOrder.status = :status', { status });
+      }
+
+      // Execute the query and get the raw result (which contains the sum)
+      const result = await queryBuilder.getRawOne(); // Use getRawOne for aggregate results
+
+      // The sum might be null if no matching orders are found, default to 0
+      // The result['totalEarnings'] might be a string, parse it to a float
+      const totalEarnings = result && result.totalEarnings ? parseFloat(result.totalEarnings) : 0;
+
+      this.logger.log(`Calculated earnings for seller ${sellerUserId} (status: ${status ?? 'All'}): ${totalEarnings}`);
       return { totalEarnings };
+
+    } catch (error) {
+      this.logger.error(`Failed to calculate earnings for seller ${sellerUserId}. Error: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to calculate seller earnings.');
+    }
   }
 
   // --- Placeholder for updateSellerOrderStatus ---
@@ -356,6 +367,7 @@ export class OrdersService {
       }
       order.status = newStatus; // Update status
       // Potentially use queryRunner for update within a transaction if needed
+      // Add logic here to prevent invalid status transitions if necessary
       return this.sellerOrdersRepository.save(order);
   }
 
