@@ -38,11 +38,14 @@ export class Order {
 
   // Matches created_at timestamp in screenshot
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  // Matches updated_at timestamp in screenshot
+  // *** MODIFIED: Added default value ***
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+  @Column({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }) // onUpdate might also help
   updatedAt: Date;
+
 
   // Relationship to SellerOrder
   @OneToMany(() => SellerOrder, sellerOrder => sellerOrder.order)
