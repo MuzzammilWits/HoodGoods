@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
-import { Link } from 'react-router-dom'; // For potential links
+// import { Link } from 'react-router-dom'; For potential links
 // *** Import the CSS file ***
 import './MyOrdersPage.css';
 
@@ -150,7 +150,8 @@ export default function MyOrdersPage() {
                                             <p>Status: <strong className={`status-badge ${statusClassMap[sellerOrder.status] || 'status-unknown'}`}>{sellerOrder.status}</strong></p>
                                         </header>
                                         <div className="shipment-details">
-                                            <p><strong>Delivery:</strong> {sellerOrder.deliveryMethod} (Est: {sellerOrder.deliveryTimeEstimate})</p>
+                                            <p><strong>Delivery Method:</strong> {sellerOrder.deliveryMethod} (R{sellerOrder.deliveryPrice.toFixed(2)})</p>
+                                            <p><strong>ETA:</strong> {sellerOrder.deliveryTimeEstimate} days</p>
                                             <p><strong>Shipment Total:</strong> R{sellerOrder.sellerTotal.toFixed(2)}</p>
                                         </div>
                                         <ul className="item-list">
@@ -165,6 +166,7 @@ export default function MyOrdersPage() {
                                                     <div className="item-details">
                                                         <span>{item.productNameSnapshot}</span>
                                                         <span>Qty: {item.quantityOrdered} @ R{item.pricePerUnit.toFixed(2)}</span>
+                                                        <span>Item Total: R{(item.pricePerUnit * item.quantityOrdered).toFixed(2)}</span>
                                                     </div>
                                                 </li>
                                             ))}
