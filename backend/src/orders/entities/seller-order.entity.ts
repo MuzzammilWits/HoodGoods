@@ -54,16 +54,6 @@ export class SellerOrder {
   @Column({ name: 'status', type: 'varchar', length: 50, default: 'Processing' })
   status: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  // *** MODIFIED: Added default value ***
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-  @Column({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }) // onUpdate might also help
-  updatedAt: Date;
-
-
 
   // Relationship to SellerOrderItem
   @OneToMany(() => SellerOrderItem, item => item.sellerOrder)

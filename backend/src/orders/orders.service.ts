@@ -176,7 +176,7 @@ export class OrdersService {
         const orderId = savedOrder.orderId; // Use property name
         this.logger.log(`Created Order ID: ${orderId} for user ${buyerUserId}`);
         // *** Logging for Timestamps (Keep for debugging if needed) ***
-        this.logger.debug(`Saved Order Timestamps - Created: ${savedOrder.createdAt?.toISOString()}, Updated: ${savedOrder.updatedAt?.toISOString()}`);
+      //  this.logger.debug(`Saved Order Timestamps - Created: ${savedOrder.createdAt?.toISOString()}, Updated: ${savedOrder.updatedAt?.toISOString()}`);
 
 
         // --- 4. Create SellerOrder records and SellerOrderItem records ---
@@ -195,7 +195,7 @@ export class OrdersService {
             const savedSellerOrder = await queryRunner.manager.save(SellerOrder, newSellerOrder);
             const sellerOrderId = savedSellerOrder.sellerOrderId; // Use property name
             // *** Logging for Timestamps (Keep for debugging if needed) ***
-            this.logger.debug(`Saved SellerOrder ${sellerOrderId} Timestamps - Created: ${savedSellerOrder.createdAt?.toISOString()}, Updated: ${savedSellerOrder.updatedAt?.toISOString()}`);
+    //        this.logger.debug(`Saved SellerOrder ${sellerOrderId} Timestamps - Created: ${savedSellerOrder.createdAt?.toISOString()}, Updated: ${savedSellerOrder.updatedAt?.toISOString()}`);
 
 
             // *** CORRECTED: Use Partial<SellerOrderItem> for type safety ***
@@ -234,7 +234,7 @@ export class OrdersService {
             if (savedItems.length > 0) {
                 // Use optional chaining and nullish coalescing for safety
                 const firstItem = savedItems[0];
-                this.logger.debug(`Saved SellerOrderItem ${firstItem.sellerOrderItemId} Timestamps - Created: ${firstItem.createdAt?.toISOString() ?? 'N/A'}, Updated: ${firstItem.updatedAt?.toISOString() ?? 'N/A'}`);
+      //          this.logger.debug(`Saved SellerOrderItem ${firstItem.sellerOrderItemId} Timestamps - Created: ${firstItem.createdAt?.toISOString() ?? 'N/A'}, Updated: ${firstItem.updatedAt?.toISOString() ?? 'N/A'}`);
             }
 
         } // End seller loop
@@ -304,7 +304,7 @@ export class OrdersService {
       const sellerOrders = await this.sellerOrdersRepository.find({
         where: { userId: sellerUserId },
         relations: ['order', 'items', 'items.product'],
-        order: { createdAt: 'DESC' } // Assuming createdAt exists and works eventually
+    //    order: { createdAt: 'DESC' } // Assuming createdAt exists and works eventually
       });
       this.logger.log(`Found ${sellerOrders.length} seller orders for seller user ID: ${sellerUserId}`);
       return sellerOrders;
