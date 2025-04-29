@@ -17,8 +17,10 @@ import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
-// import CheckoutPage from './pages/CheckoutPage'; // Removed unused import
-import OrderConfirmationPage from './pages/OrderConfirmationPage'; // *** Import the new page ***
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import SellerDashboardPage from './pages/SellerDashboardPage'; // Adjust path if needed
+// *** Import the My Orders Page ***
+import MyOrdersPage from './pages/MyOrdersPage'; // Adjust path if needed
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -66,29 +68,35 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
-            {/* Public Cart Route */}
-            <Route path="/cart" element={
+          {/* --- MODIFIED: Cart Route (Protected) --- */}
+          <Route path="/cart" element={
               <section>
-                <CartPage />
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
+                  <CartPage />
+                </ProtectedRoute>
               </section>
             } />
 
+            {/* Checkout Route (Protected) */}
             <Route path="/checkout" element={
               <section>
-                <CheckoutPage />
+                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Example: Allow all logged-in */}
+                    <CheckoutPage />
+                 </ProtectedRoute>
               </section>
             } />
 
- 
 
-            {/* --- Added Order Confirmation Route --- */}
+            {/* --- MODIFIED: Order Confirmation Route (Protected) --- */}
             <Route path="/order-confirmation" element={
               <section>
-                <OrderConfirmationPage />
+                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
+                   <OrderConfirmationPage />
+                 </ProtectedRoute>
               </section>
             } />
 
-            {/* Protected Routes */}
+            {/* --- Protected Routes --- */}
             <Route path="/create-store" element={
               <ProtectedRoute allowedRoles={['buyer']}> {/* Adjust roles as needed */}
                 <article>
@@ -105,10 +113,27 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             } />
 
+             <Route path="/seller-dashboard" element={
+              <ProtectedRoute allowedRoles={['seller']}> {/* Protect for sellers */}
+                <article>
+                  <SellerDashboardPage />
+                </article>
+              </ProtectedRoute>
+            } />
+
             <Route path="/admin-dashboard" element={
               <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
                 <article>
                   <AdminDashboard />
+                </article>
+              </ProtectedRoute>
+            } />
+
+            {/* *** ADDED My Orders Route (for any logged-in user) *** */}
+            <Route path="/my-orders" element={
+              <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Or just 'buyer' if preferred */}
+                <article>
+                  <MyOrdersPage />
                 </article>
               </ProtectedRoute>
             } />

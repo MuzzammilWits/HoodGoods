@@ -1,5 +1,5 @@
 /* --- Reset semantic elements in Hero --- */
-section, article, aside, nav, main, header, figure, figcaption, ul, li {
+section, article, aside, main, figure, figcaption, ul, li {
   all: unset;
   display: block;
 }

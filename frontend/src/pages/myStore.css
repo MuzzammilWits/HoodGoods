@@ -36,6 +36,47 @@ section.delivery-info-display {
   box-sizing: border-box;
 }
 
+/* Secondary action button (View Orders) */
+.button-secondary {
+  background-color: #6c757d; /* Bootstrap's secondary color */
+  color: white;
+  border-color: #6c757d;
+}
+.button-secondary:hover:not(:disabled) {
+  background-color: #5a6268; /* Darker gray on hover */
+  border-color: #545b62;
+  color: white;
+}
+
+.view-orders-btn {
+  /* Base Button Layout & Appearance */
+  display: inline-block; /* Ensures proper block-like behavior */
+  padding: 10px 20px; /* Match other buttons */
+  font-size: 16px; /* Match other buttons */
+  font-weight: 500; /* Match other buttons */
+  border-radius: 4px; /* Match other buttons */
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none; /* Remove underline */
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  line-height: 1.4; /* Match other buttons */
+  box-sizing: border-box;
+  vertical-align: middle;
+
+  /* Specific Colors (like button-secondary) */
+  background-color: #6c757d; /* Bootstrap's secondary color */
+  color: white;
+  border-color: #6c757d;
+}
+
+.view-orders-btn:hover:not(:disabled) {
+  background-color: #5a6268; /* Darker gray on hover */
+  border-color: #545b62;
+  color: white;
+  text-decoration: none; /* Ensure no underline on hover */
+}
+
 /* NEW: Header within the delivery section (holds H2 and Edit button) */
 .delivery-header {
   display: flex;

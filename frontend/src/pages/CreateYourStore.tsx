@@ -324,7 +324,7 @@ const CreateYourStore: React.FC = () => {
                          name="standardPrice"
                          value={formData.standardPrice}
                          onChange={(e) => handleStoreFieldChange('standardPrice', e.target.value)}
-                         placeholder="e.g., 5.00"
+                         placeholder="e.g., 50.00"
                          min="0" // HTML5 validation
                          step="0.01" // Allow cents
                          required // HTML5 validation
@@ -352,7 +352,7 @@ const CreateYourStore: React.FC = () => {
                          name="expressPrice"
                          value={formData.expressPrice}
                          onChange={(e) => handleStoreFieldChange('expressPrice', e.target.value)}
-                         placeholder="e.g., 10.00"
+                         placeholder="e.g., 100.00"
                           min="0"
                           step="0.01"
                          required
@@ -386,8 +386,8 @@ const CreateYourStore: React.FC = () => {
                     isSubmitting={isSubmitting}
                 />
 
-                {/* Actions section using Fragment instead of div */}
-                <Fragment> {/* Replaced div */}
+                {/* Actions section using Fragment instead of divs */}
+                <Fragment> 
                     <SubmissionStatus error={error} success={success} />
                     <button
                         type="submit"
@@ -396,7 +396,7 @@ const CreateYourStore: React.FC = () => {
                     >
                         {isSubmitting ? 'Creating Store...' : 'Create Your Store'}
                     </button>
-                </Fragment> {/* Replaced div */}
+                </Fragment> 
             </form>
         </section>
     );
