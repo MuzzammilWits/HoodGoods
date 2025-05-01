@@ -12,4 +12,13 @@ export class SupabaseService {
   getClient() {
     return this.supabase;
   }
+  async testConnection() {
+    const { data, error } = await this.supabase
+      .from('Users')
+      .select('*')
+      .limit(1);
+      
+    console.log('Supabase connection test:', { data, error });
+    return { data, error };
+  }
 }

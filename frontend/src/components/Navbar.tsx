@@ -20,7 +20,22 @@ const Navbar: React.FC = () => {
   const [isRoleLoading, setIsRoleLoading] = useState<boolean>(true);
 
   const navigate = useNavigate();  // useNavigate hook to programmatically navigate
-
+// Add this helper function near the top of your Navbar.tsx
+const checkAdminAccess = async (token: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${backendUrl}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.role === 'admin';
+    }
+    return false;
+  } catch (error) {
+    console.error('Admin check failed:', error);
+    return false;
+  }
+};
   useEffect(() => {
     const fetchTokenAndRole = async () => {
       if (!isLoading && isAuthenticated) {
@@ -43,6 +58,7 @@ const Navbar: React.FC = () => {
           if (roleRes.ok) {
             const data = await roleRes.json();
             setRole(data.role);
+
           } else {
             setRole(null);
           }
@@ -112,11 +128,36 @@ const Navbar: React.FC = () => {
             </li>
           )}
 
-          {!isLoading && isAuthenticated && !isRoleLoading && role === 'admin' && (
-            <li className="nav-item">
-              <Link to="/admin-dashboard" className="nav-link">Admin Dashboard</Link>
-            </li>
-          )}
+{!isLoading && isAuthenticated && !isRoleLoading && (
+  <>
+    {role === 'seller' && (
+      <li className="nav-item">
+        <Link to="/my-store" className="nav-link">My Store</Link>
+      </li>
+    )}
+    {role === 'admin' && (
+      <li className="nav-item">
+        <Link 
+          to="/admin-dashboard" 
+          className="nav-link"
+          onClick={async (e) => {
+            // Only proceed if we're sure the user is admin
+            const token = sessionStorage.getItem('access_token');
+            if (token) {
+              const isAdmin = await checkAdminAccess(token);
+              if (!isAdmin) {
+                e.preventDefault();
+                navigate('/');
+              }
+            }
+          }}
+        >
+          Admin Dashboard
+        </Link>
+      </li>
+    )}
+  </>
+)}
         </ul>
 
         {/* Icons and Authentication Section */}
