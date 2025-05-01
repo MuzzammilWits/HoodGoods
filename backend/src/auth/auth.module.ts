@@ -6,14 +6,15 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
-
+import { AdminController } from './admin.controller';//for admin delete orders
+import { SupabaseService } from 'src/supabase.service';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forFeature([User]),
   ],
-  providers: [JwtStrategy, AuthService],
-  controllers: [AuthController],
+  providers: [JwtStrategy, AuthService,SupabaseService],
+  controllers: [AuthController, AdminController],
   exports: [PassportModule],
 })
 export class AuthModule {}

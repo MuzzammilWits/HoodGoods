@@ -21,7 +21,8 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import SellerDashboardPage from './pages/SellerDashboardPage'; // Adjust path if needed
 // *** Import the My Orders Page ***
 import MyOrdersPage from './pages/MyOrdersPage'; // Adjust path if needed
-
+// admin
+import { AdminProvider } from './context/AdminContext';
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
@@ -121,13 +122,13 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             } />
 
-            <Route path="/admin-dashboard" element={
-              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
-                <article>
-                  <AdminDashboard />
-                </article>
-              </ProtectedRoute>
-            } />
+              <Route path="/admin-dashboard" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminProvider>
+                    <AdminDashboard />
+                  </AdminProvider>
+                </ProtectedRoute>
+              }/>
 
             {/* *** ADDED My Orders Route (for any logged-in user) *** */}
             <Route path="/my-orders" element={
