@@ -201,6 +201,15 @@ menu.actions {
   color: #495057;
 }
 
+.yc-auto-shown-popup {
+  z-index: 2147483647 !important; /* Use a very high z-index */
+  position: fixed !important;     /* ADDED: Ensure it's positioned relative to viewport */
+  top: 0;                         /* ADDED: Ensure it covers screen */
+  left: 0;                        /* ADDED: Ensure it covers screen */
+  width: 100%;                    /* ADDED: Ensure it covers screen */
+  height: 100%;                   /* ADDED: Ensure it covers screen */
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   /* .address-row { ... } */ /* Your existing responsive rule */
