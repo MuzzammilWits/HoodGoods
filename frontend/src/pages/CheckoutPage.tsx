@@ -18,21 +18,6 @@ type CartItemDisplay = {
   storeId: string;
 };
 
-interface CartItemForPayload {
-  productId: number;
-  quantity: number;
-  pricePerUnitSnapshot: number;
-  storeId: string;
-}
-interface OrderPayload {
-  cartItems: CartItemForPayload[];
-  deliverySelections: Record<string, 'standard' | 'express'>;
-  selectedArea: string;
-  selectedPickupPoint: string;
-  yocoChargeId: string;
-  frontendGrandTotal: number;
-}
-
 interface StoreDeliveryDetails {
     storeId: string;
     standardPrice: number;
