@@ -1,24 +1,22 @@
-import { useEffect, useState, useMemo } from 'react'; // Added React import
-import { useCart } from '../context/ContextCart'; // Ensure path is correct
+import { useEffect, useState, useMemo } from 'react';
+import { useCart } from '../context/ContextCart';
 import { useSearchParams } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react'; // Import useAuth0
+import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import './ProductsPage.css';
 
 // Search normalizer function
 const normalizeSearchTerm = (term: string) => {
-  if (!term) return ''; // Handle null/undefined input
+  if (!term) return '';
   return term
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[^\w\s]/g, '')  // Remove punctuation
-    .replace(/\b(s|es|ies|ing|ed|er)\b/g, '') // Basic suffix stripping
-    .replace(/\s+/g, ' ')  // Collapse multiple spaces
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, '')
+    .replace(/\b(s|es|ies|ing|ed|er)\b/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 };
 
-// --- INTERFACE CHANGES ---
-// Product interface matching backend entity (storeId as string)
 interface Product {
   prodId: number;
   name: string;
@@ -28,40 +26,43 @@ interface Product {
   productquantity: number;
   userId: string;
   imageUrl: string;
-  storeId: string; // <<< CHANGED to string
+  storeId: string;
   storeName: string;
   isActive: boolean;
 }
 
-// Interface for item passed to addToCart context function (storeId as string)
 interface AddToCartItem {
   productId: number;
   productName: string;
   productPrice: number;
   imageUrl?: string;
-  storeId: string;   // <<< CHANGED to string
+  storeId: string;
   storeName: string;
 }
-// --- END INTERFACE CHANGES ---
-
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  // filteredProducts state is not strictly needed if filtering is done in render or memoized
-  // const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const { user, isAuthenticated } = useAuth0();
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | null}>({message: '', type: null});
 
   const selectedCategory = searchParams.get('category') || '';
   const selectedStore = searchParams.get('store') || '';
   const searchQuery = searchParams.get('search') || '';
 
-  // Fetch products once on mount
+  // Show notification and auto-hide after delay
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({message, type});
+    setTimeout(() => {
+      setNotification({message: '', type: null});
+    }, 3000);
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
@@ -79,16 +80,12 @@ const ProductsPage = () => {
             throw new Error('Invalid data format received from server');
         }
 
-        // Validate fetched products (optional but good practice)
-        // Ensure storeId is treated as a string if necessary after fetching
         const validatedProducts = fetchedProducts.map(p => ({
             ...p,
-            storeId: String(p.storeId ?? 'unknown') // Ensure storeId is a string
+            storeId: String(p.storeId ?? 'unknown')
         }));
 
-        console.log("Validated Fetched Products:", validatedProducts);
         setProducts(validatedProducts);
-
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
           ? err.response?.data?.message || err.message
@@ -104,12 +101,10 @@ const ProductsPage = () => {
     };
 
     fetchProducts();
-  }, []); // Empty dependency array ensures fetch runs only once
+  }, []);
 
-  // Memoize the filtering logic
   const filteredProducts = useMemo(() => {
       let result = [...products];
-
       if (selectedCategory) {
         result = result.filter(product => product.category === selectedCategory);
       }
@@ -133,8 +128,6 @@ const ProductsPage = () => {
       return result;
   }, [selectedCategory, selectedStore, searchQuery, products]);
 
-
-  // --- Event Handlers for Filters ---
   const handleFilterChange = (filterType: 'category' | 'store' | 'search', value: string) => {
       const newParams = new URLSearchParams(searchParams);
       if (value) {
@@ -148,65 +141,54 @@ const ProductsPage = () => {
   const handleCategoryChange = (category: string) => handleFilterChange('category', category);
   const handleStoreChange = (store: string) => handleFilterChange('store', store);
   const handleSearchChange = (query: string) => handleFilterChange('search', query);
-  // --- End Event Handlers ---
-
 
   const handleAddToCart = async (product: Product) => {
     try {
-      // Validate product basic info
       if (!product || typeof product.prodId === 'undefined') {
         throw new Error('Product data is invalid or missing ID');
       }
-      // Validate price
+      
       const price = Number(product.price);
       if (isNaN(price)) {
         throw new Error('Product price is invalid');
       }
-      // Validate storeId (should be a non-empty string now)
+      
       if (!product.storeId || product.storeId === 'unknown') {
-         console.error("Product missing valid storeId:", product);
-         throw new Error('Product is missing store information.');
+        console.error("Product missing valid storeId:", product);
+        throw new Error('Product is missing store information.');
       }
 
-
-      // Check stock
       if (product.productquantity <= 0) {
-          alert(`${product.name} is currently out of stock.`); // Use better notification
-          return;
+        showNotification(`${product.name} is currently out of stock.`, 'error');
+        return;
       }
-      // Check ownership
+      
       if (isAuthenticated && user?.sub === product.userId) {
-          alert("You cannot add your own product to the cart."); // Use better notification
-          return;
+        showNotification("You cannot add your own product to the cart.", 'error');
+        return;
       }
 
-      // Prepare item with required string storeId
       const itemToAdd: AddToCartItem = {
         productId: product.prodId,
         productName: product.name,
         productPrice: price,
-        storeId: product.storeId, // Pass string storeId
+        storeId: product.storeId,
         storeName: product.storeName,
         imageUrl: product.imageUrl || undefined
       };
 
       await addToCart(itemToAdd);
-      alert(`${product.name} added to cart!`); // Use better notification
+      showNotification(`${product.name} added to cart!`, 'success');
 
     } catch (error) {
       console.error('Error adding to cart:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to add item to cart';
-      setError(errorMsg);
-      setTimeout(() => setError(null), 5000); // Auto-clear error
+      showNotification(errorMsg, 'error');
     }
   };
 
-
-  // Memoize category and store lists
   const categories = useMemo(() => [...new Set(products.map(product => product.category))], [products]);
   const stores = useMemo(() => [...new Set(products.map(product => product.storeName))], [products]);
-
-  // --- Render Logic ---
 
   if (isLoading) {
     return <p className="loading-spinner">Loading products...</p>;
@@ -229,12 +211,17 @@ const ProductsPage = () => {
 
   return (
     <main className="products-container">
+      {/* Notification Modal */}
+      {notification.type && (
+        <div className={`notification-modal ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+
       <h1>Artisan Products</h1>
 
-      {/* Filters Section */}
       <section className="filters-container" aria-labelledby="filters-heading">
-         <h2 id="filters-heading" className="sr-only">Product Filters</h2> {/* Screen-reader only heading */}
-          {/* Search Bar */}
+         <h2 id="filters-heading" className="sr-only">Product Filters</h2>
           <div className="search-bar filters">
             <label htmlFor="product-search">Search Products:</label>
             <input
@@ -247,7 +234,6 @@ const ProductsPage = () => {
             />
           </div>
 
-          {/* Category Filter */}
           <div className="category-filter filters">
             <label htmlFor="category-select">Filter by Category:</label>
             <select
@@ -264,7 +250,6 @@ const ProductsPage = () => {
             </select>
           </div>
 
-          {/* Store Filter */}
           <div className="store-filter filters">
             <label htmlFor="store-select">Filter by Store:</label>
             <select
@@ -282,8 +267,6 @@ const ProductsPage = () => {
           </div>
       </section>
 
-
-      {/* Products Grid */}
       <ul className="products-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => {
