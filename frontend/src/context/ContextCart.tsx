@@ -15,7 +15,7 @@ interface CartItemUI {
   availableQuantity?: number;
 }
 
-interface AddToCartItem {
+export interface AddToCartItem {
   productId: number;
   productName: string;
   productPrice: number;
