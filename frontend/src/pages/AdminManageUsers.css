@@ -1,0 +1,35 @@
+/* src/pages/AdminManageUsers.css */
+.admin-users-container {
+    padding: 2rem;
+  }
+  
+  .inactive-row {
+    background-color: #fff1f0;
+  }
+  
+  .inactive-row:hover > td {
+    background-color: #ffccc7 !important;
+  }
+  
+  .custom-message {
+    margin-top: 50vh;
+    font-size: 16px;
+  }
+  
+  /* Additional styling for the table if needed */
+  .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Style for the deactivate button */
+  .ant-btn-danger {
+    background-color: #ff4d4f;
+    border-color: #ff4d4f;
+  }
+  
+  .ant-btn-danger:hover {
+    background-color: #ff7875;
+    border-color: #ff7875;
+  }

@@ -16,6 +16,7 @@
     "@nestjs/common": "^11.0.20",
     "@nestjs/testing": "^11.0.20",
     "@supabase/supabase-js": "^2.49.4",
+    "antd": "^5.24.9",
     "axios": "^1.8.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

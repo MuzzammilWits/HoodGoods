@@ -17,6 +17,7 @@ import MyStore from './pages/MyStore';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDashTest from './pages/AdminDashTest'; //Added to test adminDashboard
 import AdminProducts from './pages/AdminProducts'; //Added to test admin function (edit products)
+import AdminManageUsers from './pages/AdminManageUsers';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
@@ -138,6 +139,16 @@ const AppContent: React.FC = () => {
                 </article>
               </ProtectedRoute>
             } />
+
+            <Route path="/admin/usermanagement" element={
+              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+                <article>
+                  <AdminManageUsers /> 
+                </article>
+              </ProtectedRoute>
+            } />
+
+            
 
             {/* *** ADDED My Orders Route (for any logged-in user) *** */}
             <Route path="/my-orders" element={

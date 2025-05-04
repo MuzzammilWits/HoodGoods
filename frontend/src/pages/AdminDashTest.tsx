@@ -2,6 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import { jewelleryImg, getImage } from '../components/utils/ImageImports';
+import productImage from '../assets/jewellery.jpg';
+import userImage from '../assets/manageUser.jpg';
+
 
 // ... (keep your existing interfaces and imports)
 
@@ -24,14 +28,15 @@ const AdminDashTest: React.FC = () => {
       </div>
 
       {/* Add this new section for management cards */}
-      <div className="management-cards">
+      <div className="management-cards2">
         <div 
-          className="management-card product-card"
+          className="management-card3 product-card"
           onClick={() => navigate('/admin/products')}
         >
           <div className="product-image-container">
+          
             <img
-              src="/manage-products.jpg" // Replace with your image or use an icon
+              src={productImage} // Replace with your image or use an icon
               alt="Manage Products"
               className="product-image"
             />
@@ -43,6 +48,28 @@ const AdminDashTest: React.FC = () => {
             </p>
             <button className="manage-btn" onClick={() => navigate('/admin/products')}>
               Go to Product Management
+            </button>
+          </div>
+        </div>
+
+        <div 
+          className="management-card3 product-card"
+          onClick={() => navigate('/admin/users')}
+        >
+          <div className="product-image-container">
+          <img
+              src={userImage}// Replace with your image or use an icon
+              alt="Manage Products"
+              className="product-image"
+            />
+          </div>
+          <div className="product-details">
+            <h2>Manage Users</h2>
+            <p className="product-description">
+              View, edit, and remove suspicious users from the marketplace
+            </p>
+            <button className="manage-btn" onClick={() => navigate('/admin/usermanagement')}>
+              Go to User Management
             </button>
           </div>
         </div>
