@@ -7,11 +7,15 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 /* Base styles and tweaks for hero section */
 .light-purple-bg {
-  background-color: var(--accent-background, #a899b5);
+  /* background-color: var(--accent-background, #a899b5); */ /* <-- Comment out temporarily for testing */
 }
 
 .hero-section {
   padding: 9rem 0;
+  position: relative; /* Needed for potential absolute children and Vanta positioning */
+  min-height: 60vh; /* <-- ADD THIS: Ensure the section takes up height */
+  /* height: 100vh; */ /* Alternative */
+  overflow: hidden; /* May prevent scrollbars if Vanta canvas slightly overflows */
 }
 
 .hero-container {
@@ -22,6 +26,8 @@ section, article, aside, main, figure, figcaption, ul, li {
   gap: 3rem;
   padding: 0 1rem;
   align-items: start;
+  position: relative; /* Ensure content is positioned relative to hero-section */
+  z-index: 1; /* Ensure content stays above Vanta canvas (if Vanta sets its z-index) */
 }
 
 .hero-header {
@@ -33,7 +39,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 .hero-title {
   font-size: 3.5rem;
   font-weight: 700;
-  color: var(--white, #432C53ff);
+  color: var(--white, rgb(255, 255, 255)); /* Consider changing if background changes */
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
@@ -44,7 +50,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   line-height: 1.7;
   margin-bottom: 2.5rem;
   max-width: 550px;
-  color: rgba(from var(--white, #ffffff) r g b / 0.9);
+  color: rgba(from var(--white, #ffffff) r g b / 0.9); /* Consider changing if background changes */
 }
 
 .hero-buttons {
@@ -113,16 +119,9 @@ section, article, aside, main, figure, figcaption, ul, li {
   position: absolute;
   bottom: -30px;
   left: -25px;
-  z-index: -1;
+  z-index: -1; /* Kept behind grid images */
   opacity: 0.4;
 }
-
-/* .dots {
-  width: 100px;
-  height: 100px;
-  background-image: radial-gradient(circle, var(--white, #fff) 1.5px, transparent 1.5px);
-  background-size: 12px 12px;
-} */
 
 /* --- Seller Prompt Styling --- */
 .hero-seller-prompt {
@@ -136,7 +135,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 .hero-seller-prompt p {
   font-size: 0.95rem;
-  color: var(--white, #fff);
+  color: var(--white, #fff); /* Consider contrast */
   line-height: 1.6;
   margin: 0;
 }
@@ -146,7 +145,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   border: none;
   padding: 0;
   font: inherit;
-  color: var(--white, #fff);
+  color: var(--white, #fff); /* Consider contrast */
   text-decoration: underline;
   cursor: pointer;
   font-weight: 600;
@@ -169,6 +168,8 @@ section, article, aside, main, figure, figcaption, ul, li {
   .hero-text { font-size: 1.1rem; }
   .hero-section {
     padding: 7rem 0;
+     min-height: unset; /* Adjust height for smaller screens if needed */
+     /* height: auto; */
   }
   .hero-seller-prompt {
     margin-top: 3rem;
@@ -178,6 +179,8 @@ section, article, aside, main, figure, figcaption, ul, li {
 @media (max-width: 768px) {
   .hero-section {
     padding: 4rem 0;
+     min-height: unset; /* Adjust height */
+     /* height: auto; */
   }
   .hero-container {
     grid-template-columns: 1fr;
@@ -187,21 +190,21 @@ section, article, aside, main, figure, figcaption, ul, li {
     align-items: flex-start;
     text-align: left;
   }
-  .hero-images { 
-    position: static; 
-    width: 100%; 
-    max-width: 450px; 
-    margin: 1rem auto 0; 
+  .hero-images {
+    position: static;
+    width: 100%;
+    max-width: 450px;
+    margin: 1rem auto 0;
   }
-  .image-grid li { 
-    aspect-ratio: 4 / 3; 
+  .image-grid li {
+    aspect-ratio: 4 / 3;
   }
-  .hero-text { 
-    max-width: 100%; 
-    font-size: 1.1rem; 
+  .hero-text {
+    max-width: 100%;
+    font-size: 1.1rem;
   }
-  .hero-title { 
-    font-size: 2.6rem; 
+  .hero-title {
+    font-size: 2.6rem;
   }
   .hero-buttons {
     align-self: center;
