@@ -133,6 +133,9 @@ const CartPage: React.FC = () => {
               >
                 Clear Cart
               </button>
+              <Link to="/products" className="checkout-btn">
+                Continue Shopping :)
+              </Link>
             </section>
           </footer>
         </section>
