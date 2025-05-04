@@ -86,8 +86,10 @@ const ProductsPage = () => {
 
         const validatedProducts = fetchedProducts.map(p => ({
             ...p,
-            storeId: String(p.storeId ?? 'unknown')
-        }));
+            storeId: String(p.storeId ?? 'unknown'),
+            productquantity: Number(p.productquantity) || 0
+        }))
+        .filter(p => p.productquantity > 0);
 
         setProducts(validatedProducts);
       } catch (err) {
