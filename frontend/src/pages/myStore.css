@@ -9,10 +9,10 @@ main.my-store-container {
 
 header.store-header {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  flex-wrap: wrap;           /* Allow wrapping */
+  justify-content: space-between; /* Less relevant now, but keep */
   align-items: flex-start;
-  gap: 20px;
+  gap: 20px;                  /* Gap between wrapped rows */
   margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e0e0e0;
@@ -22,7 +22,8 @@ header.store-header h1 {
   font-size: 2.5rem;
   color: #333;
   margin: 0;
-  flex-grow: 1;
+  width: 100%; /* Force H1 to take full width -> puts it on its own line */
+  box-sizing: border-box; /* Include padding/border in width calculation */
 }
 
 /* === Delivery Info Section Styles === */
@@ -31,53 +32,11 @@ section.delivery-info-display {
   border: 1px solid #e9ecef;
   border-radius: 6px;
   padding: 15px 20px;
-  margin-top: 10px;
-  width: 100%;
+  margin-top: 15px; /* Add some space below the H1 */
+  width: 100%;     /* Force Delivery section to take full width -> puts it on its own line */
   box-sizing: border-box;
 }
 
-/* Secondary action button (View Orders) */
-.button-secondary {
-  background-color: #6c757d; /* Bootstrap's secondary color */
-  color: white;
-  border-color: #6c757d;
-}
-.button-secondary:hover:not(:disabled) {
-  background-color: #5a6268; /* Darker gray on hover */
-  border-color: #545b62;
-  color: white;
-}
-
-.view-orders-btn {
-  /* Base Button Layout & Appearance */
-  display: inline-block; /* Ensures proper block-like behavior */
-  padding: 10px 20px; /* Match other buttons */
-  font-size: 16px; /* Match other buttons */
-  font-weight: 500; /* Match other buttons */
-  border-radius: 4px; /* Match other buttons */
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none; /* Remove underline */
-  border: 1px solid transparent;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
-  line-height: 1.4; /* Match other buttons */
-  box-sizing: border-box;
-  vertical-align: middle;
-
-  /* Specific Colors (like button-secondary) */
-  background-color: #6c757d; /* Bootstrap's secondary color */
-  color: white;
-  border-color: #6c757d;
-}
-
-.view-orders-btn:hover:not(:disabled) {
-  background-color: #5a6268; /* Darker gray on hover */
-  border-color: #545b62;
-  color: white;
-  text-decoration: none; /* Ensure no underline on hover */
-}
-
-/* NEW: Header within the delivery section (holds H2 and Edit button) */
 .delivery-header {
   display: flex;
   justify-content: space-between;
@@ -88,15 +47,15 @@ section.delivery-info-display {
 }
 
 section.delivery-info-display h2 {
-  margin: 0; /* Remove default margins */
+  margin: 0;
   font-size: 1.2rem;
   color: #495057;
 }
 
-/* Styles for the Edit Delivery button within the header */
 .delivery-header .button-edit {
-  padding: 4px 12px; /* Slightly smaller padding */
-  font-size: 0.9em; /* Slightly smaller font */
+  padding: 4px 12px;
+  font-size: 0.9em;
+  flex-shrink: 0;
 }
 
 section.delivery-info-display dl {
@@ -127,27 +86,22 @@ p.info-text {
   text-align: center;
 }
 
-/* NEW: Styles for the Delivery Edit Form */
 form.delivery-edit-form {
-  margin-top: 15px; /* Space above the form when it appears */
+  margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px dashed #dee2e6; /* Separator line */
+  border-top: 1px dashed #dee2e6;
   display: flex;
   flex-direction: column;
-  gap: 5px; /* Gap between label/input pairs */
+  gap: 5px;
 }
 
-/* Inherits label styles from general form rules */
 form.delivery-edit-form label {
-  margin-top: 10px; /* Adjust spacing between fields in this form */
+  margin-top: 10px;
 }
 form.delivery-edit-form label:first-of-type {
   margin-top: 0;
 }
 
-/* Inherits input/select styles from general form rules */
-
-/* NEW: Container for Save/Cancel buttons in delivery edit form */
 .delivery-edit-actions {
   display: flex;
   justify-content: flex-end;
@@ -158,8 +112,21 @@ form.delivery-edit-form label:first-of-type {
 }
 
 
-/* === General Button Styles (Using Your Colors) === */
-button, .button-link {
+/* === Store Actions Container (Add Product / View Orders buttons) === */
+.store-actions-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px; /* Keep margin below delivery section */
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+/* === General Button Styles === */
+button, .button-link, a.button-secondary, a.button-primary {
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
@@ -171,18 +138,20 @@ button, .button-link {
   border: 1px solid transparent;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
   line-height: 1.4;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
-button:disabled, .button-link:disabled {
+button:disabled, .button-link:disabled, a.button-secondary:disabled, a.button-primary:disabled {
   cursor: not-allowed;
-  opacity: 0.65 !important; /* Ensure disabled opacity overrides hover */
-  background-color: #cccccc !important; /* Example neutral disabled background */
+  opacity: 0.65 !important;
+  background-color: #cccccc !important;
   border-color: #cccccc !important;
   color: #666666 !important;
 }
 
-/* Primary action button (Add Product Toggle) */
+/* Primary action button */
 .button-primary,
-.add-product-toggle-btn /* Apply primary style to toggle button */ {
+.add-product-toggle-btn {
   background-color: #97c9ba;
   color: white;
   border-color: #97c9ba;
@@ -191,17 +160,32 @@ button:disabled, .button-link:disabled {
 .add-product-toggle-btn:hover:not(:disabled) {
   background-color: #432C53;
   border-color: #432C53;
-  color: white; /* Ensure text remains white on hover */
+  color: white;
 }
 
-/* Confirm action button (Add in form, Save in modal/delivery form) */
+/* Secondary action button */
+.button-secondary,
+.view-orders-btn {
+  background-color: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+.button-secondary:hover:not(:disabled),
+.view-orders-btn:hover:not(:disabled) {
+  background-color: #5a6268;
+  border-color: #545b62;
+  color: white;
+  text-decoration: none;
+}
+
+/* Confirm action button */
 .button-confirm {
   background-color: #97c9ba;
   color: white;
   border-color: #97c9ba;
 }
 .button-confirm:hover:not(:disabled) {
-  background-color: #432C53; /* Use darker hover from primary */
+  background-color: #432C53;
   border-color: #432C53;
   color: white;
 }
@@ -217,10 +201,10 @@ button:disabled, .button-link:disabled {
   border-color: #545b62;
 }
 
-/* Edit action button (Card button, Delivery Edit button) */
+/* Edit action button */
 .button-edit {
-  background-color: #e9ecef; /* Lighter background for edit */
-  color: #495057; /* Darker text */
+  background-color: #e9ecef;
+  color: #495057;
   border-color: #ced4da;
   padding: 5px 10px;
   font-size: 0.85rem;
@@ -233,8 +217,8 @@ button:disabled, .button-link:disabled {
 
 /* Delete action button */
 .button-delete {
-  background-color: #f8d7da; /* Light red background */
-  color: #721c24; /* Dark red text */
+  background-color: #f8d7da;
+  color: #721c24;
   border-color: #f5c6cb;
   padding: 5px 10px;
   font-size: 0.85rem;
@@ -247,25 +231,25 @@ button:disabled, .button-link:disabled {
 
 
 /* === Messages and Loading States === */
-p.error-message,
-section.my-store-error p {
-  background-color: #ffebee; /* Keep red background for errors */
+p.error-message {
+  background-color: #ffebee;
   border: 1px solid #ef9a9a;
-  border-left: 5px solid #d32f2f; /* Keep red left border */
-  color: #c62828; /* Keep red text */
-  padding: 12px 15px;
+  border-left: 5px solid #d32f2f;
+  color: #c62828;
+  padding: 10px 15px;
   margin-top: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   border-radius: 4px;
-  font-size: 0.95em;
+  font-size: 0.9em;
+  line-height: 1.5;
 }
+
 /* Error message specifically within delivery edit section */
 form.delivery-edit-form .error-message {
-    margin-bottom: 0; /* Adjust margin if needed within form */
+    margin-bottom: 0;
 }
 
-
-p.status-message.loading,
+/* Styles for full section errors/states */
 section.my-store-error,
 section.no-store {
   text-align: center;
@@ -274,6 +258,7 @@ section.no-store {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
+  margin-top: 30px;
 }
 section.my-store-error h2,
 section.no-store h2 {
@@ -281,10 +266,16 @@ section.no-store h2 {
   margin-bottom: 15px;
   color: #444;
 }
-section.my-store-error button, /* Style retry button if needed */
+section.my-store-error p,
+section.no-store p {
+  color: #555;
+  line-height: 1.6;
+}
+section.my-store-error button,
 section.no-store a.button-primary {
   margin-top: 20px;
 }
+
 
 /* === Add/Edit Product Form Styles === */
 section.add-product-form-section {
@@ -305,7 +296,6 @@ section.add-product-form-section h2 {
   font-weight: 600;
 }
 
-/* Targets form inside the add section OR inside the dialog */
 section.add-product-form-section form,
 dialog.edit-product-modal form {
   display: flex;
@@ -326,7 +316,6 @@ dialog.edit-product-modal form label:first-of-type {
   margin-top: 0;
 }
 
-/* Targets inputs, textarea, select inside the forms */
 section.add-product-form-section form input,
 section.add-product-form-section form textarea,
 section.add-product-form-section form select,
@@ -348,9 +337,9 @@ section.add-product-form-section form select:focus,
 dialog.edit-product-modal form input:focus,
 dialog.edit-product-modal form textarea:focus,
 dialog.edit-product-modal form select:focus {
-  border-color: #97c9ba; /* Match your primary color */
+  border-color: #97c9ba;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(151, 201, 186, 0.25); /* Adjusted focus shadow */
+  box-shadow: 0 0 0 3px rgba(151, 201, 186, 0.25);
 }
 
 section.add-product-form-section form textarea,
@@ -379,8 +368,8 @@ dialog.edit-product-modal form input[type="file"]::file-selector-button:hover {
    background-color: #dee2e6;
 }
 
-/* Add product form actions */
-section.add-product-form-section form footer {
+/* Add product form actions container */
+section.add-product-form-section footer.add-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -388,6 +377,7 @@ section.add-product-form-section form footer {
   padding-top: 20px;
   border-top: 1px solid #eee;
 }
+
 
 /* === Image Preview Styles === */
 img.image-preview {
@@ -451,13 +441,18 @@ article.product-card:hover {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-.product-image img {
+.product-image {
   width: 100%;
   height: 220px;
-  object-fit: cover;
-  display: block;
+  overflow: hidden;
   border-bottom: 1px solid #eee;
   background-color: #f8f9fa;
+}
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .product-details {
@@ -483,7 +478,7 @@ article.product-card:hover {
 }
 .product-details .product-price {
   font-weight: 700;
-  color: #1e7e34; /* Darker Green for Price */
+  color: #1e7e34;
   margin: 0 0 4px 0;
   font-size: 1.1em;
 }
@@ -497,93 +492,132 @@ article.product-card:hover {
   color: #495057;
   font-size: 0.95em;
   line-height: 1.5;
-  margin-top: auto;
   margin-bottom: 10px;
 }
 
-/* Card Actions Footer */
-footer.product-actions {
+/* Card Actions Container */
+.product-actions {
   padding: 10px 15px;
   border-top: 1px solid #f0f0f0;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  background-color: #f8f9fa; /* Light background for footer */
+  background-color: #f8f9fa;
+  margin-top: auto;
 }
 
 
-/* === Modal Styles (Updated for <dialog>) === */
+/* === Modal Styles (Shared and Specific) === */
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.6);
 }
 
-dialog.edit-product-modal { /* Target specific class */
+dialog.edit-product-modal,
+dialog.delete-confirm-modal {
   background-color: white;
   padding: 25px 30px;
   border-radius: 8px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  max-width: 550px;
+  width: 90%;
+  border: none;
   max-height: 90vh;
   overflow-y: auto;
-  border: none;
+  box-sizing: border-box;
 }
 
-dialog.edit-product-modal h2 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  color: #333;
-  font-size: 1.5rem;
-  text-align: center;
-  font-weight: 600;
-}
-
-dialog.edit-product-modal form footer.modal-actions { /* Target specific footer */
+dialog footer.modal-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
   margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid #eee;
 }
 
-dialog.edit-product-modal p.error-message { /* Target errors in modal */
+dialog p.error-message {
+  margin-top: 0;
   margin-bottom: 20px;
   text-align: center;
 }
 
+/* Edit Product Modal Specific Styles */
+dialog.edit-product-modal { max-width: 550px; }
+dialog.edit-product-modal h2 { margin-top: 0; margin-bottom: 25px; color: #333; font-size: 1.5rem; text-align: center; font-weight: 600; }
+dialog.edit-product-modal footer.modal-actions { justify-content: flex-end; }
+
+/* Delete Confirmation Modal Specific Styles */
+dialog.delete-confirm-modal { max-width: 450px; text-align: center; }
+dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #721c24; font-size: 1.4rem; font-weight: 600; }
+dialog.delete-confirm-modal p { margin-bottom: 10px; line-height: 1.6; color: #444; }
+dialog.delete-confirm-modal p strong { color: #333; font-weight: 600; }
+dialog.delete-confirm-modal footer.modal-actions { justify-content: center; gap: 15px; }
+
+
+/* === Loading Spinner Styles === */
+.loading-container {
+  display: flex;
+  flex-direction: column; /* Stack spinner and text vertically */
+  justify-content: center;
+  align-items: center;
+  min-height: 300px; /* Give it some vertical space */
+  padding: 2rem;
+  text-align: center;
+  color: #555; /* Text color */
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc; /* Light grey base border */
+  /* Use your primary color for the spinning part */
+  border-top-color: #97c9ba; /* Your primary green color */
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite; /* Reference the spin animation */
+  margin-bottom: 1rem; /* Space between spinner and text */
+}
+
+/* The spin animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading text style */
+.loading-container p {
+  font-size: 1.1em;
+  color: #555;
+}
+/* === End Loading Spinner Styles === */
+
+
 /* === Responsive Adjustments === */
 @media (max-width: 768px) {
-  header.store-header { flex-direction: column; align-items: stretch; gap: 15px; }
-  header.store-header h1 { text-align: center; }
-  .add-product-toggle-btn { width: 100%; } /* Make add button full width */
-  section.delivery-info-display dl { grid-template-columns: 1fr; gap: 5px 0; } /* Stack term/description */
+  header.store-header { align-items: stretch; }
+  header.store-header h1 { text-align: center; font-size: 2rem; }
+  section.delivery-info-display { max-width: none; }
+  .store-actions-container { flex-direction: column; align-items: stretch; }
+  .store-actions-container > * { width: 100%; text-align: center; }
+  section.delivery-info-display dl { grid-template-columns: 1fr; gap: 5px 0; }
   section.delivery-info-display dt { margin-bottom: 2px; }
   section.delivery-info-display dd { margin-bottom: 8px; }
   .delivery-header { flex-direction: column; align-items: flex-start; gap: 10px;}
-
   ul.product-list { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  dialog.edit-product-modal { padding: 20px; }
+  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 20px; width: 90%; }
 }
+
 @media (max-width: 480px) {
+  main.my-store-container { margin: 20px auto; padding: 0 15px; }
+  header.store-header h1 { font-size: 1.8rem; }
   ul.product-list { grid-template-columns: 1fr; }
-  footer.product-actions { flex-direction: row; justify-content: space-around; }
-  footer.product-actions button { width: auto; flex-grow: 1; text-align: center; }
-  dialog.edit-product-modal { padding: 15px; max-height: 95vh; }
+  .product-actions { flex-direction: row; justify-content: space-around; padding: 8px 10px; }
+  .product-actions button { flex-grow: 1; margin: 0 5px; padding: 6px 10px; font-size: 0.8rem; }
+  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 15px; width: 95%; max-height: 95vh; }
   dialog.edit-product-modal h2 { font-size: 1.3rem; }
-  dialog.edit-product-modal form footer.modal-actions,
-  section.add-product-form-section form footer {
-     flex-direction: column;
-     gap: 10px;
-  }
-   dialog.edit-product-modal form footer.modal-actions button,
-   section.add-product-form-section form footer button {
-       width: 100%;
-   }
-   .delivery-edit-actions { /* Stack buttons on small screens */
-       flex-direction: column;
-   }
-   .delivery-edit-actions button {
-       width: 100%;
-   }
+  dialog.delete-confirm-modal h2 { font-size: 1.25rem; }
+  dialog footer.modal-actions, section.add-product-form-section footer.add-form-actions, .delivery-edit-actions { flex-direction: column; gap: 10px; align-items: stretch; }
+  dialog footer.modal-actions button, section.add-product-form-section footer.add-form-actions button, .delivery-edit-actions button { width: 100%; }
+  form.delivery-edit-form { gap: 3px; }
+  form.delivery-edit-form label { margin-top: 12px; font-size: 0.9rem; }
+  form.delivery-edit-form input, form.delivery-edit-form select { padding: 8px 10px; font-size: 0.95rem; }
+  section.add-product-form-section form input, section.add-product-form-section form textarea, section.add-product-form-section form select, dialog.edit-product-modal form input, dialog.edit-product-modal form textarea, dialog.edit-product-modal form select { padding: 8px 10px; font-size: 0.95rem; }
 }

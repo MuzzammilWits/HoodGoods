@@ -18,6 +18,11 @@
 .error-message {
     color: #dc3545; /* Bootstrap danger red */
     font-weight: bold;
+    background-color: #f8d7da; /* Light red background for errors */
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
 }
 
 .order-list {
@@ -80,8 +85,8 @@
 .shipment-card {
     border: 1px solid #e0e0e0;
     border-radius: 6px;
-    padding: 1.25rem; /* Increased padding */
-    margin-bottom: 1.5rem; /* Increased margin */
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
     background-color: #f9f9f9;
 }
 
@@ -93,9 +98,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem; /* Increased margin */
+    margin-bottom: 0.75rem;
     border-bottom: 1px dashed #ddd;
-    padding-bottom: 0.75rem; /* Increased padding */
+    padding-bottom: 0.75rem;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
@@ -123,15 +128,15 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* Increased gap */
+    gap: 1rem;
 }
 
 .item {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding-bottom: 0.75rem; /* Increased padding */
-    border-bottom: 1px dashed #eee; /* Lighter dash */
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed #eee;
 }
 
 .item:last-child {
@@ -161,7 +166,7 @@
     color: #333;
 }
 
-/* Status Badge Styles (copied from SellerDashboard) */
+/* Status Badge Styles */
 .status-badge {
     padding: 0.25em 0.6em;
     border-radius: 0.25rem;
@@ -172,11 +177,54 @@
     white-space: nowrap;
 }
 
-.status-processing { background-color: #ffc107; color: #333; } /* Yellowish */
-.status-packaging { background-color: #17a2b8; } /* Teal */
-.status-ready { background-color: #007bff; } /* Blue */
-.status-shipped { background-color: #fd7e14; } /* Orange */
-.status-delivered { background-color: #28a745; } /* Green */
-.status-cancelled { background-color: #dc3545; text-decoration: line-through; } /* Red */
-.status-unknown { background-color: #6c757d; } /* Gray for default/unknown */
+.status-processing { background-color: #ffc107; color: #333; }
+.status-packaging { background-color: #17a2b8; }
+.status-ready { background-color: #007bff; }
+.status-shipped { background-color: #fd7e14; }
+.status-delivered { background-color: #28a745; }
+.status-cancelled { background-color: #dc3545; text-decoration: line-through; }
+.status-unknown { background-color: #6c757d; }
 
+
+/* === Loading Spinner Styles === */
+.loading-container {
+  display: flex;
+  flex-direction: column; /* Stack spinner and text vertically */
+  justify-content: center;
+  align-items: center;
+  min-height: 300px; /* Give it some vertical space for standalone loading */
+  padding: 2rem;
+  text-align: center;
+  color: #555; /* Text color */
+}
+
+/* Adjustments for inline loading (within page content) */
+.my-orders-container > .loading-container {
+    min-height: 150px; /* Reduce height when shown inline */
+    padding: 1rem 0; /* Reduce padding when inline */
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc; /* Light grey base border */
+  /* Use your primary color for the spinning part */
+  border-top-color: #97c9ba; /* Your primary green color */
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite; /* Reference the spin animation */
+  margin-bottom: 1rem; /* Space between spinner and text */
+}
+
+/* The spin animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading text style */
+.loading-container p {
+  font-size: 1.1em;
+  color: #555;
+}
+/* === End Loading Spinner Styles === */
