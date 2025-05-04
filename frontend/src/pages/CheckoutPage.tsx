@@ -282,7 +282,7 @@ export default function CheckoutPage() {
             // *** MODIFICATION END ***
 
             paymentTimeoutRef.current = null; // Ensure ref is cleared
-        }, 45000); // 45 seconds
+        }, 27000); // 45 seconds
         // --- End Timeout Fallback ---
 
     } catch (error) { // Catch initiation errors
