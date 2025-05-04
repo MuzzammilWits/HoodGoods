@@ -62,6 +62,10 @@ const ProductsPage = () => {
       setNotification({message: '', type: null});
     }, 3000);
   };
+  //for spinner 
+
+
+  //for spinner
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -144,6 +148,10 @@ const ProductsPage = () => {
 
   const handleAddToCart = async (product: Product) => {
     try {
+      if (!isAuthenticated) {
+        showNotification('Please sign in or create an account to add items to your cart', 'error');
+        return;
+      }
       if (!product || typeof product.prodId === 'undefined') {
         throw new Error('Product data is invalid or missing ID');
       }
@@ -191,7 +199,12 @@ const ProductsPage = () => {
   const stores = useMemo(() => [...new Set(products.map(product => product.storeName))], [products]);
 
   if (isLoading) {
-    return <p className="loading-spinner">Loading products...</p>;
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading products...</p>
+      </div>
+    );
   }
 
   if (error && !isLoading) {
