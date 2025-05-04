@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
-// import { Link } from 'react-router-dom'; For potential links
-// *** Import the CSS file ***
-import './MyOrdersPage.css';
+// import { Link } from 'react-router-dom';
+import './MyOrdersPage.css'; // Make sure spinner CSS is in here or imported
 
-// --- Helper Types (Matching backend response for GET /orders/my-orders) ---
+// --- Helper Types ---
 interface ProductSummary {
     prodId: number;
     name: string;
@@ -50,7 +49,7 @@ interface BuyerOrderDetails {
 }
 // --- End Helper Types ---
 
-// Create Axios instance outside the component
+// Create Axios instance
 const api = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
 });
@@ -69,12 +68,11 @@ const statusClassMap: Record<string, string> = {
 export default function MyOrdersPage() {
     const { isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
     const [orders, setOrders] = useState<BuyerOrderDetails[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // For data fetching
     const [error, setError] = useState<string | null>(null);
 
     // --- Fetch Buyer Orders ---
     const fetchMyOrders = useCallback(async () => {
-        if (!isAuthenticated) return;
         setIsLoading(true);
         setError(null);
         try {
@@ -89,44 +87,70 @@ export default function MyOrdersPage() {
                 ? err.response?.data?.message || err.message
                 : 'Could not load your orders.';
             setError(errorMsg);
-            setOrders([]); // Clear orders on error
+            setOrders([]);
         } finally {
             setIsLoading(false);
         }
-    }, [isAuthenticated, getAccessTokenSilently]); // Dependencies
+    }, [getAccessTokenSilently]); // Dependencies
 
     // --- Initial Data Fetch Effect ---
     useEffect(() => {
-        if (isAuthenticated && !isAuthLoading) {
+        // Only fetch if Auth0 is done loading AND user is authenticated
+        if (!isAuthLoading && isAuthenticated) {
             fetchMyOrders();
         } else if (!isAuthLoading && !isAuthenticated) {
+            // If Auth0 is done and user is not logged in, stop loading
             setIsLoading(false);
             setOrders([]);
+            setError(null); // No error, just not logged in
         }
+        // If isAuthLoading is true, we show the auth loading text below
     }, [isAuthenticated, isAuthLoading, fetchMyOrders]); // Run when auth state changes
 
 
     // --- Render Logic ---
+
+    // Keep original text for Auth loading
     if (isAuthLoading) {
-        return <p>Loading authentication...</p>;
+        return (
+             <main className="my-orders-container">
+                 <p>Loading authentication...</p> {/* Text for initial auth check */}
+             </main>
+        );
     }
 
+    // Show login message if Auth0 is done loading but user isn't logged in
     if (!isAuthenticated) {
-        return <p>Please log in to view your order history.</p>;
+        return (
+             <main className="my-orders-container">
+                 <p>Please log in to view your order history.</p>
+                 {/* Optionally add a login button here */}
+             </main>
+        );
     }
 
+    // --- Authenticated User Content ---
     return (
-        // *** Use classNames matching the CSS file ***
         <main className="my-orders-container">
             <h1>My Orders</h1>
 
-            {isLoading && <p>Loading your orders...</p>}
-            {error && <p className="error-message">Error loading orders: {error}</p>}
+            {/* MODIFIED: Show spinner *while* fetching orders (isLoading state) */}
+            {isLoading && (
+                <div className="loading-container" style={{ minHeight: '150px', padding: '1rem 0' }}> {/* Adjusted style for inline loading */}
+                    <div className="spinner"></div>
+                    <p>Loading your orders...</p>
+                </div>
+            )}
 
+            {/* Show error message if fetching orders failed */}
+            {error && !isLoading && <p className="error-message">Error loading orders: {error}</p>}
+
+            {/* Show message if loading is done, no error, but no orders */}
             {!isLoading && orders.length === 0 && !error && (
                 <p>You haven't placed any orders yet.</p>
             )}
 
+            {/* Display orders if loading is done and orders exist */}
             {!isLoading && orders.length > 0 && (
                 <div className="order-list">
                     {orders.map((order) => (

@@ -5,11 +5,23 @@
 .navbar {
   background-color: var(--light-purple, #F9F6FD);
   padding: 0.8rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  /* --- MODIFIED: Changed position to fixed for always-visible navbar --- */
+  position: fixed;   /* Changed from sticky */
+  top: 0;            /* Stick to the top */
+  left: 0;           /* Align to the left edge */
+  width: 100%;       /* Span full viewport width */
+  /* --- END MODIFICATION --- */
+  z-index: 100;      /* Ensure it's above other content */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
+
+/* --- ADDED: Padding for body to prevent overlap --- */
+/* Add this rule to your global CSS or where appropriate */
+/* Adjust the padding-top value based on your navbar's actual height */
+body { /* Or your main content wrapper class/id */
+  padding-top: 70px; /* Example value - MUST ADJUST based on navbar height! */
+}
+/* --- END ADDED --- */
 
 .navbar-container {
   max-width: 1200px;

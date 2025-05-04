@@ -45,7 +45,7 @@
     margin-top: 0.5rem;
 }
 
-/* --- NEW Styles for Orders Section Header & Filter --- */
+/* --- Styles for Orders Section Header & Filter --- */
 .orders-header {
     display: flex;
     flex-wrap: wrap; /* Allow filter to wrap below title on small screens */
@@ -91,7 +91,7 @@
     cursor: not-allowed;
     opacity: 0.7;
 }
-/* --- End NEW Styles --- */
+/* --- End Styles --- */
 
 
 .order-list {
@@ -126,7 +126,8 @@
      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.order-header { /* Already defined above, ensure consistent styling */
+.order-header { /* Ensure styles here don't conflict with .orders-header */
+    /* Styles specific to the card header */
     border-bottom: 1px solid #eee;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
@@ -137,7 +138,7 @@
     gap: 0.5rem;
 }
 
-.order-header h3 {
+.order-header h3 { /* Target h3 inside card header */
     margin: 0;
     font-size: 1.1em;
     color: #0056b3;
@@ -285,3 +286,49 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(151, 201, 186, 0.25); /* Adjusted focus shadow */
 }
+
+
+/* === Loading Spinner Styles === */
+.loading-container {
+  display: flex;
+  flex-direction: column; /* Stack spinner and text vertically */
+  justify-content: center;
+  align-items: center;
+  min-height: 300px; /* Give it some vertical space for standalone loading */
+  padding: 2rem;
+  text-align: center;
+  color: #555; /* Text color */
+}
+
+/* Adjustments for inline loading (within page content) */
+.dashboard-section > .loading-container { /* Target only direct children */
+    min-height: 150px; /* Reduce height when shown inline */
+    padding: 1rem 0; /* Reduce padding when inline */
+    background-color: transparent; /* Ensure it doesn't override section bg */
+    box-shadow: none; /* Ensure it doesn't override section shadow */
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc; /* Light grey base border */
+  /* Use your primary color for the spinning part */
+  border-top-color: #97c9ba; /* Your primary green color */
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite; /* Reference the spin animation */
+  margin-bottom: 1rem; /* Space between spinner and text */
+}
+
+/* The spin animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading text style */
+.loading-container p {
+  font-size: 1.1em;
+  color: #555;
+}
+/* === End Loading Spinner Styles === */
