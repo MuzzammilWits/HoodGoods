@@ -1,263 +1,430 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// // REMOVED: import { vi } from 'vitest'; // Cannot use Vitest 'vi' with Jest runner
-// import { CartController } from './cart.controller';
-// import { CartService } from './cart.service';
-// import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Adjust path if needed
-// import { CreateCartItemDto } from './dto/create-cart-item.dto';
-// import { UpdateCartItemDto } from './dto/update-cart-item.dto';
-// import { SyncCartDto } from './dto/sync-cart.dto';
-// import { HttpException, HttpStatus } from '@nestjs/common';
-// import { Request } from 'express'; // Import Request type if needed, or use a simplified mock
+// cart.controller.spec.ts
 
-// // Extend the Request type to include the 'user' property if not globally defined
-// interface CustomRequest extends Request {
-//   user?: { sub: string };
-// }
+import { Test, TestingModule } from '@nestjs/testing';
+import { CartController } from './cart.controller';
+// Import the updated interface definition from the service file
+import { CartService, CartItemWithProductDetails } from './cart.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateCartItemDto } from './dto/create-cart-item.dto';
+import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { SyncCartDto } from './dto/sync-cart.dto';
+// Import base CartItem entity for methods that return it
+import { CartItem } from './entities/cart-item.entity';
+import { HttpException, HttpStatus, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+
+// --- MOCK DATA (Updated based on latest CartService) ---
+
+const mockUserId = 'user-123';
+const mockProductId1 = 1;
+const mockProductId2 = 2;
+const mockStoreId1 = 'store-abc'; // Example store ID as string
+const mockStoreId2 = 'store-xyz'; // Example store ID as string
+
+// Define mock data conforming to the NEW (flattened) CartItemWithProductDetails interface
+const mockCartItemWithDetails1: CartItemWithProductDetails = {
+  cartID: 10, // Assuming CartItem has cartID from getCart implementation
+  userId: mockUserId,
+  productId: mockProductId1,
+  quantity: 2,
+  // Flattened product details:
+  productName: 'Test Product 1 Updated',
+  productPrice: 10.99,
+  imageUrl: 'http://example.com/img1-updated.jpg',
+  availableQuantity: 100, // Example available stock
+  storeName: 'Awesome Store A', // Example store name
+  storeId: mockStoreId1,    // Example store ID
+};
+
+const mockCartItemWithDetails2: CartItemWithProductDetails = {
+  cartID: 11,
+  userId: mockUserId,
+  productId: mockProductId2,
+  quantity: 1,
+  // Flattened product details:
+  productName: 'Test Product 2 Updated',
+  productPrice: 5.50,
+  imageUrl: null, // Example with null image URL
+  availableQuantity: 50,
+  storeName: 'Super Store B',
+  storeId: mockStoreId2,
+};
+
+// The mock data array returned by the mocked getCart service method
+const mockCartData: CartItemWithProductDetails[] = [
+  mockCartItemWithDetails1,
+  mockCartItemWithDetails2,
+];
+
+// Mock CartItem entity structure (for methods like addToCart, updateCartItem)
+const mockBaseCartItem1: CartItem = {
+    cartID: 10,
+    userId: mockUserId,
+    productId: mockProductId1,
+    quantity: 2, // Initial quantity
+    
+    // Add user/product relations if they exist in your entity, otherwise omit or set to null
+    // user: null,
+    // product: null,
+};
+
+const mockAddedCartItem: CartItem = {
+    ...mockBaseCartItem1,
+    quantity: 3, // Quantity after adding/updating
+ 
+}
+
+// --- END MOCK DATA ---
 
 
-// // Mock CartService methods using Jest
-// const mockCartService = {
-//   getCart: jest.fn(),
-//   addToCart: jest.fn(),
-//   syncCart: jest.fn(),
-//   updateCartItem: jest.fn(),
-//   removeFromCart: jest.fn(),
-//   clearCart: jest.fn(),
-// };
+// Mock CartService (using jest.fn() for all methods)
+const mockCartService = {
+  getCart: jest.fn(),
+  addToCart: jest.fn(),
+  syncCart: jest.fn(),
+  updateCartItem: jest.fn(),
+  removeFromCart: jest.fn(),
+  clearCart: jest.fn(),
+};
 
-// // Mock JwtAuthGuard using Jest
-// const mockJwtAuthGuard = {
-//   // Use jest.fn() for the guard mock as well
-//   canActivate: jest.fn(() => true),
-// };
+// Mock Request object helper
+const mockRequest = (userId: string) => ({
+  user: { sub: userId }, // Assuming 'sub' holds the user ID from JWT payload
+});
 
-// // Mock Request object structure
-// const mockRequest = (userId: string): Partial<CustomRequest> => ({
-//   user: { sub: userId }, // Match the structure used in controller (req.user.sub)
-// });
+// --- TEST SUITE ---
+
+describe('CartController', () => {
+  let controller: CartController;
+  let service: typeof mockCartService; // Use typeof for better type checking on the mock
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [CartController],
+      providers: [
+        {
+          provide: CartService,
+          useValue: mockCartService, // Use the mock implementation
+        },
+      ],
+    })
+      // Override the guard to always allow access for these unit/integration tests
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
+
+    controller = module.get<CartController>(CartController);
+    // Get the instance of the mocked service to check calls, etc.
+    service = module.get(CartService);
+
+    // Reset mocks before each test to ensure isolation
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  // --- Test getCart ---
+  describe('getCart', () => {
+    it('should return the user cart with flattened product details', async () => {
+      // Arrange: Mock service resolves with the updated (flattened) data structure
+      service.getCart.mockResolvedValue(mockCartData);
+      const req = mockRequest(mockUserId);
+
+      // Act
+      const result = await controller.getCart(req);
+
+      // Assert
+      expect(service.getCart).toHaveBeenCalledWith(mockUserId);
+      expect(result).toEqual(mockCartData); // Check against the updated mock data
+    });
+
+    it('should return an empty array if the cart is empty', async () => {
+        // Arrange
+        service.getCart.mockResolvedValue([]);
+        const req = mockRequest(mockUserId);
+
+        // Act
+        const result = await controller.getCart(req);
+
+        // Assert
+        expect(service.getCart).toHaveBeenCalledWith(mockUserId);
+        expect(result).toEqual([]);
+    });
 
 
-// describe('CartController', () => {
-//   let controller: CartController;
-//   let service: CartService;
+    it('should throw HttpException if service throws a generic error', async () => {
+      // Arrange: Mock service rejects with a generic error
+      const error = new Error('Database connection lost');
+      service.getCart.mockRejectedValue(error);
+      const req = mockRequest(mockUserId);
 
-//   const userId = 'user-123'; // Example user ID for tests
+      // Act & Assert
+      await expect(controller.getCart(req)).rejects.toThrow(
+        new HttpException('Failed to fetch cart', HttpStatus.INTERNAL_SERVER_ERROR) // Controller catches generic error
+      );
+      expect(service.getCart).toHaveBeenCalledWith(mockUserId);
+    });
 
-//   beforeEach(async () => {
-//     // Reset mocks before each test using Jest's clearAllMocks
-//     jest.clearAllMocks();
+     it('should re-throw HttpException from service if service throws HttpException', async () => {
+        // Arrange: Mock service rejects with a specific NestJS HttpException
+        const serviceError = new InternalServerErrorException("Failed to retrieve cart."); // Match the actual error thrown by service
+        service.getCart.mockRejectedValue(serviceError);
+        const req = mockRequest(mockUserId);
 
-//     const module: TestingModule = await Test.createTestingModule({
-//       controllers: [CartController],
-//       providers: [
-//         {
-//           provide: CartService,
-//           useValue: mockCartService, // Provide the mock service
-//         },
-//       ],
-//     })
-//       // Override the guard globally for this testing module
-//       .overrideGuard(JwtAuthGuard)
-//       .useValue(mockJwtAuthGuard) // Use the Jest mocked guard
-//       .compile();
+        // Act & Assert
+        await expect(controller.getCart(req)).rejects.toThrow(serviceError); // Controller should re-throw it
+        expect(service.getCart).toHaveBeenCalledWith(mockUserId);
+      });
+  });
 
-//     controller = module.get<CartController>(CartController);
-//     // Get the mocked service instance for assertion checks
-//     service = module.get<CartService>(CartService);
-//   });
+  // --- Test addToCart ---
+  describe('addToCart', () => {
+    const dto: CreateCartItemDto = { productId: mockProductId1, quantity: 1 };
 
-//   it('should be defined', () => {
-//     expect(controller).toBeDefined();
-//   });
+    it('should add an item to the cart and return the resulting CartItem entity', async () => {
+      // Arrange: Service returns the saved/updated CartItem entity
+      service.addToCart.mockResolvedValue(mockAddedCartItem);
+      const req = mockRequest(mockUserId);
 
-//   // --- Test Suite for getCart ---
-//   describe('getCart', () => {
-//     it('should return the user cart successfully', async () => {
-//       const mockCart = { userId, items: [{ productId: 'prod-1', quantity: 2 }] };
-//       // Use mockResolvedValue for async functions with Jest mocks
-//       mockCartService.getCart.mockResolvedValue(mockCart);
+      // Act
+      const result = await controller.addToCart(req, dto);
 
-//       const req = mockRequest(userId);
-//       const result = await controller.getCart(req);
+      // Assert
+      expect(service.addToCart).toHaveBeenCalledWith(mockUserId, dto);
+      expect(result).toEqual(mockAddedCartItem); // Should return the CartItem, not CartItemWithProductDetails
+    });
 
-//       expect(result).toEqual(mockCart);
-//       // Use Jest's expect(...).toHaveBeenCalledWith(...)
-//       expect(service.getCart).toHaveBeenCalledWith(userId);
-//       expect(service.getCart).toHaveBeenCalledTimes(1);
-//     });
+    it('should throw HttpException if service throws NotFoundException (product not found)', async () => {
+      // Arrange
+      const error = new NotFoundException(`Product with ID ${dto.productId} not found.`);
+      service.addToCart.mockRejectedValue(error);
+      const req = mockRequest(mockUserId);
 
-//     it('should throw HttpException if service fails', async () => {
-//       // Use mockRejectedValue for async functions with Jest mocks
-//       mockCartService.getCart.mockRejectedValue(new Error('Service error'));
+      // Act & Assert
+      await expect(controller.addToCart(req, dto)).rejects.toThrow(error);
+      expect(service.addToCart).toHaveBeenCalledWith(mockUserId, dto);
+    });
 
-//       const req = mockRequest(userId);
+    it('should throw HttpException if service throws BadRequestException (e.g., out of stock)', async () => {
+        // Arrange
+        const error = new BadRequestException(`Cannot add ${dto.quantity} items. Only 0 available.`);
+        service.addToCart.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//       // Jest's exception testing syntax
-//       await expect(controller.getCart(req)).rejects.toThrow(
-//         new HttpException('Failed to fetch cart', HttpStatus.INTERNAL_SERVER_ERROR),
-//       );
-//       expect(service.getCart).toHaveBeenCalledWith(userId);
-//     });
-//   });
+        // Act & Assert
+        await expect(controller.addToCart(req, dto)).rejects.toThrow(error);
+        expect(service.addToCart).toHaveBeenCalledWith(mockUserId, dto);
+      });
 
-//   // --- Test Suite for addToCart ---
-//   describe('addToCart', () => {
-//     // Assume CreateCartItemDto requires name and price based on previous example
-//      const dto: CreateCartItemDto = { productId: 'prod-new', quantity: 1, name: 'Sample Product', price: 100 };
-//      const dtoFail: CreateCartItemDto = { productId: 'prod-fail', quantity: 1, name: 'Failed Product', price: 0 };
 
-//     it('should add an item to the cart successfully', async () => {
-//       const mockUpdatedCart = { userId, items: [dto] };
-//       mockCartService.addToCart.mockResolvedValue(mockUpdatedCart);
+    it('should throw generic HttpException for other unexpected service errors', async () => {
+        // Arrange
+        const error = new Error('Unexpected database issue');
+        service.addToCart.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//       const req = mockRequest(userId);
-//       const result = await controller.addToCart(req, dto);
+        // Act & Assert
+        await expect(controller.addToCart(req, dto)).rejects.toThrow(
+          new HttpException('Failed to add item to cart', HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+        expect(service.addToCart).toHaveBeenCalledWith(mockUserId, dto);
+      });
+  });
 
-//       expect(result).toEqual(mockUpdatedCart);
-//       expect(service.addToCart).toHaveBeenCalledWith(userId, dto);
-//       expect(service.addToCart).toHaveBeenCalledTimes(1);
-//     });
+  // --- Test syncCart ---
+  describe('syncCart', () => {
+    const dto: SyncCartDto = { items: [{ productId: mockProductId1, quantity: 3 }, { productId: mockProductId2, quantity: 1}] };
 
-//     it('should throw HttpException if service fails', async () => {
-//       mockCartService.addToCart.mockRejectedValue(new Error('Service error'));
+    it('should sync the cart successfully and return a success message', async () => {
+      // Arrange
+      service.syncCart.mockResolvedValue(undefined); // Sync might not return data on success
+      const req = mockRequest(mockUserId);
 
-//       const req = mockRequest(userId);
+      // Act
+      const result = await controller.syncCart(req, dto);
 
-//       await expect(controller.addToCart(req, dtoFail)).rejects.toThrow(
-//         new HttpException('Failed to add to cart', HttpStatus.INTERNAL_SERVER_ERROR),
-//       );
-//       expect(service.addToCart).toHaveBeenCalledWith(userId, dtoFail);
-//     });
-//   });
+      // Assert
+      expect(service.syncCart).toHaveBeenCalledWith(mockUserId, dto.items);
+      expect(result).toEqual({ message: 'Cart synced successfully' });
+    });
 
-//   // --- Test Suite for syncCart ---
-//   describe('syncCart', () => {
-//      // Assume SyncCartDto items also need name/price
-//      const dto: SyncCartDto = { items: [{ productId: 'prod-sync', quantity: 3, name: 'Sample Product', price: 100 }] };
-//      const dtoFail: SyncCartDto = { items: [{ productId: 'prod-sync-fail', quantity: 1, name: 'Sample Product', price: 100 }] };
+    it('should throw HttpException if service throws NotFoundException (product missing)', async () => {
+      // Arrange
+      const error = new NotFoundException(`Sync failed: Products not found with IDs: ${mockProductId2}.`);
+      service.syncCart.mockRejectedValue(error);
+      const req = mockRequest(mockUserId);
 
-//     it('should sync the cart successfully', async () => {
-//       mockCartService.syncCart.mockResolvedValue(undefined); // syncCart might not return anything
+      // Act & Assert
+      await expect(controller.syncCart(req, dto)).rejects.toThrow(error);
+      expect(service.syncCart).toHaveBeenCalledWith(mockUserId, dto.items);
+    });
 
-//       const req = mockRequest(userId);
-//       const result = await controller.syncCart(req, dto);
+    it('should throw generic HttpException for other unexpected service errors', async () => {
+      // Arrange
+      const error = new Error('Transaction failed');
+      service.syncCart.mockRejectedValue(error);
+      const req = mockRequest(mockUserId);
 
-//       expect(result).toEqual({ message: 'Cart synced successfully' });
-//       expect(service.syncCart).toHaveBeenCalledWith(userId, dto.items);
-//       expect(service.syncCart).toHaveBeenCalledTimes(1);
-//     });
+      // Act & Assert
+      await expect(controller.syncCart(req, dto)).rejects.toThrow(
+        new HttpException('Failed to sync cart', HttpStatus.INTERNAL_SERVER_ERROR)
+      );
+      expect(service.syncCart).toHaveBeenCalledWith(mockUserId, dto.items);
+    });
+  });
 
-//     it('should throw HttpException if service fails', async () => {
-//       mockCartService.syncCart.mockRejectedValue(new Error('Service error'));
+  // --- Test updateCartItem ---
+  describe('updateCartItem', () => {
+    const productIdToUpdate = mockProductId1;
+    const dto: UpdateCartItemDto = { quantity: 5 };
+    const updatedCartItemEntity = { ...mockBaseCartItem1, quantity: 5, updatedAt: new Date() };
 
-//       const req = mockRequest(userId);
+    it('should update a cart item quantity and return the updated CartItem entity', async () => {
+      // Arrange: Service returns the updated CartItem entity
+      service.updateCartItem.mockResolvedValue(updatedCartItemEntity);
+      const req = mockRequest(mockUserId);
 
-//       await expect(controller.syncCart(req, dtoFail)).rejects.toThrow(
-//         new HttpException('Failed to sync cart', HttpStatus.INTERNAL_SERVER_ERROR),
-//       );
-//       expect(service.syncCart).toHaveBeenCalledWith(userId, dtoFail.items);
-//     });
-//   });
+      // Act: Pass the number directly (ParseIntPipe is handled by NestJS runtime)
+      const result = await controller.updateCartItem(req, productIdToUpdate, dto);
 
-//   // --- Test Suite for updateCartItem ---
-//   describe('updateCartItem', () => {
-//     const productId = 'prod-update';
-//     const dto: UpdateCartItemDto = { quantity: 5 };
+      // Assert
+      expect(service.updateCartItem).toHaveBeenCalledWith(mockUserId, productIdToUpdate, dto);
+      expect(result).toEqual(updatedCartItemEntity); // Returns CartItem entity
+    });
 
-//     it('should update a cart item successfully', async () => {
-//       const mockUpdatedCartItem = { productId, quantity: 5 }; // Or the whole cart
-//       mockCartService.updateCartItem.mockResolvedValue(mockUpdatedCartItem);
+    it('should throw HttpException if item not found (NotFoundException from service)', async () => {
+      // Arrange
+      const error = new NotFoundException(`Cart item with product ID ${productIdToUpdate} not found.`);
+      service.updateCartItem.mockRejectedValue(error);
+      const req = mockRequest(mockUserId);
 
-//       const req = mockRequest(userId);
-//       const result = await controller.updateCartItem(req, productId, dto);
+      // Act & Assert
+      await expect(controller.updateCartItem(req, productIdToUpdate, dto)).rejects.toThrow(error);
+      expect(service.updateCartItem).toHaveBeenCalledWith(mockUserId, productIdToUpdate, dto);
+    });
 
-//       expect(result).toEqual(mockUpdatedCartItem);
-//       expect(service.updateCartItem).toHaveBeenCalledWith(userId, productId, dto);
-//       expect(service.updateCartItem).toHaveBeenCalledTimes(1);
-//     });
+    it('should throw HttpException if quantity is invalid (BadRequestException from service)', async () => {
+        // Arrange
+        const error = new BadRequestException(`Cannot set quantity to ${dto.quantity}. Only 3 available.`);
+        service.updateCartItem.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//     it('should throw HttpException if service fails', async () => {
-//       mockCartService.updateCartItem.mockRejectedValue(new Error('Service error'));
+        // Act & Assert
+        await expect(controller.updateCartItem(req, productIdToUpdate, dto)).rejects.toThrow(error);
+        expect(service.updateCartItem).toHaveBeenCalledWith(mockUserId, productIdToUpdate, dto);
+      });
 
-//       const req = mockRequest(userId);
 
-//       await expect(controller.updateCartItem(req, productId, dto)).rejects.toThrow(
-//         new HttpException('Failed to update cart item', HttpStatus.INTERNAL_SERVER_ERROR),
-//       );
-//       expect(service.updateCartItem).toHaveBeenCalledWith(userId, productId, dto);
-//     });
-//   });
+    it('should throw generic HttpException for other unexpected service errors', async () => {
+        // Arrange
+        const error = new Error('Update failed unexpectedly');
+        service.updateCartItem.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//   // --- Test Suite for removeFromCart ---
-//   describe('removeFromCart', () => {
-//     const productId = 'prod-remove';
-//     it('should remove an item from the cart successfully', async () => {
-//       mockCartService.removeFromCart.mockResolvedValue(true); // Simulate successful removal
+        // Act & Assert
+        await expect(controller.updateCartItem(req, productIdToUpdate, dto)).rejects.toThrow(
+            new HttpException('Failed to update cart item', HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+        expect(service.updateCartItem).toHaveBeenCalledWith(mockUserId, productIdToUpdate, dto);
+      });
+  });
 
-//       const req = mockRequest(userId);
-//       const result = await controller.removeFromCart(req, productId);
+  // --- Test removeFromCart ---
+  describe('removeFromCart', () => {
+    const productIdToRemove = mockProductId1;
 
-//       expect(result).toEqual({ message: 'Item removed from cart' });
-//       expect(service.removeFromCart).toHaveBeenCalledWith(userId, productId);
-//       expect(service.removeFromCart).toHaveBeenCalledTimes(1);
-//     });
+    it('should remove an item from the cart and return success message', async () => {
+      // Arrange: Service indicates success (item was found and deleted)
+      service.removeFromCart.mockResolvedValue(true);
+      const req = mockRequest(mockUserId);
 
-//     it('should throw HttpException with 404 if item not found', async () => {
-//       mockCartService.removeFromCart.mockResolvedValue(false); // Simulate item not found
+      // Act
+      const result = await controller.removeFromCart(req, productIdToRemove);
 
-//       const req = mockRequest(userId);
+      // Assert
+      expect(service.removeFromCart).toHaveBeenCalledWith(mockUserId, productIdToRemove);
+      expect(result).toEqual({ message: 'Item removed from cart' });
+    });
 
-//       await expect(controller.removeFromCart(req, productId)).rejects.toThrow(
-//         new HttpException('Item not found', HttpStatus.NOT_FOUND),
-//       );
-//       expect(service.removeFromCart).toHaveBeenCalledWith(userId, productId);
-//     });
+    it('should throw HttpException with NOT_FOUND if item was not found by service', async () => {
+      // Arrange: Service indicates item not found (delete affected 0 rows)
+      service.removeFromCart.mockResolvedValue(false);
+      const req = mockRequest(mockUserId);
 
-//     it('should throw HttpException with 500 if service fails unexpectedly', async () => {
-//        mockCartService.removeFromCart.mockRejectedValue(new Error('Database connection error'));
+      // Act & Assert
+      await expect(controller.removeFromCart(req, productIdToRemove)).rejects.toThrow(
+        new HttpException('Item not found in cart', HttpStatus.NOT_FOUND) // Controller translates false to 404
+      );
+      expect(service.removeFromCart).toHaveBeenCalledWith(mockUserId, productIdToRemove);
+    });
 
-//        const req = mockRequest(userId);
+     it('should throw generic HttpException for other unexpected service errors', async () => {
+        // Arrange
+        const error = new Error('Deletion failed unexpectedly');
+        service.removeFromCart.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//        await expect(controller.removeFromCart(req, productId)).rejects.toThrow(
-//          new HttpException('Failed to remove item', HttpStatus.INTERNAL_SERVER_ERROR),
-//        );
-//        expect(service.removeFromCart).toHaveBeenCalledWith(userId, productId);
-//     });
-//   });
+        // Act & Assert
+        await expect(controller.removeFromCart(req, productIdToRemove)).rejects.toThrow(
+            new HttpException('Failed to remove item from cart', HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+        expect(service.removeFromCart).toHaveBeenCalledWith(mockUserId, productIdToRemove);
+      });
+  });
 
-//   // --- Test Suite for clearCart ---
-//   describe('clearCart', () => {
-//     it('should clear the cart successfully', async () => {
-//       mockCartService.clearCart.mockResolvedValue(true); // Simulate successful clear
+   // --- Test clearCart ---
+  describe('clearCart', () => {
+    it('should clear the entire cart and return success message', async () => {
+        // Arrange: Service indicates items were deleted
+        service.clearCart.mockResolvedValue(true);
+        const req = mockRequest(mockUserId);
 
-//       const req = mockRequest(userId);
-//       const result = await controller.clearCart(req);
+        // Act
+        const result = await controller.clearCart(req);
 
-//       expect(result).toEqual({ message: 'Cart cleared' });
-//       expect(service.clearCart).toHaveBeenCalledWith(userId);
-//       expect(service.clearCart).toHaveBeenCalledTimes(1);
-//     });
+        // Assert
+        expect(service.clearCart).toHaveBeenCalledWith(mockUserId);
+        expect(result).toEqual({ message: 'Cart cleared successfully' });
+    });
 
-//     it('should throw HttpException with 404 if cart already empty', async () => {
-//       mockCartService.clearCart.mockResolvedValue(false); // Simulate cart already empty
+    it('should return specific success message if cart was already empty', async () => {
+        // Arrange: Service indicates nothing was deleted (cart was likely empty)
+        service.clearCart.mockResolvedValue(false);
+        const req = mockRequest(mockUserId);
 
-//       const req = mockRequest(userId);
+        // Act
+        const result = await controller.clearCart(req);
 
-//       await expect(controller.clearCart(req)).rejects.toThrow(
-//         new HttpException('Cart already empty', HttpStatus.NOT_FOUND),
-//       );
-//       expect(service.clearCart).toHaveBeenCalledWith(userId);
-//     });
+        // Assert
+        expect(service.clearCart).toHaveBeenCalledWith(mockUserId);
+        // Controller handles false from service gracefully
+        expect(result).toEqual({ message: 'Cart cleared successfully (or was already empty)' });
+    });
 
-//      it('should throw HttpException with 500 if service fails unexpectedly', async () => {
-//        mockCartService.clearCart.mockRejectedValue(new Error('Cache clear failed'));
+    it('should throw generic HttpException for unexpected service errors', async () => {
+        // Arrange
+        const error = new Error('Clear operation failed unexpectedly');
+        service.clearCart.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
 
-//        const req = mockRequest(userId);
+        // Act & Assert
+        await expect(controller.clearCart(req)).rejects.toThrow(
+            new HttpException('Failed to clear cart', HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+        expect(service.clearCart).toHaveBeenCalledWith(mockUserId);
+    });
 
-//        await expect(controller.clearCart(req)).rejects.toThrow(
-//          new HttpException('Failed to clear cart', HttpStatus.INTERNAL_SERVER_ERROR),
-//        );
-//        expect(service.clearCart).toHaveBeenCalledWith(userId);
-//     });
-//   });
-// });
+     it('should re-throw HttpException from service if applicable', async () => {
+        // Arrange
+        const error = new InternalServerErrorException('Database error during clear');
+        service.clearCart.mockRejectedValue(error);
+        const req = mockRequest(mockUserId);
+
+        // Act & Assert
+        await expect(controller.clearCart(req)).rejects.toThrow(error);
+        expect(service.clearCart).toHaveBeenCalledWith(mockUserId);
+    });
+  });
+
+});

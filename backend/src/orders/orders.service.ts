@@ -7,7 +7,8 @@ import {
   BadRequestException,
   ConflictException,
   Logger,
-  ForbiddenException
+  ForbiddenException,
+  Inject
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -26,14 +27,16 @@ export class OrdersService {
   constructor(
     private dataSource: DataSource,
     @InjectRepository(Order)
-    private ordersRepository: Repository<Order>, // Need Order repo for buyer orders
+    private ordersRepository: Repository<Order>,
     @InjectRepository(CartItem)
     private cartItemsRepository: Repository<CartItem>,
     @InjectRepository(SellerOrder)
     private sellerOrdersRepository: Repository<SellerOrder>,
+    // Add this:
+    @Inject(Logger) private readonly logger: Logger,
   ) {}
 
-  private readonly logger = new Logger(OrdersService.name);
+ // private readonly logger = new Logger(OrdersService.name);
 
   // ... (groupItemsByStore method - keep as is) ...
   private groupItemsByStore(items: CartItemDto[]): Record<string, CartItemDto[]> {

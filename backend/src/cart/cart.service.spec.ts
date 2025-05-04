@@ -1,332 +1,603 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { Repository, EntityManager, DeleteResult, ObjectLiteral } from 'typeorm';
-// import { HttpException, HttpStatus } from '@nestjs/common';
-// import { CartService } from './cart.service';
-// import { CartItem } from './entities/cart-item.entity';
-// import { CreateCartItemDto } from './dto/create-cart-item.dto';
-// import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+// cart.service.spec.ts
 
-// // *** ADJUSTED TYPES ***
-// // Type for standard repository methods (excluding 'manager')
-// type MockRepositoryMethods<T extends ObjectLiteral = any> = Partial<Record<Exclude<keyof Repository<T>, 'manager'>, jest.Mock>>;
-// // Type for our specific manager mock structure
-// type MockManagerWithTransaction = { manager: { transaction: jest.Mock } };
-// // Combined type describing the actual return value of createMockRepository
-// type MockRepositoryType<T extends ObjectLiteral = any> = MockRepositoryMethods<T> & MockManagerWithTransaction;
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository, EntityManager, DeleteResult, ObjectLiteral } from 'typeorm';
+import { CartService, CartItemWithProductDetails } from './cart.service';
+import { CartItem } from './entities/cart-item.entity';
+import { Product } from '../products/entities/product.entity';
+import { CreateCartItemDto } from './dto/create-cart-item.dto';
+import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 
-// // Define a simpler type for the mock entity manager used in transactions
-// type MockEntityManager = Partial<Record<'delete' | 'create' | 'save', jest.Mock>>;
+// --- Mock Data ---
+const mockUserId = 'user-test-123';
+const mockProductId1 = 101;
+const mockProductId2 = 102;
+const mockStoreId1 = 'store-a';
+const mockStoreId2 = 'store-b';
 
-// // createMockRepository now returns the explicitly defined combined type
-// const createMockRepository = <T extends ObjectLiteral = any>(): MockRepositoryType<T> => ({
-//   find: jest.fn(),
-//   findOne: jest.fn(),
-//   findOneOrFail: jest.fn(),
-//   create: jest.fn(),
-//   save: jest.fn(),
-//   delete: jest.fn(),
-//   // manager is an OBJECT containing the transaction mock function
-//   manager: {
-//     transaction: jest.fn(),
-//   },
-// });
+const mockCartItem1: CartItem = {
+    cartID: 1,
+    userId: mockUserId,
+    productId: mockProductId1,
+    quantity: 2,
+   
+    // Add relations if needed by entity definition, e.g., user: null, product: null
+};
 
-// const createMockEntityManager = (): MockEntityManager => ({
-//     delete: jest.fn(),
-//     create: jest.fn(),
-//     save: jest.fn(),
-// });
+const mockCartItem2: CartItem = {
+    cartID: 2,
+    userId: mockUserId,
+    productId: mockProductId2,
+    quantity: 1,
+   
+};
+
+const mockProduct1: Product = {
+    isActive: true,
+    userId: mockUserId,
+    store: {
+        storeId: mockStoreId1,  
+        userId: mockUserId,
+storeName: 'Store A',
+standardPrice: 9.99,
+standardTime: "24 hours",    
+expressPrice: 19.99,
+expressTime: "12 hours",
+products: [],
+user: {
+    userID: "342",
+    role: "seller"
+},
+      
+     
+    },
+    prodId: mockProductId1, 
+    name: 'Test Product 2',
+    price: 9.99,
+    productquantity: 10, // Available stock
+    description: 'Desc 1',
+    imageUrl: 'img1.jpg',
+    storeName: 'Store A',
+    storeId: mockStoreId1,
+    category: "Other",
+
+};
+
+const mockProduct2: Product = {
+    isActive: true,
+    userId: mockUserId,
+    store: {
+        storeId: mockStoreId1,  
+        userId: mockUserId,
+storeName: 'Store A',
+standardPrice: 5.00,
+standardTime: "24 hours",    
+expressPrice: 19.99,
+expressTime: "12 hours",
+products: [],
+user: {
+    userID: "342",
+    role: "seller"
+},
+      
+     
+    },
+    prodId: mockProductId2, 
+    name: 'Test Product 1',
+    price: 9.99,
+    productquantity: 5, // Available stock
+    description: 'Desc 2',
+    imageUrl: 'img1.jpg',
+    storeName: 'Store B',
+    storeId: mockStoreId1,
+    category: "Other",
+
+};
 
 
-// describe('CartService', () => {
-//   let service: CartService;
-//   // Use the adjusted combined type for the repository variable
-//   let repository: MockRepositoryType<CartItem>;
-//   let mockEntityManager: MockEntityManager;
 
-//   const userId = 'user-123';
-//   const productId = 'product-abc';
-//   const mockDate = new Date('2025-04-26T20:33:03.000Z'); // Updated time
+const mockCartItemWithDetails1: CartItemWithProductDetails = {
+    cartID: mockCartItem1.cartID,
+    userId: mockCartItem1.userId,
+    productId: mockCartItem1.productId,
+    quantity: mockCartItem1.quantity,
+    productName: mockProduct1.name,
+    productPrice: mockProduct1.price,
+    imageUrl: mockProduct1.imageUrl,
+    availableQuantity: mockProduct1.productquantity,
+    storeName: mockProduct1.storeName,
+    storeId: mockProduct1.storeId,
+};
 
-//   const mockCartItem: CartItem = {
-//     id: 'item-id-1',
-//     userId,
-//     productId,
-//     name: 'Test Product',
-//     price: 10.99,
-//     image: 'test.jpg',
-//     quantity: 1,
-//     createdAt: mockDate,
-//     updatedAt: mockDate,
-//   };
+const mockCartItemWithDetails2: CartItemWithProductDetails = {
+    cartID: mockCartItem2.cartID,
+    userId: mockCartItem2.userId,
+    productId: mockCartItem2.productId,
+    quantity: mockCartItem2.quantity,
+    productName: mockProduct2.name,
+    productPrice: mockProduct2.price,
+    imageUrl: mockProduct2.imageUrl,
+    availableQuantity: mockProduct2.productquantity,
+    storeName: mockProduct2.storeName,
+    storeId: mockProduct2.storeId,
+};
 
-//   beforeAll(() => {
-//      jest.useFakeTimers();
-//      jest.setSystemTime(mockDate);
-//   });
+// --- TypeORM Mock Factory ---
+// Define a type for our mock repository methods
+type MockRepository<T extends ObjectLiteral = any> = {
+  find: jest.Mock;
+  findOne: jest.Mock;
+  findByIds: jest.Mock;
+  create: jest.Mock;
+  save: jest.Mock;
+  delete: jest.Mock;
+  findBy: jest.Mock;
+  manager: jest.Mock & { transaction: jest.Mock };
+};
 
-//   afterAll(() => {
-//      jest.useRealTimers();
-//   });
+const createMockRepository = <T extends ObjectLiteral = any>(): MockRepository<T> => ({
+  find: jest.fn(),
+  findOne: jest.fn(),
+  findByIds: jest.fn(),
+  create: jest.fn(),
+  save: jest.fn(),
+  delete: jest.fn(),
+  findBy: jest.fn(),
+  manager: Object.assign(jest.fn(), {
+    transaction: jest.fn(),
+  }),
+}) as MockRepository<T>;
+
+// Mock EntityManager for transactions
+const mockEntityManager = {
+    delete: jest.fn(),
+    findByIds: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+};
 
 
-//   beforeEach(async () => {
-//     mockEntityManager = createMockEntityManager();
+// --- Test Suite ---
+describe('CartService', () => {
+  let service: CartService;
+  let cartRepository: MockRepository<CartItem>;
+  let productRepository: MockRepository<Product>;
 
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [
-//         CartService,
-//         {
-//           provide: getRepositoryToken(CartItem),
-//           useValue: createMockRepository<CartItem>(),
-//         },
-//       ],
-//     }).compile();
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CartService,
+        {
+          provide: getRepositoryToken(CartItem),
+          useValue: createMockRepository<CartItem>(),
+        },
+        {
+          provide: getRepositoryToken(Product),
+          useValue: createMockRepository<Product>(),
+        },
+      ],
+    }).compile();
 
-//     service = module.get<CartService>(CartService);
-//     // Get the repository mock using the adjusted type
-//     repository = module.get<MockRepositoryType<CartItem>>(getRepositoryToken(CartItem));
+    service = module.get<CartService>(CartService);
+    cartRepository = module.get(getRepositoryToken(CartItem));
+    productRepository = module.get(getRepositoryToken(Product));
 
-//     repository.manager.transaction!.mockImplementation(async (cb) => {
-//         return await cb(mockEntityManager as unknown as EntityManager);
-//     });
-//   });
+    // Reset mocks before each test
+    jest.clearAllMocks();
 
-//    afterEach(() => {
-//         jest.clearAllMocks();
-//    });
+    // Mock the transaction implementation
+    // It should immediately call the callback with the mockEntityManager
+    cartRepository.manager.transaction.mockImplementation(async (callback) => {
+        return await callback(mockEntityManager);
+    });
 
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
+  });
 
-//   //----------------------------------
-//   // getCart Tests
-//   //----------------------------------
-//   describe('getCart', () => {
-//     it('should return an array of cart items for a user', async () => {
-//       const cartItems = [mockCartItem, { ...mockCartItem, id: 'item-id-2', productId: 'prod-xyz'}];
-//       repository.find!.mockResolvedValue(cartItems);
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
-//       const result = await service.getCart(userId);
+  // --- getCart Tests ---
+  describe('getCart', () => {
+    it('should retrieve cart items and map them to details', async () => {
+      cartRepository.find.mockResolvedValue([mockCartItem1, mockCartItem2]);
+      productRepository.findByIds.mockResolvedValue([mockProduct1, mockProduct2]);
 
-//       expect(result).toEqual(cartItems);
-//       expect(repository.find).toHaveBeenCalledWith({
-//         where: { userId },
-//         order: { createdAt: 'DESC' }
-//       });
-//     });
+      const result = await service.getCart(mockUserId);
 
-//     it('should return an empty array if the cart is empty', async () => {
-//       repository.find!.mockResolvedValue([]);
+      expect(cartRepository.find).toHaveBeenCalledWith({
+        where: { userId: mockUserId },
+        order: { cartID: 'ASC' }
+      });
+      expect(productRepository.findByIds).toHaveBeenCalledWith([mockProductId1, mockProductId2]);
+      expect(result).toEqual([mockCartItemWithDetails1, mockCartItemWithDetails2]);
+    });
 
-//       const result = await service.getCart(userId);
+    it('should return an empty array if no cart items found', async () => {
+      cartRepository.find.mockResolvedValue([]);
 
-//       expect(result).toEqual([]);
-//       expect(repository.find).toHaveBeenCalledWith({
-//         where: { userId },
-//         order: { createdAt: 'DESC' }
-//       });
-//     });
-//   });
+      const result = await service.getCart(mockUserId);
 
-//   //----------------------------------
-//   // addToCart Tests
-//   //----------------------------------
-//   describe('addToCart', () => {
-//     const createDto: CreateCartItemDto = {
-//         productId,
-//         quantity: 2,
-//         name: 'Test Product DTO',
-//         price: 10.99
-//     };
+      expect(cartRepository.find).toHaveBeenCalledWith({
+        where: { userId: mockUserId },
+        order: { cartID: 'ASC' }
+      });
+      expect(productRepository.findByIds).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
 
-//     it('should add a new item to the cart if it does not exist', async () => {
-//       const newItemData = {
-//         ...createDto,
-//         userId,
-//         createdAt: mockDate,
-//         updatedAt: mockDate,
-//       };
-//       const createArg = { ...newItemData };
-//       const savedItem = { ...createArg, id: 'new-item-id', image: 'test.jpg' };
+     it('should exclude items if their corresponding product is not found', async () => {
+        // Cart has item1 and item2, but product repository only returns product1
+        cartRepository.find.mockResolvedValue([mockCartItem1, mockCartItem2]);
+        productRepository.findByIds.mockResolvedValue([mockProduct1]); // Product 2 missing
 
-//       repository.findOne!.mockResolvedValue(null);
-//       repository.create!.mockReturnValue(createArg as any);
-//       repository.save!.mockResolvedValue(savedItem as any);
+        const result = await service.getCart(mockUserId);
 
-//       const result = await service.addToCart(userId, createDto);
+        expect(cartRepository.find).toHaveBeenCalledTimes(1);
+        expect(productRepository.findByIds).toHaveBeenCalledWith([mockProductId1, mockProductId2]);
+        // Only the item with the found product should be returned
+        expect(result).toEqual([mockCartItemWithDetails1]);
+      });
 
-//       expect(result).toEqual(savedItem);
-//       expect(repository.findOne).toHaveBeenCalledWith({ where: { userId, productId } });
-//        expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
-//            userId,
-//            productId: createDto.productId,
-//            quantity: createDto.quantity,
-//            name: createDto.name,
-//            price: createDto.price,
-//        }));
-//       expect(repository.save).toHaveBeenCalledWith(expect.objectContaining(createArg));
-//     });
+    it('should throw InternalServerErrorException if cartRepository.find fails', async () => {
+      cartRepository.find.mockRejectedValue(new Error('DB Find Error'));
 
-//     it('should update the quantity of an existing item', async () => {
-//       const existingItem = { ...mockCartItem, quantity: 1 };
-//       const addedQuantity = createDto.quantity;
-//       const expectedUpdatedItem = { ...existingItem, quantity: existingItem.quantity + addedQuantity, updatedAt: mockDate };
+      await expect(service.getCart(mockUserId)).rejects.toThrow(InternalServerErrorException);
+    });
 
-//       repository.findOne!.mockResolvedValue(existingItem);
-//       repository.save!.mockResolvedValue(expectedUpdatedItem as any);
+    it('should throw InternalServerErrorException if productRepository.findByIds fails', async () => {
+      cartRepository.find.mockResolvedValue([mockCartItem1]);
+      productRepository.findByIds.mockRejectedValue(new Error('DB FindByIds Error'));
 
-//       const result = await service.addToCart(userId, createDto);
+      await expect(service.getCart(mockUserId)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
 
-//       expect(result).toEqual(expectedUpdatedItem);
-//       expect(repository.findOne).toHaveBeenCalledWith({ where: { userId, productId } });
-//       expect(repository.save).toHaveBeenCalledWith(expectedUpdatedItem);
-//       expect(repository.create).not.toHaveBeenCalled();
-//     });
-//   });
+  // --- addToCart Tests ---
+  describe('addToCart', () => {
+    const dto: CreateCartItemDto = { productId: mockProductId1, quantity: 1 };
 
-//   //----------------------------------
-//   // updateCartItem Tests
-//   //----------------------------------
-//   describe('updateCartItem', () => {
-//     const updateDto: UpdateCartItemDto = { quantity: 5 };
+    it('should add a new item if it does not exist', async () => {
+      const newItem = { ...mockCartItem1, quantity: dto.quantity };
+      productRepository.findOne.mockResolvedValue(mockProduct1); // Product exists and has stock
+      cartRepository.findOne.mockResolvedValue(null); // Cart item doesn't exist
+      cartRepository.create.mockReturnValue(newItem); // Mock creation
+      cartRepository.save.mockResolvedValue(newItem); // Mock save
 
-//     it('should update the quantity of a specific cart item', async () => {
-//       const itemToUpdate = { ...mockCartItem };
-//       const expectedUpdatedItem = { ...itemToUpdate, quantity: updateDto.quantity };
+      const result = await service.addToCart(mockUserId, dto);
 
-//       repository.findOneOrFail!.mockResolvedValue(itemToUpdate);
-//       repository.save!.mockResolvedValue(expectedUpdatedItem as any);
+      expect(productRepository.findOne).toHaveBeenCalledWith({ where: { prodId: dto.productId } });
+      expect(cartRepository.findOne).toHaveBeenCalledWith({ where: { userId: mockUserId, productId: dto.productId } });
+      expect(cartRepository.create).toHaveBeenCalledWith({ userId: mockUserId, productId: dto.productId, quantity: dto.quantity });
+      expect(cartRepository.save).toHaveBeenCalledWith(newItem);
+      expect(result).toEqual(newItem);
+    });
 
-//       const result = await service.updateCartItem(userId, productId, updateDto);
+    it('should update quantity if item already exists', async () => {
+      const existingItem = { ...mockCartItem1 }; // quantity: 2
+      const updatedItem = { ...existingItem, quantity: existingItem.quantity + dto.quantity }; // quantity: 3
+      const productWithEnoughStock = { ...mockProduct1, productquantity: 10 };
 
-//       expect(result).toEqual(expectedUpdatedItem);
-//       expect(repository.findOneOrFail).toHaveBeenCalledWith({ where: { userId, productId } });
-//       expect(repository.save).toHaveBeenCalledWith(expectedUpdatedItem);
-//     });
+      productRepository.findOne.mockResolvedValue(productWithEnoughStock);
+      cartRepository.findOne.mockResolvedValue(existingItem);
+      cartRepository.save.mockResolvedValue(updatedItem);
 
-//     it('should throw an error if the item to update is not found', async () => {
-//       const error = new Error('Item not found');
-//       repository.findOneOrFail!.mockRejectedValue(error);
+      const result = await service.addToCart(mockUserId, dto);
 
-//       await expect(service.updateCartItem(userId, productId, updateDto)).rejects.toThrow(error);
+      expect(productRepository.findOne).toHaveBeenCalledWith({ where: { prodId: dto.productId } });
+      expect(cartRepository.findOne).toHaveBeenCalledWith({ where: { userId: mockUserId, productId: dto.productId } });
+      expect(cartRepository.create).not.toHaveBeenCalled();
+      // Check that save was called with the updated quantity
+      expect(cartRepository.save).toHaveBeenCalledWith(expect.objectContaining({ quantity: existingItem.quantity + dto.quantity -1  }));
+      expect(result).toEqual(updatedItem);
+    });
 
-//       expect(repository.findOneOrFail).toHaveBeenCalledWith({ where: { userId, productId } });
-//       expect(repository.save).not.toHaveBeenCalled();
-//     });
-//   });
+    it('should throw NotFoundException if product not found', async () => {
+      productRepository.findOne.mockResolvedValue(null);
 
-//   //----------------------------------
-//   // removeFromCart Tests
-//   //----------------------------------
-//   describe('removeFromCart', () => {
-//     it('should remove an item from the cart and return true', async () => {
-//       const deleteResult: DeleteResult = { affected: 1, raw: {} };
-//       repository.delete!.mockResolvedValue(deleteResult);
+      await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(NotFoundException);
+      expect(cartRepository.findOne).not.toHaveBeenCalled();
+    });
 
-//       const result = await service.removeFromCart(userId, productId);
+     it('should throw BadRequestException if product stock is invalid (NaN)', async () => {
+        const productInvalidStock = { ...mockProduct1, productquantity: NaN };
+        productRepository.findOne.mockResolvedValue(productInvalidStock);
 
-//       expect(result).toBe(true);
-//       expect(repository.delete).toHaveBeenCalledWith({ userId, productId });
-//     });
+        await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(BadRequestException);
+        await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(`Product with ID ${dto.productId} is currently unavailable (invalid stock).`);
+      });
 
-//     it('should return false if no item was removed', async () => {
-//       const deleteResult: DeleteResult = { affected: 0, raw: {} };
-//       repository.delete!.mockResolvedValue(deleteResult);
+     it('should throw BadRequestException if product stock is invalid (< 0)', async () => {
+        const productInvalidStock = { ...mockProduct1, productquantity: -1 };
+        productRepository.findOne.mockResolvedValue(productInvalidStock);
 
-//       const result = await service.removeFromCart(userId, productId);
+        await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(BadRequestException);
+         await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(`Product with ID ${dto.productId} is currently unavailable (invalid stock).`);
+      });
 
-//       expect(result).toBe(false);
-//       expect(repository.delete).toHaveBeenCalledWith({ userId, productId });
-//     });
-//   });
 
-//   //----------------------------------
-//   // clearCart Tests
-//   //----------------------------------
-//   describe('clearCart', () => {
-//     it('should remove all items for a user and return true', async () => {
-//       const deleteResult: DeleteResult = { affected: 3, raw: {} };
-//       repository.delete!.mockResolvedValue(deleteResult);
+    it('should throw BadRequestException if product is out of stock (stock = 0)', async () => {
+      const productOutOfStock = { ...mockProduct1, productquantity: 0 };
+      productRepository.findOne.mockResolvedValue(productOutOfStock);
 
-//       const result = await service.clearCart(userId);
+      await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(BadRequestException);
+      await expect(service.addToCart(mockUserId, dto)).rejects.toThrow(`Product "${productOutOfStock.name}" is out of stock.`);
+    });
 
-//       expect(result).toBe(true);
-//       expect(repository.delete).toHaveBeenCalledWith({ userId });
-//     });
+    it('should throw BadRequestException if adding new item exceeds stock', async () => {
+      const productLowStock = { ...mockProduct1, productquantity: 2 }; // Only 2 available
+      const addDto: CreateCartItemDto = { productId: mockProductId1, quantity: 3 }; // Trying to add 3
+      productRepository.findOne.mockResolvedValue(productLowStock);
+      cartRepository.findOne.mockResolvedValue(null); // Item does not exist yet
 
-//     it('should return false if the cart was already empty', async () => {
-//       const deleteResult: DeleteResult = { affected: 0, raw: {} };
-//       repository.delete!.mockResolvedValue(deleteResult);
+      await expect(service.addToCart(mockUserId, addDto)).rejects.toThrow(BadRequestException);
+      await expect(service.addToCart(mockUserId, addDto)).rejects.toThrow(`Cannot add ${addDto.quantity} items. Only ${productLowStock.productquantity} available for "${productLowStock.name}".`);
+    });
 
-//       const result = await service.clearCart(userId);
+    it('should throw BadRequestException if updating existing item exceeds stock', async () => {
+      const existingItem = { ...mockCartItem1, quantity: 3 }; // Already has 3
+      const productStock = { ...mockProduct1, productquantity: 4 }; // Only 4 total available
+      const addDto: CreateCartItemDto = { productId: mockProductId1, quantity: 2 }; // Trying to add 2 more
 
-//       expect(result).toBe(false);
-//       expect(repository.delete).toHaveBeenCalledWith({ userId });
-//     });
-//   });
+      productRepository.findOne.mockResolvedValue(productStock);
+      cartRepository.findOne.mockResolvedValue(existingItem);
 
-//    //----------------------------------
-//   // syncCart Tests
-//   //----------------------------------
-//   describe('syncCart', () => {
-//     const syncItemsDto: CreateCartItemDto[] = [
-//       { productId: 'prod-1', quantity: 1, name: 'Sync Prod 1', price: 5 },
-//       { productId: 'prod-2', quantity: 3, name: 'Sync Prod 2', price: 8 },
-//     ];
+      await expect(service.addToCart(mockUserId, addDto)).rejects.toThrow(BadRequestException);
+      await expect(service.addToCart(mockUserId, addDto)).rejects.toThrow(`Cannot add ${addDto.quantity} more items. Only ${productStock.productquantity - existingItem.quantity} left in stock for "${productStock.name}". Total available: ${productStock.productquantity}.`);
+    });
+  });
 
-//     const itemsToCreate = syncItemsDto.map(item => ({
-//        ...item,
-//        userId,
-//        createdAt: mockDate,
-//     }));
+  // --- updateCartItem Tests ---
+   describe('updateCartItem', () => {
+        const productId = mockProductId1;
+        const dto: UpdateCartItemDto = { quantity: 3 }; // Update to quantity 3
 
-//     const createdCartItems = itemsToCreate.map((item, index) => ({
-//       id: `sync-item-${index}`,
-//       ...item,
-//       image: 'sync-img.jpg',
-//       updatedAt: mockDate
-//     }));
+        it('should update item quantity successfully', async () => {
+            const existingItem = { ...mockCartItem1, quantity: 1 };
+            const productWithStock = { ...mockProduct1, productquantity: 5 };
+            const updatedItem = { ...existingItem, quantity: dto.quantity };
 
-//     it('should clear existing cart and add new items within a transaction', async () => {
-//         mockEntityManager.delete!.mockResolvedValue({ affected: 2, raw: {} });
-//         mockEntityManager.create!.mockImplementation((entity, itemData) => ({ ...itemData }));
-//         mockEntityManager.save!.mockResolvedValue(createdCartItems);
+            cartRepository.findOne.mockResolvedValue(existingItem);
+            productRepository.findOne.mockResolvedValue(productWithStock);
+            cartRepository.save.mockResolvedValue(updatedItem);
 
-//         await service.syncCart(userId, syncItemsDto);
+            const result = await service.updateCartItem(mockUserId, productId, dto);
 
-//         expect(repository.manager.transaction).toHaveBeenCalledTimes(1);
-//         expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId });
-//         expect(mockEntityManager.create).toHaveBeenCalledTimes(syncItemsDto.length);
-//         itemsToCreate.forEach(item => {
-//             expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, item);
-//         });
-//         expect(mockEntityManager.save).toHaveBeenCalledWith(
-//            itemsToCreate.map(item => expect.objectContaining(item))
-//         );
-//         expect(repository.delete).not.toHaveBeenCalled();
-//     });
+            expect(cartRepository.findOne).toHaveBeenCalledWith({ where: { userId: mockUserId, productId: productId } });
+            expect(productRepository.findOne).toHaveBeenCalledWith({ where: { prodId: productId } });
+            expect(cartRepository.save).toHaveBeenCalledWith(expect.objectContaining({ quantity: dto.quantity }));
+            expect(result).toEqual(updatedItem);
+        });
 
-//      it('should handle potential errors during transaction', async () => {
-//         const transactionError = new Error('Database transaction failed');
+        it('should throw BadRequestException if quantity is zero or less', async () => {
+            const invalidDto: UpdateCartItemDto = { quantity: 0 };
+            await expect(service.updateCartItem(mockUserId, productId, invalidDto)).rejects.toThrow(BadRequestException);
+            await expect(service.updateCartItem(mockUserId, productId, invalidDto)).rejects.toThrow('Quantity must be greater than zero. Use remove endpoint to delete item.');
+            expect(cartRepository.findOne).not.toHaveBeenCalled();
+        });
 
-//         repository.manager.transaction!.mockImplementation(async (cb) => {
-//              mockEntityManager.delete!.mockRejectedValue(new Error('Delete failed'));
-//              try {
-//                  await cb(mockEntityManager as unknown as EntityManager);
-//              } catch(e) {
-//                 throw transactionError;
-//              }
-//         });
+        it('should throw NotFoundException if cart item not found', async () => {
+            cartRepository.findOne.mockResolvedValue(null);
 
-//         await expect(service.syncCart(userId, syncItemsDto)).rejects.toThrow(transactionError);
+            await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(NotFoundException);
+             await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(`Cart item with product ID ${productId} not found for this user.`);
+             expect(productRepository.findOne).not.toHaveBeenCalled();
+        });
 
-//         expect(repository.manager.transaction).toHaveBeenCalledTimes(1);
-//         expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId });
-//         expect(mockEntityManager.create).not.toHaveBeenCalled();
-//         expect(mockEntityManager.save).not.toHaveBeenCalled();
-//     });
-//   });
-// });
+         it('should throw NotFoundException if product not found', async () => {
+            cartRepository.findOne.mockResolvedValue(mockCartItem1);
+            productRepository.findOne.mockResolvedValue(null); // Product deleted
+
+            await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(NotFoundException);
+            await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(`Product with ID ${productId} not found (might have been deleted).`);
+            expect(cartRepository.save).not.toHaveBeenCalled();
+         });
+
+        it('should throw BadRequestException if product stock is invalid', async () => {
+            const productInvalidStock = { ...mockProduct1, productquantity: NaN };
+            cartRepository.findOne.mockResolvedValue(mockCartItem1);
+            productRepository.findOne.mockResolvedValue(productInvalidStock);
+
+            await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(BadRequestException);
+            await expect(service.updateCartItem(mockUserId, productId, dto)).rejects.toThrow(`Product with ID ${productId} is currently unavailable (invalid stock).`);
+         });
+
+         it('should throw BadRequestException if requested quantity exceeds stock', async () => {
+            const productLowStock = { ...mockProduct1, productquantity: 2 }; // Stock is 2
+            const highQuantityDto: UpdateCartItemDto = { quantity: 3 }; // Requesting 3
+            cartRepository.findOne.mockResolvedValue(mockCartItem1);
+            productRepository.findOne.mockResolvedValue(productLowStock);
+
+            await expect(service.updateCartItem(mockUserId, productId, highQuantityDto)).rejects.toThrow(BadRequestException);
+            await expect(service.updateCartItem(mockUserId, productId, highQuantityDto)).rejects.toThrow(`Cannot set quantity to ${highQuantityDto.quantity}. Only ${productLowStock.productquantity} available for "${productLowStock.name}".`);
+         });
+    });
+
+  // --- syncCart Tests ---
+  describe('syncCart', () => {
+    const itemsToSync: CreateCartItemDto[] = [
+      { productId: mockProductId1, quantity: 3 },
+      { productId: mockProductId2, quantity: 1 },
+    ];
+
+    it('should delete existing items and add new ones within a transaction', async () => {
+        mockEntityManager.findByIds.mockResolvedValue([mockProduct1, mockProduct2]); // Both products found with enough stock
+        mockEntityManager.create
+            .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId1, quantity: 3 })
+            .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId2, quantity: 1 });
+        mockEntityManager.save.mockResolvedValue(undefined); // Simulate successful save
+
+        await service.syncCart(mockUserId, itemsToSync);
+
+        expect(cartRepository.manager.transaction).toHaveBeenCalledTimes(1);
+        expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId: mockUserId });
+        expect(mockEntityManager.findByIds).toHaveBeenCalledWith(Product, [mockProductId1, mockProductId2]);
+        expect(mockEntityManager.create).toHaveBeenCalledTimes(2);
+        expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, { userId: mockUserId, productId: mockProductId1, quantity: 3 });
+        expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, { userId: mockUserId, productId: mockProductId2, quantity: 1 });
+        expect(mockEntityManager.save).toHaveBeenCalledWith([
+            { userId: mockUserId, productId: mockProductId1, quantity: 3 },
+            { userId: mockUserId, productId: mockProductId2, quantity: 1 },
+        ]);
+    });
+
+     it('should handle empty items array by just deleting existing items', async () => {
+        await service.syncCart(mockUserId, []);
+
+        expect(cartRepository.manager.transaction).toHaveBeenCalledTimes(1);
+        expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId: mockUserId });
+        expect(mockEntityManager.findByIds).not.toHaveBeenCalled();
+        expect(mockEntityManager.create).not.toHaveBeenCalled();
+        expect(mockEntityManager.save).not.toHaveBeenCalled();
+     });
+
+    it('should throw NotFoundException if any product ID is not found', async () => {
+        mockEntityManager.findByIds.mockResolvedValue([mockProduct1]); // Product 2 missing
+
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(NotFoundException);
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(`Sync failed: Products not found with IDs: ${mockProductId2}.`);
+        expect(cartRepository.manager.transaction).toHaveBeenCalledTimes(2); // Transaction started
+        expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId: mockUserId });
+        expect(mockEntityManager.findByIds).toHaveBeenCalledWith(Product, [mockProductId1, mockProductId2]);
+        expect(mockEntityManager.create).not.toHaveBeenCalled(); // Should fail before creating
+        expect(mockEntityManager.save).not.toHaveBeenCalled();
+     });
+
+    it('should adjust quantity down if requested quantity exceeds available stock', async () => {
+        const productLowStock = { ...mockProduct2, productquantity: 2 }; // Only 2 available
+        const syncItemsLowStock: CreateCartItemDto[] = [
+            { productId: mockProductId1, quantity: 1 }, // OK
+            { productId: mockProductId2, quantity: 5 }, // Request 5, only 2 available
+        ];
+        mockEntityManager.findByIds.mockResolvedValue([mockProduct1, productLowStock]);
+        mockEntityManager.create
+            .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId1, quantity: 1 })
+            .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId2, quantity: 2 }); // Adjusted quantity
+         mockEntityManager.save.mockResolvedValue(undefined);
+
+         await service.syncCart(mockUserId, syncItemsLowStock);
+
+         expect(mockEntityManager.create).toHaveBeenCalledTimes(2);
+         expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, { userId: mockUserId, productId: mockProductId1, quantity: 1 });
+         expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, { userId: mockUserId, productId: mockProductId2, quantity: 2 }); // Check adjusted quantity
+         expect(mockEntityManager.save).toHaveBeenCalledTimes(1);
+    });
+
+     it('should skip items with quantity zero or less', async () => {
+        const syncItemsZeroQuantity: CreateCartItemDto[] = [
+            { productId: mockProductId1, quantity: 1 },
+            { productId: mockProductId2, quantity: 0 }, // Quantity 0
+        ];
+        mockEntityManager.findByIds.mockResolvedValue([mockProduct1, mockProduct2]);
+         mockEntityManager.create
+            .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId1, quantity: 1 }); // Only create item 1
+        mockEntityManager.save.mockResolvedValue(undefined);
+
+        await service.syncCart(mockUserId, syncItemsZeroQuantity);
+
+        expect(mockEntityManager.create).toHaveBeenCalledTimes(1); // Only called once
+        expect(mockEntityManager.create).toHaveBeenCalledWith(CartItem, { userId: mockUserId, productId: mockProductId1, quantity: 1 });
+        expect(mockEntityManager.save).toHaveBeenCalledWith([{ userId: mockUserId, productId: mockProductId1, quantity: 1 }]); // Only save item 1
+     });
+
+    it('should throw BadRequestException if product has invalid stock during sync', async () => {
+        const productInvalidStock = { ...mockProduct1, productquantity: NaN };
+        mockEntityManager.findByIds.mockResolvedValue([productInvalidStock, mockProduct2]);
+
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(BadRequestException);
+         await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(`Product ID ${mockProductId1} has invalid stock data during sync.`);
+     });
+
+    it('should throw InternalServerErrorException if findByIds fails in transaction', async () => {
+        mockEntityManager.findByIds.mockRejectedValue(new Error('DB Error'));
+
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(InternalServerErrorException);
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow('Failed to fetch product details during sync.');
+     });
+
+    it('should throw InternalServerErrorException if save fails in transaction', async () => {
+        mockEntityManager.findByIds.mockResolvedValue([mockProduct1, mockProduct2]);
+         mockEntityManager.create.mockReturnValue({}); // Simplified mock
+        mockEntityManager.save.mockRejectedValue(new Error('DB Save Error'));
+
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow(InternalServerErrorException);
+        await expect(service.syncCart(mockUserId, itemsToSync)).rejects.toThrow('Failed to save cart items during sync.');
+    });
+
+  });
+
+  // --- removeFromCart Tests ---
+  describe('removeFromCart', () => {
+    const productId = mockProductId1;
+
+    it('should return true if delete is successful (affected > 0)', async () => {
+      cartRepository.delete.mockResolvedValue({ affected: 1 } as DeleteResult);
+      const result = await service.removeFromCart(mockUserId, productId);
+      expect(cartRepository.delete).toHaveBeenCalledWith({ userId: mockUserId, productId: productId });
+      expect(result).toBe(true);
+    });
+
+    it('should return false if item not found (affected = 0)', async () => {
+      cartRepository.delete.mockResolvedValue({ affected: 0 } as DeleteResult);
+      const result = await service.removeFromCart(mockUserId, productId);
+      expect(cartRepository.delete).toHaveBeenCalledWith({ userId: mockUserId, productId: productId });
+      expect(result).toBe(false);
+    });
+
+     it('should return false if affected is null or undefined', async () => {
+        cartRepository.delete.mockResolvedValue({ affected: null } as DeleteResult);
+        let result = await service.removeFromCart(mockUserId, productId);
+        expect(result).toBe(false);
+
+        cartRepository.delete.mockResolvedValue({ affected: undefined } as DeleteResult);
+        result = await service.removeFromCart(mockUserId, productId);
+        expect(result).toBe(false);
+
+        cartRepository.delete.mockResolvedValue({} as DeleteResult); // No affected property
+        result = await service.removeFromCart(mockUserId, productId);
+        expect(result).toBe(false);
+     });
+
+     it('should allow TypeORM errors to propagate (e.g., DB connection)', async () => {
+        const dbError = new Error("DB Connection Error");
+        cartRepository.delete.mockRejectedValue(dbError);
+        await expect(service.removeFromCart(mockUserId, productId)).rejects.toThrow(dbError);
+     });
+  });
+
+  // --- clearCart Tests ---
+   describe('clearCart', () => {
+        it('should return true if delete is successful (affected > 0)', async () => {
+          cartRepository.delete.mockResolvedValue({ affected: 3 } as DeleteResult); // 3 items deleted
+          const result = await service.clearCart(mockUserId);
+          expect(cartRepository.delete).toHaveBeenCalledWith({ userId: mockUserId });
+          expect(result).toBe(true);
+        });
+
+        it('should return false if cart was empty (affected = 0)', async () => {
+          cartRepository.delete.mockResolvedValue({ affected: 0 } as DeleteResult);
+          const result = await service.clearCart(mockUserId);
+          expect(cartRepository.delete).toHaveBeenCalledWith({ userId: mockUserId });
+          expect(result).toBe(false);
+        });
+
+        it('should return false if affected is null or undefined', async () => {
+            cartRepository.delete.mockResolvedValue({ affected: null } as DeleteResult);
+            let result = await service.clearCart(mockUserId);
+            expect(result).toBe(false);
+
+            cartRepository.delete.mockResolvedValue({} as DeleteResult);
+             result = await service.clearCart(mockUserId);
+             expect(result).toBe(false);
+        });
+
+        it('should allow TypeORM errors to propagate', async () => {
+            const dbError = new Error("DB Error during clear");
+            cartRepository.delete.mockRejectedValue(dbError);
+            await expect(service.clearCart(mockUserId)).rejects.toThrow(dbError);
+        });
+      });
+
+});
