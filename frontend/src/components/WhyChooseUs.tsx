@@ -1,6 +1,6 @@
 import React from 'react';
 import './WhyChooseUs.css';
-import { marketplaceImg } from './utils/ImageImports';
+
 
 interface FeatureProps {
   icon: React.ReactNode;
@@ -44,8 +44,8 @@ const WhyChooseUs: React.FC = () => {
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M4 14h16M4 10h16M7 18l-3 4M17 18l3 4" />
                   </svg>
                 }
-                title="Fast & Free Shipping"
-                description="Get your handmade treasures delivered quickly—without extra cost. We offer speedy, reliable shipping across South Africa."
+                title="Secure & Trusted Shopping"
+                description="Shop with confidence. We use secure payment gateways and prioritize your privacy for a safe online experience."
               />
 
               <Feature
@@ -54,8 +54,8 @@ const WhyChooseUs: React.FC = () => {
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 6v6l4 2" />
                   </svg>
                 }
-                title="24/7 Support"
-                description="Need help? We're here for you anytime, day or night. Whether it's a question or a concern, we've got your back."
+                title="Truly Handmade Treasures"
+                description="Discover one-of-a-kind items crafted with passion and skill by talented artisans right here in South Africa."
               />
 
               <Feature
@@ -64,8 +64,8 @@ const WhyChooseUs: React.FC = () => {
                     <path fill="none" stroke="currentColor" strokeWidth="2" d="M22 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9 9 4 9 9zM8 15l3-3-3-3M12 12h6" />
                   </svg>
                 }
-                title="Hassle Free Returns"
-                description="Changed your mind? No problem. Enjoy easy returns with no stress, because we want you to love what you buy."
+                title="Careful & Reliable Delivery"
+                description="Your handmade items are packed with care and shipped reliably to your choice of pickup points. Choose the best delivery option for you at checkout."
               />
 
               <Feature
@@ -80,12 +80,12 @@ const WhyChooseUs: React.FC = () => {
             </section>
           </article>
 
-          <figure className="why-choose-us-image">
+          {/* <figure className="why-choose-us-image">
             <img
               src={marketplaceImg}
               alt="Artisan marketplace products display"
             />
-          </figure>
+          </figure> */}
         </section>
       </main>
     </section>

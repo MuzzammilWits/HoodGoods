@@ -118,24 +118,20 @@ const CartPage: React.FC = () => {
             <dl className="summary-details">
               <dt>Subtotal:</dt>
               <dd>R{Number(totalPrice).toFixed(2)}</dd>
-              <dt>Shipping:</dt>
-              <dd>Free</dd>
-              <dt className="total-label">Total:</dt>
-              <dd className="total-value">R{totalPrice.toFixed(2)}</dd>
             </dl>
             <section className="cart-actions">
+              <Link to="/products" className="checkout-btn">
+                Continue Shopping
+              </Link>
               <Link to="/checkout" className="checkout-btn">
                 Proceed to Checkout
               </Link>
               <button
                 onClick={clearCart}
-                className="clear-cart-btn"
+                className="checkout-btn"
               >
                 Clear Cart
               </button>
-              <Link to="/products" className="checkout-btn">
-                Continue Shopping :)
-              </Link>
             </section>
           </footer>
         </section>

@@ -37,19 +37,21 @@
 
 /* Why Choose Us row layout */
 .why-choose-us-row {
-  display: grid;
-  grid-template-columns: 3fr 1fr; /* Adjust ratio as needed */
-  gap: 2rem; /* Adjust gap */
-  align-items: start;
+  /* display: grid; */ /* <-- Comment out or remove */
+  /* grid-template-columns: 3fr 1fr; */ /* <-- Comment out or remove */
+  /* gap: 2rem; */ /* <-- Gap is likely not needed if it's not a grid */
+  /* align-items: start; */ /* <-- Alignment for grid items */
+
+  /* Keep these properties to center the content block */
   max-width: 1200px; /* Consistent max-width */
   margin: 0 auto;   /* Center the row */
   padding: 0 1rem;  /* Consistent padding */
 }
 
-.why-choose-us-content {
+/* .why-choose-us-content {
   display: flex;
   flex-direction: column;
-}
+} */
 
 /* Section title within this component */
 .why-choose-us-content .section-title,
@@ -65,7 +67,7 @@
 .features-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 2rem 4rem; /* Your change here is correct */
   margin-top: 2rem;
 }
 
@@ -139,11 +141,8 @@
     margin: 0 auto 2rem auto;
   }
 
-  /* Ensure titles remain left-aligned or center if preferred */
-  .why-choose-us-content .section-title,
-  .about-us-content .section-title {
-       /* text-align: center; */ /* Optional: re-center titles on smaller screens */
-  }
+  
+  
 }
 
 @media (max-width: 768px) {

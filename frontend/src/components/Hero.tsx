@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './Hero.css';
 // These image imports are no longer used if the <main> section is commented out
 // import { jewelleryImg, flowerImg, honeyImg, ceramicsImg, getImage } from './utils/ImageImports'; // Adjust path if needed
