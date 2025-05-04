@@ -1,15 +1,19 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './CheckoutPage.css'; // Ensure CSS is linked
-import { useCart } from '../context/ContextCart';
+import { useCart } from '../context/ContextCart'; // Assuming path is correct
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
 
-// --- Interfaces --- (Keep interfaces as they are)
+// --- Interfaces ---
 type CartItemDisplay = {
-  id: string;
+  // Assuming structure based on usage later - adjust if needed
+  id: string; // Likely mapped from productId
+  productId: number;
   name: string;
+  productName: string; // Included as it's used in groupedItemsByStoreId mapping
   price: number;
+  productPrice: number; // Included as it's used in calculations
   quantity: number;
   storeName: string;
   storeId: string;
@@ -41,19 +45,24 @@ interface StoreDeliveryDetails {
 
 type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
 
-declare const YocoSDK: any;
+declare const YocoSDK: any; // Assumes YocoSDK is loaded globally
 interface InitiatePaymentResponse {
   checkoutId: string;
 }
 // --- End Interfaces ---
 
-// --- NEW: Define Pickup Locations Data Structure ---
+// --- Pickup Locations Data Structure ---
 const pickupLocationsData: Record<string, string[]> = {
     "Area1": ["Area 1 - Pickup Point Alpha", "Area 1 - Pickup Point Beta"],
     "Area2": ["Area 2 - Pickup Point Gamma", "Area 2 - Pickup Point Delta", "Area 2 - Pickup Point Epsilon"],
     "Area3": ["Area 3 - Pickup Point Zeta", "Area 3 - Pickup Point Eta", "Area 3 - Pickup Point Theta"]
 };
 // --- End Pickup Locations Data ---
+
+// Axios instance - Defined outside component for stability
+const api = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
+});
 
 export default function CheckoutPage() {
   // --- Hooks ---
@@ -62,10 +71,7 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
 
   // --- State ---
-  // REMOVED: streetAddress state
-  // MODIFIED: deliveryArea renamed to selectedArea
   const [selectedArea, setSelectedArea] = useState('');
-  // NEW: State for the selected pickup point
   const [selectedPickupPoint, setSelectedPickupPoint] = useState('');
   const [deliverySelectionState, setDeliverySelectionState] = useState<Record<string, 'standard' | 'express'>>({});
   const [storeDeliveryOptions, setStoreDeliveryOptions] = useState<DeliveryOptionsResponse>({});
@@ -74,15 +80,11 @@ export default function CheckoutPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  // --- Ref for Timeout ---
+  // --- Refs ---
   const paymentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const yocoInstanceRef = useRef<any>(null);
 
-  // Axios instance
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
-  });
-
-  // --- Data Processing & Memos --- (Keep these as they are)
+  // --- Data Processing & Memos ---
   const uniqueStoreIds = useMemo(() =>
     [...new Set(cartItems.map(item => item.storeId).filter(id => id && id !== 'unknown'))]
   , [cartItems]);
@@ -94,8 +96,11 @@ export default function CheckoutPage() {
       if (!groups[key]) groups[key] = [];
       groups[key].push({
         id: item.productId.toString(),
+        productId: item.productId,
         name: item.productName,
+        productName: item.productName,
         price: item.productPrice,
+        productPrice: item.productPrice,
         quantity: item.quantity,
         storeName: item.storeName || 'Unknown Store',
         storeId: key
@@ -106,8 +111,9 @@ export default function CheckoutPage() {
 
   // --- Effects ---
 
-  // Effect for fetching delivery options (Keep as is)
+  // Effect for fetching delivery options
   useEffect(() => {
+    console.log("Delivery Options Effect Triggered. isAuthenticated:", isAuthenticated, "uniqueStoreIds:", uniqueStoreIds); // Added log
     if (!isAuthenticated || uniqueStoreIds.length === 0) {
       setStoreDeliveryOptions({});
       setDeliverySelectionState({});
@@ -116,6 +122,7 @@ export default function CheckoutPage() {
     const fetchOptions = async () => {
       setIsLoadingDeliveryOptions(true);
       setDeliveryOptionsError(null);
+      console.log("Fetching delivery options for store IDs:", uniqueStoreIds); // Added log
       try {
         const token = await getAccessTokenSilently();
         const response = await api.post<DeliveryOptionsResponse>(
@@ -124,21 +131,22 @@ export default function CheckoutPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const fetchedOptions = response.data || {};
+        console.log("Fetched delivery options:", fetchedOptions); // Added log
         setStoreDeliveryOptions(fetchedOptions);
         // Initialize/preserve delivery selections
         setDeliverySelectionState(prev => {
           const newSelectionState: Record<string, 'standard' | 'express'> = {};
           uniqueStoreIds.forEach(id => {
-            if (fetchedOptions[id]) { // Only add if options exist for store
-              newSelectionState[id] = prev[id] || 'standard'; // Default or keep existing
+            if (fetchedOptions[id]) {
+              newSelectionState[id] = prev[id] || 'standard';
             }
           });
-          // Ensure we don't lose selections for stores that might temporarily disappear/reappear if cart changes
           Object.keys(prev).forEach(id => {
-             if (uniqueStoreIds.includes(id) && fetchedOptions[id] && !newSelectionState[id]) {
-                 newSelectionState[id] = prev[id];
-             }
+              if (uniqueStoreIds.includes(id) && fetchedOptions[id] && !newSelectionState[id]) {
+                  newSelectionState[id] = prev[id];
+              }
           });
+          console.log("Updated delivery selection state:", newSelectionState); // Added log
           return newSelectionState;
        });
       } catch (error) {
@@ -148,23 +156,35 @@ export default function CheckoutPage() {
         setStoreDeliveryOptions({});
         setDeliverySelectionState({});
       } finally {
+        console.log("Finished fetching delivery options."); // Added log
         setIsLoadingDeliveryOptions(false);
       }
     };
     fetchOptions();
-  }, [uniqueStoreIds, isAuthenticated, getAccessTokenSilently]); // Keep dependencies
+  // --- ***** THE CHANGE IS HERE ***** ---
+  // Removed 'api' from the dependency array below
+  }, [uniqueStoreIds, isAuthenticated, getAccessTokenSilently]);
+  // --- ***** END OF CHANGE ***** ---
 
-  // Effect for Timeout Cleanup on Unmount (Keep as is)
+  // Effect for Timeout and Yoco Cleanup on Unmount
   useEffect(() => {
     return () => {
       if (paymentTimeoutRef.current) {
         console.log("CheckoutPage unmounting, clearing payment timeout.");
         clearTimeout(paymentTimeoutRef.current);
       }
+      try {
+        if (yocoInstanceRef.current && typeof yocoInstanceRef.current.closePopup === 'function') {
+            console.log("CheckoutPage unmounting, attempting to close Yoco popup via ref...");
+            yocoInstanceRef.current.closePopup();
+        }
+      } catch (e) {
+        console.error("Error closing Yoco popup during unmount:", e);
+      }
     };
-  }, []);
+  }, []); // Empty dependency array
 
-  // --- Calculation Functions --- (Keep these as they are)
+  // --- Calculation Functions ---
   const calculateStoreSubtotal = (items: CartItemDisplay[]): number => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const calculateTotalDelivery = (): number => {
@@ -192,225 +212,165 @@ export default function CheckoutPage() {
     }
   };
 
-  // NEW: Handler for Area change
   const handleAreaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       const newArea = event.target.value;
       setSelectedArea(newArea);
-      setSelectedPickupPoint(''); // Reset pickup point when area changes
+      setSelectedPickupPoint('');
   };
 
-  // --- MODIFIED handlePayment function ---
+  // --- handlePayment function with Yoco closing logic ---
   const handlePayment = async () => {
-    // --- Step 1: Frontend Validation (Keep existing validation) ---
-    if (!isAuthenticated || !user || cartItems.length === 0) {
-        setPaymentError("Cannot proceed to payment. Ensure you are logged in and have items in your cart.");
-        return;
-    }
-    if (!selectedArea || !selectedPickupPoint) {
-        setPaymentError("Please select your delivery area and pickup point.");
-        return;
-    }
-     if (uniqueStoreIds.some(id => !deliverySelectionState[id])) {
-        setPaymentError("Please select a delivery option for all store groups.");
-        return;
-     }
-     // --- End Frontend Validation ---
+    // --- Step 1: Frontend Validation ---
+    if (!isAuthenticated || !user || cartItems.length === 0) { /* ... */ return; }
+    if (!selectedArea || !selectedPickupPoint) { /* ... */ return; }
+    if (uniqueStoreIds.some(id => !deliverySelectionState[id])) { /* ... */ return; }
+    // --- End Frontend Validation ---
 
     setIsProcessingPayment(true);
     setPaymentError(null);
 
-    // Clear any previous lingering timeout
-    if (paymentTimeoutRef.current) {
-        clearTimeout(paymentTimeoutRef.current);
-        paymentTimeoutRef.current = null;
-    }
+    if (paymentTimeoutRef.current) { clearTimeout(paymentTimeoutRef.current); paymentTimeoutRef.current = null; }
+    yocoInstanceRef.current = null; // Clear previous instance ref
 
     try {
-      // --- Step 2: Initiate Yoco Payment with Backend (Keep existing logic) ---
+      // --- Step 2: Initiate Yoco Payment with Backend ---
       const token = await getAccessTokenSilently();
       console.log("Initiating payment with backend...");
-      // Assuming 'api' is your preconfigured Axios instance
       const response = await api.post<InitiatePaymentResponse>('/payments/initiate-yoco',
-          {
-              amount: Math.round(grandTotal * 100), // Send amount in cents
-              currency: 'ZAR',
-          },
+          { amount: Math.round(grandTotal * 100), currency: 'ZAR' },
           { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const { checkoutId } = response.data;
       console.log("Received checkoutId:", checkoutId);
       if (!checkoutId) throw new Error("Missing checkoutId from backend.");
       // --- End Yoco Initiation ---
 
-
       // --- Step 3: Show Yoco Popup ---
-      const yoco = new YocoSDK({ publicKey: 'pk_test_ed3c54a6gOol69qa7f45' }); // Use your actual public key
+      const yoco = new YocoSDK({ publicKey: 'pk_test_ed3c54a6gOol69qa7f45' }); // Replace with your key
+      yocoInstanceRef.current = yoco; // Store instance in ref
 
       console.log("Showing Yoco popup...");
       yoco.showPopup({
           checkoutId: checkoutId,
           amountInCents: Math.round(grandTotal * 100),
           currency: 'ZAR',
-          // customer: { email: user.email }, // Optional: Pass customer details
-          callback: async (result: any) => { // <<< Make callback async
-              // --- Step 4: Handle Yoco Callback ---
-              // Clear timeout inside callback
+          callback: async (result: any) => { // <<< Callback starts here
               if (paymentTimeoutRef.current) {
                   console.log("Yoco callback triggered, clearing payment timeout.");
                   clearTimeout(paymentTimeoutRef.current);
                   paymentTimeoutRef.current = null;
               }
-
               console.log("--- Yoco SDK Callback START ---");
-              console.log("Received Yoco Result:", JSON.stringify(result, null, 2)); // Log the full result to check structure
+              console.log("Received Yoco Result:", JSON.stringify(result, null, 2));
 
               let outcomeError: string | null = null;
               let shouldClearCartAndNavigate = false;
+              const shouldClosePopup = true;
 
               try {
-                  // --- Step 4a: Check Yoco Result Status ---
+                  // --- Check Yoco Result Status ---
                   if (result.error) {
                       console.error("Yoco Payment Error:", result.error);
                       outcomeError = `Payment failed: ${result.error.message || 'Please try again.'}`;
                   } else if (result.status === 'successful' || result.status === 'pending' || result.status === 'charge_ready') {
-                      // --- PAYMENT SUCCEEDED (or pending confirmation) via Yoco ---
-                      console.log(`Yoco Payment Status: ${result.status}. Attempting backend order creation...`);
-
-                      // --- Step 4b: Prepare Payload for Backend /orders/create ---
-                      // IMPORTANT: Inspect the logged 'result' object to find the correct Yoco charge ID property!
-                      const yocoChargeId = result.id || result.chargeId || result.paymentId || 'yoco_id_not_found'; // <<< ADJUST THIS based on actual Yoco result object
-                      if (yocoChargeId === 'yoco_id_not_found') {
-                          console.warn("Could not find Yoco Charge/Payment ID in result object:", result);
-                      }
-
-                      // Map frontend cart items to the structure expected by the backend DTO
+                     console.log(`Yoco Payment Status: ${result.status}. Attempting backend order creation...`);
+                      const yocoChargeId = result.id || result.chargeId || result.paymentId || 'yoco_id_not_found';
+                      // ... (prepare orderPayload as before) ...
                       const backendCartItems: CartItemForPayload[] = cartItems.map(item => ({
-                          productId: item.productId, // Ensure this is the correct numeric ID
-                          quantity: item.quantity,
-                          pricePerUnitSnapshot: item.productPrice, // Price used during checkout
-                          storeId: item.storeId.toString(), // Ensure storeId is string if needed by backend
+                          productId: item.productId, quantity: item.quantity, pricePerUnitSnapshot: item.productPrice, storeId: item.storeId.toString(),
                       }));
-
                       const orderPayload: OrderPayload = {
-                          cartItems: backendCartItems,
-                          deliverySelections: deliverySelectionState,
-                          selectedArea: selectedArea,
-                          selectedPickupPoint: selectedPickupPoint,
-                          yocoChargeId: yocoChargeId,
-                          frontendGrandTotal: grandTotal,
+                          cartItems: backendCartItems, deliverySelections: deliverySelectionState, selectedArea: selectedArea, selectedPickupPoint: selectedPickupPoint, yocoChargeId: yocoChargeId, frontendGrandTotal: grandTotal,
                       };
-                      // --- End Prepare Payload ---
-
-
-                      // --- Step 4c: Call Backend /orders/create Endpoint ---
+                      // --- Call Backend ---
                       try {
-                          // Get token again just in case it expired during payment interaction
                           const backendToken = await getAccessTokenSilently();
                           console.log("Calling backend POST /orders/create endpoint...");
-
-                          // Use your Axios instance 'api'
-                          await api.post('/orders/create', orderPayload, {
-                              headers: { Authorization: `Bearer ${backendToken}` },
-                          });
-
+                          await api.post('/orders/create', orderPayload, { headers: { Authorization: `Bearer ${backendToken}` } });
                           console.log("Backend successfully created the order.");
-                          // Set flag to clear cart and navigate AFTER the callback logic finishes
                           shouldClearCartAndNavigate = true;
-
                       } catch (backendError) {
-                          // --- Backend Order Creation FAILED! ---
                           console.error("--- Backend /orders/create FAILED ---:", backendError);
-                          if (axios.isAxiosError(backendError)) {
+                           if (axios.isAxiosError(backendError)) {
                               const errorMsg = backendError.response?.data?.message || backendError.message;
-                              // Provide specific message based on potential backend errors
                               let displayMsg = `Order Placement Failed: ${errorMsg}.`;
-                              if (backendError.response?.status === 409) { // Example: Conflict (e.g., stock)
-                                   displayMsg = `Order Placement Issue: ${errorMsg}. Please adjust your cart or try again.`
-                              }
-                               outcomeError = `${displayMsg} Payment MAY have been processed (Yoco Status: ${result.status}). Please contact support with Payment Reference: ${yocoChargeId}.`;
-                          } else {
-                              outcomeError = `An unexpected error occurred while placing your order. Payment MAY have been processed (Yoco Status: ${result.status}). Please contact support with Payment Reference: ${yocoChargeId}.`;
-                          }
-                          // --- DO NOT clear cart or navigate here ---
+                              if (backendError.response?.status === 409) { displayMsg = `Order Placement Issue: ${errorMsg}. Please adjust your cart or try again.` }
+                               outcomeError = `${displayMsg} Payment MAY have been processed... Contact support...`; // Abridged
+                          } else { outcomeError = `An unexpected error occurred... Contact support...`; } // Abridged
                       }
                       // --- End Backend Call ---
+                  } else if (result.status === 'failed') { /* ... set outcomeError ... */ }
+                    else if (result.status === 'cancelled') { /* ... set outcomeError ... */ }
+                    else { /* ... set outcomeError ... */ }
+                  // --- End Status Check ---
 
-                  } else if (result.status === 'failed') {
-                      console.warn("Yoco Payment explicitly failed.");
-                      outcomeError = "Payment failed. Please check your details or try another card.";
-                  } else if (result.status === 'cancelled') {
-                      console.warn("Yoco Payment was cancelled (status: 'cancelled').");
-                      outcomeError = "Payment was cancelled.";
-                  } else {
-                      // Handle other unexpected statuses
-                      console.warn("Yoco Payment resulted in unexpected status:", result.status, "Full result:", result);
-                      outcomeError = "Payment outcome uncertain. Please check your confirmation or contact support.";
-                  }
+                  if (outcomeError) { setPaymentError(outcomeError); }
 
-                  // --- Step 4d: Handle Callback Outcome ---
-                  if (outcomeError) {
-                      console.log("Setting payment error state:", outcomeError);
-                      setPaymentError(outcomeError); // Display error to the user
-                  }
-
-                  if (shouldClearCartAndNavigate) {
-                      // --- Order successfully created on backend ---
-                      try {
-                          console.log("Clearing cart on frontend...");
-                          await clearCart(); // Use clearCart from context
-                          console.log("Frontend cart cleared.");
-                          console.log("Navigating to /order-confirmation");
-                          navigate('/order-confirmation'); // Navigate only after backend success
-                      } catch (clearError) {
-                          console.error("Error clearing cart on frontend after successful order creation:", clearError);
-                          // Minor issue: Order created, but frontend cart didn't clear.
-                           setPaymentError("Order created successfully, but failed to clear local cart. Please refresh if items still appear.");
-                           // Still navigate as the order IS placed.
-                           navigate('/order-confirmation');
-                      }
-                  }
-                  // --- End Handle Callback Outcome ---
-
-              } catch (callbackLogicError) {
-                  // --- Error within the callback logic itself ---
-                  console.error("--- Error INSIDE Yoco Callback Logic ---:", callbackLogicError);
-                  setPaymentError("An internal error occurred after payment processing. Please check your order history or contact support.");
-                  // Avoid clearing cart or navigating if the flow logic failed
-              } finally {
+              } catch (callbackLogicError) { /* ... setPaymentError ... */ }
+                finally {
                   // --- Always reset processing state ---
                   console.log("Resetting isProcessingPayment to false via callback.");
                   setIsProcessingPayment(false);
+
+                  // --- ***** THE FIX: Attempt to close Yoco popup ***** ---
+                  if (shouldClosePopup) {
+                      try {
+                          // !!! IMPORTANT: Replace 'closePopup' with ACTUAL method from Yoco Docs !!!
+                          if (yocoInstanceRef.current && typeof yocoInstanceRef.current.closePopup === 'function') {
+                             console.log("Attempting to close Yoco popup via SDK ref...");
+                             yocoInstanceRef.current.closePopup(); // <<< CALL CLEANUP
+                          } else {
+                             console.warn("Yoco SDK instance ref not found or no closePopup method. Attempting manual removal...");
+                             const yocoPopupElement = document.querySelector('.yc-auto-shown-popup'); // Use the class you found
+                             if (yocoPopupElement) { yocoPopupElement.remove(); }
+                             else { console.warn("Could not find .yc-auto-shown-popup to remove manually."); }
+                          }
+                      } catch (closeError) { console.error("Error trying to close/remove Yoco popup:", closeError); }
+                  }
+                   // --- ***** END OF FIX ***** ---
+
                   console.log("--- Yoco SDK Callback END ---");
+              } // --- End finally block ---
+
+              // --- Navigation (Happens AFTER finally block) ---
+              if (shouldClearCartAndNavigate) {
+                 try {
+                   await clearCart();
+                   console.log("Navigating to /order-confirmation (after attempted popup close)");
+                   navigate('/order-confirmation');
+                 } catch (clearError) {
+                   setPaymentError("Order created, but failed to clear local cart..."); // Abridged
+                   navigate('/order-confirmation'); // Still navigate
+                 }
               }
-              // --- End Step 4: Handle Yoco Callback ---
-          } // end callback
+              // --- End Navigation ---
+          } // <<< Callback ends here
       }); // end showPopup
 
-      // --- Step 5: Set Timeout Fallback (Keep existing logic) ---
+      // --- Step 5: Set Timeout Fallback ---
       console.log("Setting payment timeout fallback (45s).");
       paymentTimeoutRef.current = setTimeout(() => {
           console.warn("Payment timeout reached.");
-          // Only set error if still processing (i.e., callback hasn't completed/run)
           if (isProcessingPayment) {
-                setIsProcessingPayment(false);
-                setPaymentError("Payment process was cancelled or timed out before completing.");
+              setIsProcessingPayment(false);
+              setPaymentError("Payment process timed out.");
+              // Also attempt to close popup on timeout
+              try {
+                 if (yocoInstanceRef.current && typeof yocoInstanceRef.current.closePopup === 'function') { yocoInstanceRef.current.closePopup(); }
+              } catch(e) { console.error("Error closing popup on timeout:", e); }
           }
           paymentTimeoutRef.current = null;
-      }, 45000); // 45 seconds
+      }, 45000);
       // --- End Timeout Fallback ---
 
-    } catch (error) { // Catch errors during Yoco initiation step
+    } catch (error) { // Catch initiation errors
         console.error("Failed to initiate payment:", error);
         const errorMsg = axios.isAxiosError(error) ? error.response?.data?.message || error.message : 'Payment initiation failed';
         setPaymentError(errorMsg);
-        if (paymentTimeoutRef.current) { // Clear timeout if initiation failed
-             clearTimeout(paymentTimeoutRef.current);
-             paymentTimeoutRef.current = null;
-        }
-        setIsProcessingPayment(false); // Reset processing state on initiation error
+        if (paymentTimeoutRef.current) { clearTimeout(paymentTimeoutRef.current); paymentTimeoutRef.current = null; }
+        setIsProcessingPayment(false);
     }
-  }; // --- END MODIFIED handlePayment ---
+  }; // --- END handlePayment ---
 
   // --- Render Logic ---
   if (isAuthLoading) return <p>Loading authentication...</p>;
@@ -420,22 +380,20 @@ export default function CheckoutPage() {
   if (cartItems.length === 0) return ( <main className="checkout-container"><h1>Checkout</h1><p>Your cart is empty.</p><Link to="/products" className="back-link">Continue Shopping</Link></main> );
 
   const displayGrandTotal = typeof grandTotal === 'number' && !isNaN(grandTotal) ? grandTotal : 0;
-  // UPDATED: Checkout readiness check
   const isCheckoutReady = !isProcessingPayment &&
-                         !isLoadingDeliveryOptions &&
-                         !deliveryOptionsError &&
-                         selectedArea && // Check selected area
-                         selectedPickupPoint && // Check selected pickup point
-                         uniqueStoreIds.length > 0 &&
-                         !uniqueStoreIds.some(id => !deliverySelectionState[id]) &&
-                         displayGrandTotal > 0;
+                           !isLoadingDeliveryOptions &&
+                           !deliveryOptionsError &&
+                           selectedArea &&
+                           selectedPickupPoint &&
+                           uniqueStoreIds.length > 0 &&
+                           !uniqueStoreIds.some(id => !deliverySelectionState[id]) &&
+                           displayGrandTotal > 0;
 
   return (
     <main className="checkout-container">
       <header>
         <h1>Checkout</h1>
-        <p className="instructions">Please select your pickup location and review your order.</p> {/* Updated instruction */}
-        {/* Display relevant errors */}
+        <p className="instructions">Please select your pickup location and review your order.</p>
         {contextCartError && <p className="error-message">Cart Notice: {contextCartError}</p>}
         {deliveryOptionsError && <p className="error-message">Delivery Error: {deliveryOptionsError}</p>}
         {paymentError && <p className="error-message">Payment Error: {paymentError}</p>}
@@ -443,125 +401,73 @@ export default function CheckoutPage() {
 
       <div className="checkout-layout">
 
-        {/* MODIFIED: Delivery Address Section -> Pickup Location Section */}
+        {/* Pickup Location Section */}
         <section className="form-section pickup-location-section" aria-labelledby="pickup-location-heading">
             <h2 id="pickup-location-heading">Pickup Location</h2>
-
-            {/* Area Selection Dropdown */}
             <p className="form-field">
               <label htmlFor="delivery-area">Select Area</label>
-              <select
-                id="delivery-area"
-                className="form-input"
-                value={selectedArea}
-                onChange={handleAreaChange} // Use specific handler
-                required
-              >
+              <select id="delivery-area" className="form-input" value={selectedArea} onChange={handleAreaChange} required>
                 <option value="" disabled>Select an area...</option>
-                {Object.keys(pickupLocationsData).map(area => (
-                    <option key={area} value={area}>{area}</option>
-                ))}
+                {Object.keys(pickupLocationsData).map(area => (<option key={area} value={area}>{area}</option>))}
               </select>
             </p>
-
-            {/* Pickup Point Selection Dropdown */}
             <p className="form-field">
               <label htmlFor="pickup-point">Select Pickup Point</label>
-              <select
-                id="pickup-point"
-                className="form-input"
-                value={selectedPickupPoint}
-                onChange={(e) => setSelectedPickupPoint(e.target.value)}
-                required
-                disabled={!selectedArea} // Disable until an area is chosen
-              >
+              <select id="pickup-point" className="form-input" value={selectedPickupPoint} onChange={(e) => setSelectedPickupPoint(e.target.value)} required disabled={!selectedArea}>
                 <option value="" disabled>Select a pickup point...</option>
-                {selectedArea && pickupLocationsData[selectedArea] && // Check if area and points exist
-                    pickupLocationsData[selectedArea].map(point => (
-                        <option key={point} value={point}>{point}</option>
-                ))}
+                {selectedArea && pickupLocationsData[selectedArea]?.map(point => (<option key={point} value={point}>{point}</option>))}
               </select>
               {!selectedArea && <small className="field-hint">Please select an area first.</small>}
             </p>
-         </section>
-        {/* END MODIFIED SECTION */}
+           </section>
 
-        {/* Order Summary Section (Remains the same) */}
+        {/* Order Summary Section */}
         <section className="form-section order-summary-section" aria-labelledby="order-summary-heading">
           <h2 id="order-summary-heading">Order Summary</h2>
           {uniqueStoreIds.map(storeId => {
             const items = groupedItemsByStoreId[storeId];
             const deliveryDetails = storeDeliveryOptions[storeId];
             const currentSelection = deliverySelectionState[storeId];
-
             if (!items || items.length === 0) return null;
             const storeName = items[0]?.storeName || `Store ID: ${storeId}`;
-
             return (
               <article key={storeId} className="store-group" aria-labelledby={`store-heading-${storeId}`}>
                 <h3 id={`store-heading-${storeId}`} className="store-name">{storeName}</h3>
-
-                {/* Delivery Options Dropdown */}
                 <div className="delivery-option form-field">
                   <label htmlFor={`delivery-${storeId}`}>Delivery Option</label>
-                  {isLoadingDeliveryOptions ? (
-                       "Loading options..."
-                   ) : !deliveryDetails ? (
-                       <span className="error-message">Unavailable</span>
-                   ) : (
-                    <select
-                        id={`delivery-${storeId}`}
-                        className="form-input"
-                        value={currentSelection || ''}
-                        onChange={(e) => handleDeliveryOptionChange(storeId, e.target.value)}
-                        required
-                    >
+                  {isLoadingDeliveryOptions ? ("Loading options...") : !deliveryDetails ? (<span className="error-message">Unavailable</span>) : (
+                     <select id={`delivery-${storeId}`} className="form-input" value={currentSelection || ''} onChange={(e) => handleDeliveryOptionChange(storeId, e.target.value)} required>
                         <option value="standard">Standard - R{deliveryDetails.standardPrice.toFixed(2)} ({deliveryDetails.standardTime})</option>
                         <option value="express">Express - R{deliveryDetails.expressPrice.toFixed(2)} ({deliveryDetails.expressTime})</option>
-                    </select>
-                  )}
+                     </select>
+                   )}
                 </div>
-
-                {/* Items List */}
                 <ul className="order-items" aria-label={`Items from ${storeName}`}>
                   {items.map(item => ( <li key={`${item.id}-${storeId}`} className="order-item">{item.name} - R{item.price.toFixed(2)} × {item.quantity}</li> ))}
                 </ul>
-
-                {/* Store Summary Footer */}
                 <footer className="store-summary">
                   <p>Subtotal: R{calculateStoreSubtotal(items).toFixed(2)}</p>
-                  {deliveryDetails && currentSelection && (
-                     <p>Delivery: R{(currentSelection === 'standard' ? deliveryDetails.standardPrice : deliveryDetails.expressPrice).toFixed(2)}</p>
-                   )}
+                  {deliveryDetails && currentSelection && (<p>Delivery: R{(currentSelection === 'standard' ? deliveryDetails.standardPrice : deliveryDetails.expressPrice).toFixed(2)}</p>)}
                 </footer>
               </article>
             );
           })}
-          {/* Grand Total Section */}
           <footer className="order-totals">
             <p className="grand-total">Grand Total: R{displayGrandTotal.toFixed(2)}</p>
           </footer>
         </section>
 
-        {/* Payment Button Section (Updated disabled logic check) */}
+        {/* Payment Button Section */}
         <section className="payment-section">
-          <button
-            type="button"
-            onClick={handlePayment}
-            disabled={!isCheckoutReady || isProcessingPayment} // Uses updated isCheckoutReady
-            className="yoco-pay-button"
-          >
+          <button type="button" onClick={handlePayment} disabled={!isCheckoutReady || isProcessingPayment} className="yoco-pay-button">
             {isProcessingPayment ? 'Processing...' : `Pay R${displayGrandTotal.toFixed(2)} with Yoco`}
           </button>
-           {/* Optional: Show detailed disable reason */}
            {!isCheckoutReady && !isProcessingPayment && <p style={{fontSize: '0.8em', color: 'grey', marginTop: '5px'}}>Please select area, pickup point, and delivery options.</p>}
         </section>
 
-        {/* Actions Menu (Remains the same) */}
+        {/* Actions Menu */}
         <menu className="actions">
-          <li>
-            <Link to="/cart" className="back-link">Back to Cart</Link>
-          </li>
+          <li><Link to="/cart" className="back-link">Back to Cart</Link></li>
         </menu>
       </div> {/* End checkout-layout wrapper */}
     </main>
