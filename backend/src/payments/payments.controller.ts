@@ -3,12 +3,16 @@ import { Controller, Post, Body, Req, UseGuards, HttpCode, HttpStatus, InternalS
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Your JWT guard
 import { PaymentsService } from './payments.service';
 
-interface InitiatePaymentDto {
+// interface InitiatePaymentDto {
+//   amount: number; // Expect amount in cents
+//   currency: string;
+//   // Add other fields if needed (e.g., cart details)
+// }
+export interface InitiatePaymentDto {
   amount: number; // Expect amount in cents
   currency: string;
   // Add other fields if needed (e.g., cart details)
 }
-
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}

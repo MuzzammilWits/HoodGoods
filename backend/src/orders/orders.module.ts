@@ -1,6 +1,6 @@
 // src/orders/orders.module.ts
 
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm'; // Import TypeOrmModule
 import { OrdersService } from './orders.service'; // Import the service
 import { OrdersController } from './orders.controller'; // Import the controller
@@ -42,7 +42,7 @@ import { AuthModule } from '../auth/auth.module';             // Adjust path
     // In our case, OrdersService uses repositories/queryRunner directly.
   ],
   controllers: [OrdersController], // Declare the controller belonging to this module
-  providers: [OrdersService],      // Declare the service belonging to this module
+  providers: [OrdersService   ,Logger],      // Declare the service belonging to this module
   // exports: [OrdersService] // Only needed if other modules need to inject OrdersService directly
 })
 export class OrdersModule {}

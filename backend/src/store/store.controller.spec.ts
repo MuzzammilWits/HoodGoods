@@ -1,188 +1,305 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { StoreController } from './store.controller';
-// import { StoreService } from './store.service';
-// import { AuthGuard } from '@nestjs/passport';
-// import { CreateProductDto, CreateStoreWithProductsDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from '../products/dto/update-product.dto';
-// import { BadRequestException, HttpStatus } from '@nestjs/common';
+// store.controller.spec.ts
 
-// // Mock Type for StoreService
-// type MockStoreService = {
-//   createStoreWithProducts: jest.Mock;
-//   getStoreByUserId: jest.Mock;
-//   addProduct: jest.Mock;
-//   updateProduct: jest.Mock;
-//   deleteProduct: jest.Mock;
-// };
+import { Test, TestingModule } from '@nestjs/testing';
+import { StoreController } from './store.controller';
+import { StoreService, StoreDeliveryDetails } from './store.service';
+import { AuthGuard } from '@nestjs/passport';
+import { CreateStoreDto } from './dto/create-store.dto';
+import { CreateProductDto } from '../products/dto/create-product.dto';
+import { UpdateProductDto } from '../products/dto/update-product.dto';
+import { GetDeliveryOptionsDto } from './dto/get-delivery-options.dto';
+import { UpdateStoreDto } from './dto/update-store.dto';
+import { Product } from '../products/entities/product.entity';
+import { Store } from './entities/store.entity';
+import { NotFoundException, BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 
-// // Factory function for creating the mock service
-// const storeServiceMockFactory = (): MockStoreService => ({
-//   createStoreWithProducts: jest.fn(),
-//   getStoreByUserId: jest.fn(),
-//   addProduct: jest.fn(),
-//   updateProduct: jest.fn(),
-//   deleteProduct: jest.fn(),
-// });
 
-// describe('StoreController', () => {
-//   let controller: StoreController;
-//   let service: MockStoreService;
+// Interface defined in controller (or import if external)
+interface RequestWithUser extends Request {
+    user: { sub: string };
+  }
+// --- Mock Data ---
+const mockUserId = 'user-jwt-123';
+const mockStoreId = 'store-abc-456';
+const mockProductId = 101;
 
-//   const mockUserId = 'user-abc-123';
-//   const mockProductId = 1;
-//   const mockStore = { storeId: 'store-xyz-789', name: 'My Test Store', userId: mockUserId, products: [] };
-//   const mockProduct = { prodId: mockProductId, name: 'Test Product', price: 10, category: 'Test', description: '', imageUrl: '', isActive: true, storeId: mockStore.storeId };
+// Mock Store Entity
+const mockStore: Store = {
+  storeId: mockStoreId,
+  userId: mockUserId,
+  storeName: 'Test Store',
+  standardTime: '48 hours',
+  standardPrice: 10.50,
+  expressTime: '24 hours',
+  expressPrice: 20.00,
+  user: { userId: mockUserId } as any, // Mock user object, adjust fields as needed
+  products: [],
+};
 
-//   const mockRequest = {
-//     user: {
-//       sub: mockUserId,
-//     },
-//   };
+// Mock Product Entity
+const mockProduct: Product = {
+  prodId: mockProductId,
+  name: 'Test Product',
+  price: 50.00,
+  productquantity: 10,
+  description: 'A product for testing',
+  imageUrl: 'test.jpg',
+  storeName: mockStore.storeName, // Denormalized?
+  storeId: mockStore.storeId,     // Denormalized?
+  category: 'Testing',           // Or productCategory?
+  isActive: true,
+  userId: mockUserId,            // Added missing property
+  store: mockStore,              // Added missing property
 
-//   const mockRequestWithoutUser = {
-//     user: undefined, // Simulate missing user
-//   };
+  // Add relations if defined, e.g.:
+  // categoryId: 1,
+};
 
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       controllers: [StoreController],
-//       providers: [
-//         // Provide the mock factory for StoreService
-//         { provide: StoreService, useFactory: storeServiceMockFactory },
-//       ],
-//     })
-//     // --- Mocking the AuthGuard ---
-//     // We assume the guard passes and attaches the user in successful scenarios.
-//     // For failure scenarios (no user), we pass a modified mock request.
-//     // This avoids needing to explicitly mock the guard's canActivate method here.
-//     // .overrideGuard(AuthGuard('jwt'))
-//     // .useValue({ canActivate: jest.fn(() => true) }) // Alternative way to mock guard
-//     .compile();
+// Mock Delivery Details
+const mockDeliveryDetails: StoreDeliveryDetails = {
+    storeId: mockStore.storeId,
+    storeName: mockStore.storeName,
+    standardTime: mockStore.standardTime,
+    standardPrice: mockStore.standardPrice,
+    expressTime: mockStore.expressTime,
+    expressPrice: mockStore.expressPrice,
+};
 
-//     controller = module.get<StoreController>(StoreController);
-//     // Get the mock instance
-//     service = module.get(StoreService);
-//   });
+// --- Mock Service ---
+const mockStoreService = {
+  createStoreWithProducts: jest.fn(),
+  getStoreByUserId: jest.fn(),
+  updateStoreDeliveryOptions: jest.fn(),
+  addProduct: jest.fn(),
+  updateProduct: jest.fn(),
+  deleteProduct: jest.fn(),
+  getDeliveryOptionsForStores: jest.fn(),
+};
 
-//   it('should be defined', () => {
-//     expect(controller).toBeDefined();
-//   });
+// Mock Request Object Helper
+const mockRequest = (userId: string) => ({
+    user: { sub: userId },
+  } as RequestWithUser); // <-- Add type assertion here
 
-//   // --- Test Cases for createStore ---
-//   describe('createStore', () => {
-//     const createStoreDto: CreateStoreWithProductsDto = {
-//       storeName: 'New Store',
-//       products: [{ name: 'Initial Product', price: 25, category: 'Gadgets', description: 'desc', imageUrl: 'img.jpg' }],
-//     };
+// --- Test Suite ---
+describe('StoreController', () => {
+  let controller: StoreController;
+  let service: typeof mockStoreService;
 
-//     it('should call storeService.createStoreWithProducts and return the result', async () => {
-//       const expectedResult = { ...mockStore, name: createStoreDto.storeName, products: [mockProduct] };
-//       service.createStoreWithProducts.mockResolvedValue(expectedResult);
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [StoreController],
+      providers: [
+        {
+          provide: StoreService,
+          useValue: mockStoreService,
+        },
+      ],
+    })
+      // Bypass the actual AuthGuard('jwt') for all tests in this suite
+      .overrideGuard(AuthGuard('jwt'))
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
-//       const result = await controller.createStore(createStoreDto, mockRequest);
+    controller = module.get<StoreController>(StoreController);
+    service = module.get(StoreService);
 
-//       expect(service.createStoreWithProducts).toHaveBeenCalledWith(createStoreDto, mockUserId);
-//       expect(result).toEqual(expectedResult);
-//     });
+    // Reset mocks before each test
+    jest.clearAllMocks();
+  });
 
-//     it('should throw BadRequestException if user ID is missing', async () => {
-//       await expect(controller.createStore(createStoreDto, mockRequestWithoutUser))
-//         .rejects.toThrow(BadRequestException);
-//       await expect(controller.createStore(createStoreDto, { user: {} } as any)) // Test with user but no sub
-//         .rejects.toThrow(BadRequestException);
-//       expect(service.createStoreWithProducts).not.toHaveBeenCalled();
-//     });
-//   });
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
 
-//   // --- Test Cases for getMyStore ---
-//   describe('getMyStore', () => {
-//     it('should call storeService.getStoreByUserId and return the result', async () => {
-//       service.getStoreByUserId.mockResolvedValue(mockStore);
+  // --- createStore Tests ---
+  describe('createStore', () => {
+    it('should call service createStoreWithProducts and return the created store', async () => {
+      const createStoreDto: CreateStoreDto = {
+        storeName: 'New Store',
+        standardTime: '72 hours',
+        standardPrice: 5.0,
+        expressTime: '36 hours',
+        expressPrice: 12.0,
+        products: [{ name: 'Initial Product', price: 10, productquantity: 5, category: 'Initial' }],
+      };
+      const req = mockRequest(mockUserId);
+      service.createStoreWithProducts.mockResolvedValue(mockStore); // Return a mock store
 
-//       const result = await controller.getMyStore(mockRequest);
+      const result = await controller.createStore(createStoreDto, req);
 
-//       expect(service.getStoreByUserId).toHaveBeenCalledWith(mockUserId);
-//       expect(result).toEqual(mockStore);
-//     });
+      expect(service.createStoreWithProducts).toHaveBeenCalledWith(createStoreDto, mockUserId);
+      expect(result).toEqual(mockStore);
+    });
 
-//     it('should throw BadRequestException if user ID is missing', async () => {
-//       await expect(controller.getMyStore(mockRequestWithoutUser))
-//         .rejects.toThrow(BadRequestException);
-//       expect(service.getStoreByUserId).not.toHaveBeenCalled();
-//     });
-//   });
+    it('should propagate errors from the service', async () => {
+       const createStoreDto: CreateStoreDto = { /* ... */ } as any;
+       const req = mockRequest(mockUserId);
+       const serviceError = new BadRequestException('Invalid data');
+       service.createStoreWithProducts.mockRejectedValue(serviceError);
 
-//   // --- Test Cases for addProduct ---
-//   describe('addProduct', () => {
-//     const productDto: CreateProductDto = {
-//         name: 'Another Product',
-//         price: 50,
-//         category: 'Books',
-//         description: 'A good read',
-//         imageUrl: 'book.png'
-//     };
-//     const expectedAddedProduct = { ...mockProduct, name: productDto.name, prodId: 2 };
+       await expect(controller.createStore(createStoreDto, req)).rejects.toThrow(serviceError);
+    });
+  });
 
-//     it('should call storeService.addProduct and return the new product', async () => {
-//         service.addProduct.mockResolvedValue(expectedAddedProduct);
+  // --- getMyStore Tests ---
+  describe('getMyStore', () => {
+    it('should call service getStoreByUserId and return the store and products', async () => {
+      const storeWithProducts = { store: mockStore, products: [mockProduct] };
+      const req = mockRequest(mockUserId);
+      service.getStoreByUserId.mockResolvedValue(storeWithProducts);
 
-//         const result = await controller.addProduct(productDto, mockRequest);
+      const result = await controller.getMyStore(req);
 
-//         expect(service.addProduct).toHaveBeenCalledWith(mockUserId, productDto);
-//         expect(result).toEqual(expectedAddedProduct);
-//     });
+      expect(service.getStoreByUserId).toHaveBeenCalledWith(mockUserId);
+      expect(result).toEqual(storeWithProducts);
+    });
 
-//     it('should throw BadRequestException if user ID is missing', async () => {
-//         await expect(controller.addProduct(productDto, mockRequestWithoutUser))
-//           .rejects.toThrow(BadRequestException);
-//         expect(service.addProduct).not.toHaveBeenCalled();
-//     });
-//   });
+    it('should throw NotFoundException if service throws it', async () => {
+        const req = mockRequest(mockUserId);
+        const serviceError = new NotFoundException('Store not found for this user');
+        service.getStoreByUserId.mockRejectedValue(serviceError);
 
-//   // --- Test Cases for updateProduct ---
-//   describe('updateProduct', () => {
-//     const updateDto: UpdateProductDto = { name: 'Updated Product Name', price: 15 };
-//     const expectedUpdatedProduct = { ...mockProduct, ...updateDto };
+        await expect(controller.getMyStore(req)).rejects.toThrow(serviceError);
+     });
+  });
 
-//     it('should call storeService.updateProduct with correct parameters', async () => {
-//         service.updateProduct.mockResolvedValue(expectedUpdatedProduct);
+  // --- updateMyStoreDeliveryOptions Tests ---
+  describe('updateMyStoreDeliveryOptions', () => {
+    it('should call service updateStoreDeliveryOptions and return the updated store', async () => {
+        const updateDto: UpdateStoreDto = {
+            standardTime: '40 hours',
+            standardPrice: 11.00,
+            // Only include fields being updated as per DTO definition
+        };
+        const updatedStore = { ...mockStore, ...updateDto }; // Simulate updated store
+        const req = mockRequest(mockUserId);
+        service.updateStoreDeliveryOptions.mockResolvedValue(updatedStore);
 
-//         const result = await controller.updateProduct(mockProductId, updateDto, mockRequest);
+        const result = await controller.updateMyStoreDeliveryOptions(updateDto, req);
 
-//         expect(service.updateProduct).toHaveBeenCalledWith(mockProductId, updateDto, mockUserId);
-//         expect(result).toEqual(expectedUpdatedProduct);
-//     });
+        expect(service.updateStoreDeliveryOptions).toHaveBeenCalledWith(mockUserId, updateDto);
+        expect(result).toEqual(updatedStore);
+    });
 
-//     it('should throw BadRequestException if user ID is missing', async () => {
-//         await expect(controller.updateProduct(mockProductId, updateDto, mockRequestWithoutUser))
-//             .rejects.toThrow(BadRequestException);
-//         expect(service.updateProduct).not.toHaveBeenCalled();
-//     });
+     it('should throw NotFoundException if service throws it', async () => {
+        const updateDto: UpdateStoreDto = { /* ... */ } as any;
+        const req = mockRequest(mockUserId);
+        const serviceError = new NotFoundException('User store not found');
+        service.updateStoreDeliveryOptions.mockRejectedValue(serviceError);
 
-//     // Note: ParseIntPipe failure cases are typically handled by NestJS framework testing, not controller unit tests
-//   });
+        await expect(controller.updateMyStoreDeliveryOptions(updateDto, req)).rejects.toThrow(serviceError);
+     });
 
-//   // --- Test Cases for deleteProduct ---
-//   describe('deleteProduct', () => {
-//     it('should call storeService.deleteProduct with correct parameters and return void', async () => {
-//         // deleteProduct service method might return void or some confirmation
-//         service.deleteProduct.mockResolvedValue(undefined); // Simulate void return
+      it('should throw BadRequestException if service throws it (e.g., validation)', async () => {
+        const updateDto: UpdateStoreDto = { /* ... */ } as any;
+        const req = mockRequest(mockUserId);
+        const serviceError = new BadRequestException('Invalid price format');
+        service.updateStoreDeliveryOptions.mockRejectedValue(serviceError);
 
-//         // Use await directly as the controller method returns Promise<void>
-//         await controller.deleteProduct(mockProductId, mockRequest);
+        await expect(controller.updateMyStoreDeliveryOptions(updateDto, req)).rejects.toThrow(serviceError);
+     });
+  });
 
-//         // Check if the service method was called correctly
-//         expect(service.deleteProduct).toHaveBeenCalledWith(mockProductId, mockUserId);
+  // --- addProduct Tests ---
+  describe('addProduct', () => {
+    it('should call service addProduct and return the created product', async () => {
+        const productDto: CreateProductDto = {
+            name: 'New Product',
+            price: 25.0,
+            productquantity: 15,
+            category: 'New Category',
+            // imageUrl and description might be optional
+        };
+        const req = mockRequest(mockUserId);
+        service.addProduct.mockResolvedValue(mockProduct); // Return a mock product
 
-//         // No specific return value to check due to @HttpCode(HttpStatus.NO_CONTENT)
-//         // The absence of an error is the success indicator here.
-//     });
+        const result = await controller.addProduct(productDto, req);
 
-//     it('should throw BadRequestException if user ID is missing', async () => {
-//         await expect(controller.deleteProduct(mockProductId, mockRequestWithoutUser))
-//             .rejects.toThrow(BadRequestException);
-//         expect(service.deleteProduct).not.toHaveBeenCalled();
-//     });
-//   });
+        expect(service.addProduct).toHaveBeenCalledWith(mockUserId, productDto);
+        expect(result).toEqual(mockProduct);
+    });
 
-// });
+     it('should throw NotFoundException if service throws it (e.g., user store not found)', async () => {
+        const productDto: CreateProductDto = { /* ... */ } as any;
+        const req = mockRequest(mockUserId);
+        const serviceError = new NotFoundException('User store not found to add product');
+        service.addProduct.mockRejectedValue(serviceError);
+
+        await expect(controller.addProduct(productDto, req)).rejects.toThrow(serviceError);
+     });
+  });
+
+  // --- updateProduct Tests ---
+  describe('updateProduct', () => {
+    it('should call service updateProduct and return the updated product', async () => {
+        const updateProductDto: UpdateProductDto = { name: 'Updated Product Name' };
+        const updatedProduct = { ...mockProduct, ...updateProductDto };
+        const req = mockRequest(mockUserId);
+        service.updateProduct.mockResolvedValue(updatedProduct);
+
+        const result = await controller.updateProduct(mockProductId, updateProductDto, req);
+
+        expect(service.updateProduct).toHaveBeenCalledWith(mockProductId, updateProductDto, mockUserId);
+        expect(result).toEqual(updatedProduct);
+    });
+
+     it('should throw NotFoundException if service throws it (product/store not found or auth failed)', async () => {
+        const updateProductDto: UpdateProductDto = { /* ... */ } as any;
+        const req = mockRequest(mockUserId);
+        const serviceError = new NotFoundException('Product not found or access denied');
+        service.updateProduct.mockRejectedValue(serviceError);
+
+        await expect(controller.updateProduct(mockProductId, updateProductDto, req)).rejects.toThrow(serviceError);
+     });
+  });
+
+  // --- deleteProduct Tests ---
+  describe('deleteProduct', () => {
+    it('should call service deleteProduct and return void (204 status)', async () => {
+        const req = mockRequest(mockUserId);
+        service.deleteProduct.mockResolvedValue(undefined); // Simulate successful void return
+
+        // Act: Call the controller method. The void return and @HttpCode handle the 204 status.
+        await controller.deleteProduct(mockProductId, req);
+
+        // Assert
+        expect(service.deleteProduct).toHaveBeenCalledWith(mockProductId, mockUserId);
+        // No explicit return value to check for 204
+    });
+
+    it('should throw NotFoundException if service throws it', async () => {
+        const req = mockRequest(mockUserId);
+        const serviceError = new NotFoundException('Product not found or access denied for deletion');
+        service.deleteProduct.mockRejectedValue(serviceError);
+
+        await expect(controller.deleteProduct(mockProductId, req)).rejects.toThrow(serviceError);
+     });
+  });
+
+  // --- getDeliveryOptions Tests ---
+  describe('getDeliveryOptions', () => {
+    it('should call service getDeliveryOptionsForStores and return delivery details record', async () => {
+        const getDeliveryOptionsDto: GetDeliveryOptionsDto = { storeIds: [mockStoreId, 'another-store-id'] };
+        const deliveryDetailsRecord: Record<string, StoreDeliveryDetails> = {
+            [mockStoreId]: mockDeliveryDetails,
+            'another-store-id': { /* details for other store */ } as any,
+        };
+        service.getDeliveryOptionsForStores.mockResolvedValue(deliveryDetailsRecord);
+
+        const result = await controller.getDeliveryOptions(getDeliveryOptionsDto);
+
+        expect(service.getDeliveryOptionsForStores).toHaveBeenCalledWith(getDeliveryOptionsDto.storeIds);
+        expect(result).toEqual(deliveryDetailsRecord);
+    });
+
+     it('should propagate errors from the service', async () => {
+        const getDeliveryOptionsDto: GetDeliveryOptionsDto = { storeIds: ['id1'] };
+        const serviceError = new InternalServerErrorException('Failed to fetch delivery details');
+        service.getDeliveryOptionsForStores.mockRejectedValue(serviceError);
+
+        await expect(controller.getDeliveryOptions(getDeliveryOptionsDto)).rejects.toThrow(serviceError);
+     });
+  });
+
+});
