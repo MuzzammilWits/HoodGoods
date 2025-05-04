@@ -233,10 +233,8 @@ const ProductsPage = () => {
         </div>
       )}
 
-      <h1>Artisan Products</h1>
 
       <section className="filters-container" aria-labelledby="filters-heading">
-         <h2 id="filters-heading" className="sr-only">Product Filters</h2>
           <div className="search-bar filters">
             <label htmlFor="product-search">Search Products:</label>
             <input
