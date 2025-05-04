@@ -1,235 +1,313 @@
-// import { render, screen, fireEvent } from '@testing-library/react';
-// import '@testing-library/jest-dom';
-// import { vi } from 'vitest'; // Or import { jest } from '@jest/globals'; if using Jest
-// import ProductForm from './ProductForm'; // Adjust path if needed
-// import { ProductFormData } from '../types/createStore'; // Adjust path if needed
+// src/components/ProductForm.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+import ProductForm from './ProductForm';
+import { ProductFormData } from '../types/createStore';
 
-// // Mock Props Setup
-// const mockProduct: ProductFormData = {
-//   productName: 'Test Item',
-//   productDescription: 'A great test item.',
-//   productPrice: '19.99',
-//   productCategory: 'Clothing',
-//   image: null,
-//   imagePreview: null,
-//   // imageURL: '', // Assuming not directly part of form data state
-// };
+// Sample product data for testing
+const mockProduct: ProductFormData = {
+  productName: 'Test Product',
+  productDescription: 'This is a test product description',
+  productPrice: '29.99',
+  productQuantity: '10',
+  productCategory: 'Art',
+  image: null,
+  imagePreview: null,
+  imageURL: undefined
+};
 
-// const mockCategories = ['Clothing', 'Art', 'Crafts'];
-// const mockIndex = 0;
-// const mockOnProductChange = vi.fn(); // Use jest.fn() if using Jest
-// const mockOnImageChange = vi.fn();
-// const mockOnRemove = vi.fn();
+// Sample categories
+const mockCategories = [
+  'Home & Living', 
+  'Jewellery & Accessories', 
+  'Clothing', 
+  'Art', 
+  'Crafts & Collectibles'
+];
 
-// describe('ProductForm Component', () => {
-//   beforeEach(() => {
-//     // Reset mocks before each test
-//     vi.clearAllMocks(); // Use jest.clearAllMocks() if using Jest
-//   });
+describe('ProductForm component', () => {
+  // Mock functions for props
+  const mockOnProductChange = vi.fn();
+  const mockOnImageChange = vi.fn();
+  const mockOnRemove = vi.fn();
+  
+  beforeEach(() => {
+    // Clear all mocks before each test
+    vi.clearAllMocks();
+  });
 
-//   test('renders all form fields correctly with initial values', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
+  // Test 1: Basic rendering
+  test('renders all form elements correctly', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Check heading
+    expect(screen.getByText('Product #1')).toBeInTheDocument();
+    
+    // Check input fields
+    expect(screen.getByLabelText('Product Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Description')).toBeInTheDocument();
+    expect(screen.getByLabelText('Price (R)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Quantity Available')).toBeInTheDocument();
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Product Image/)).toBeInTheDocument();
+    
+    // Check if values are populated correctly
+    expect(screen.getByLabelText('Product Name')).toHaveValue('Test Product');
+    expect(screen.getByLabelText('Description')).toHaveValue('This is a test product description');
+    expect(screen.getByLabelText('Price (R)')).toHaveValue(29.99);
+    expect(screen.getByLabelText('Quantity Available')).toHaveValue(10);
+    expect(screen.getByLabelText('Category')).toHaveValue('Art');
+    
+    // Check if remove button is present
+    expect(screen.getByText('Remove Product')).toBeInTheDocument();
+  });
 
-//     // Check labels and inputs exist with correct values
-//     expect(screen.getByLabelText(/Product Name/i)).toHaveValue(mockProduct.productName);
-//     expect(screen.getByLabelText(/Description/i)).toHaveValue(mockProduct.productDescription);
-//     expect(screen.getByLabelText(/Price \(R\)/i)).toHaveValue(parseFloat(mockProduct.productPrice)); // Input type=number uses number value
-//     expect(screen.getByLabelText(/Category/i)).toHaveValue(mockProduct.productCategory);
-//     expect(screen.getByLabelText(/Product Image/i)).toBeInTheDocument();
+  // Test 2: Input changes call the correct handlers - Fixed approach
+  test('calls the correct handlers when inputs change', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Test name change - use fireEvent instead of userEvent
+    const nameInput = screen.getByLabelText('Product Name');
+    fireEvent.change(nameInput, { target: { value: 'New Product Name' } });
+    expect(mockOnProductChange).toHaveBeenCalledWith(0, 'productName', 'New Product Name');
+    
+    // Test description change
+    const descriptionInput = screen.getByLabelText('Description');
+    fireEvent.change(descriptionInput, { target: { value: 'New description' } });
+    expect(mockOnProductChange).toHaveBeenCalledWith(0, 'productDescription', 'New description');
+    
+    // Test price change
+    const priceInput = screen.getByLabelText('Price (R)');
+    fireEvent.change(priceInput, { target: { value: '39.99' } });
+    expect(mockOnProductChange).toHaveBeenCalledWith(0, 'productPrice', '39.99');
+    
+    // Test quantity change
+    const quantityInput = screen.getByLabelText('Quantity Available');
+    fireEvent.change(quantityInput, { target: { value: '20' } });
+    expect(mockOnProductChange).toHaveBeenCalledWith(0, 'productQuantity', '20');
+    
+    // Test category change
+    const categorySelect = screen.getByLabelText('Category');
+    fireEvent.change(categorySelect, { target: { value: 'Clothing' } });
+    expect(mockOnProductChange).toHaveBeenCalledWith(0, 'productCategory', 'Clothing');
+  });
 
-//     // Check heading
-//     expect(screen.getByRole('heading', { name: `Product #${mockIndex + 1}` })).toBeInTheDocument();
+  // Test 3: Image change handler
+  test('calls image change handler when file is selected', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Create a file and dispatch a change event
+    const file = new File(['image content'], 'test-image.png', { type: 'image/png' });
+    const fileInput = screen.getByLabelText(/Product Image/) as HTMLInputElement;
+    
+    // Simulate file change event
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    
+    // Check if image change handler was called with correct params
+    expect(mockOnImageChange).toHaveBeenCalledTimes(1);
+    expect(mockOnImageChange).toHaveBeenCalledWith(0, expect.any(Object));
+  });
 
-//     // Check remove button exists (since canRemove is true)
-//     expect(screen.getByRole('button', { name: /Remove Product/i })).toBeInTheDocument();
-//   });
+  // Test 4: Remove button calls remove handler
+  test('calls remove handler when remove button is clicked', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Click remove button - use fireEvent
+    const removeButton = screen.getByText('Remove Product');
+    fireEvent.click(removeButton);
+    
+    // Check if remove handler was called with correct index
+    expect(mockOnRemove).toHaveBeenCalledTimes(1);
+    expect(mockOnRemove).toHaveBeenCalledWith(0);
+  });
 
-//   test('calls onProductChange when text inputs change', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
+  // Test 5: Remove button is not shown when canRemove is false
+  test('hides remove button when canRemove is false', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={false}
+      />
+    );
+    
+    // Check that remove button is not present
+    expect(screen.queryByText('Remove Product')).not.toBeInTheDocument();
+  });
 
-//     const nameInput = screen.getByLabelText(/Product Name/i);
-//     const descInput = screen.getByLabelText(/Description/i);
-//     const priceInput = screen.getByLabelText(/Price \(R\)/i);
+  // Test 6: Form is disabled when isSubmitting is true
+  test('disables all form elements when isSubmitting is true', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={true}
+        canRemove={true}
+      />
+    );
+    
+    // Check that all inputs are disabled
+    expect(screen.getByLabelText('Product Name')).toBeDisabled();
+    expect(screen.getByLabelText('Description')).toBeDisabled();
+    expect(screen.getByLabelText('Price (R)')).toBeDisabled();
+    expect(screen.getByLabelText('Quantity Available')).toBeDisabled();
+    expect(screen.getByLabelText('Category')).toBeDisabled();
+    expect(screen.getByLabelText(/Product Image/)).toBeDisabled();
+    expect(screen.getByText('Remove Product')).toBeDisabled();
+  });
 
-//     fireEvent.change(nameInput, { target: { value: 'New Name' } });
-//     expect(mockOnProductChange).toHaveBeenCalledWith(mockIndex, 'productName', 'New Name');
+  // Test 7: Shows image preview when available
+  test('displays image preview when available', () => {
+    const productWithPreview = {
+      ...mockProduct,
+      imagePreview: 'data:image/png;base64,fakeImageData'
+    };
+    
+    render(
+      <ProductForm
+        product={productWithPreview}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Check if preview image is rendered
+    const previewImage = screen.getByAltText('Preview');
+    expect(previewImage).toBeInTheDocument();
+    expect(previewImage).toHaveAttribute('src', 'data:image/png;base64,fakeImageData');
+  });
 
-//     fireEvent.change(descInput, { target: { value: 'New Desc' } });
-//     expect(mockOnProductChange).toHaveBeenCalledWith(mockIndex, 'productDescription', 'New Desc');
+  // Test 8: Shows "Please select an image" prompt when no image is selected
+  test('shows prompt when no image is selected', () => {
+    const productWithoutImage = {
+      ...mockProduct,
+      image: null,
+      imagePreview: null
+    };
+    
+    render(
+      <ProductForm
+        product={productWithoutImage}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Check if prompt is shown
+    expect(screen.getByText('Please select an image.')).toBeInTheDocument();
+  });
 
-//     fireEvent.change(priceInput, { target: { value: '25.50' } });
-//     expect(mockOnProductChange).toHaveBeenCalledWith(mockIndex, 'productPrice', '25.50');
+  // Test 9: Properly renders product categories in select dropdown
+  test('renders all product categories in the dropdown', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={0}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Check for default option
+    expect(screen.getByText('Select a category')).toBeInTheDocument();
+    
+    // Check if all categories are present
+    mockCategories.forEach(category => {
+      expect(screen.getByText(category)).toBeInTheDocument();
+    });
+  });
 
-//     expect(mockOnProductChange).toHaveBeenCalledTimes(3);
-//   });
-
-//   test('calls onProductChange when category select changes', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
-
-//     const categorySelect = screen.getByLabelText(/Category/i);
-//     fireEvent.change(categorySelect, { target: { value: 'Art' } });
-//     expect(mockOnProductChange).toHaveBeenCalledWith(mockIndex, 'productCategory', 'Art');
-//     expect(mockOnProductChange).toHaveBeenCalledTimes(1);
-//   });
-
-//   test('calls onImageChange when file input changes', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
-
-//     const fileInput = screen.getByLabelText(/Product Image/i);
-//     const dummyFile = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' });
-
-//     // Simulate file selection
-//     fireEvent.change(fileInput, { target: { files: [dummyFile] } });
-
-//     // Check if the callback was called with the index and the event object
-//     expect(mockOnImageChange).toHaveBeenCalledTimes(1);
-//     expect(mockOnImageChange).toHaveBeenCalledWith(mockIndex, expect.objectContaining({
-//       target: expect.objectContaining({
-//         files: expect.arrayContaining([dummyFile]),
-//       }),
-//     }));
-//   });
-
-//   test('displays image preview when imagePreview prop is provided', () => {
-//     const productWithPreview = { ...mockProduct, imagePreview: 'data:image/png;base64,previewdata' };
-//     render(
-//       <ProductForm
-//         product={productWithPreview}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
-
-//     const previewImage = screen.getByAltText(`Preview for product ${mockIndex + 1}`);
-//     expect(previewImage).toBeInTheDocument();
-//     expect(previewImage).toHaveAttribute('src', productWithPreview.imagePreview);
-//   });
-
-//    test('displays "Please select an image" when no image or preview exists', () => {
-//     const productNoImage = { ...mockProduct, image: null, imagePreview: null };
-//     render(
-//       <ProductForm
-//         product={productNoImage}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true}
-//       />
-//     );
-
-//     expect(screen.getByText(/Please select an image/i)).toBeInTheDocument();
-//   });
-
-
-//   test('calls onRemove when remove button is clicked', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={true} // Ensure button is rendered
-//       />
-//     );
-
-//     const removeButton = screen.getByRole('button', { name: /Remove Product/i });
-//     fireEvent.click(removeButton);
-
-//     expect(mockOnRemove).toHaveBeenCalledWith(mockIndex);
-//     expect(mockOnRemove).toHaveBeenCalledTimes(1);
-//   });
-
-//   test('does not render remove button when canRemove is false', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={false}
-//         canRemove={false} // Set to false
-//       />
-//     );
-
-//     expect(screen.queryByRole('button', { name: /Remove Product/i })).not.toBeInTheDocument();
-//   });
-
-//   test('disables all inputs and buttons when isSubmitting is true', () => {
-//     render(
-//       <ProductForm
-//         product={mockProduct}
-//         index={mockIndex}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemove={mockOnRemove}
-//         isSubmitting={true} // Set to true
-//         canRemove={true}
-//       />
-//     );
-
-//     expect(screen.getByLabelText(/Product Name/i)).toBeDisabled();
-//     expect(screen.getByLabelText(/Description/i)).toBeDisabled();
-//     expect(screen.getByLabelText(/Price \(R\)/i)).toBeDisabled();
-//     expect(screen.getByLabelText(/Category/i)).toBeDisabled();
-//     expect(screen.getByLabelText(/Product Image/i)).toBeDisabled();
-//     expect(screen.getByRole('button', { name: /Remove Product/i })).toBeDisabled();
-//   });
-// });
+  // Test 10: Renders with different index
+  test('renders with different index', () => {
+    render(
+      <ProductForm
+        product={mockProduct}
+        index={2}
+        productCategories={mockCategories}
+        onProductChange={mockOnProductChange}
+        onImageChange={mockOnImageChange}
+        onRemove={mockOnRemove}
+        isSubmitting={false}
+        canRemove={true}
+      />
+    );
+    
+    // Check that the correct product number is displayed
+    expect(screen.getByText('Product #3')).toBeInTheDocument();
+    
+    // Check IDs for inputs contain the index
+    expect(screen.getByLabelText('Product Name')).toHaveAttribute('id', 'product-name-2');
+    expect(screen.getByLabelText('Description')).toHaveAttribute('id', 'product-description-2');
+    expect(screen.getByLabelText('Price (R)')).toHaveAttribute('id', 'product-price-2');
+    expect(screen.getByLabelText('Quantity Available')).toHaveAttribute('id', 'product-quantity-2');
+    expect(screen.getByLabelText('Category')).toHaveAttribute('id', 'product-category-2');
+    expect(screen.getByLabelText(/Product Image/)).toHaveAttribute('id', 'product-image-2');
+  });
+});

@@ -1,202 +1,193 @@
-// import { render, screen, fireEvent } from '@testing-library/react';
-// import '@testing-library/jest-dom';
-// import { vi } from 'vitest'; // Or import { jest } from '@jest/globals'; if using Jest
-// import ProductList from './ProductList'; // Adjust path if needed
-// import { ProductFormData } from '../types/createStore'; // Adjust path if needed
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import ProductList from './ProductList';
+import ProductForm from './ProductForm';
+import { ProductFormData } from '../types/createStore';
 
-// // --- Mock ProductForm ---
-// // We mock ProductForm to verify props passed down without testing its internals again.
-// vi.mock('./ProductForm', () => ({
-//   // Default export mock
-//   default: vi.fn(({ index, product, canRemove }) => (
-//     <div data-testid={`mock-product-form-${index}`}>
-//       Mock Product Form #{index + 1} - Name: {product.productName} - CanRemove: {String(canRemove)}
-//     </div>
-//   )),
-// }));
-// // If using Jest:
-// // jest.mock('./ProductForm', () => ({
-// //   __esModule: true, // Needed for default export mocks with Jest
-// //   default: jest.fn(({ index, product, canRemove }) => (
-// //     <div data-testid={`mock-product-form-${index}`}>
-// //       Mock Product Form #{index + 1} - Name: {product.productName} - CanRemove: {String(canRemove)}
-// //     </div>
-// //   )),
-// // }));
+// Mock the ProductForm component
+vi.mock('./ProductForm', () => ({
+  default: vi.fn(() => <div data-testid="product-form">Mocked Product Form</div>)
+}));
 
+describe('ProductList Component', () => {
+  // Define mock product data that matches the expected type
+  const mockProducts: ProductFormData[] = [
+    {
+      productName: 'Test Product 1',
+      productDescription: 'Description 1',
+      productPrice: '10.99',
+      productQuantity: '10',
+      productCategory: 'Category A',
+      image: null,
+      imagePreview: '',
+      imageURL: ''
+    },
+    {
+      productName: 'Test Product 2',
+      productDescription: 'Description 2',
+      productPrice: '20.99',
+      productQuantity: '5',
+      productCategory: 'Category B',
+      image: null,
+      imagePreview: '',
+      imageURL: ''
+    }
+  ];
 
-// // --- Mock Props Setup ---
-// const mockProducts: ProductFormData[] = [
-//   { productName: 'Item 1', productDescription: 'Desc 1', productPrice: '10', productCategory: 'Art', image: null, imagePreview: null },
-//   { productName: 'Item 2', productDescription: 'Desc 2', productPrice: '20', productCategory: 'Clothing', image: null, imagePreview: null },
-// ];
-// const mockCategories = ['Clothing', 'Art', 'Crafts'];
-// const mockOnProductChange = vi.fn(); // Use jest.fn() if using Jest
-// const mockOnImageChange = vi.fn();
-// const mockOnRemoveProduct = vi.fn();
-// const mockOnAddProduct = vi.fn();
+  // Define correct type for onProductChange to match the component
+  const onProductChangeFn = vi.fn((_index: number, _field: keyof Omit<ProductFormData,
+      'image' | 'imagePreview' | 'imageURL' |
+      'standardPrice' | 'standardTime' | 'expressPrice' | 'expressTime'
+  >, _value: string) => {});
 
-// // Import the mocked component *after* the mock definition
-// // Ensure this dynamic import works with your test runner setup (Vitest usually handles it)
-// const MockedProductForm = vi.mocked( // Use jest.mocked() if using Jest
-//     (await import('./ProductForm')).default
-// );
+  // Define mock props
+  const mockProps = {
+    products: mockProducts,
+    productCategories: ['Category A', 'Category B', 'Category C'],
+    onProductChange: onProductChangeFn,
+    onImageChange: vi.fn(),
+    onRemoveProduct: vi.fn(),
+    onAddProduct: vi.fn(),
+    isSubmitting: false
+  };
 
+  beforeEach(() => {
+    // Clear all mock calls before each test
+    vi.clearAllMocks();
+    
+    // Reset the ProductForm mock implementation for each test
+    (ProductForm as any).mockImplementation(() => <div data-testid="product-form">Mocked Product Form</div>);
+  });
 
-// describe('ProductList Component', () => {
-//    beforeEach(() => {
-//     // Reset mocks before each test
-//     vi.clearAllMocks(); // Use jest.clearAllMocks() if using Jest
-//   });
+  it('renders correctly with products', () => {
+    render(<ProductList {...mockProps} />);
+    
+    // Check heading and description
+    expect(screen.getByText('Products')).toBeInTheDocument();
+    expect(screen.getByText('Add at least one product. Ensure all fields are filled and an image is selected.')).toBeInTheDocument();
+    
+    // Check that ProductForm is rendered for each product
+    const productForms = screen.getAllByTestId('product-form');
+    expect(productForms).toHaveLength(2);
+    
+    // Check that add button is rendered
+    expect(screen.getByText('+ Add Another Product')).toBeInTheDocument();
+  });
 
-//   test('renders heading, paragraph, and correct number of ProductForms', () => {
-//     render(
-//       <ProductList
-//         products={mockProducts}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemoveProduct={mockOnRemoveProduct}
-//         onAddProduct={mockOnAddProduct}
-//         isSubmitting={false}
-//       />
-//     );
+  it('calls onAddProduct when add button is clicked', () => {
+    render(<ProductList {...mockProps} />);
+    
+    const addButton = screen.getByText('+ Add Another Product');
+    fireEvent.click(addButton);
+    
+    // Verify the handler was called
+    expect(mockProps.onAddProduct).toHaveBeenCalledTimes(1);
+  });
 
-//     expect(screen.getByRole('heading', { name: /Products/i })).toBeInTheDocument();
-//     expect(screen.getByText(/Add at least one product/i)).toBeInTheDocument();
+  it('passes correct props to ProductForm components', () => {
+    render(<ProductList {...mockProps} />);
+    
+    // Check that ProductForm is called with correct props for each product
+    expect(ProductForm).toHaveBeenCalledTimes(2);
+    
+    // Get the first call arguments and verify they contain the expected properties
+    const firstCallArgs = (ProductForm as any).mock.calls[0][0];
+    expect(firstCallArgs.product).toEqual(mockProps.products[0]);
+    expect(firstCallArgs.index).toBe(0);
+    expect(firstCallArgs.productCategories).toEqual(mockProps.productCategories);
+    expect(firstCallArgs.onProductChange).toBe(mockProps.onProductChange);
+    expect(firstCallArgs.onImageChange).toBe(mockProps.onImageChange);
+    expect(firstCallArgs.onRemove).toBe(mockProps.onRemoveProduct);
+    expect(firstCallArgs.isSubmitting).toBe(mockProps.isSubmitting);
+    expect(firstCallArgs.canRemove).toBe(true);
+    
+    // Get the second call arguments and verify they contain the expected properties
+    const secondCallArgs = (ProductForm as any).mock.calls[1][0];
+    expect(secondCallArgs.product).toEqual(mockProps.products[1]);
+    expect(secondCallArgs.index).toBe(1);
+    expect(secondCallArgs.productCategories).toEqual(mockProps.productCategories);
+    expect(secondCallArgs.onProductChange).toBe(mockProps.onProductChange);
+    expect(secondCallArgs.onImageChange).toBe(mockProps.onImageChange);
+    expect(secondCallArgs.onRemove).toBe(mockProps.onRemoveProduct);
+    expect(secondCallArgs.isSubmitting).toBe(mockProps.isSubmitting);
+    expect(secondCallArgs.canRemove).toBe(true);
+  });
 
-//     // Check if the correct number of mocked forms are rendered
-//     const forms = screen.getAllByTestId(/mock-product-form-/i);
-//     expect(forms).toHaveLength(mockProducts.length);
+  it('disables add button when isSubmitting is true', () => {
+    render(<ProductList {...mockProps} isSubmitting={true} />);
+    
+    const addButton = screen.getByText('+ Add Another Product');
+    expect(addButton).toBeDisabled();
+  });
 
-//     // Check content of mocked forms (optional, verifies data pass-down)
-//     expect(forms[0]).toHaveTextContent('Mock Product Form #1 - Name: Item 1');
-//     expect(forms[1]).toHaveTextContent('Mock Product Form #2 - Name: Item 2');
-//   });
+  it('does not allow removing the last product', () => {
+    // Modify props to have only one product
+    const singleProductProps = {
+      ...mockProps,
+      products: [mockProps.products[0]]
+    };
+    
+    render(<ProductList {...singleProductProps} />);
+    
+    // Check that ProductForm is called with canRemove: false
+    const callArgs = (ProductForm as any).mock.calls[0][0];
+    expect(callArgs.canRemove).toBe(false);
+  });
 
-//   test('passes correct props down to each ProductForm', () => {
-//      render(
-//       <ProductList
-//         products={mockProducts}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemoveProduct={mockOnRemoveProduct}
-//         onAddProduct={mockOnAddProduct}
-//         isSubmitting={false}
-//       />
-//     );
+  it('renders correct section class name', () => {
+    const { container } = render(<ProductList {...mockProps} />);
+    const section = container.querySelector('section.product-list-section');
+    expect(section).toBeInTheDocument();
+  });
 
-//     // Verify props passed to the first mocked ProductForm
-//     // --- FIX: Added 'undefined' as second expected argument ---
-//     expect(MockedProductForm).toHaveBeenNthCalledWith(1, // Check 1st call
-//       expect.objectContaining({ // Check 1st argument (props)
-//         index: 0,
-//         product: mockProducts[0],
-//         productCategories: mockCategories,
-//         onProductChange: mockOnProductChange,
-//         onImageChange: mockOnImageChange,
-//         onRemove: mockOnRemoveProduct,
-//         isSubmitting: false,
-//         canRemove: true, // Because products.length > 1
-//       }),
-//       undefined // Expect 'undefined' as the 2nd argument
-//     );
+  it('renders the correct number of ProductForm components', () => {
+    // Test with 3 products
+    const threeProductProps = {
+      ...mockProps,
+      products: [
+        ...mockProps.products,
+        {
+          productName: 'Test Product 3',
+          productDescription: 'Description 3',
+          productPrice: '30.99',
+          productQuantity: '15',
+          productCategory: 'Category C',
+          image: null,
+          imagePreview: '',
+          imageURL: ''
+        }
+      ]
+    };
+    
+    render(<ProductList {...threeProductProps} />);
+    
+    // Should render 3 ProductForm components
+    expect(ProductForm).toHaveBeenCalledTimes(3);
+    const productForms = screen.getAllByTestId('product-form');
+    expect(productForms).toHaveLength(3);
+  });
 
-//      // Verify props passed to the second mocked ProductForm
-//      // --- FIX: Added 'undefined' as second expected argument ---
-//      expect(MockedProductForm).toHaveBeenNthCalledWith(2, // Check 2nd call
-//       expect.objectContaining({ // Check 1st argument (props)
-//         index: 1,
-//         product: mockProducts[1],
-//         // Check a few key props again for the second call
-//         productCategories: mockCategories,
-//         onProductChange: mockOnProductChange,
-//         isSubmitting: false,
-//         canRemove: true,
-//       }),
-//       undefined // Expect 'undefined' as the 2nd argument
-//     );
-//   });
-
-//    test('passes canRemove=false to ProductForm when only one product exists', () => {
-//      render(
-//       <ProductList
-//         products={[mockProducts[0]]} // Only one product
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemoveProduct={mockOnRemoveProduct}
-//         onAddProduct={mockOnAddProduct}
-//         isSubmitting={false}
-//       />
-//     );
-
-//      // --- FIX: Check calls more explicitly ---
-//      // Check the first (and only) call more explicitly
-//      expect(MockedProductForm).toHaveBeenCalledTimes(1); // Ensure it was called exactly once
-
-//      // Check the props object (first argument) of the first call
-//      expect(MockedProductForm.mock.calls[0][0]).toMatchObject(
-//         expect.objectContaining({
-//             index: 0,
-//             product: mockProducts[0],
-//             canRemove: false, // Should be false for single product
-//         })
-//      );
-//      // --- End FIX ---
-
-//      // Check content of mocked form (still useful)
-//      expect(screen.getByTestId('mock-product-form-0')).toHaveTextContent('CanRemove: false');
-//   });
-
-
-//   test('calls onAddProduct when "Add Another Product" button is clicked', () => {
-//     render(
-//       <ProductList
-//         products={mockProducts}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemoveProduct={mockOnRemoveProduct}
-//         onAddProduct={mockOnAddProduct}
-//         isSubmitting={false}
-//       />
-//     );
-
-//     const addButton = screen.getByRole('button', { name: /\+ Add Another Product/i });
-//     fireEvent.click(addButton);
-
-//     expect(mockOnAddProduct).toHaveBeenCalledTimes(1);
-//   });
-
-//   test('disables "Add Another Product" button when isSubmitting is true', () => {
-//      render(
-//       <ProductList
-//         products={mockProducts}
-//         productCategories={mockCategories}
-//         onProductChange={mockOnProductChange}
-//         onImageChange={mockOnImageChange}
-//         onRemoveProduct={mockOnRemoveProduct}
-//         onAddProduct={mockOnAddProduct}
-//         isSubmitting={true} // Set submitting state
-//       />
-//     );
-
-//     const addButton = screen.getByRole('button', { name: /\+ Add Another Product/i });
-//     expect(addButton).toBeDisabled();
-
-//     // --- FIX: Check calls more explicitly ---
-//     // Verify the mock was called for each product
-//     expect(MockedProductForm).toHaveBeenCalledTimes(mockProducts.length);
-
-//     // Check the 'isSubmitting' prop in the first argument (props object) of each call
-//     expect(MockedProductForm.mock.calls[0][0]).toMatchObject(
-//       expect.objectContaining({ isSubmitting: true })
-//     );
-//     expect(MockedProductForm.mock.calls[1][0]).toMatchObject(
-//       expect.objectContaining({ isSubmitting: true })
-//     );
-//     // --- End FIX ---
-//   });
-// });
+  it('handles button click correctly when disabled', () => {
+    render(<ProductList {...mockProps} isSubmitting={true} />);
+    
+    const addButton = screen.getByText('+ Add Another Product');
+    fireEvent.click(addButton);
+    
+    // The handler should not be called when button is disabled
+    expect(mockProps.onAddProduct).not.toHaveBeenCalled();
+  });
+  
+  it('correctly passes onProductChange handler to ProductForm', () => {
+    render(<ProductList {...mockProps} />);
+    
+    // Extract the onProductChange handler that was passed to ProductForm
+    const passedProps = (ProductForm as any).mock.calls[0][0];
+    const passedHandler = passedProps.onProductChange;
+    
+    // Call the handler
+    passedHandler(0, 'productName', 'Updated Name');
+    
+    // Verify our mock was called with correct parameters
+    expect(mockProps.onProductChange).toHaveBeenCalledWith(0, 'productName', 'Updated Name');
+  });
+});
