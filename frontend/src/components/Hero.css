@@ -7,7 +7,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 /* Base styles and tweaks for hero section */
 .light-purple-bg {
-  background-color: var(--accent-background, #a899b5); /* <-- Comment out temporarily for testing */
+  background-color: var(--accent-background, #f9f6fd); /* <-- Comment out temporarily for testing */
 }
 
 .hero-section {
