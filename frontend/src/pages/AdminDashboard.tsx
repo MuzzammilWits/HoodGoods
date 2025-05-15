@@ -1,12 +1,22 @@
 // src/pages/AdminDashboard.tsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
   return (
-    // Use the <main> tag to semantically identify the primary content area
     <main style={{ padding: '2rem' }}>
-      <h1>Welcome to the Admin Dashboard</h1>
-      <p>This is a placeholder page for admin controls.</p>
+      <h1>Admin Dashboard</h1>
+      <nav className="admin-nav">
+        <Link to="/admin/products-approval" className="nav-link">
+          Product Approvals
+        </Link>
+        <Link to="/admin/seller-requests" className="nav-link">
+          Seller Requests
+        </Link>
+        <Link to="/admin/reports" className="nav-link">
+          Reports
+        </Link>
+      </nav>
     </main>
   );
 };
