@@ -1,0 +1,91 @@
+/* frontend/src/components/reporting/SalesTrendReport.css */
+/* .sales-trend-report { Main container for this specific report component */
+/* Styles for the overall report box, if different from .report-group */
+/* } */
+  
+  .report-title {
+    font-size: 1.5em; /* Or your preferred size */
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .charts-export-area {
+    padding: 15px;
+    /* background-color: white; PDF capture area background */
+    /* No border here, as the parent .report-group or .chart-container might have it */
+  }
+  
+  .chart-container {
+    margin-bottom: 30px;
+  }
+  
+  .chart-title {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .chart-canvas-wrapper {
+    height: 350px; /* Crucial for Chart.js canvas responsiveness */
+    width: 100%;
+    position: relative; /* Often useful for canvas behavior */
+  }
+  
+  .report-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 10px; /* Space between buttons */
+  }
+  
+  /* Add styles for .btn .btn-secondary if not globally defined */
+  .btn.btn-secondary {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .btn.btn-secondary:hover {
+    background-color: #e0e0e0;
+  }
+  .btn.btn-secondary:disabled {
+    background-color: #f9f9f9;
+    color: #aaa;
+    cursor: not-allowed;
+    border-color: #eee;
+  }
+  
+  
+  .report-loading,
+  .report-error,
+  .report-no-data {
+    min-height: 200px; /* Give some space for these messages */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .report-no-data .report-actions { /* Center buttons if no data */
+      justify-content: center;
+  }
+  
+  
+  .visually-hidden { /* For accessibility, hide elements visually but keep for screen readers */
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap; /* Keep from breaking to new line */
+  }
+  .centered-message { /* Re-add if you removed it from SellerAnalyticsPage.css */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+  }

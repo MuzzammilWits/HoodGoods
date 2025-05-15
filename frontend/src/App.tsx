@@ -19,6 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import SellerDashboardPage from './pages/SellerDashboardPage'; // Adjust path if needed
+import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
 // *** Import the My Orders Page ***
 import MyOrdersPage from './pages/MyOrdersPage'; // Adjust path if needed
 
@@ -112,6 +113,15 @@ const AppContent: React.FC = () => {
                 </article>
               </ProtectedRoute>
             } />
+
+            <Route
+              path="/seller/analytics"
+              element={
+                <ProtectedRoute allowedRoles={['seller']}>
+                  <SellerAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />  
 
              <Route path="/seller-dashboard" element={
               <ProtectedRoute allowedRoles={['seller']}> {/* Protect for sellers */}
