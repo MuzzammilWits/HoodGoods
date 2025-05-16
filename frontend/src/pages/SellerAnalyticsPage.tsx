@@ -141,13 +141,6 @@ const SellerAnalyticsPage: React.FC = () => {
           >
             Sales Trends
           </button>
-          <button
-            onClick={() => setActiveReport('custom')}
-            className={activeReport === 'custom' ? 'active' : ''}
-            disabled // Disable until CustomViewReport is ready
-          >
-            Custom Performance
-          </button>
         </nav>
       </header>
 

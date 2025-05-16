@@ -16,7 +16,7 @@ import {
   StockBreakdownDto
 } from './dto/inventory-status.dto';
 
-const LOW_STOCK_THRESHOLD = 10;
+const LOW_STOCK_THRESHOLD = 5;
 
 @Injectable()
 export class ReportingService {
