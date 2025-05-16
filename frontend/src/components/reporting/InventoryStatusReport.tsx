@@ -137,8 +137,8 @@ const InventoryStatusReport: React.FC = () => {
       yPos += 20;
 
       doc.setFontSize(9);
-      doc.text(`Report Generated (Backend): ${reportData.reportGeneratedAt ? new Date(reportData.reportGeneratedAt).toLocaleString() : 'N/A'}`, margin, yPos);
-      doc.text(`Printed (Frontend): ${formattedDate} ${formattedTime}`, pageWidth - margin, yPos, { align: 'right'});
+      doc.text(`Report Generated: ${reportData.reportGeneratedAt ? new Date(reportData.reportGeneratedAt).toLocaleString() : 'N/A'}`, margin, yPos);
+      doc.text(`Printed: ${formattedDate} ${formattedTime}`, pageWidth - margin, yPos, { align: 'right'});
       yPos += 25;
 
       if (pieChartContainerRef.current) {

@@ -153,24 +153,37 @@ tbody tr:hover {
 
 .filters {
   display: flex;
-  flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
-  gap: 15px;
+  flex-wrap: wrap;         /* Allows items to wrap to the next line if not enough space */
+  gap: 15px;               /* Space between items if they are on the same line */
   margin-bottom: 15px;
-  align-items: center;
+  align-items: center;     /* Aligns items vertically if they are on the same line and have different heights */
+  background-color: #f7f7f7f6;
 }
 
 .search-bar, .category-filter {
+  /* Styling for the appearance */
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1em;
+  box-sizing: border-box;
+
+  /* Flex properties */
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  min-width: 180px;
+
+  /* Add this to ensure consistent height */
+  height: 40px; /* Adjust this value as needed, e.g., 38px, 42px */
 }
 
 .search-bar {
-  flex-grow: 1;
-  min-width: 200px; /* Minimum width for search bar */
+  flex-grow: 1; /* Existing: allows search bar to grow */
+  min-width: 180px;
 }
 
 .category-filter {
+  flex-grow: 1; /* Add this: allows category filter to grow as well */
   min-width: 180px;
 }
