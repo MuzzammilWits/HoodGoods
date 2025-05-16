@@ -1,4 +1,151 @@
 /* frontend/src/pages/SellerAnalyticsPage.css */
+
+/* frontend/src/pages/SellerAnalyticsPage.css */
+.seller-analytics-page {
+  padding: 20px;
+  background-color: #f4f6f8; /* Light background for the page */
+  min-height: 100vh;
+}
+
+/* Centering messages for loading/error states */
+.centered-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh; /* Adjust as needed */
+  text-align: center;
+}
+
+.loading-container p,
+.message-container h2,
+.message-container p {
+  color: #555;
+}
+.message-container.error-message-container p {
+  color: #c0392b; /* Darker red for error text */
+}
+
+
+.analytics-header {
+  text-align: center;
+  margin-bottom: 20px; /* Reduced margin slightly */
+}
+
+.analytics-header h1 {
+  color: #2c3e50; /* Dark blue-grey */
+  font-size: 2.2em; /* Slightly reduced font size */
+  margin-bottom: 15px;
+}
+
+.report-nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Reduced gap slightly */
+  margin-bottom: 30px; /* Increased margin to separate from content */
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.report-nav button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: 1px solid #ddd; /* Subtle border */
+  border-radius: 25px; /* More pronounced pill shape */
+  background-color: #ffffff; /* White background */
+  color: #3498db; /* Primary blue */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.report-nav button:hover {
+  background-color: #f8f9fa; /* Very light grey on hover */
+  border-color: #bdc3c7; /* Slightly darker border on hover */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.report-nav button.active {
+  background-color: #3498db; /* Primary blue for active */
+  color: white;
+  font-weight: bold;
+  border-color: #2980b9; /* Darker blue border for active */
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.4); /* Subtle shadow for active button */
+}
+
+.report-nav button:disabled {
+  background-color: #ecf0f1; /* Light grey for disabled */
+  color: #bdc3c7; /* Muted text color for disabled */
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+  box-shadow: none;
+}
+
+
+.analytics-content {
+  /* Optional: Add general styling for the area that holds the reports */
+}
+
+.report-group {
+  background-color: #ffffff; /* White background for report cards/sections */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07); /* Slightly more pronounced shadow */
+  margin-bottom: 30px; /* Space between report groups */
+}
+
+.report-group-title { /* For titles within cards if you use them */
+  color: #34495e; /* Darker shade for titles */
+}
+
+.placeholder-text {
+  color: #7f8c8d; /* Muted color for placeholder text */
+}
+
+/* Bootstrap card styling (if you're using Bootstrap classes like .card, .card-header, .card-body) */
+.card {
+  border: 1px solid #e0e0e0; /* Lighter border for cards */
+}
+.card-header {
+  background-color: #f8f9fa; /* Very light grey for card headers */
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0.75rem 1.25rem;
+}
+.card-header .h5 {
+  font-size: 1.1rem; /* Adjust title size in card header */
+  color: #34495e;
+}
+.card-body {
+  padding: 1.25rem;
+}
+
+/* Container from Bootstrap - if you're not using Bootstrap globally, define it or use an alternative */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .container { max-width: 540px; }
+}
+@media (min-width: 768px) {
+  .container { max-width: 720px; }
+}
+@media (min-width: 992px) {
+  .container { max-width: 960px; }
+}
+@media (min-width: 1200px) {
+  .container { max-width: 1140px; }
+}
+
+.mt-4 { margin-top: 1.5rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+
+
 .seller-analytics-page {
     max-width: 1200px;
     margin: 20px auto;

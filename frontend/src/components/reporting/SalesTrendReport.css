@@ -1,91 +1,96 @@
 /* frontend/src/components/reporting/SalesTrendReport.css */
-/* .sales-trend-report { Main container for this specific report component */
-/* Styles for the overall report box, if different from .report-group */
-/* } */
-  
-  .report-title {
-    font-size: 1.5em; /* Or your preferred size */
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .charts-export-area {
-    padding: 15px;
-    /* background-color: white; PDF capture area background */
-    /* No border here, as the parent .report-group or .chart-container might have it */
-  }
-  
-  .chart-container {
-    margin-bottom: 30px;
-  }
-  
-  .chart-title {
-    text-align: center;
-    font-size: 1.2em;
-    color: #555;
-    margin-bottom: 10px;
-  }
-  
-  .chart-canvas-wrapper {
-    height: 350px; /* Crucial for Chart.js canvas responsiveness */
-    width: 100%;
-    position: relative; /* Often useful for canvas behavior */
-  }
-  
-  .report-actions {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
-    gap: 10px; /* Space between buttons */
-  }
-  
-  /* Add styles for .btn .btn-secondary if not globally defined */
-  .btn.btn-secondary {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    color: #333;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  .btn.btn-secondary:hover {
-    background-color: #e0e0e0;
-  }
-  .btn.btn-secondary:disabled {
-    background-color: #f9f9f9;
-    color: #aaa;
-    cursor: not-allowed;
-    border-color: #eee;
-  }
-  
-  
-  .report-loading,
-  .report-error,
-  .report-no-data {
-    min-height: 200px; /* Give some space for these messages */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .report-no-data .report-actions { /* Center buttons if no data */
-      justify-content: center;
-  }
-  
-  
-  .visually-hidden { /* For accessibility, hide elements visually but keep for screen readers */
-    position: absolute !important;
-    height: 1px; width: 1px;
-    overflow: hidden;
-    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
-    clip: rect(1px, 1px, 1px, 1px);
-    white-space: nowrap; /* Keep from breaking to new line */
-  }
-  .centered-message { /* Re-add if you removed it from SellerAnalyticsPage.css */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-  }
+.sales-trend-report {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sales-trend-report h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.report-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+  flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+}
+
+.report-controls label {
+  font-weight: bold;
+  color: #555;
+}
+
+.report-controls select,
+.report-controls input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+.csv-button { /* Style if not already globally styled */
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2ecc71; /* Green */
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+.csv-button:hover {
+  background-color: #27ae60;
+}
+
+
+.loading-message, .error-message, .info-message {
+  text-align: center;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: #D8000C; /* Error red */
+  background-color: #FFD2D2; /* Light red background */
+  border: 1px solid #D8000C;
+}
+
+.info-message {
+  color: #00529B; /* Info blue */
+  background-color: #BDE5F8; /* Light blue background */
+  border: 1px solid #00529B;
+}
+
+.chart-container-st { /* Specific class for sales trend chart container */
+  position: relative;
+  height: 40vh; /* Or a fixed height like 300px, 400px */
+  width: 100%; /* Takes full width of its parent */
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.report-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+.report-summary h4 {
+  margin-top: 0;
+  color: #333;
+}
+.report-summary p {
+  margin: 5px 0;
+  color: #555;
+  font-size: 0.9em;
+}

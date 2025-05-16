@@ -1,142 +1,290 @@
 // backend/src/reporting/reporting.service.ts
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { SupabaseService } from '../supabase.service';
+import { Injectable, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Store } from '../store/entities/store.entity';
+import { Product } from '../products/entities/product.entity';
+import { SellerOrder } from '../orders/entities/seller-order.entity';
+import { SellerOrderItem } from '../orders/entities/seller-order-item.entity';
+import { Order } from '../orders/entities/order.entity';
+import { SalesDataDto, SalesReportDto, TimePeriod } from './dto/sales-report.dto';
+import {
+  InventoryStatusResponseDto,
+  LowStockItemDto, 
+  OutOfStockItemDto,
+  FullInventoryItemDto,
+  StockBreakdownDto
+} from './dto/inventory-status.dto';
 
-// Make sure this is exported or defined in a shared types file accessible by the controller too
-export interface SalesTrendDataPoint {
-  order_date: string;
-  total_revenue: number;
-  order_count: number;
-}
+const LOW_STOCK_THRESHOLD = 10;
 
 @Injectable()
 export class ReportingService {
-  constructor(private readonly supabase: SupabaseService) {}
+  private readonly logger = new Logger(ReportingService.name);
 
-  private async getStoreIdForSeller(auth0UserId: string): Promise<string> {
-    const client = this.supabase.getClient();
-    // Your User entity uses 'userID' to store the Auth0 'sub'.
-    // Your Stores entity uses 'userID' to link to User entity's 'userID'.
-    const { data: storeData, error: storeError } = await client
-      .from('Stores') // DB Table Name
-      .select('store_id') // DB Column Name
-      .eq('userID', auth0UserId) // DB Column Name in Stores, matches User.userID (Auth0 sub)
-      .single();
+  constructor(
+    @InjectRepository(Store)
+    private readonly storeRepository: Repository<Store>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(SellerOrder)
+    private readonly sellerOrderRepository: Repository<SellerOrder>,
+    @InjectRepository(SellerOrderItem)
+    private readonly sellerOrderItemRepository: Repository<SellerOrderItem>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+  ) {}
 
-    if (storeError || !storeData) {
-      console.error(`Error fetching store for seller (Auth0 User ID: ${auth0UserId}):`, storeError);
-      throw new NotFoundException(`Store not found for user ${auth0UserId}. Please ensure a store is created for this seller.`);
+  async getStoreIdForSeller(auth0UserId: string): Promise<string> {
+    this.logger.log(`Fetching store ID for seller with Auth0 User ID: ${auth0UserId}`);
+    try {
+      const store = await this.storeRepository.findOne({
+        where: { userId: auth0UserId },
+      });
+      if (!store) {
+        this.logger.warn(`No store found for Auth0 User ID: ${auth0UserId}`);
+        throw new NotFoundException(`Store not found for user ${auth0UserId}.`);
+      }
+      this.logger.log(`Store ID ${store.storeId} found for Auth0 User ID: ${auth0UserId}`);
+      return store.storeId;
+    } catch (error: any) {
+      this.logger.error(`Error fetching store ID for user ${auth0UserId}: ${error.message}`, error.stack);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Could not retrieve store information.');
     }
-    return storeData.store_id;
   }
 
-  async getSalesTrendsForSeller(auth0UserId: string): Promise<SalesTrendDataPoint[]> {
+  async getInventoryStatus(auth0UserId: string): Promise<InventoryStatusResponseDto> {
+    this.logger.log(`Generating inventory status report for user ${auth0UserId}`);
     const storeId = await this.getStoreIdForSeller(auth0UserId);
-    const client = this.supabase.getClient();
-
-    // This query structure reflects your TypeORM entity relationships:
-    // SellerOrderItem -> SellerOrder -> Order
-    // SellerOrderItem -> Product
-    const { data, error } = await client
-      .from('SellerOrderItems') // DB Table Name
-      .select(`
-        quantityOrdered:quantity_ordered, 
-        pricePerUnit:price_per_unit, 
-        sellerOrder:SellerOrders!inner ( 
-          order:Orders!inner ( 
-            orderId:order_id,        
-            orderDate:order_date    
-          )
-        ),
-        product:Products!inner ( 
-          store_id  
-        )
-      `)
-      // Filter on the store_id from the joined Products table
-      // Using the alias 'product' and then the DB column name 'store_id'
-      .eq('product.store_id', storeId);
-
-
-    if (error) {
-      // Log the detailed error from Supabase
-      console.error('SUPABASE QUERY ERROR in getSalesTrendsForSeller:', JSON.stringify(error, null, 2));
-      throw new InternalServerErrorException('Could not fetch sales trends due to a database query error.');
+    
+    let products: Product[];
+    try {
+      products = await this.productRepository.find({
+        where: { storeId: storeId, isActive: true },
+      });
+    } catch (error: any) {
+      this.logger.error(`Error fetching products for store ${storeId}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Could not retrieve products for inventory report.');
     }
 
-    if (!data || data.length === 0) {
-      return [];
+    const lowStockItems: LowStockItemDto[] = [];
+    const outOfStockItems: OutOfStockItemDto[] = [];
+    const fullInventory: FullInventoryItemDto[] = [];
+    let inStockCount = 0;
+
+    if (!products || products.length === 0) {
+      this.logger.log(`No products found for store ${storeId}. Returning empty inventory report.`);
+      return {
+        lowStockItems,
+        outOfStockItems,
+        fullInventory,
+        stockBreakdown: {
+          inStockPercent: 0,
+          lowStockPercent: 0,
+          outOfStockPercent: 0,
+          totalProducts: 0,
+        },
+        reportGeneratedAt: new Date(),
+      };
     }
 
-    // Type 'data' as 'any[]' for now if not using fully generated Supabase types for this complex select.
-    // Ideally, you'd have a precise interface for the shape of 'item'.
-    const items = data as any[];
+    products.forEach(product => {
+      fullInventory.push({
+        prodId: product.prodId,
+        productName: product.name,
+        quantity: product.productquantity,
+        price: product.price,
+        category: product.category,
+      });
 
-    const dailyData: Record<string, { total_revenue: number; order_ids: Set<string> }> = {};
-
-    for (const item of items) {
-      // Access data based on the nested structure and aliases defined in the select query
-      if (
-        !item.sellerOrder ||
-        !item.sellerOrder.order ||
-        !item.product
-      ) {
-        console.warn('Skipping item due to missing nested data from Supabase query:', item);
-        continue;
+      if (product.productquantity === 0) {
+        outOfStockItems.push({
+          prodId: product.prodId,
+          productName: product.name,
+        });
+      } else if (product.productquantity < LOW_STOCK_THRESHOLD) {
+        lowStockItems.push({
+          prodId: product.prodId,
+          productName: product.name,
+          currentQuantity: product.productquantity,
+        });
+      } else {
+        inStockCount++;
       }
+    });
 
-      const orderDateFromOrder = item.sellerOrder.order.orderDate; // Access using JS property name from your select aliases
-      const mainOrderIdFromOrder = item.sellerOrder.order.orderId; // Access using JS property name
+    const totalProducts = products.length;
+    const stockBreakdown: StockBreakdownDto = {
+      inStockPercent: totalProducts > 0 ? parseFloat(((inStockCount / totalProducts) * 100).toFixed(2)) : 0,
+      lowStockPercent: totalProducts > 0 ? parseFloat(((lowStockItems.length / totalProducts) * 100).toFixed(2)) : 0,
+      outOfStockPercent: totalProducts > 0 ? parseFloat(((outOfStockItems.length / totalProducts) * 100).toFixed(2)) : 0,
+      totalProducts: totalProducts,
+    };
+    
+    this.logger.log(`Inventory status report generated for store ${storeId}: ${totalProducts} total products.`);
 
-      if (typeof orderDateFromOrder !== 'string' && !(orderDateFromOrder instanceof Date)) {
-        console.warn('Skipping item due to invalid order_date type:', orderDateFromOrder);
-        continue;
-      }
-      
-      const dateStr = (orderDateFromOrder instanceof Date ? orderDateFromOrder.toISOString() : String(orderDateFromOrder)).split('T')[0];
-
-      if (!dateStr) {
-          console.warn('Skipping item due to empty date string after processing:', item);
-          continue;
-      }
-
-      if (!dailyData[dateStr]) {
-        dailyData[dateStr] = { total_revenue: 0, order_ids: new Set() };
-      }
-
-      // Use JS property names as aliased in the select or as direct columns from SellerOrderItems
-      const quantity = typeof item.quantityOrdered === 'number' ? item.quantityOrdered : 0;
-      const price = typeof item.pricePerUnit === 'number' ? item.pricePerUnit : 0;
-
-      dailyData[dateStr].total_revenue += quantity * price;
-      if (mainOrderIdFromOrder != null) {
-        dailyData[dateStr].order_ids.add(mainOrderIdFromOrder);
-      }
-    }
-
-    const result: SalesTrendDataPoint[] = Object.entries(dailyData)
-      .map(([date, totals]) => ({
-        order_date: date,
-        total_revenue: parseFloat(totals.total_revenue.toFixed(2)),
-        order_count: totals.order_ids.size,
-      }))
-      .sort((a, b) => new Date(a.order_date).getTime() - new Date(b.order_date).getTime());
-
-    return result;
+    return {
+      lowStockItems,
+      outOfStockItems,
+      fullInventory,
+      stockBreakdown,
+      reportGeneratedAt: new Date(),
+    };
   }
 
-  // Helper for CSV generation
-  generateCsvData(data: SalesTrendDataPoint[]): string { // Typed the input for consistency
-    if (!data || data.length === 0) {
-      // Return headers even for an empty report for consistency
-      return 'order_date,total_revenue,order_count\n';
+
+  async getSalesTrends(auth0UserId: string, period: TimePeriod, date?: string): Promise<SalesReportDto> {
+    const storeId = await this.getStoreIdForSeller(auth0UserId);
+    this.logger.log(`Fetching sales trends for store ${storeId}, period: ${period}, date: ${date}`);
+
+    const { startDate, endDate } = this.calculateDateRange(period, date);
+    this.logger.log(`Calculated date range for query - Start: ${startDate.toISOString()}, End: ${endDate.toISOString()}`);
+
+    let ordersForStore: any[] = []; // Initialize to empty array
+
+    try {
+      const queryBuilder = this.orderRepository 
+        .createQueryBuilder('order') 
+        .innerJoin('order.sellerOrders', 'sellerOrder') 
+        .innerJoin('sellerOrder.items', 'sellerOrderItem') 
+        .innerJoin('sellerOrderItem.product', 'product') 
+        .where('product.storeId = :storeId', { storeId }) 
+        .andWhere('order.orderDate >= :startDate', { startDate }) 
+        .andWhere('order.orderDate < :endDate', { endDate })
+       // .andWhere('sellerOrder.status = :status', { status: 'Processing' }) 
+        .select([
+          'order.orderDate AS "orderDate"', 
+          'SUM(sellerOrderItem.quantityOrdered * sellerOrderItem.pricePerUnit) AS "dailySales"', 
+        ])
+        .groupBy('order.orderDate') 
+        .orderBy('order.orderDate', 'ASC'); 
+
+      this.logger.debug('>>> Sales Trends Query constructed. Attempting to execute...');
+      const generatedSql = queryBuilder.getSql(); // Get the SQL for logging
+      this.logger.debug(`>>> Generated SQL: ${generatedSql}`);
+      this.logger.debug(`>>> Parameters: ${JSON.stringify({ storeId, startDate, endDate, status: 'completed' })}`);
+
+      ordersForStore = await queryBuilder.getRawMany(); // Execute the query
+
+      this.logger.log(`>>> Raw sales data fetched from DB. Count: ${ordersForStore.length}`); // Changed to .log to ensure visibility
+      if (ordersForStore.length > 0) {
+        this.logger.debug(`>>> First raw sales data item from DB: ${JSON.stringify(ordersForStore[0])}`);
+      } else {
+        this.logger.log('>>> No raw sales data items returned from the database query.');
+      }
+
+      const salesData: SalesDataDto[] = ordersForStore.map(orderItem => ({
+        date: new Date(orderItem.orderDate).toISOString().split('T')[0],
+        sales: parseFloat(orderItem.dailySales) || 0,
+      }));
+
+      const totalSales = salesData.reduce((sum, currentItem) => sum + currentItem.sales, 0);
+      const averageDailySales = salesData.length > 0 ? totalSales / salesData.length : 0;
+
+      this.logger.log(`Sales trends processed. Total sales: ${totalSales}, Average daily sales: ${averageDailySales}`);
+
+      const displayStartDate = startDate.toISOString().split('T')[0];
+      const displayEndDate = new Date(endDate.getTime() - (24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
+      return {
+        salesData,
+        summary: {
+          totalSales: parseFloat(totalSales.toFixed(2)),
+          averageDailySales: parseFloat(averageDailySales.toFixed(2)),
+          period: period,
+          startDate: displayStartDate,
+          endDate: displayEndDate,
+        },
+        reportGeneratedAt: new Date(),
+      };
+    } catch (error: any) { 
+      this.logger.error(`Error during getSalesTrends execution for store ${storeId}: ${error.message}`, error.stack);
+      // Log the generated SQL and parameters if an error occurs during query execution
+      // This might be redundant if the error object itself contains query and parameters, but good for explicit logging
+      if (error.query && error.parameters) { 
+        this.logger.error(`Failed Query (from error object): ${error.query}`);
+        this.logger.error(`Parameters (from error object): ${JSON.stringify(error.parameters)}`);
+      } else {
+        // If the error doesn't have query/parameters, try to log the one we constructed
+        const tempQueryBuilder = this.orderRepository.createQueryBuilder('order') /* ... recreate query ... */ ;
+        this.logger.error(`Failed Query (reconstructed for logging): ${tempQueryBuilder.getSql()}`);
+      }
+      throw new InternalServerErrorException('Could not retrieve sales trends.');
     }
-    const header = Object.keys(data[0]).join(',') + '\n';
-    const rows = data.map(row =>
-      Object.values(row)
-        .map(String) 
-        .map(val => `"${val.replace(/"/g, '""')}"`) 
-        .join(',') + '\n'
-    );
-    return header + rows.join('');
+  }
+
+  private calculateDateRange(period: TimePeriod, dateStr?: string): { startDate: Date; endDate: Date } {
+    let now: Date;
+    if (dateStr) {
+        const parts = dateStr.split('-').map(Number);
+        now = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0));
+    } else {
+        const tempNow = new Date();
+        now = new Date(Date.UTC(tempNow.getUTCFullYear(), tempNow.getUTCMonth(), tempNow.getUTCDate(), 0, 0, 0, 0));
+    }
+    this.logger.debug(`calculateDateRange initial 'now' (UTC start of day): ${now.toISOString()}`);
+
+    let startDate = new Date(now); 
+    let endDate = new Date(now);   
+
+    switch (period) {
+      case TimePeriod.DAILY:
+        endDate.setUTCDate(startDate.getUTCDate() + 1);
+        break;
+      case TimePeriod.WEEKLY:
+        const dayOfWeek = startDate.getUTCDay(); 
+        const diffToMonday = (dayOfWeek === 0) ? -6 : (1 - dayOfWeek); 
+        startDate.setUTCDate(startDate.getUTCDate() + diffToMonday);
+        endDate = new Date(startDate);
+        endDate.setUTCDate(startDate.getUTCDate() + 7);
+        break;
+      case TimePeriod.MONTHLY:
+        startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+        endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+        break;
+      case TimePeriod.YEARLY:
+        startDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+        endDate = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
+        break;
+      default:
+        this.logger.warn(`Invalid time period: ${period}. Defaulting to daily based on 'now'.`);
+        endDate.setUTCDate(startDate.getUTCDate() + 1);
+        break;
+    }
+    this.logger.log(`Calculated date range (UTC) - Period: ${period}, InputDate: ${dateStr || 'N/A'}, Start: ${startDate.toISOString()}, End: ${endDate.toISOString()}`);
+    return { startDate, endDate };
+  }
+
+  generateCSVData<T extends object>(data: T[], reportType: string): string {
+    if (!data || data.length === 0) {
+      return `No data available for ${reportType} report.`;
+    }
+    try {
+      const headers = Object.keys(data[0]);
+      const csvRows = [headers.join(',')]; 
+
+      data.forEach(row => {
+        const values = headers.map(header => {
+          const value = row[header as keyof T];
+          if (value === null || value === undefined) {
+            return '';
+          }
+          const stringValue = String(value);
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        });
+        csvRows.push(values.join(','));
+      });
+
+      return csvRows.join('\n');
+    } catch (error: any) {
+        this.logger.error(`Error generating CSV data for ${reportType}: ${error.message}`, error.stack);
+        throw new InternalServerErrorException(`Could not generate CSV for ${reportType}.`);
+    }
   }
 }

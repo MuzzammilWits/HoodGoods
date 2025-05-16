@@ -3,7 +3,104 @@
 // The VITE_API_URL should point to your NestJS backend's /api route
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const REPORTING_ENDPOINT_PREFIX = `${API_BASE_URL}/reporting`;
+// frontend/src/services/reportingService.ts
+import { SalesReportData, TimePeriod, InventoryStatusReportData } from '../types'; // Ensure InventoryStatusReportData is imported
 
+
+
+// Existing getSalesTrendReport function...
+export const getSalesTrendReport = async (
+  token: string,
+  period: TimePeriod,
+  date?: string,
+): Promise<SalesReportData> => {
+  let url = `${API_BASE_URL}/reporting/seller/sales-trends?period=${period}`;
+  if (date) {
+    url += `&date=${date}`;
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch sales trend report');
+  }
+  return response.json();
+};
+
+export const downloadSalesTrendCsv = async (
+  token: string,
+  period: TimePeriod,
+  date?: string,
+): Promise<Blob> => {
+  let url = `${API_BASE_URL}/reporting/seller/sales-trends/csv?period=${period}`;
+  if (date) {
+    url += `&date=${date}`;
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json(); // Or response.text() if CSV error isn't JSON
+    throw new Error(errorData.message || 'Failed to download sales trend CSV');
+  }
+  return response.blob();
+};
+
+// ---- NEW FUNCTIONS FOR INVENTORY STATUS ----
+
+export const getInventoryStatusReport = async (
+  token: string,
+): Promise<InventoryStatusReportData> => {
+  const url = `${API_BASE_URL}/reporting/seller/inventory/status`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch inventory status report');
+  }
+  return response.json();
+};
+
+export const downloadInventoryStatusCsv = async (
+  token: string,
+): Promise<Blob> => {
+  const url = `${API_BASE_URL}/reporting/seller/inventory/csv`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    // Backend CSV error might be text or JSON, adjust if needed
+    const errorText = await response.text(); 
+    console.error("CSV Download Error Text:", errorText);
+    try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.message || 'Failed to download inventory status CSV');
+    } catch (e) {
+        throw new Error(errorText || 'Failed to download inventory status CSV');
+    }
+  }
+  return response.blob();
+};
+
+// ---- END NEW FUNCTIONS ----
 export interface SalesTrendDataPointAPI {
   order_date: string; // Expecting date string (e.g., ISO format "YYYY-MM-DD")
   total_revenue: number;
