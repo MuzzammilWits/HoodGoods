@@ -1,5 +1,8 @@
 // src/types/index.ts
-
+// frontend/src/types/index.ts
+// ... your existing exports
+export * from './reporting'; // Add this line
+export * from './createStore'; // Assuming this is your existing createStore types
 export interface ColorOption {
   id: number;
   color: string;

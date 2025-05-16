@@ -1,24 +1,29 @@
 // backend/src/reporting/reporting.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ Needed for repository injection
 import { ReportingController } from './reporting.controller';
 import { ReportingService } from './reporting.service';
-import { AuthModule } from '../auth/auth.module'; // << IMPORT AuthModule
-import { SupabaseService } from '../supabase.service'; // Assuming you still use this directly in ReportingService
-                                                    // OR if ReportingService also needs TypeORM repositories,
-                                                    // you'd import TypeOrmModule.forFeature([...]) here too.
+import { AuthModule } from '../auth/auth.module';
+import { SupabaseService } from '../supabase.service';
+
+import { Store } from '../store/entities/store.entity';
+import { Product } from '../products/entities/product.entity';
+import { SellerOrder } from '../orders/entities/seller-order.entity';
+import { SellerOrderItem } from '../orders/entities/seller-order-item.entity';
+import { Order } from '../orders/entities/order.entity';
 
 @Module({
   imports: [
-    AuthModule, // This makes exported providers from AuthModule (like AuthService) available
-                // for injection into components within ReportingModule.
+    AuthModule,
+    TypeOrmModule.forFeature([
+      Store,
+      Product,
+      SellerOrder,
+      SellerOrderItem,
+      Order,
+    ]),
   ],
   controllers: [ReportingController],
-  providers: [
-    ReportingService,
-    SupabaseService, // If ReportingService injects this directly for DB calls
-                     // If ReportingService uses TypeORM repositories, it would get them
-                     // from TypeOrmModule.forFeature imported above.
-                     // For now, let's assume it uses SupabaseService as per earlier examples.
-  ],
+  providers: [ReportingService, SupabaseService],
 })
 export class ReportingModule {}

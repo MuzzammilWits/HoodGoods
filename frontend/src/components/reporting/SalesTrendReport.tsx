@@ -1,5 +1,6 @@
 // frontend/src/components/reporting/SalesTrendReport.tsx
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth0 } from '@auth0/auth0-react'; // Import useAuth0
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -10,262 +11,224 @@ import {
   Title,
   Tooltip,
   Legend,
-  TimeScale, // Ensure TimeScale is imported
-  Filler
+  TimeScale, // If using time scale
+  TimeSeriesScale, // If using time series scale
 } from 'chart.js';
-import 'chartjs-adapter-date-fns'; // Adapter for date handling
-import {
-  fetchSalesTrendsForSeller,
-  downloadSalesTrendsForSellerCSV,
-  SalesTrendDataPointAPI
-} from '../../services/reportingService';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import './SalesTrendReport.css'; // Ensure this CSS file exists or create it
+import 'chartjs-adapter-date-fns'; // Import adapter if using time scales
+
+import { getSalesTrendReport, downloadSalesTrendCsv } from '../../services/reportingService';
+import { SalesReportData, TimePeriod, SalesData } from '../../types'; // Make sure SalesData is imported if used individually
+import './SalesTrendReport.css'; // Your existing CSS
 
 ChartJS.register(
-  CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale, Filler
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale, // Register TimeScale if your x-axis is time-based
+  TimeSeriesScale // Register TimeSeriesScale if appropriate
 );
 
-// Define the props for this component
-interface SalesTrendReportProps {
-  // storeId is not strictly needed if the backend infers it from the token,
-  // but can be kept if you have other client-side uses for it.
-  // For now, we assume backend infers it, so it's commented out.
-  // storeId: string;
-  getAccessTokenSilently: () => Promise<string>; // Function to get Auth0 token
-}
+// Remove the prop type if getAccessTokenSilently is no longer a prop
+// interface SalesTrendReportProps {
+//   getAccessTokenSilently: () => Promise<string>;
+// }
 
-const SalesTrendReport: React.FC<SalesTrendReportProps> = ({ getAccessTokenSilently }) => {
-  const [reportData, setReportData] = useState<SalesTrendDataPointAPI[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const SalesTrendReport: React.FC = (/* props: SalesTrendReportProps */) => { // Remove props if not used
+  const { getAccessTokenSilently } = useAuth0(); // Use the hook directly
+
+  const [reportData, setReportData] = useState<SalesReportData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const chartsExportRef = useRef<HTMLDivElement>(null); // Changed from HTMLElement to HTMLDivElement for more specificity if it wraps both charts
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(TimePeriod.WEEKLY);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]); // Default to today for daily/specific views
 
   useEffect(() => {
-    const loadSalesData = async () => {
-      setIsLoading(true);
+    const fetchReport = async () => {
+      console.log(`SalesTrendReport: Fetching report for period: ${selectedPeriod}, date: ${selectedDate}`);
+      setLoading(true);
       setError(null);
       try {
-        const token = await getAccessTokenSilently(); // Get the token
-        const data = await fetchSalesTrendsForSeller(token); // Pass token to service function
-        // Sort data by date to ensure charts display correctly
-        data.sort((a, b) => new Date(a.order_date).getTime() - new Date(b.order_date).getTime());
+        const token = await getAccessTokenSilently();
+        console.log("SalesTrendReport: Token fetched successfully.");
+        const data = await getSalesTrendReport(token, selectedPeriod, selectedPeriod === TimePeriod.DAILY ? selectedDate : undefined);
+        console.log("SalesTrendReport: Data fetched:", data);
         setReportData(data);
       } catch (err: any) {
-        console.error("Failed to load sales trends data:", err);
-        setError(err.message || "Failed to load sales trends data.");
+        console.error("SalesTrendReport: Error fetching sales trend report:", err);
+        setError(err.message || 'An unexpected error occurred while fetching sales trends.');
+        setReportData(null); // Clear previous data on error
       } finally {
-        setIsLoading(false);
+        setLoading(false);
+        console.log("SalesTrendReport: Fetch attempt finished.");
       }
     };
 
-    loadSalesData();
-    // Dependency array: getAccessTokenSilently is a stable function from useAuth0,
-    // but including it is good practice if it's used directly in the effect.
-  }, [getAccessTokenSilently]);
+    fetchReport();
+  }, [getAccessTokenSilently, selectedPeriod, selectedDate]);
 
-  const handleDownloadPDF = async () => {
-    if (chartsExportRef.current) {
-      const originalBackgroundColor = chartsExportRef.current.style.backgroundColor;
-      chartsExportRef.current.style.backgroundColor = 'white';
-
-      try {
-        // Using a higher scale can improve resolution for PDF
-        const canvas = await html2canvas(chartsExportRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-        chartsExportRef.current.style.backgroundColor = originalBackgroundColor;
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: 'a4' }); // Removed compress:true, it's not a standard option here
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        // Calculate aspect ratio
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgWidth = imgProps.width;
-        const imgHeight = imgProps.height;
-        
-        const margin = 20; // px
-        const availableWidth = pdfWidth - 2 * margin;
-        const availableHeight = pdfHeight - 2 * margin - 30; // Extra margin for title
-
-        const ratio = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
-
-        const newImgWidth = imgWidth * ratio;
-        const newImgHeight = imgHeight * ratio;
-        
-        const imgX = (pdfWidth - newImgWidth) / 2;
-        const imgY = margin + 30; // Position below title
-
-        pdf.setFontSize(18);
-        pdf.text("My Store Sales Trends", pdfWidth / 2, margin + 15, { align: 'center' });
-        pdf.addImage(imgData, 'PNG', imgX, imgY, newImgWidth, newImgHeight);
-        pdf.save('my_sales_trends_report.pdf');
-
-      } catch (pdfError) {
-        console.error("Failed to generate PDF:", pdfError);
-        if (chartsExportRef.current) { // Check again as it might be null in async error handling
-            chartsExportRef.current.style.backgroundColor = originalBackgroundColor;
-        }
-        alert("Could not generate PDF report. Please try again.");
-      }
-    } else {
-      alert("Chart data not available for PDF export.");
+  const chartData = useMemo(() => {
+    if (!reportData || !reportData.salesData || reportData.salesData.length === 0) {
+      console.log("SalesTrendReport: No sales data available for chart.");
+      return null;
     }
-  };
+    console.log("SalesTrendReport: Preparing chart data from:", reportData.salesData);
+    return {
+      labels: reportData.salesData.map(d => d.date), // Dates should be in a format Chart.js understands (e.g., YYYY-MM-DD)
+      datasets: [
+        {
+          label: 'Daily Sales (R)',
+          data: reportData.salesData.map(d => d.sales),
+          fill: false,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1,
+        },
+      ],
+    };
+  }, [reportData]);
 
-  const handleDownloadCSV = async () => { // Made async to use await
+  const chartOptions = useMemo(() => {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top' as const,
+        },
+        title: {
+          display: true,
+          text: `Sales Trends - ${reportData?.summary?.period || selectedPeriod} (${reportData?.summary?.startDate} to ${reportData?.summary?.endDate})`,
+        },
+        tooltip: {
+            callbacks: {
+                label: function(context: any) {
+                    let label = context.dataset.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed.y !== null) {
+                        label += new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(context.parsed.y);
+                    }
+                    return label;
+                }
+            }
+        }
+      },
+      scales: {
+        x: {
+          type: 'time' as const,
+          time: {
+            unit: (selectedPeriod === TimePeriod.DAILY ? 'day' :
+                  selectedPeriod === TimePeriod.WEEKLY ? 'day' :
+                  selectedPeriod === TimePeriod.MONTHLY ? 'day' :
+                  'month') as 'day' | 'month',
+            tooltipFormat: 'MMM dd, yyyy',
+             displayFormats: {
+                day: 'MMM dd',
+                week: 'MMM dd',
+                month: 'MMM yyyy',
+                year: 'yyyy'
+            }
+          },
+          title: {
+            display: true,
+            text: 'Date',
+          },
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Sales (ZAR)',
+          },
+          ticks: {
+            callback: function(value: any) {
+              return 'R ' + value;
+            }
+          }
+        },
+      },
+    };
+  }, [reportData, selectedPeriod]);
+
+
+  const handleDownloadCsv = async () => {
+    console.log("SalesTrendReport: Attempting to download CSV...");
     try {
-      const token = await getAccessTokenSilently(); // Get the token
-      const blob = await downloadSalesTrendsForSellerCSV(token); // Pass token
+      const token = await getAccessTokenSilently();
+      const blob = await downloadSalesTrendCsv(token, selectedPeriod, selectedPeriod === TimePeriod.DAILY ? selectedDate : undefined);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'my_sales_trends.csv';
+      a.download = `sales_trend_${selectedPeriod}_${selectedDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (csvError: any) {
-      console.error("Failed to download CSV:", csvError);
-      alert(`Could not download CSV report: ${csvError.message}`);
+      console.log("SalesTrendReport: CSV download initiated.");
+    } catch (err: any) {
+      console.error("SalesTrendReport: Failed to download CSV:", err);
+      setError(err.message || 'Failed to download CSV.');
     }
   };
 
-  if (isLoading) return <p className="report-loading centered-message">Loading sales trends data...</p>;
-  if (error) return <p className="report-error centered-message" style={{ color: 'red' }}>Error: {error}</p>;
 
-  const commonChartOptions: any = { // Consider typing this more strictly if possible
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        type: 'time' as const, // Important for date-fns adapter
-        time: {
-          unit: reportData.length > 60 ? 'month' : reportData.length > 7 ? 'week' : 'day', // Dynamic unit
-          tooltipFormat: 'MMM dd, yyyy', // e.g., Jan 01, 2023
-          displayFormats: {
-            day: 'MMM dd',     // e.g., Jan 01
-            week: 'MMM dd',    // e.g., Jan 01 (start of week)
-            month: 'MMM yyyy'  // e.g., Jan 2023
-          }
-        },
-        title: { display: true, text: 'Date', font: { size: 14 } },
-        grid: { display: false }
-      },
-      // Y-axis defined per chart below for clarity
-    },
-    plugins: {
-      legend: { position: 'top' as const },
-      tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-        callbacks: {
-          label: function(context: any) {
-            let label = context.dataset.label || '';
-            if (label) { label += ': '; }
-            if (context.parsed.y !== null) {
-              if (context.dataset.label?.toLowerCase().includes('revenue')) {
-                label += new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(context.parsed.y);
-              } else {
-                label += context.parsed.y;
-              }
-            }
-            return label;
-          }
-        }
-      }
-    },
-    interaction: { mode: 'index' as const, intersect: false },
-    elements: { point: { radius: 2, hoverRadius: 4 } }
-  };
-
-  if (!reportData || reportData.length === 0) {
-    return (
-      <article className="sales-trend-report card" aria-labelledby="sales-trends-main-heading">
-        <div className="card-header">
-            <h3 id="sales-trends-main-heading" className="report-title h5 mb-0">Sales Trends</h3>
-        </div>
-        <div className="card-body">
-            <p className="report-no-data centered-message card-text">No sales data found for the current period.</p>
-        </div>
-        <footer className="report-actions card-footer text-end">
-          <button onClick={handleDownloadCSV} className="btn btn-secondary btn-sm me-2">Download CSV</button>
-          <button onClick={handleDownloadPDF} disabled className="btn btn-secondary btn-sm">Download PDF</button>
-        </footer>
-      </article>
-    );
+  if (loading) {
+    return <div className="loading-message">Loading sales data...</div>;
   }
 
-  // Ensure date strings are converted to Date objects for the time scale
-  const chartLabels = reportData.map(d => new Date(d.order_date));
-
-  const revenueChartData = {
-    labels: chartLabels,
-    datasets: [{
-      label: 'Total Revenue (ZAR)',
-      data: reportData.map(d => d.total_revenue),
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      fill: true,
-      tension: 0.1
-    }]
-  };
-
-  const ordersChartData = {
-    labels: chartLabels,
-    datasets: [{
-      label: 'Number of Orders',
-      data: reportData.map(d => d.order_count),
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-      fill: true,
-      tension: 0.1
-    }]
-  };
-
   return (
-    <article className="sales-trend-report card" aria-labelledby="sales-trends-main-heading">
-        <div className="card-header">
-            <h3 id="sales-trends-main-heading" className="report-title h5 mb-0">Sales Trends</h3>
-        </div>
-      {/* chartsExportRef should wrap the content intended for PDF export */}
-      <div ref={chartsExportRef} className="charts-export-area card-body"> {/* Ensure this div has a white background if needed for PDF */}
-        <section className="chart-container mb-4" aria-labelledby="revenue-chart-heading">
-          {/* <h4 id="revenue-chart-heading" className="chart-title">Revenue Over Time</h4> */}
-          <div className="chart-canvas-wrapper" style={{ height: '300px', position: 'relative' }}>
-            <Line
-              options={{
-                ...commonChartOptions,
-                plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Revenue Over Time' } },
-                scales: { ...commonChartOptions.scales, y: { beginAtZero: true, title: { display: true, text: 'Revenue (ZAR)', font: {size: 14} } } }
-              }}
-              data={revenueChartData}
-            />
-          </div>
-        </section>
-
-        <section className="chart-container" aria-labelledby="orders-chart-heading">
-          {/* <h4 id="orders-chart-heading" className="chart-title">Orders Over Time</h4> */}
-           <div className="chart-canvas-wrapper" style={{ height: '300px', position: 'relative' }}>
-            <Line
-              options={{
-                ...commonChartOptions,
-                plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Orders Over Time' } },
-                scales: { ...commonChartOptions.scales, y: { beginAtZero: true, title: { display: true, text: 'Number of Orders', font: {size: 14} } } }
-              }}
-              data={ordersChartData}
-            />
-          </div>
-        </section>
+    <div className="sales-trend-report">
+      <h3>Sales Trend Report</h3>
+      <div className="report-controls">
+        <label htmlFor="period-select">Select Period: </label>
+        <select
+          id="period-select"
+          value={selectedPeriod}
+          onChange={(e) => setSelectedPeriod(e.target.value as TimePeriod)}
+        >
+          {Object.values(TimePeriod).map(p => (
+            <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+          ))}
+        </select>
+        {/* Optionally show date picker if period is 'daily' or for specific range selection */}
+        {selectedPeriod === TimePeriod.DAILY && (
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            style={{ marginLeft: '10px' }}
+          />
+        )}
+         <button onClick={handleDownloadCsv} className="csv-button" style={{ marginLeft: '10px' }}>
+            Download CSV
+        </button>
       </div>
 
-      <footer className="report-actions card-footer text-end">
-        <button onClick={handleDownloadCSV} className="btn btn-primary btn-sm me-2">Download Sales Data (CSV)</button>
-        <button onClick={handleDownloadPDF} className="btn btn-primary btn-sm">Download Sales Charts (PDF)</button>
-      </footer>
-    </article>
+      {error && <div className="error-message">Error: {error}</div>}
+
+      {!error && !chartData && !loading && (
+        <div className="info-message">No sales data available for the selected period.</div>
+      )}
+
+      {chartData && (
+        <div className="chart-container-st"> {/* Used a different class to avoid conflict if any */}
+          <Line options={chartOptions} data={chartData} />
+        </div>
+      )}
+      {reportData && reportData.summary && (
+        <div className="report-summary">
+          <h4>Report Summary</h4>
+          <p>Total Sales: R {reportData.summary.totalSales.toFixed(2)}</p>
+          <p>Average Daily Sales: R {reportData.summary.averageDailySales.toFixed(2)}</p>
+          <p>Period Covered: {reportData.summary.startDate} to {reportData.summary.endDate}</p>
+          <p>Report Generated: {new Date(reportData.reportGeneratedAt).toLocaleString()}</p>
+        </div>
+      )}
+    </div>
   );
 };
 
