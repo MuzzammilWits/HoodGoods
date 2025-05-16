@@ -3,22 +3,30 @@ import { Controller, Get, Query, UseGuards, Req, Res, Header, ParseEnumPipe, Def
 import { ReportingService } from './reporting.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SalesReportDto, TimePeriod } from './dto/sales-report.dto';
-// ---- NEW IMPORTS ----
-import { InventoryStatusResponseDto } from './dto/inventory-status.dto';
-// ---- END NEW IMPORTS ----
-import { Response } from 'express'; // Import Response from express
+import { InventoryStatusResponseDto, FullInventoryItemDto } from './dto/inventory-status.dto'; // Ensure FullInventoryItemDto is exported if used here explicitly
+import { Response } from 'express';
+
+// Helper function to safely format CSV cell content
+function formatCsvCell(value: any): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const stringValue = String(value);
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`; // Escape double quotes
+  }
+  return stringValue;
+}
 
 @Controller('api/reporting')
-@UseGuards(JwtAuthGuard) // Apply to all routes in this controller
+@UseGuards(JwtAuthGuard)
 export class ReportingController {
   constructor(private readonly reportingService: ReportingService) {}
 
-  // ---- NEW ENDPOINT FOR INVENTORY STATUS ----
   @Get('seller/inventory/status')
   async getInventoryStatusReport(
     @Req() req,
   ): Promise<InventoryStatusResponseDto> {
-    // req.user.sub will contain the Auth0 user ID from the JwtAuthGuard
     return this.reportingService.getInventoryStatus(req.user.sub);
   }
 
@@ -30,48 +38,104 @@ export class ReportingController {
     @Res() res: Response,
   ): Promise<void> {
     const inventoryData: InventoryStatusResponseDto = await this.reportingService.getInventoryStatus(req.user.sub);
+
+    // Create a map for easy lookup of full product details by prodId from the fullInventory list
+    // This ensures we can get category and price for low/out-of-stock items.
+    const fullInventoryMap = new Map<number, FullInventoryItemDto>();
+    inventoryData.fullInventory.forEach(item => {
+      fullInventoryMap.set(item.prodId, item);
+    });
+
+    // Define the single, unified header row (5 columns)
+    const header = 'Product ID,Product Name,Category,Price,Current Quantity\n';
+    let csvData = header;
+
+    // Function to format a product row according to the unified header
+    // It expects an item that has all the necessary fields (prodId, productName, category, price, quantity)
+    const formatProductDataRow = (productDetails: FullInventoryItemDto): string => {
+      return [
+        formatCsvCell(productDetails.prodId),
+        formatCsvCell(productDetails.productName),
+        formatCsvCell(productDetails.category),
+        formatCsvCell(productDetails.price),
+        formatCsvCell(productDetails.quantity), // 'quantity' from FullInventoryItemDto is current quantity
+      ].join(',') + '\n';
+    };
     
-    // Combine all lists for a comprehensive CSV or create separate CSVs/sections
-    // For this example, let's create a CSV from the full inventory list primarily
-    // and mention others. A more complex CSV might require more structure.
-
-    let csvData = 'Report Section,Product ID,Product Name,Quantity,Price,Category\n';
-
+    // # Full Inventory section
     csvData += '# Full Inventory\n';
     inventoryData.fullInventory.forEach(item => {
-        csvData += `Full Inventory,${item.prodId},"${item.productName.replace(/"/g, '""')}",${item.quantity},${item.price},"${item.category.replace(/"/g, '""')}"\n`;
+      csvData += formatProductDataRow(item);
     });
 
+    // # Low Stock Items section
     csvData += '\n# Low Stock Items\n';
-    csvData += 'Product ID,Product Name,Current Quantity\n';
-    inventoryData.lowStockItems.forEach(item => {
-        csvData += `${item.prodId},"${item.productName.replace(/"/g, '""')}",${item.currentQuantity}\n`;
-    });
+    if (inventoryData.lowStockItems.length > 0) {
+      inventoryData.lowStockItems.forEach(lowStockItem => {
+        const fullDetailItem = fullInventoryMap.get(lowStockItem.prodId);
+        if (fullDetailItem) {
+          // Use fullDetailItem to ensure all 5 columns are populated correctly
+          csvData += formatProductDataRow(fullDetailItem);
+        } else {
+          // Fallback: This should ideally not happen if data is consistent.
+          // Log this server-side if it occurs.
+          // For CSV, provide what we have for the lowStockItem, with placeholders for missing full details.
+          csvData += [
+            formatCsvCell(lowStockItem.prodId),
+            formatCsvCell(lowStockItem.productName),
+            formatCsvCell('N/A_Category'), // Category missing from LowStockItemDto
+            formatCsvCell('N/A_Price'),   // Price missing from LowStockItemDto
+            formatCsvCell(lowStockItem.currentQuantity)
+          ].join(',') + '\n';
+        }
+      });
+    } else {
+      // Do not add "No items..." to the CSV data itself, the empty section under the marker is enough.
+    }
 
+    // # Out of Stock Items section
     csvData += '\n# Out of Stock Items\n';
-    csvData += 'Product ID,Product Name\n';
-    inventoryData.outOfStockItems.forEach(item => {
-        csvData += `${item.prodId},"${item.productName.replace(/"/g, '""')}"\n`;
-    });
+    if (inventoryData.outOfStockItems.length > 0) {
+      inventoryData.outOfStockItems.forEach(outOfStockItem => {
+        const fullDetailItem = fullInventoryMap.get(outOfStockItem.prodId);
+        if (fullDetailItem) {
+          // Use fullDetailItem to ensure all 5 columns are populated correctly
+          // (quantity will be 0 for these items as per FullInventoryItemDto)
+          csvData += formatProductDataRow(fullDetailItem);
+        } else {
+          // Fallback
+          csvData += [
+            formatCsvCell(outOfStockItem.prodId),
+            formatCsvCell(outOfStockItem.productName),
+            formatCsvCell('N/A_Category'),
+            formatCsvCell('N/A_Price'),
+            formatCsvCell(0) // Current Quantity is 0
+          ].join(',') + '\n';
+        }
+      });
+    } else {
+      // Do not add "No items..." to the CSV
+    }
     
+    // # Stock Breakdown section
     csvData += '\n# Stock Breakdown\n';
     csvData += `Total Products,${inventoryData.stockBreakdown.totalProducts}\n`;
     csvData += `In Stock (%),${inventoryData.stockBreakdown.inStockPercent}\n`;
     csvData += `Low Stock (%),${inventoryData.stockBreakdown.lowStockPercent}\n`;
     csvData += `Out of Stock (%),${inventoryData.stockBreakdown.outOfStockPercent}\n`;
 
+    // Report Generated At
     csvData += `\nReport Generated At:,${inventoryData.reportGeneratedAt.toISOString()}\n`;
 
     res.send(csvData);
   }
-  // ---- END NEW ENDPOINT ----
 
-
+  // Sales Trends Endpoints (remain unchanged from your provided file)
   @Get('seller/sales-trends')
   async getSalesTrends(
     @Req() req,
     @Query('period', new DefaultValuePipe(TimePeriod.WEEKLY), new ParseEnumPipe(TimePeriod)) period: TimePeriod,
-    @Query('date') @Optional() date?: string, // Make date optional
+    @Query('date') @Optional() date?: string,
   ): Promise<SalesReportDto> {
     return this.reportingService.getSalesTrends(req.user.sub, period, date);
   }
@@ -86,9 +150,8 @@ export class ReportingController {
     @Query('date') @Optional() date?: string,
   ): Promise<void> {
     const reportData: SalesReportDto = await this.reportingService.getSalesTrends(req.user.sub, period, date);
-    // Use generic CSV generation for sales data
-    const csvData = this.reportingService.generateCSVData(reportData.salesData, 'Sales Trends');
-    // Add summary to CSV
+    const salesCsvRows = this.reportingService.generateCSVData(reportData.salesData, 'Sales Trends');
+    
     let summaryCsv = '\n# Report Summary\n';
     summaryCsv += `Total Sales,${reportData.summary.totalSales}\n`;
     summaryCsv += `Average Daily Sales,${reportData.summary.averageDailySales}\n`;
@@ -97,6 +160,6 @@ export class ReportingController {
     summaryCsv += `End Date,${reportData.summary.endDate}\n`;
     summaryCsv += `Report Generated At,${reportData.reportGeneratedAt.toISOString()}\n`;
 
-    res.send(csvData + summaryCsv);
+    res.send(salesCsvRows + summaryCsv);
   }
 }
