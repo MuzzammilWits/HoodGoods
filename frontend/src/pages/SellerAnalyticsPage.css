@@ -51,9 +51,9 @@
   font-size: 1em;
   cursor: pointer;
   border: 1px solid #ddd; /* Subtle border */
-  border-radius: 25px; /* More pronounced pill shape */
+  border-radius: 5px; /* More pronounced pill shape */
   background-color: #ffffff; /* White background */
-  color: #3498db; /* Primary blue */
+  color: #432C53; /* Primary blue */
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   transition: all 0.2s ease-in-out;
   font-weight: 500;
@@ -66,10 +66,10 @@
 }
 
 .report-nav button.active {
-  background-color: #3498db; /* Primary blue for active */
+  background-color: #432C53; /* Primary blue for active */
   color: white;
   font-weight: bold;
-  border-color: #2980b9; /* Darker blue border for active */
+  border-color: #432C53; /* Darker blue border for active */
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.4); /* Subtle shadow for active button */
 }
 
@@ -82,9 +82,9 @@
 }
 
 
-.analytics-content {
+/* .analytics-content {
   /* Optional: Add general styling for the area that holds the reports */
-}
+/* } */ */
 
 .report-group {
   background-color: #ffffff; /* White background for report cards/sections */
