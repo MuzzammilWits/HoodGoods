@@ -1,7 +1,8 @@
-// src/App.tsx
+// frontend/src/App.tsx
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } // Removed Link as it's not directly used in App.tsx, but in components like Hero/Navbar
+from 'react-router-dom';
 import { CartProvider } from './context/ContextCart';
 import './App.css';
 
@@ -20,16 +21,22 @@ import AdminStoreApproval from './pages/AdminPages/AdminStoreApproval';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
-import SellerDashboardPage from './pages/SellerDashboardPage'; // Adjust path if needed
-// *** Import the My Orders Page ***
-import MyOrdersPage from './pages/MyOrdersPage'; // Adjust path if needed
+import SellerDashboardPage from './pages/SellerDashboardPage';
+import MyOrdersPage from './pages/MyOrdersPage';
+// --- RESTORED IMPORTS for Analytics Pages ---
+import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+
+
+// --- NEW IMPORTS FOR RECOMMENDATIONS ---
+import BestSellersList from './components/recommendations/BestSellersList';
+import RecommendationsPage from './pages/RecommendationsPage'; // Assuming you've created this page
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState?: AppState) => {
     console.log("Auth0 onRedirectCallback triggered. AppState:", appState);
-    // Navigate to the intended route after login, or fallback to current path/home
     navigate(appState?.returnTo || window.location.pathname || '/');
   };
 
@@ -49,31 +56,48 @@ const AppContent: React.FC = () => {
           <Navbar />
         </header>
 
-        <main>
+        <main className="app-main-content"> {/* Added a class for potential global main styling */}
           <Routes>
-            {/* Public Home Routes */}
+            {/* Public Home Route */}
             <Route path="/" element={
               <>
-                <section>
+                <section aria-labelledby="hero-heading">
+                  {/* Visually hidden h2 for "Main Showcase" removed as requested */}
                   <Hero />
                 </section>
-                <section>
+
+                {/* --- ADDED BestSellersList (Popular Products) right above WhyChooseUs --- */}
+                <section aria-labelledby="popular-products-heading" className="homepage-recommendations" style={{ padding: '20px 15px', backgroundColor: 'var(--background-color-light, #f9f9f9)' }}>
+                  <h2 id="popular-products-heading" className="visually-hidden">Popular Products</h2> {/* Keeping this one as BestSellersList has its own visible title */}
+                  <BestSellersList limit={6} title="Popular This Week" />
+                </section>
+
+                <section aria-labelledby="why-choose-us-heading" style={{ backgroundColor: 'var(--background-color, #fff)', padding: '20px 0' }}>
+                   {/* Visually hidden h2 for "Our Values" removed as requested */}
                   <WhyChooseUs />
                 </section>
+                {/* Other homepage sections might follow here */}
               </>
             } />
 
             {/* Public Products Route */}
             <Route path="/products" element={
-              <section>
+              <section aria-label="All Products">
                 <ProductsPage />
               </section>
             } />
 
-          {/* --- MODIFIED: Cart Route (Protected) --- */}
-          <Route path="/cart" element={
-              <section>
-                <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
+            {/* --- NEW: Dedicated Recommendations Page Route --- */}
+            <Route path="/recommendations" element={
+              <section aria-label="Product Recommendations">
+                <RecommendationsPage />
+              </section>
+            } />
+
+            {/* Cart Route (Protected) */}
+            <Route path="/cart" element={
+              <section aria-label="Shopping Cart">
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
                   <CartPage />
                 </ProtectedRoute>
               </section>
@@ -81,55 +105,67 @@ const AppContent: React.FC = () => {
 
             {/* Checkout Route (Protected) */}
             <Route path="/checkout" element={
-              <section>
-                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Example: Allow all logged-in */}
-                    <CheckoutPage />
-                 </ProtectedRoute>
+              <section aria-label="Checkout">
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                  <CheckoutPage />
+                </ProtectedRoute>
               </section>
             } />
 
-
-            {/* --- MODIFIED: Order Confirmation Route (Protected) --- */}
+            {/* Order Confirmation Route (Protected) */}
             <Route path="/order-confirmation" element={
-              <section>
-                 <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Protect for buyers and sellers */}
-                   <OrderConfirmationPage />
-                 </ProtectedRoute>
+              <section aria-label="Order Confirmation">
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                  <OrderConfirmationPage />
+                </ProtectedRoute>
               </section>
             } />
 
             {/* --- Protected Routes --- */}
             <Route path="/create-store" element={
-              <ProtectedRoute allowedRoles={['buyer']}> {/* Adjust roles as needed */}
-                <article>
+              <ProtectedRoute allowedRoles={['buyer']}>
+                <article aria-label="Create Your Store">
                   <CreateYourStore />
                 </article>
               </ProtectedRoute>
             } />
 
             <Route path="/my-store" element={
-              <ProtectedRoute allowedRoles={['seller']}> {/* Adjust roles as needed */}
-                <article>
+              <ProtectedRoute allowedRoles={['seller']}>
+                <article aria-label="My Store Management">
                   <MyStore />
                 </article>
               </ProtectedRoute>
             } />
 
-             <Route path="/seller-dashboard" element={
-              <ProtectedRoute allowedRoles={['seller']}> {/* Protect for sellers */}
-                <article>
+            <Route path="/seller-dashboard" element={
+              <ProtectedRoute allowedRoles={['seller']}>
+                <article aria-label="Seller Dashboard">
                   <SellerDashboardPage />
                 </article>
               </ProtectedRoute>
             } />
+            
+            {/* --- RESTORED Seller Analytics Page Route --- */}
+            <Route
+              path="/seller/analytics"
+              element={
+                <ProtectedRoute allowedRoles={['seller']}>
+                  <section aria-label="Seller Analytics">
+                    <SellerAnalyticsPage />
+                  </section>
+                </ProtectedRoute>
+              }
+            /> 
 
             <Route path="/admin-dashboard" element={
-              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
-                <article>
+              <ProtectedRoute allowedRoles={['admin']}>
+                <article aria-label="Admin Dashboard">
                   <AdminDashboard />
                 </article>
               </ProtectedRoute>
             } />
+
 
             <Route path="/admin/product-approval" element={
               <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
@@ -156,15 +192,27 @@ const AppContent: React.FC = () => {
             } />
 
             {/* *** ADDED My Orders Route (for any logged-in user) *** */}
+
+            {/* --- RESTORED Admin Analytics Page Route --- */}
+            <Route path="/admin/analytics" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <section aria-label="Admin Platform Analytics"> {/* Changed from <article> to <section> for consistency with SellerAnalytics */}
+                  <AdminAnalyticsPage />
+                </section>
+              </ProtectedRoute>
+            } />
+
+
             <Route path="/my-orders" element={
-              <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Or just 'buyer' if preferred */}
-                <article>
+              <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                <article aria-label="My Orders">
                   <MyOrdersPage />
                 </article>
               </ProtectedRoute>
             } />
 
-            {/* Add other routes as needed */}
+            {/* Consider a 404 Not Found Route */}
+            {/* <Route path="*" element={<NotFoundPage />} /> */}
 
           </Routes>
         </main>
@@ -177,7 +225,6 @@ const AppContent: React.FC = () => {
   );
 }
 
-// Keep the structure if AppContent is necessary for context providers
 function App() {
   return <AppContent />;
 }

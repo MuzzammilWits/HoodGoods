@@ -1,3 +1,5 @@
+/* frontend/src/pages/ProductsPage.css */
+
 .products-container {
   padding: 2rem;
   max-width: 1200px;
@@ -8,7 +10,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 
 .product-card {
@@ -66,7 +68,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-clamp: 2;
-  box-orient: vertical;
 }
 
 .product-price {
@@ -92,13 +93,6 @@
   background-color: #97c9ba;
 }
 
-.loading-spinner {
-  text-align: center;
-  padding: 3rem;
-  font-size: 1.2rem;
-  color: #555;
-}
-
 .error-message {
   text-align: center;
   padding: 3rem;
@@ -118,59 +112,103 @@
   transition: background-color 0.2s;
 }
 
-.retry-button:hover {
-  background-color: #2c5fb3;
-}
-
-.filters {
-  margin-bottom: 1rem;
+/* --- Styles for the entire filter area --- */
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* This gap is between .filter-row-search-recs and the category/store filters */
+  margin-bottom: 2rem;
   padding: 1rem;
   background: #F9F6FD;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Row for search bar and recommendations button */
+/* Row for search bar and recommendations button */
+.filter-row-search-recs {
+  display: flex;
+  align-items: center; /* Keep this for now, button moved up which is good */
+  gap: 1rem;
+  width: 100%;
+}
+
+/* General styling for individual filter groups (search, category, store) */
+.filters {
+  display: flex;
+  flex-direction: column;
+  /* gap: 0.1rem; */ /* This was correctly removed */
+  width: 100%;
+  /* You might add a very small padding to .filters itself if you want a global inner space,
+     but this won't create the specific grey strip between label and input */
+  /* padding: 0.1rem 0; */ /* Example: Small vertical padding within each filter group */
+}
+
+.search-bar.filters {
+  flex-grow: 1;
+  width: auto;
+  min-width: 200px;
 }
 
 .filters label {
-  margin-right: 0.5rem;
   font-weight: bold;
+  display: block;
+  font-size: 0.85rem;
+  color: #333;
+  /* MODIFIED: Reduce or remove margin-bottom to eliminate the grey space.
+     Try 0 for the tightest fit, or a very small value like 0.1rem if 0 is too tight.
+     The background of .filters-container will show if this margin is > 0
+     and if .filters has no background of its own.
+  */
+  margin-bottom: 0.1rem; /* Let's try a very small value first. If still too much grey, change to 0 */
+  /* Or, for absolutely no space: */
+  /* margin-bottom: 0; */
 }
 
-.filters select {
-  padding: 0.5rem;
+.filters select,
+.search-bar input[type="search"] {
+  padding: 0.6rem 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  margin-right: 1rem;
-}
-
-/* NEW: Search bar styles */
-.search-bar input {
-  padding: 0.5rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
   width: 100%;
-  max-width: 400px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  line-height: 1.5;
+  background-clip: padding-box;
 }
 
-/* NEW: Responsive filters */
-@media (max-width: 600px) {
-  .filters {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .filters select, 
-  .search-bar input {
-    width: 100%;
-    margin-right: 0;
-  }
+/* .recommendations-link-container remains commented out or empty */
+
+.products-page-cta-button {
+  background-color: #432C53;
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border: 1px solid #432C53;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.5;
+  cursor: pointer;
+  height: auto;
 }
 
-@media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  }
+.products-page-cta-button:hover,
+.products-page-cta-button:focus {
+  background-color: #97c9ba;
+  border-color: #97c9ba;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
+
 /* Notification Modal Styles */
 .notification-modal {
   position: fixed;
@@ -186,95 +224,88 @@
 }
 
 .notification-modal.success {
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
 }
 
 .notification-modal.error {
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-.loading-container {
-  display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
-  justify-content: center;
-  align-items: center;
-  min-height: 200px; /* Ensure it takes up some space */
-  padding: 2rem;
-  text-align: center;
-  color: #555; /* Adjust color as needed */
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-/* Basic CSS Spinner */
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1); /* Light grey border */
-  border-left-color: #007bff; /* Blue color for the spinning part - adjust as needed */
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite; /* Animation definition */
-  margin-bottom: 1rem; /* Space between spinner and text */
-}
-
-/* Spinner container (you already have loading-container) */
+/* Loading Container and Spinner */
 .loading-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 300px; /* or 100vh if you want fullscreen */
+  align-items: center;
+  min-height: 300px;
+  padding: 2rem;
   text-align: center;
 }
 
-/* The Spinner itself */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #ccc;
-  border-top-color: #007bff; /* Primary blue color */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px; /* Space below spinner */
-  animation: spin 0.7s linear infinite; /* faster spin */
-  border-top-color: #97c9ba; /* a nice green instead of blue */
-
-}
-
-/* The spin animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading text */
 .loading-container p {
   font-size: 1.2rem;
   color: #555;
+  margin-top: 1rem;
 }
 
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(204, 204, 204, 0.3);
+  border-top-color: #97c9ba;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-/* Style the loading text if needed */
-.loading-container p {
-  font-size: 1.1em;
-  /* Add other styles like font-weight if desired */
+/* Responsive adjustments for filters */
+@media (max-width: 768px) {
+  .filter-row-search-recs {
+    flex-wrap: wrap;
+  }
+  .search-bar.filters {
+    min-width: 150px;
+  }
+  .recommendations-link-container {
+    flex-basis: 100%; /* Take full width if it wraps */
+    margin-top: 0.5rem; /* Add some space if it wraps */
+    width: 100%; /* Ensure its child button can also be 100% if needed */
+  }
+  .products-page-cta-button {
+     /* If the container takes full width, you might want the button to as well */
+    /* width: 100%; */
+  }
+}
+
+@media (max-width: 600px) {
+  .filter-row-search-recs {
+    flex-direction: column;
+    align-items: stretch; /* Make children take full width */
+    gap: 0.75rem;
+  }
+  .search-bar.filters {
+    width: 100%;
+    min-width: auto;
+  }
+  .recommendations-link-container {
+    width: 100%;
+    margin-top: 0; /* Reset margin as it's now part of the column flow */
+  }
+  .products-page-cta-button {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }

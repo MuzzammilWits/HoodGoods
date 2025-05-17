@@ -8,6 +8,8 @@ import { User } from '../auth/user.entity';
 import { Store } from './entities/store.entity'; // Import the new Store entity
 
 @Module({
+
+  
   imports: [
     // Add Store to the list of entities for this module
     TypeOrmModule.forFeature([Product, User, Store]),

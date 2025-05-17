@@ -1,23 +1,27 @@
-// src/types/index.ts
+// frontend/src/types/index.ts
+
+// ... your existing exports
+export * from './reporting';
+export * from './createStore';
 
 export interface ColorOption {
   id: number;
   color: string;
 }
 
-export interface Product {
-  id: number; // Corresponds to prodId from backend?
+export interface Product { // This is your general Product type, ensure it's comprehensive
+  prodId: number; // Changed from id to prodId to match backend Product entity
   name: string;
-  price: string; // Consider if this should be number if coming directly from backend
-  image: string; // Corresponds to imageUrl from backend?
-  colorOptions: ColorOption[]; // This field doesn't seem to exist in the backend entity provided
-  productquantity: number; // Added: The quantity from the backend
-  // --- Potential other fields from backend entity ---
-  // description?: string; 
-  // category?: string;
-  // storeName?: string;
-  // userId?: string;
-  // isActive?: boolean;
+  description?: string;
+  category?: string;
+  price: number; // Changed from string to number
+  productquantity: number;
+  userId?: string; // Seller's ID
+  imageUrl?: string; // Changed from image to imageUrl
+  storeId: string; // Added storeId
+  storeName?: string;
+  isActive?: boolean;
+  // colorOptions: ColorOption[]; // This field doesn't seem to exist in the backend Product entity for general products
 }
 
 export interface Shop {
@@ -32,4 +36,19 @@ export interface Feature {
   title: string;
   description: string;
   icon: string;
+}
+
+// --- UPDATED PopularProductDto ---
+export interface PopularProductDto {
+  productId: number; // Matches backend (Product.prodId)
+  name: string; // Matches backend (Product.name)
+  imageUrl?: string; // Matches backend (Product.imageUrl)
+  storeName?: string; // Matches backend (Product.storeName)
+  salesCount: number; // Calculated field
+
+  // --- NEW FIELDS FOR ADD TO CART ---
+  productPrice: number;    // From backend (Product.price)
+  productquantity: number; // Available stock, from backend (Product.productquantity)
+  storeId: string;         // From backend (Product.storeId)
+  userId: string;          // Seller's ID, from backend (Product.userId)
 }

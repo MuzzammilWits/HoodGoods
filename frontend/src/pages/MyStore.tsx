@@ -462,6 +462,7 @@ const handleUpdateProduct = async () => {
                 <div className="store-actions-container">
                     <button onClick={() => setIsAddingProductFormVisible(prev => !prev)} className="button-primary add-product-toggle-btn">{isAddingProductFormVisible ? 'Cancel Add Product' : 'Add New Product'}</button>
                     <Link to="/seller-dashboard" className="button-secondary view-orders-btn">View Current Orders</Link>
+                    <Link to="/seller/analytics" className="button-secondary view-orders-btn"> View Analytics </Link>
                 </div>
             </header>
 
