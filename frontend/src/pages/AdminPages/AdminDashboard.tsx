@@ -68,7 +68,7 @@ const AdminDashboard: React.FC = () => {
             <p className="product-description">
               View, edit, and remove suspicious users from the marketplace
             </p>
-            <button className="manage-btn" onClick={() => navigate('/admin/usermanagement')}>
+            <button className="manage-btn" onClick={() => navigate('/admin/product-approval')}>
               Go to Products Management
             </button>
           </div>
