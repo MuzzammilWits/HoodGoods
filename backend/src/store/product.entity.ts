@@ -1,4 +1,6 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+//import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Store } from '../store/entities/store.entity';
 
 @Entity('Products') // Match your exact table name
 export class Product {
@@ -31,5 +33,6 @@ export class Product {
   
   @Column({ type: 'int4', default: 0 }) // Assuming integer, default to 0 if not specified
   productquantity: number;
+
 
 }
