@@ -31,7 +31,7 @@ export class Product {
   @Column({ name: 'storeName', type: 'varchar', length: 255, nullable: false })
   storeName: string;
 
-  @Column({ name: 'is_active', type: 'boolean', default: true })
+  @Column({ name: 'is_active', type: 'boolean', default: false })
   isActive: boolean;
 
   @Column({ name: 'store_id', type: 'bigint', nullable: false })
