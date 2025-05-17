@@ -1,0 +1,25 @@
+// frontend/src/pages/RecommendationsPage.tsx
+import React from 'react';
+import BestSellersList from '../components/recommendations/BestSellersList';
+import './RecommendationsPage.css'; // Create this CSS file
+
+const RecommendationsPage: React.FC = () => {
+  return (
+    <div className="recommendations-page-container" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+      <header className="recommendations-page-header">
+        <h1>Discover Products You Might Like</h1>
+        <p>Based on current trends and popular items.</p>
+      </header>
+
+      <section className="recommendation-section">
+        <BestSellersList limit={12} timeWindowDays={30} title="Top Selling Products This Month" />
+      </section>
+
+      <section className="recommendation-section" style={{ marginTop: '40px' }}>
+        <BestSellersList limit={8} timeWindowDays={7} title="Trending This Week" />
+      </section>
+    </div>
+  );
+};
+
+export default RecommendationsPage;
