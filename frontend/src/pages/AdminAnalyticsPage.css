@@ -1,0 +1,62 @@
+/* frontend/src/pages/AdminAnalyticsPage.css */
+.admin-analytics-page {
+  padding: 1rem; /* Add some padding around the page content */
+}
+
+.admin-analytics-page .page-header {
+  text-align: center; /* Center the main page title */
+  border-bottom: 2px solid #007bff; /* Example accent border */
+  padding-bottom: 0.75rem;
+}
+
+.admin-analytics-page .page-header h1 {
+  color: #333;
+  font-weight: 600;
+}
+
+.admin-analytics-page .analytics-content .report-group {
+  margin-top: 1.5rem;
+}
+
+/* You can reuse .container and .mt-4 from Bootstrap if you have it,
+   or define them if needed */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+.mt-4 {
+  margin-top: 1.5rem !important; /* Example margin top */
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.mb-5 {
+  margin-bottom: 3rem !important;
+}

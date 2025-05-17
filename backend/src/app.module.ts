@@ -11,6 +11,8 @@ import { StoreModule } from './store/store.module';
 import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module'; // <<< Import the new module
+import { ReportingModule } from './reporting/reporting.module'; 
+import { RecommendationsModule } from './recommendations/recommendations.module'; // <--- IMPORT HERE
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { OrdersModule } from './orders/orders.module'; // <<< Import the new mod
     ProductsModule,
     PaymentsModule, // Add the StoreModule here
     OrdersModule,
+    RecommendationsModule,
+    ReportingModule
   ],
   
 

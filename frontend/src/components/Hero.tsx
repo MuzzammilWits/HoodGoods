@@ -1,3 +1,4 @@
+// frontend/src/components/Hero.tsx
 import React, { useEffect, useRef } from 'react';
 import './Hero.css';
 // These image imports are no longer used if the <main> section is commented out
@@ -6,15 +7,11 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 
 // --- TypeScript Declaration for Vanta ---
-// (Keep this as it helps TypeScript understand Vanta)
 declare global {
   interface Window {
     VANTA: {
-      // Add FOG here:
       FOG: (options: VantaFogOptions) => VantaEffect;
-      // You can remove BIRDS if you're not using it anywhere else,
-      // or keep it if you might switch between effects.
-      // BIRDS?: (options: VantaBirdsOptions) => VantaEffect;
+      // BIRDS?: (options: VantaBirdsOptions) => VantaEffect; // Kept if you might use it
     };
   }
 }
@@ -35,14 +32,30 @@ interface VantaFogOptions {
   speed?: number;
 }
 
+// Interface for VantaBirdsOptions if you were to use it
+// interface VantaBirdsOptions {
+//   el: HTMLElement | string;
+//   mouseControls?: boolean;
+//   touchControls?: boolean;
+//   gyroControls?: boolean;
+//   minHeight?: number;
+//   minWidth?: number;
+//   backgroundColor?: number | string;
+//   color1?: number | string;
+//   color2?: number | string;
+//   birdSize?: number;
+//   wingSpan?: number;
+//   speedLimit?: number;
+//   separation?: number;
+//   alignment?: number;
+//   cohesion?: number;
+//   quantity?: number;
+// }
 
 interface VantaEffect {
   destroy: () => void;
 }
-
-
 // --- End TypeScript Declaration ---
-
 
 const Hero: React.FC = () => {
   const { isAuthenticated, loginWithRedirect, isLoading } = useAuth0();
@@ -58,45 +71,37 @@ const Hero: React.FC = () => {
   };
 
   // --- Vanta Initialization useEffect ---
-// Inside the Hero component's useEffect hook...
+  useEffect(() => {
+    let effectInstance: VantaEffect | null = null;
 
-useEffect(() => {
-  let effectInstance: VantaEffect | null = null;
-
-  // Ensure you are checking for and calling FOG
-  if (window.VANTA && window.VANTA.FOG && vantaRef.current) { // Check for FOG
-    console.log("Initializing Vanta Fog effect (run once)...");
-    effectInstance = window.VANTA.FOG({ // <--- MAKE SURE THIS SAYS FOG
-      el: vantaRef.current,
-      // General Controls
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-
-      // --- Fog Specific Options (from the Fog image) ---
-   
-      highlightColor: 0x6514a4,
-      midtoneColor: 0x090909,
-      lowlightColor: 0x4920d2,
-      baseColor: 0x000000,
-      blurFactor: 0.36,
-      speed: 0.60,
-      zoom: 0.20
-  // Add other Fog options if needed
-    });
-  } else {
+    if (window.VANTA && window.VANTA.FOG && vantaRef.current) {
+      console.log("Initializing Vanta Fog effect (run once)...");
+      effectInstance = window.VANTA.FOG({
+        el: vantaRef.current,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        highlightColor: 0x6514a4, // Purpleish highlight
+        midtoneColor: 0x090909,   // Dark midtone (almost black)
+        lowlightColor: 0x4920d2,  // Deeper purple lowlight
+        baseColor: 0x000000,     // Black base for the fog
+        blurFactor: 0.36,
+        speed: 0.60,
+        zoom: 0.20
+      });
+    } else {
       console.warn("Vanta.js FOG or target element not ready for initialization.");
-  }
-
-  // Cleanup function (remains the same)
-  return () => {
-    if (effectInstance) {
-      effectInstance.destroy();
     }
-  };
-}, []); // Empty dependency array
+
+    return () => {
+      if (effectInstance) {
+        effectInstance.destroy();
+        console.log("Vanta Fog effect destroyed.");
+      }
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount and unmount
 
   return (
     // Attach the ref to the main section element
@@ -116,6 +121,11 @@ useEffect(() => {
             <Link to="products" className="btn btn-primary">
               Shop now
             </Link>
+            {/* --- NEW LINK TO RECOMMENDATIONS PAGE --- */}
+            <Link to="/recommendations" className="btn btn-secondary" style={{ marginLeft: '10px' }}>
+              Discover Picks
+            </Link>
+            {/* --- END NEW LINK --- */}
           </nav>
           {showPrompt && (
             <aside className="hero-seller-prompt">
@@ -132,49 +142,10 @@ useEffect(() => {
 
         {/* --- You have commented out this section --- */}
         {/* <main className="hero-images">
-          <ul className="image-grid">
-             <li className="grid-item new">
-               <figure>
-                 {getImage(jewelleryImg, "Jewelry", 200, 150)}
-                 <figcaption className="tag">New</figcaption>
-               </figure>
-             </li>
-             <li className="grid-item featured">
-               <figure>
-                 {getImage(flowerImg, "Flowers", 200, 150)}
-                 <figcaption className="tag">Featured</figcaption>
-               </figure>
-             </li>
-             <li className="grid-item">
-               <figure>
-                 {getImage(honeyImg, "Honey", 200, 150)}
-                 <figcaption className="tag">Popular</figcaption>
-               </figure>
-             </li>
-             <li className="grid-item">
-               <figure>
-                 {getImage(ceramicsImg, "Ceramics", 200, 150)}
-                 <figcaption className="tag">Trending</figcaption>
-               </figure>
-             </li>
-           </ul>
-
-            <figure className="dots-decoration" aria-hidden="true">
-              <svg
-                className="dots"
-                width="100"
-                height="100"
-                aria-hidden="true"
-              >
-                <pattern id="dots-pattern" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
-                  <circle cx="1.5" cy="1.5" r="1.5" fill="var(--white, #fff)"/>
-                </pattern>
-                <rect width="100" height="100" fill="url(#dots-pattern)" />
-              </svg>
-            </figure>
-          </main> */}
-       </article>
-     </section>
+        // ... (your commented out image grid) ...
+        </main> */}
+      </article>
+    </section>
   );
 };
 
