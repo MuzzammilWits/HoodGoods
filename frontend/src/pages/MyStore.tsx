@@ -489,22 +489,28 @@ const handleUpdateProduct = async () => {
                 {(products && products.length > 0) ? (
                     <ul className="product-list">
                         {products.map((product) => (
-                            <li key={product.prodId} className="product-list-item">
-                                <article className="product-card">
-                                    <div className="product-image"> <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} /> </div>
-                                    <div className="product-details">
-                                        <h3>{product.name}</h3>
-                                        <p className="product-description">{product.description}</p>
-                                        <p className="product-category">Category: {product.category}</p>
-                                        <p className="product-price">Price: R{product.price.toFixed(2)}</p>
-                                        <p className="product-quantity">Quantity: {product.productquantity}</p>
-                                    </div>
-                                    <div className="product-actions">
-                                        <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>Edit</button>
-                                        <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>{isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}</button>
-                                    </div>
-                                </article>
-                            </li>
+// In the products.map section, update the product-card div:
+                        <li key={product.prodId} className="product-list-item">
+                        <article className={`product-card ${!product.isActive ? 'inactive' : ''}`}>
+                            {!product.isActive && (
+                            <span className="product-status-badge">Pending Approval</span>
+                            )}
+                            <div className="product-image">
+                            <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
+                            </div>
+                            <div className="product-details">
+                            <h3>{product.name}</h3>
+                            <p className="product-description">{product.description}</p>
+                            <p className="product-category">Category: {product.category}</p>
+                            <p className="product-price">Price: R{product.price.toFixed(2)}</p>
+                            <p className="product-quantity">Quantity: {product.productquantity}</p>
+                            </div>
+                            <div className="product-actions">
+                            <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>Edit</button>
+                            <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>{isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}</button>
+                            </div>
+                        </article>
+                        </li>
                         ))}
                     </ul>
                 ) : (<p className="no-products">You haven't added any products yet.</p>)}
