@@ -73,7 +73,7 @@ export class StoreService {
           userId: userId,
           storeId: savedStore.storeId,
           storeName: savedStore.storeName, // Ensure storeName is set here
-          isActive: true,
+          isActive: false,
         });
       });
 
@@ -209,7 +209,7 @@ export class StoreService {
         userId: userId,
         storeId: store.storeId,
         storeName: store.storeName,
-        isActive: true,
+        isActive: false,
     });
 
     try {
