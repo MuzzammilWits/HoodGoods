@@ -53,6 +53,9 @@ export class Store {
   expressTime: string;
   // --- End Delivery Options ---
 
+  @Column({ name: 'is_active_Store', type: 'boolean', default: false })
+  isActive: boolean;
+
   @OneToMany(() => Product, product => product.store, { eager: false }) // Added eager: false for clarity
   products: Product[];
 

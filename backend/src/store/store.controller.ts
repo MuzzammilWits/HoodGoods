@@ -88,4 +88,25 @@ export class StoreController {
   }
   // --- End Fetch Multiple Delivery Options ---
 
+  @Get()
+  async getAllStoresWithProducts() {
+    return this.storeService.getAllStoresWithProducts();
+  }
+
+  @Get('inactive')
+  getInactiveStoresWithProducts() {
+    return this.storeService.getInactiveStoresWithProducts();
+  }
+  
+  @Patch(':storeId/approve')
+  approveStore(@Param('storeId') storeId: string) {
+    return this.storeService.approveStore(storeId);
+  }
+
+
+  @Delete(':storeId')
+  rejectStore(@Param('storeId') storeId: string) {
+    return this.storeService.rejectStore(storeId);
+  }
+
 } // End Controller

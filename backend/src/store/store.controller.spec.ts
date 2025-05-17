@@ -32,6 +32,7 @@ const mockStore: Store = {
   standardPrice: 10.50,
   expressTime: '24 hours',
   expressPrice: 20.00,
+  isActiveStore: false,
   user: { userId: mockUserId } as any, // Mock user object, adjust fields as needed
   products: [],
 };
@@ -47,7 +48,7 @@ const mockProduct: Product = {
   storeName: mockStore.storeName, // Denormalized?
   storeId: mockStore.storeId,     // Denormalized?
   category: 'Testing',           // Or productCategory?
-  isActive: true,
+  isActive: false,
   userId: mockUserId,            // Added missing property
   store: mockStore,              // Added missing property
 
