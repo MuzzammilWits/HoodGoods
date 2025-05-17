@@ -1,3 +1,5 @@
+/* frontend/src/pages/ProductsPage.css */
+
 .products-container {
   padding: 2rem;
   max-width: 1200px;
@@ -8,7 +10,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem; /* Give some space from the filters */
 }
 
 .product-card {
@@ -66,7 +68,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-clamp: 2;
-  box-orient: vertical;
 }
 
 .product-price {
@@ -92,13 +93,6 @@
   background-color: #97c9ba;
 }
 
-.loading-spinner {
-  text-align: center;
-  padding: 3rem;
-  font-size: 1.2rem;
-  color: #555;
-}
-
 .error-message {
   text-align: center;
   padding: 3rem;
@@ -118,59 +112,89 @@
   transition: background-color 0.2s;
 }
 
-.retry-button:hover {
-  background-color: #2c5fb3;
-}
-
-.filters {
-  margin-bottom: 1rem;
+/* --- Styles for the entire filter area --- */
+.filters-container {
+  display: flex;
+  flex-direction: column; /* MODIFIED: Stack filter rows/items vertically */
+  gap: 1rem; /* Gap between the search/recs row and the subsequent filter items */
+  margin-bottom: 2rem;
   padding: 1rem;
   background: #F9F6FD;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* NEW: Row for search bar and recommendations button */
+.filter-row-search-recs {
+  display: flex;
+  align-items: flex-end; /* Aligns items based on their bottom edge (good for inputs and buttons) */
+  gap: 1rem; /* Gap between search bar and recommendations button */
+  width: 100%; /* Take full width within the column flow of filters-container */
+}
+
+/* General styling for individual filter groups (search, category, store) */
+.filters { /* This class is on search-bar, category-filter, store-filter */
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  /* flex-grow: 1; /* This might not be needed for category/store if they stack and take width of parent */
+  width: 100%; /* Make category/store filters take full width of .filters-container */
+}
+
+.search-bar.filters { /* Target the search bar specifically within the row */
+  flex-grow: 1; /* Allow search bar to take available space in the row */
+  width: auto; /* Override width: 100% from general .filters if needed, flex-grow handles it */
+  min-width: 200px; /* Give it a minimum width */
 }
 
 .filters label {
-  margin-right: 0.5rem;
   font-weight: bold;
+  display: block;
+  font-size: 0.85rem;
+  color: #333;
 }
 
-.filters select {
-  padding: 0.5rem;
+.filters select,
+.search-bar input[type="search"] {
+  padding: 0.6rem 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  margin-right: 1rem;
-}
-
-/* NEW: Search bar styles */
-.search-bar input {
-  padding: 0.5rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
   width: 100%;
-  max-width: 400px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
 }
 
-/* NEW: Responsive filters */
-@media (max-width: 600px) {
-  .filters {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .filters select, 
-  .search-bar input {
-    width: 100%;
-    margin-right: 0;
-  }
+.recommendations-link-container {
+  /* No specific flex properties needed here, it will align based on parent .filter-row-search-recs */
 }
 
-@media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  }
+.products-page-cta-button {
+  background-color: #ff6347;
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.5;
+  cursor: pointer;
+  /* Adjust height or padding if needed to visually align with search input */
+  height: calc(0.6rem * 2 + 0.9rem * 1.5 + 2px); /* Approximate height matching input with 0.6rem padding */
 }
+
+.products-page-cta-button:hover,
+.products-page-cta-button:focus {
+  background-color: #e55337;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 /* Notification Modal Styles */
 .notification-modal {
   position: fixed;
@@ -186,95 +210,93 @@
 }
 
 .notification-modal.success {
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
 }
 
 .notification-modal.error {
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-.loading-container {
-  display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
-  justify-content: center;
-  align-items: center;
-  min-height: 200px; /* Ensure it takes up some space */
-  padding: 2rem;
-  text-align: center;
-  color: #555; /* Adjust color as needed */
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-/* Basic CSS Spinner */
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1); /* Light grey border */
-  border-left-color: #007bff; /* Blue color for the spinning part - adjust as needed */
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite; /* Animation definition */
-  margin-bottom: 1rem; /* Space between spinner and text */
-}
-
-/* Spinner container (you already have loading-container) */
+/* Loading Container and Spinner */
 .loading-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 300px; /* or 100vh if you want fullscreen */
+  align-items: center;
+  min-height: 300px;
+  padding: 2rem;
   text-align: center;
 }
 
-/* The Spinner itself */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #ccc;
-  border-top-color: #007bff; /* Primary blue color */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px; /* Space below spinner */
-  animation: spin 0.7s linear infinite; /* faster spin */
-  border-top-color: #97c9ba; /* a nice green instead of blue */
-
-}
-
-/* The spin animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading text */
 .loading-container p {
   font-size: 1.2rem;
   color: #555;
+  margin-top: 1rem;
 }
 
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(204, 204, 204, 0.3);
+  border-top-color: #97c9ba;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-/* Style the loading text if needed */
-.loading-container p {
-  font-size: 1.1em;
-  /* Add other styles like font-weight if desired */
+/* Responsive adjustments for filters */
+@media (max-width: 768px) {
+  .filter-row-search-recs {
+    /* Allow search and recs button to wrap if space is too tight */
+    flex-wrap: wrap;
+  }
+  .search-bar.filters {
+    min-width: 150px; /* Allow search to shrink more before recs button wraps */
+  }
+  .recommendations-link-container {
+    /* If it wraps, it might need full width or specific alignment */
+     flex-basis: 100%; /* If it wraps, let it take full width */
+     margin-top: 0.5rem; /* Add space if it wraps */
+  }
+  .products-page-cta-button {
+    /* If container is full width, button might also need to be full width */
+    /* width: 100%; */
+    /* box-sizing: border-box; */
+  }
+}
+
+@media (max-width: 600px) {
+  /* .filters-container is already flex-direction: column from previous iteration.
+     We just need to ensure its children behave as expected. */
+  .filter-row-search-recs {
+    flex-direction: column; /* Stack search and recs button on very small screens */
+    align-items: stretch; /* Make them take full width */
+    gap: 0.75rem;
+  }
+  .search-bar.filters {
+    width: 100%;
+    min-width: auto; /* Reset min-width */
+  }
+  .recommendations-link-container {
+    width: 100%;
+    margin-top: 0; /* Reset margin as it's now part of the column flow */
+  }
+  .products-page-cta-button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  /* Category and Store filters will already be full width due to .filters width: 100% */
 }

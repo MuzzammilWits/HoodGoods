@@ -1,10 +1,11 @@
 // frontend/src/components/recommendations/BestSellersList.tsx
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Import axios for role fetching
 import { getBestSellingProducts } from '../../services/recommendationsService';
 import { PopularProductDto } from '../../types';
 import { AddToCartItem, useCart } from '../../context/ContextCart';
 import { useAuth0 } from '@auth0/auth0-react';
-import './BestSellersList.css'; // Will update this CSS
+import './BestSellersList.css';
 
 interface BestSellersListProps {
   limit?: number;
@@ -12,18 +13,25 @@ interface BestSellersListProps {
   title?: string;
 }
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; // For role fetching
+
 const BestSellersList: React.FC<BestSellersListProps> = ({
   limit = 5,
   timeWindowDays = 30,
   title = 'Best Selling Products',
 }) => {
   const [products, setProducts] = useState<PopularProductDto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true); // For products loading
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | null }>({ message: '', type: null });
 
-  const { addToCart, cartItems } = useCart(); // Get addToCart function and cartItems from context
-  const { user, isAuthenticated } = useAuth0();
+  const { addToCart, cartItems } = useCart();
+  // Updated Auth0 destructuring
+  const { user, isAuthenticated, getAccessTokenSilently, isLoading: isAuth0Loading } = useAuth0();
+
+  // New state for user role
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [isRoleFetching, setIsRoleFetching] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -43,6 +51,33 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
     fetchProducts();
   }, [limit, timeWindowDays]);
 
+  // Fetch user role
+  useEffect(() => {
+    const fetchRole = async () => {
+      if (isAuthenticated && user && !isAuth0Loading) {
+        setIsRoleFetching(true);
+        try {
+          const token = await getAccessTokenSilently();
+          const response = await axios.get(`${backendUrl}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setCurrentUserRole(response.data.role);
+        } catch (e) {
+          console.error("Failed to fetch user role in BestSellersList:", e);
+          setCurrentUserRole(null);
+        } finally {
+          setIsRoleFetching(false);
+        }
+      } else if (!isAuth0Loading) {
+        setCurrentUserRole(null);
+        setIsRoleFetching(false);
+      }
+    };
+    if (!isAuth0Loading) {
+        fetchRole();
+    }
+  }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading]);
+
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({ message, type });
     setTimeout(() => {
@@ -51,6 +86,19 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
   };
 
   const handleAddToCartFromRecommendation = async (product: PopularProductDto) => {
+    // Prevent action if Auth0 or role is still loading
+    if (isAuth0Loading || isRoleFetching) {
+      showNotification("Please wait, verifying user permissions...", "error");
+      return;
+    }
+
+    // Check if the user is an admin
+    if (currentUserRole === 'admin') {
+      alert("An admin cannot add products to cart."); // Use alert as requested for admin
+      return; // Prevent adding to cart for admins
+    }
+
+    // Original logic for non-admin users
     try {
       if (!isAuthenticated) {
         showNotification('Please sign in to add items to your cart.', 'error');
@@ -63,7 +111,7 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
       if (typeof product.productPrice !== 'number' || isNaN(product.productPrice)) {
         throw new Error('Product price is invalid.');
       }
-      if (!product.storeId || product.storeId === 'unknown') {
+      if (!product.storeId || product.storeId === 'unknown') { // Assuming 'unknown' is a possible string literal from backend
         console.error("Product missing valid storeId:", product);
         throw new Error('Product is missing store information.');
       }
@@ -76,7 +124,6 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
         return;
       }
 
-      // --- STOCK LIMIT CHECK ---
       const existingItemInCart = cartItems.find(item => item.productId === product.productId);
       const currentQuantityInCart = existingItemInCart ? existingItemInCart.quantity : 0;
 
@@ -84,7 +131,6 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
         showNotification(`Cannot add more ${product.name}. Stock limit reached (${product.productquantity} available).`, 'error');
         return;
       }
-      // --- END STOCK LIMIT CHECK ---
 
       const itemToAdd: AddToCartItem = {
         productId: product.productId,
@@ -93,12 +139,10 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
         storeId: String(product.storeId),
         storeName: product.storeName || 'Unknown Store',
         imageUrl: product.imageUrl || undefined,
-        // Pass availableQuantity so CartContext can potentially use it if enhanced
-        // availableQuantity: product.productquantity 
       };
 
-      await addToCart(itemToAdd); // Note: addToCart in ContextCart currently doesn't use availableQuantity for its internal logic
-      showNotification(`${product.name} added to cart!`, 'success');
+      await addToCart(itemToAdd);
+      showNotification(`${product.name} added to cart!`, 'success'); // Original success message
 
     } catch (error) {
       console.error('Error adding recommended product to cart:', error);
@@ -107,6 +151,7 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
     }
   };
 
+  // Main loading for products list
   if (loading) {
     return <div className="best-sellers-loading">Loading best sellers...</div>;
   }
@@ -115,44 +160,56 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
     return <div className="best-sellers-error">Error: {error}</div>;
   }
 
-  if (products.length === 0) {
-    return <div className="best-sellers-empty">No best selling products found.</div>;
+  if (products.length === 0 && !loading) { // Ensure not to show if still loading
+    return <div className="best-sellers-empty">No best selling products found for the selected period.</div>;
   }
 
   return (
     <div className="best-sellers-container">
       <h2>{title}</h2>
       {notification.type && (
-        <div className={`recommendation-notification ${notification.type}`}>
+        <div className={`recommendation-notification ${notification.type} notification-modal`}> {/* Added notification-modal for consistency if styles exist */}
           {notification.message}
         </div>
       )}
       <div className="best-sellers-grid">
         {products.map((product) => {
           const isOwner = isAuthenticated && product.userId === user?.sub;
-          // Backend already filters for productquantity > 0, but this is a good client-side fallback
-          const isOutOfStock = product.productquantity <= 0; 
+          const isOutOfStock = typeof product.productquantity === 'number' && product.productquantity <= 0;
           
           const existingItemInCart = cartItems.find(item => item.productId === product.productId);
           const currentQuantityInCart = existingItemInCart ? existingItemInCart.quantity : 0;
-          const canAddMore = currentQuantityInCart < product.productquantity;
+          const canAddMore = typeof product.productquantity === 'number' && currentQuantityInCart < product.productquantity;
 
-          const isDisabled = isOutOfStock || isOwner || !canAddMore;
+          // Button disabled logic
+          let isDisabled = isOutOfStock || isOwner || !canAddMore || (isAuth0Loading || isRoleFetching);
+          if (!isDisabled && currentUserRole === 'admin') { // Disable for admin after role is loaded
+            isDisabled = true;
+          }
+
+          // Button text logic
           let buttonText = 'Add to Cart';
-          if (isOwner) buttonText = 'Your Product';
-          else if (isOutOfStock) buttonText = 'Out of Stock';
-          else if (!canAddMore) buttonText = 'Max in Cart';
-
+          if (isAuth0Loading || isRoleFetching) {
+              buttonText = 'Verifying...';
+          } else if (currentUserRole === 'admin') {
+              buttonText = 'Admin View';
+          } else if (isOwner) {
+              buttonText = 'Your Product';
+          } else if (isOutOfStock) {
+              buttonText = 'Out of Stock';
+          } else if (!canAddMore) {
+              buttonText = 'Max in Cart';
+          }
 
           return (
             <div key={product.productId} className="best-seller-card">
               <img
-                src={product.imageUrl || '/placeholder-image.png'}
+                src={product.imageUrl || '/placeholder-image.png'} // Ensure you have a placeholder
                 alt={product.name}
                 className="best-seller-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  if (target.src !== '/placeholder-image.png') {
+                  if (target.src.includes('placeholder-image.png') === false) { // Check to avoid loop if placeholder itself fails
                     target.src = '/placeholder-image.png';
                   }
                 }}
@@ -163,17 +220,18 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
                   <p className="best-seller-store">Sold by: {product.storeName}</p>
                 )}
                 <p className="best-seller-price">R{product.productPrice.toFixed(2)}</p>
-                {/* --- DISPLAY AVAILABLE QUANTITY --- */}
                 <p className="best-seller-stock">
                   {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
                 </p>
               </div>
               <button
                 onClick={() => handleAddToCartFromRecommendation(product)}
-                className="btn-add-to-cart-recommendation"
+                className="btn-add-to-cart-recommendation" // Make sure this class exists and is styled
                 disabled={isDisabled}
                 aria-label={
-                  isOwner ? `Cannot add own product ${product.name}` 
+                  isAuth0Loading || isRoleFetching ? 'Verifying user permissions'
+                  : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
+                  : isOwner ? `Cannot add own product ${product.name}` 
                   : isOutOfStock ? `${product.name} is out of stock` 
                   : !canAddMore ? `Maximum quantity of ${product.name} already in cart`
                   : `Add ${product.name} to cart`
