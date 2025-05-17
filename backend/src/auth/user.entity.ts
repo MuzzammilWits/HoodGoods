@@ -9,3 +9,4 @@ export class User {
   @Column({ default: 'buyer' })
   role: string;
 }
+ 

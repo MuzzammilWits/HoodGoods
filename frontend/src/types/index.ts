@@ -36,3 +36,11 @@ export interface Feature {
   description: string;
   icon: string;
 }
+
+export interface PopularProductDto {
+  productId: number;
+  name: string;
+  imageUrl?: string;
+  storeName?: string;
+  salesCount: number;
+}

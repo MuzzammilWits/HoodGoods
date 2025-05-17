@@ -1,7 +1,8 @@
-// src/App.tsx
+// frontend/src/App.tsx
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } // Removed Link as it's not directly used in App.tsx, but in components like Hero/Navbar
+from 'react-router-dom';
 import { CartProvider } from './context/ContextCart';
 import './App.css';
 
@@ -21,13 +22,18 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import SellerDashboardPage from './pages/SellerDashboardPage';
 import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
 import MyOrdersPage from './pages/MyOrdersPage';
-import AdminAnalyticsPage from './pages/AdminAnalyticsPage'; // <-- NEW: Import AdminAnalyticsPage
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+
+// --- NEW IMPORTS FOR RECOMMENDATIONS ---
+import BestSellersList from './components/recommendations/BestSellersList';
+import RecommendationsPage from './pages/RecommendationsPage'; // Assuming you've created this page
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState?: AppState) => {
     console.log("Auth0 onRedirectCallback triggered. AppState:", appState);
+    // Navigate to the intended route after login, or to the current path, or fallback to home
     navigate(appState?.returnTo || window.location.pathname || '/');
   };
 
@@ -37,40 +43,55 @@ const AppContent: React.FC = () => {
       clientId={import.meta.env.VITE_AUTH0_CLIENT_ID!}
       authorizationParams={{
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL || window.location.origin,
+        redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL || window.location.origin, // Ensure callback URL is correctly configured
       }}
       onRedirectCallback={onRedirectCallback}
-      cacheLocation="localstorage"
+      cacheLocation="localstorage" // Using localstorage for cache, consider implications for token storage
     >
-      <CartProvider>
+      <CartProvider> {/* Cart context wrapping the application */}
         <header>
-          <Navbar />
+          <Navbar /> {/* Navbar rendered on all pages */}
         </header>
 
-        <main>
+        <main className="app-main-content"> {/* Added a class for potential global main styling */}
           <Routes>
-            {/* Public Home Routes */}
+            {/* Public Home Route */}
             <Route path="/" element={
               <>
-                <section>
+                <section aria-labelledby="hero-heading"> {/* Hero section */}
+                  <h2 id="hero-heading" className="visually-hidden">Main Showcase</h2> {/* For accessibility */}
                   <Hero />
                 </section>
-                <section>
+                <section aria-labelledby="why-choose-us-heading" style={{ backgroundColor: 'var(--background-color, #fff)', padding: '20px 0' }}> {/* Why Choose Us section */}
+                   <h2 id="why-choose-us-heading" className="visually-hidden">Our Values</h2> {/* For accessibility */}
                   <WhyChooseUs />
                 </section>
+                {/* --- ADDED BestSellersList to HomePage --- */}
+                <section aria-labelledby="popular-products-heading" className="homepage-recommendations" style={{ padding: '20px 15px', backgroundColor: 'var(--background-color-light, #f9f9f9)' }}>
+                  <h2 id="popular-products-heading" className="visually-hidden">Popular Products</h2> {/* For accessibility, real title is in BestSellersList */}
+                  <BestSellersList limit={6} title="Popular Right Now" />
+                </section>
+                {/* You might have other homepage sections like <ImageGalleryDisplay /> here */}
               </>
             } />
 
             {/* Public Products Route */}
             <Route path="/products" element={
-              <section>
+              <section aria-label="All Products">
                 <ProductsPage />
+              </section>
+            } />
+
+            {/* --- NEW: Dedicated Recommendations Page Route --- */}
+            <Route path="/recommendations" element={
+              <section aria-label="Product Recommendations">
+                <RecommendationsPage />
               </section>
             } />
 
             {/* Cart Route (Protected) */}
             <Route path="/cart" element={
-              <section>
+              <section aria-label="Shopping Cart">
                 <ProtectedRoute allowedRoles={['buyer', 'seller']}>
                   <CartPage />
                 </ProtectedRoute>
@@ -79,26 +100,26 @@ const AppContent: React.FC = () => {
 
             {/* Checkout Route (Protected) */}
             <Route path="/checkout" element={
-              <section>
-                 <ProtectedRoute allowedRoles={['buyer', 'seller']}>
-                    <CheckoutPage />
-                 </ProtectedRoute>
+              <section aria-label="Checkout">
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                  <CheckoutPage />
+                </ProtectedRoute>
               </section>
             } />
 
             {/* Order Confirmation Route (Protected) */}
             <Route path="/order-confirmation" element={
-              <section>
-                 <ProtectedRoute allowedRoles={['buyer', 'seller']}>
-                   <OrderConfirmationPage />
-                 </ProtectedRoute>
+              <section aria-label="Order Confirmation">
+                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                  <OrderConfirmationPage />
+                </ProtectedRoute>
               </section>
             } />
 
-            {/* --- Protected Routes --- */}
+            {/* --- Protected Routes for Sellers and Buyers --- */}
             <Route path="/create-store" element={
-              <ProtectedRoute allowedRoles={['buyer']}>
-                <article>
+              <ProtectedRoute allowedRoles={['buyer']}> {/* Assuming only buyers can become sellers */}
+                <article aria-label="Create Your Store">
                   <CreateYourStore />
                 </article>
               </ProtectedRoute>
@@ -106,7 +127,7 @@ const AppContent: React.FC = () => {
 
             <Route path="/my-store" element={
               <ProtectedRoute allowedRoles={['seller']}>
-                <article>
+                <article aria-label="My Store Management">
                   <MyStore />
                 </article>
               </ProtectedRoute>
@@ -116,58 +137,65 @@ const AppContent: React.FC = () => {
               path="/seller/analytics"
               element={
                 <ProtectedRoute allowedRoles={['seller']}>
-                  <SellerAnalyticsPage />
+                  <section aria-label="Seller Analytics">
+                    <SellerAnalyticsPage />
+                  </section>
                 </ProtectedRoute>
               }
-            />  
+            />
 
-             <Route path="/seller-dashboard" element={
+            <Route path="/seller-dashboard" element={
               <ProtectedRoute allowedRoles={['seller']}>
-                <article>
+                <article aria-label="Seller Dashboard">
                   <SellerDashboardPage />
                 </article>
               </ProtectedRoute>
             } />
 
+            {/* --- Protected Routes for Admin --- */}
             <Route path="/admin-dashboard" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <article>
+                <article aria-label="Admin Dashboard">
                   <AdminDashboard />
                 </article>
               </ProtectedRoute>
             } />
 
-            {/* *** NEW: Admin Analytics Page Route *** */}
             <Route path="/admin/analytics" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <article>
+                <section aria-label="Admin Platform Analytics">
                   <AdminAnalyticsPage />
-                </article>
+                </section>
               </ProtectedRoute>
             } />
 
+            {/* Protected Route for User Orders */}
             <Route path="/my-orders" element={
               <ProtectedRoute allowedRoles={['buyer', 'seller']}>
-                <article>
+                <article aria-label="My Orders">
                   <MyOrdersPage />
                 </article>
               </ProtectedRoute>
             } />
 
-            {/* Add other routes as needed */}
+            {/* Consider adding a 404 Not Found Route here */}
+            {/* <Route path="*" element={<NotFoundPage />} /> */}
 
           </Routes>
         </main>
 
         <footer>
-          <Footer />
+          <Footer /> {/* Footer rendered on all pages */}
         </footer>
       </CartProvider>
     </Auth0Provider>
   );
 }
 
+// The App component that renders AppContent, which contains the router context
 function App() {
+  // BrowserRouter is typically in main.tsx, so AppContent is used here.
+  // If BrowserRouter was here, AppContent would be its child.
   return <AppContent />;
 }
 
