@@ -74,6 +74,28 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
+        <div 
+          className="management-card3 product-card"
+          onClick={() => navigate('/admin/reports')}
+        >
+          <div className="product-image-container">
+          <img
+              src={"userImage"}// Replace with your image or use an icon
+              alt="View Reports"
+              className="product-image"
+            />
+          </div>
+          <div className="product-details">
+            <h2>View Reports</h2>
+            <p className="product-description">
+              View all reports and data from your HoodGoods users
+            </p>
+            <button className="manage-btn" onClick={() => navigate('/admin/reports')}>
+              View Reports
+            </button>
+          </div>
+        </div>
+
         {/* You can add more management cards here for other admin functions */}
       </div>
 
