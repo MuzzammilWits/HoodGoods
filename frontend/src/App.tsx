@@ -147,6 +147,14 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             } />
 
+            <Route path="/admin/reports" element={
+              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+                <article>
+                  <AdminStoreApproval /> 
+                </article>
+              </ProtectedRoute>
+            } />
+
             {/* *** ADDED My Orders Route (for any logged-in user) *** */}
             <Route path="/my-orders" element={
               <ProtectedRoute allowedRoles={['buyer', 'seller']}> {/* Or just 'buyer' if preferred */}
