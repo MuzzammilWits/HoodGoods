@@ -36,7 +36,7 @@ export interface StoreFormData {
     standardTime: string; // Selected time range string (e.g., "3-4")
     expressPrice: string; // Keep as string for input, parse on submit
     expressTime: string; // Selected time range string (e.g., "1-2")
-
+    isActiveStore: boolean;
     // Array of initial products (using the simplified ProductFormData above)
     products: ProductFormData[];
 }

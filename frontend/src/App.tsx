@@ -14,7 +14,9 @@ import CartPage from './pages/CartPage';
 import ProductsPage from './pages/ProductsPage';
 import CreateYourStore from './pages/CreateYourStore';
 import MyStore from './pages/MyStore';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/AdminPages/AdminDashboard';
+import AdminProductApproval from './pages/AdminPages/AdminProductApproval';
+import AdminStoreApproval from './pages/AdminPages/AdminStoreApproval';
 import ProtectedRoute from './components/ProtectedRoute';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
@@ -125,6 +127,22 @@ const AppContent: React.FC = () => {
               <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
                 <article>
                   <AdminDashboard />
+                </article>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/product-approval" element={
+              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+                <article>
+                  <AdminProductApproval /> 
+                </article>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/store-approval" element={
+              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+                <article>
+                  <AdminStoreApproval /> 
                 </article>
               </ProtectedRoute>
             } />
