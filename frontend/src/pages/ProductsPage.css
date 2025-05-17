@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-  margin-top: 2rem; /* Give some space from the filters */
+  margin-top: 2rem;
 }
 
 .product-card {
@@ -115,8 +115,8 @@
 /* --- Styles for the entire filter area --- */
 .filters-container {
   display: flex;
-  flex-direction: column; /* MODIFIED: Stack filter rows/items vertically */
-  gap: 1rem; /* Gap between the search/recs row and the subsequent filter items */
+  flex-direction: column;
+  gap: 1rem; /* This gap is between .filter-row-search-recs and the category/store filters */
   margin-bottom: 2rem;
   padding: 1rem;
   background: #F9F6FD;
@@ -124,27 +124,30 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* NEW: Row for search bar and recommendations button */
+/* Row for search bar and recommendations button */
+/* Row for search bar and recommendations button */
 .filter-row-search-recs {
   display: flex;
-  align-items: flex-end; /* Aligns items based on their bottom edge (good for inputs and buttons) */
-  gap: 1rem; /* Gap between search bar and recommendations button */
-  width: 100%; /* Take full width within the column flow of filters-container */
+  align-items: center; /* Keep this for now, button moved up which is good */
+  gap: 1rem;
+  width: 100%;
 }
 
 /* General styling for individual filter groups (search, category, store) */
-.filters { /* This class is on search-bar, category-filter, store-filter */
+.filters {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  /* flex-grow: 1; /* This might not be needed for category/store if they stack and take width of parent */
-  width: 100%; /* Make category/store filters take full width of .filters-container */
+  /* gap: 0.1rem; */ /* This was correctly removed */
+  width: 100%;
+  /* You might add a very small padding to .filters itself if you want a global inner space,
+     but this won't create the specific grey strip between label and input */
+  /* padding: 0.1rem 0; */ /* Example: Small vertical padding within each filter group */
 }
 
-.search-bar.filters { /* Target the search bar specifically within the row */
-  flex-grow: 1; /* Allow search bar to take available space in the row */
-  width: auto; /* Override width: 100% from general .filters if needed, flex-grow handles it */
-  min-width: 200px; /* Give it a minimum width */
+.search-bar.filters {
+  flex-grow: 1;
+  width: auto;
+  min-width: 200px;
 }
 
 .filters label {
@@ -152,6 +155,14 @@
   display: block;
   font-size: 0.85rem;
   color: #333;
+  /* MODIFIED: Reduce or remove margin-bottom to eliminate the grey space.
+     Try 0 for the tightest fit, or a very small value like 0.1rem if 0 is too tight.
+     The background of .filters-container will show if this margin is > 0
+     and if .filters has no background of its own.
+  */
+  margin-bottom: 0.1rem; /* Let's try a very small value first. If still too much grey, change to 0 */
+  /* Or, for absolutely no space: */
+  /* margin-bottom: 0; */
 }
 
 .filters select,
@@ -162,35 +173,38 @@
   font-size: 0.9rem;
   box-sizing: border-box;
   width: 100%;
+  line-height: 1.5;
+  background-clip: padding-box;
 }
 
-.recommendations-link-container {
-  /* No specific flex properties needed here, it will align based on parent .filter-row-search-recs */
-}
+/* .recommendations-link-container remains commented out or empty */
 
 .products-page-cta-button {
-  background-color: #ff6347;
+  background-color: #432C53;
   color: white;
   padding: 0.6rem 1.25rem;
-  border: none;
+  border: 1px solid #432C53;
+  box-sizing: border-box;
   border-radius: 5px;
   font-size: 0.9rem;
   font-weight: bold;
   text-decoration: none;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   white-space: nowrap;
   line-height: 1.5;
   cursor: pointer;
-  /* Adjust height or padding if needed to visually align with search input */
-  height: calc(0.6rem * 2 + 0.9rem * 1.5 + 2px); /* Approximate height matching input with 0.6rem padding */
+  height: auto;
 }
 
 .products-page-cta-button:hover,
 .products-page-cta-button:focus {
-  background-color: #e55337;
+  background-color: #97c9ba;
+  border-color: #97c9ba;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -260,35 +274,31 @@
 /* Responsive adjustments for filters */
 @media (max-width: 768px) {
   .filter-row-search-recs {
-    /* Allow search and recs button to wrap if space is too tight */
     flex-wrap: wrap;
   }
   .search-bar.filters {
-    min-width: 150px; /* Allow search to shrink more before recs button wraps */
+    min-width: 150px;
   }
   .recommendations-link-container {
-    /* If it wraps, it might need full width or specific alignment */
-     flex-basis: 100%; /* If it wraps, let it take full width */
-     margin-top: 0.5rem; /* Add space if it wraps */
+    flex-basis: 100%; /* Take full width if it wraps */
+    margin-top: 0.5rem; /* Add some space if it wraps */
+    width: 100%; /* Ensure its child button can also be 100% if needed */
   }
   .products-page-cta-button {
-    /* If container is full width, button might also need to be full width */
+     /* If the container takes full width, you might want the button to as well */
     /* width: 100%; */
-    /* box-sizing: border-box; */
   }
 }
 
 @media (max-width: 600px) {
-  /* .filters-container is already flex-direction: column from previous iteration.
-     We just need to ensure its children behave as expected. */
   .filter-row-search-recs {
-    flex-direction: column; /* Stack search and recs button on very small screens */
-    align-items: stretch; /* Make them take full width */
+    flex-direction: column;
+    align-items: stretch; /* Make children take full width */
     gap: 0.75rem;
   }
   .search-bar.filters {
     width: 100%;
-    min-width: auto; /* Reset min-width */
+    min-width: auto;
   }
   .recommendations-link-container {
     width: 100%;
@@ -298,5 +308,4 @@
     width: 100%;
     box-sizing: border-box;
   }
-  /* Category and Store filters will already be full width due to .filters width: 100% */
 }
