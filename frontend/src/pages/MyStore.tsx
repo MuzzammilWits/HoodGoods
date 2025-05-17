@@ -282,11 +282,74 @@ const MyStore: React.FC = () => {
          const file = e.target.files?.[0]; if(file){ setEditProductImage(file); const r=new FileReader(); r.onloadend=()=>setEditProductPreview(r.result as string); r.readAsDataURL(file); }
     };
 
-    const handleUpdateProduct = async () => {
-         if (!editingProduct) { setActionError("No product selected."); return; } setActionError(null); setIsSavingEdit(true); const token = await getToken(); if (!token) { setActionError("Auth error."); setIsSavingEdit(false); return; } const priceNum=parseFloat(editFormData.price??''); const quantityNum=parseInt(editFormData.productQuantity??'',10); if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0){ setActionError("Valid price/quantity."); setIsSavingEdit(false); return; }
-         try { let imageUrl = editingProduct.imageUrl; if (editProductImage) { imageUrl = await uploadImageToBackend(editProductImage, token); } const payload: Partial<Product & { imageUrl?: string | null }> = {}; if (editFormData.name !== editingProduct.name) payload.name = editFormData.name; if (editFormData.description !== editingProduct.description) payload.description = editFormData.description; if (priceNum !== editingProduct.price) payload.price = priceNum; if (editFormData.category !== editingProduct.category) payload.category = editFormData.category; if (quantityNum !== editingProduct.productquantity) payload.productquantity = quantityNum; if (imageUrl !== editingProduct.imageUrl) payload.imageUrl = imageUrl; if (Object.keys(payload).length === 0) { setActionError("No changes detected."); setIsSavingEdit(false); return; } const res = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!res.ok) { const e=await res.json().catch(()=>({message:'Failed update'})); throw new Error(e.message || `Error: ${res.statusText}`); } closeEditModal(); await fetchStoreData(token);
-         } catch (err: any) { console.error(`Error updating product ${editingProduct.prodId}:`, err); setActionError(err.message || "Unknown error saving."); } finally { setIsSavingEdit(false); }
-    };
+const handleUpdateProduct = async () => {
+  if (!editingProduct) { setActionError("No product selected."); return; }
+  setActionError(null);
+  setIsSavingEdit(true);
+  const token = await getToken();
+  
+  if (!token) { 
+    setActionError("Auth error."); 
+    setIsSavingEdit(false); 
+    return; 
+  }
+
+  const priceNum = parseFloat(editFormData.price??'');
+  const quantityNum = parseInt(editFormData.productQuantity??'',10);
+  
+  if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0) { 
+    setActionError("Valid price/quantity."); 
+    setIsSavingEdit(false); 
+    return; 
+  }
+
+  try {
+    let imageUrl = editingProduct.imageUrl;
+    if (editProductImage) {
+      imageUrl = await uploadImageToBackend(editProductImage, token);
+    }
+
+    const payload: Partial<Product & { imageUrl?: string | null }> = {};
+    if (editFormData.name !== editingProduct.name) payload.name = editFormData.name;
+    if (editFormData.description !== editingProduct.description) payload.description = editFormData.description;
+    if (priceNum !== editingProduct.price) payload.price = priceNum;
+    if (editFormData.category !== editingProduct.category) payload.category = editFormData.category;
+    if (quantityNum !== editingProduct.productquantity) payload.productquantity = quantityNum;
+    if (imageUrl !== editingProduct.imageUrl) payload.imageUrl = imageUrl;
+
+    // Add notification about admin review
+    if (Object.keys(payload).length > 0) {
+      payload.isActive = false; // This will trigger admin review
+      setActionError("Your changes have been saved and will be reviewed by an admin before appearing on the site.");
+    } else {
+      setActionError("No changes detected.");
+      setIsSavingEdit(false);
+      return;
+    }
+
+    const res = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, {
+      method: 'PATCH',
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({message: 'Failed update'}));
+      throw new Error(e.message || `Error: ${res.statusText}`);
+    }
+
+    closeEditModal();
+    await fetchStoreData(token);
+  } catch (err: any) {
+    console.error(`Error updating product ${editingProduct.prodId}:`, err);
+    setActionError(err.message || "Unknown error saving.");
+  } finally {
+    setIsSavingEdit(false);
+  }
+};
 
     const handleDeleteClick = (product: Product) => {
         setProductToDelete(product);
@@ -451,7 +514,9 @@ const MyStore: React.FC = () => {
                 {editingProduct && (
                     <form onSubmit={(e)=>{e.preventDefault();handleUpdateProduct();}} method="dialog">
                         <h2>Edit: {editingProduct.name}</h2>
-                        {actionError && !isSavingEdit && <p className="error-message">{actionError}</p>}
+                        {actionError && !isSavingEdit && <p className={actionError.includes("review") ? "info-message" : "error-message"}>
+          {actionError}
+        </p>}
                         <label htmlFor="editProdName">Name:</label><input id="editProdName" type="text" value={editFormData.name||''} onChange={(e)=>handleEditFormChange('name',e.target.value)} required disabled={isSavingEdit}/>
                         <label htmlFor="editProdDesc">Description:</label><textarea id="editProdDesc" value={editFormData.description||''} onChange={(e)=>handleEditFormChange('description',e.target.value)} disabled={isSavingEdit}></textarea>
                         <label htmlFor="editProdPrice">Price (R):</label><input id="editProdPrice" type="number" value={editFormData.price||''} onChange={(e)=>handleEditFormChange('price',e.target.value)} required min="0.01" step="0.01" disabled={isSavingEdit}/>
