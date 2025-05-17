@@ -27,4 +27,25 @@ export class ProductsService {
     
     return query.getMany();
   }
+
+  async findAllInactive(): Promise<Product[]> {
+    return this.productRepository.find({ 
+      where: { isActive: false },
+      order: { prodId: 'ASC' }
+    });
+  }
+
+  async approveProduct(id: number): Promise<Product> {
+    const product = await this.productRepository.findOneBy({ prodId: id });
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    product.isActive = true;
+    return this.productRepository.save(product);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.productRepository.delete(id);
+  }
+
 }

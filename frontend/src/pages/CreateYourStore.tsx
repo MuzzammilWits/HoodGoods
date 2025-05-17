@@ -33,6 +33,7 @@ const initialStoreState: StoreFormData = {
     standardTime: STANDARD_DELIVERY_TIMES[0], // Default to first option
     expressPrice: '', // Initialize as string
     expressTime: EXPRESS_DELIVERY_TIMES[0], // Default to first option
+    isActiveStore: false,
     products: [initialProductState]
 };
 // --- End Initial Store state ---

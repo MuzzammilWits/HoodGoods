@@ -73,7 +73,7 @@ export class StoreService {
           userId: userId,
           storeId: savedStore.storeId,
           storeName: savedStore.storeName, // Ensure storeName is set here
-          isActive: true,
+          isActive: false,
         });
       });
 
@@ -103,6 +103,62 @@ export class StoreService {
      });
      return { store, products };
   }
+
+  async getAllStoresWithProducts(): Promise<Store[]> {
+    return this.storeRepository.find({
+      relations: ['products'], // Load associated products for each store
+      order: {
+        storeName: 'ASC',
+        products: {
+          prodId: 'ASC',
+        },
+      },
+    });
+  }
+
+  // --- START METHODS FOR ADMIN MANAGE STORES --- 
+  async getInactiveStoresWithProducts(): Promise<Store[]> {
+    const stores = await this.storeRepository.find({
+      where: { isActive: false },
+      relations: ['products'],
+      order: { storeName: 'ASC' }
+    });
+  
+    // Filter each store's products to only include inactive ones
+    return stores.map(store => ({
+      ...store,
+      products: store.products.filter(product => !product.isActive),
+    }));
+  }
+
+  async approveStore(storeId: string): Promise<Store> {
+    const store = await this.storeRepository.findOne({ where: { storeId } });
+    if (!store) throw new NotFoundException('Store not found');
+    store.isActive = true;
+    await this.storeRepository.save(store);
+
+    await this.productRepository.update(
+      { storeId: storeId },          // condition: all products with this storeId
+      { isActive: true }      // update: set isActiveProduct = true
+    );
+
+    return store;
+  }
+
+  async rejectStore(storeId: string): Promise<void> {
+    const store = await this.storeRepository.findOne({ where: { storeId } });
+    if (!store) throw new NotFoundException('Store not found');
+
+    await this.storeRepository.remove(store);
+    
+    await this.userRepository.update (
+      {userID : store.userId},
+      {role: 'buyer'}
+    );
+
+
+  }
+  // --- END ADMIN MANAGE STORES METHODS ---
 
   // --- NEW: Method to Update Store Delivery Options ---
   async updateStoreDeliveryOptions(userId: string, updateStoreDto: UpdateStoreDto): Promise<Store> {
@@ -153,7 +209,7 @@ export class StoreService {
         userId: userId,
         storeId: store.storeId,
         storeName: store.storeName,
-        isActive: true,
+        isActive: false,
     });
 
     try {
@@ -171,7 +227,10 @@ export class StoreService {
      if (!product) throw new NotFoundException(`Product ID ${productId} not found`);
      if (product.userId !== userId) throw new ForbiddenException('You are not authorized to update this product.');
 
-     this.productRepository.merge(product, updateProductDto);
+     this.productRepository.merge(product, {
+        ...updateProductDto,
+        isActive: false // This will override any other isActive value
+      });
 
      try {
          return await this.productRepository.save(product);

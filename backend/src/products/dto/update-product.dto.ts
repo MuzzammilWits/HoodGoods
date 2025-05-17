@@ -6,7 +6,8 @@ export interface UpdateProductDto {
   price?: number;                // Changed from productPrice
   category?: string;             // Changed from productCategory
   imageUrl?: string;             // Changed from imageURL
-  productquantity?: number;      // Added optional product quantity field
+  productquantity?: number; // Added optional product quantity field
+  isActive?: boolean;
   // storeName is typically not updated individually here, but managed at the store level
   // isActive might be handled by separate activate/deactivate endpoints
 }
