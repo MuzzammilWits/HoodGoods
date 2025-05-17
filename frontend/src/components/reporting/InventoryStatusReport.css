@@ -76,12 +76,12 @@
 
 /* Styles for the container of the Pie Chart on the webpage */
 .inventory-pie-chart-container { /* Updated class name for clarity */
-  width: 90%;             /* Responsive width */
-  max-width: 450px;       /* Max width for the chart, adjust as needed */
-  min-height: 400px;      /* Adjusted minimum height to accommodate title + chart */
-  margin: 20px auto;      /* Center the chart container */
+  width: 90%;            /* Responsive width */
+  max-width: 450px;      /* Max width for the chart, adjust as needed */
+  min-height: 400px;     /* Adjusted minimum height to accommodate title + chart */
+  margin: 20px auto;     /* Center the chart container */
   background-color: #fff; /* White background for consistent PDF capture */
-  padding: 20px;          /* Padding inside the container */
+  padding: 20px;         /* Padding inside the container */
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   display: flex;
@@ -99,11 +99,11 @@
 }
 
 /* Targets the div Chart.js creates around the canvas for the Pie chart */
-.inventory-pie-chart-container > div { 
+.inventory-pie-chart-container > div {
   position: relative;
-  width: 100% !important; 
+  width: 100% !important;
   max-width: 350px; /* Max width of the canvas itself */
-  height: auto !important; 
+  height: auto !important;
   aspect-ratio: 1 / 1; /* Maintain a square aspect ratio for pie chart */
   flex-grow: 1; /* Allow chart to take space, but aspect-ratio will govern */
 }
@@ -144,46 +144,44 @@ th {
 }
 
 tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: hsl(0, 0%, 98%);
 }
 
 tbody tr:hover {
   background-color: #f1f1f1;
 }
 
+/* === UPDATED FILTER STYLES === */
 .filters {
   display: flex;
-  flex-wrap: wrap;         /* Allows items to wrap to the next line if not enough space */
-  gap: 15px;               /* Space between items if they are on the same line */
-  margin-bottom: 15px;
-  align-items: center;     /* Aligns items vertically if they are on the same line and have different heights */
-  background-color: #f7f7f7f6;
+  flex-direction: column; /* Stack filter items vertically */
+  gap: 15px;              /* Space between filter items */
+  margin-bottom: 20px; 
+
+  background-color: #f1f1f1;
+  
+  /* Increased bottom margin for spacing */
+  /* align-items: stretch; /* Default, makes items fill cross-axis (width in column) */
 }
 
-.search-bar, .category-filter {
-  /* Styling for the appearance */
+/* .search-bar, .category-filter {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1em;
-  box-sizing: border-box;
+  width: 100%;             
+  box-sizing: border-box;  
+} */
 
-  /* Flex properties */
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: 0;
-  min-width: 180px;
-
-  /* Add this to ensure consistent height */
-  height: 40px; /* Adjust this value as needed, e.g., 38px, 42px */
-}
-
+/* Removed individual min-width and flex-grow as they are not needed for this layout */
+/*
 .search-bar {
-  flex-grow: 1; /* Existing: allows search bar to grow */
-  min-width: 180px;
-}
+  /* flex-grow: 1; /* Removed */
+  /* min-width: 200px; /* Removed */
+/* } */
 
+/*
 .category-filter {
-  flex-grow: 1; /* Add this: allows category filter to grow as well */
-  min-width: 180px;
-}
+  /* min-width: 180px; /* Removed */
+/* } */
+
