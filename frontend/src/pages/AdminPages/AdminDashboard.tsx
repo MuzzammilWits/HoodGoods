@@ -90,7 +90,7 @@ const AdminDashboard: React.FC = () => {
             <p className="product-description">
               View all reports and data from your HoodGoods users
             </p>
-            <button className="manage-btn" onClick={() => navigate('/admin/reports')}>
+            <button className="manage-btn" onClick={() => navigate('/admin/analytics')}>
               View Reports
             </button>
           </div>
