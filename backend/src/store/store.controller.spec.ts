@@ -47,7 +47,7 @@ const mockProduct: Product = {
   storeName: mockStore.storeName, // Denormalized?
   storeId: mockStore.storeId,     // Denormalized?
   category: 'Testing',           // Or productCategory?
-  isActive: true,
+  isActive: false,
   userId: mockUserId,            // Added missing property
   store: mockStore,              // Added missing property
 

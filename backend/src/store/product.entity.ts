@@ -26,7 +26,7 @@ export class Product {
   @Column({ name: 'storeName', type: 'varchar' })
   storeName: string;
 
-  @Column({ name: 'is_active', type: 'boolean' })
+  @Column({ name: 'is_active', type: 'boolean', default: false })
   isActive: boolean;
   
   @Column({ type: 'int4', default: 0 }) // Assuming integer, default to 0 if not specified
