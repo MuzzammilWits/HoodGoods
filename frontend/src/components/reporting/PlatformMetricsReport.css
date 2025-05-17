@@ -1,0 +1,195 @@
+/* frontend/src/components/reporting/PlatformMetricsReport.css */
+.platform-metrics-report {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.report-container { /* General class for report cards */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.report-header {
+  display: flex;
+  flex-direction: column; /* Stack title and controls */
+  justify-content: space-between;
+  align-items: flex-start; /* Align items to the start */
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.report-header h2 {
+  margin: 0 0 0.75rem 0; /* Add some bottom margin to h2 */
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.report-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between control elements */
+  flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+}
+
+.report-controls label {
+  margin-right: 5px;
+  font-weight: 500;
+}
+
+.report-controls select,
+.report-controls input[type="date"],
+.report-controls button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.report-controls button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.report-controls button:hover {
+  background-color: #0056b3;
+}
+
+.report-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+
+.report-summary .report-generated-at,
+.report-summary .period-covered {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background-color: #fff;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.metric-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.metric-card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 0;
+}
+
+.export-buttons {
+  margin-top: 1.5rem;
+  text-align: right;
+}
+
+.export-buttons .csv-button {
+  padding: 10px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.export-buttons .csv-button:hover {
+  background-color: #218838;
+}
+
+.export-buttons .csv-button:disabled {
+  background-color: #ccc;
+}
+
+/* Shared loading/error/info messages (can be in a global CSS file too) */
+.loading-message, .error-message, .info-message {
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+  border-radius: 4px;
+}
+.loading-message { background-color: #eef; color: #33a; }
+.error-message { background-color: #fee; color: #a33; }
+.info-message { background-color: #eff; color: #3aa; }
+
+.report-content { /* New class for the main content area below header */
+    padding-top: 1rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Default to single column */
+  gap: 2rem; /* Space between charts */
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 992px) { /* For larger screens, display charts side-by-side */
+  .charts-grid {
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+  }
+}
+
+.chart-container {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  height: 350px; /* Or your preferred chart height */
+  position: relative; /* Important for chart.js responsiveness */
+}
+
+/* Ensure the chart itself fills the container */
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.export-buttons .pdf-button {
+  padding: 10px 15px;
+  background-color: #dc3545; /* Example: Red color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.export-buttons .pdf-button:hover {
+  background-color: #c82333;
+}
+
+.export-buttons .pdf-button:disabled {
+  background-color: #ccc;
+}
