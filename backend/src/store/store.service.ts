@@ -227,7 +227,10 @@ export class StoreService {
      if (!product) throw new NotFoundException(`Product ID ${productId} not found`);
      if (product.userId !== userId) throw new ForbiddenException('You are not authorized to update this product.');
 
-     this.productRepository.merge(product, updateProductDto);
+     this.productRepository.merge(product, {
+        ...updateProductDto,
+        isActive: false // This will override any other isActive value
+      });
 
      try {
          return await this.productRepository.save(product);
