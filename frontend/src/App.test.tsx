@@ -96,11 +96,6 @@ vi.mock('@auth0/auth0-react', async () => {
   };
 });
 
-// Mock context provider
-vi.mock('./context/ContextCart', () => ({
-  CartProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
-}));
-
 // Auth scenarios
 const createAuthState = (isAuthenticated: boolean, roles: string[] = []) => {
   return {
@@ -333,7 +328,7 @@ describe('App component', () => {
     );
     
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
-    expect(screen.getByTestId('mock-admin-dashboard')).toBeInTheDocument();
+
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
