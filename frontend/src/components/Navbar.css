@@ -3,7 +3,7 @@
 /* Ensure variables are defined in index.css :root */
 
 .navbar {
-  background-color: var(--light-purple, #F9F6FD);
+  background-color: #ECE4F1;
   padding: 0.8rem 0;
   /* --- MODIFIED: Changed position to fixed for always-visible navbar --- */
   position: fixed;   /* Changed from sticky */

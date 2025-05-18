@@ -53,25 +53,40 @@
   flex-direction: column;
 } */
 
-/* Section title within this component */
-.why-choose-us-content .section-title,
-.about-us-section .section-title { /* Targeting About Us heading */
-    text-align: left; /* Ensure left alignment */
-    margin-bottom: 2rem;
-    color: var(--primary-color); /* Corrected: Use primary color */
-    font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
-    font-weight: 700; /* Ensure bold weight */
-    font-size: 3.5rem; /* Base size for About Us (Keep this size) */
+/* Common styling for main section headings in this component */
+.common-section-heading {
+  text-align: left; /* Ensure left alignment */
+  margin-bottom: 2rem; /* Space below heading */
+  color: var(--primary-color); /* Consistent color */
+  font-family: 'Poppins', sans-serif; /* Consistent font */
+  font-weight: 700; /* Consistent weight */
+  font-size: 2.5rem; /* Set the common size (slightly smaller than previous Why Choose Us) */
 }
 
-/* Specific style for Why Choose Us heading to make it smaller */
-.why-choose-us-section h2 {
-    text-align: left; /* Ensure left alignment */
+/* Section title within this component */
+.why-choose-us-content .section-title,
+.about-us-section .section-title {
+    /* text-align: left; */ /* Already set in .common-section-heading */
     margin-bottom: 2rem;
-    color: var(--primary-color); /* Keep color specific */
-    font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
-    font-weight: 700; /* Ensure bold weight */
-    font-size: 2.8rem; /* Corrected: Smaller size for Why Choose Us */
+    /* color: var(--primary-color); */ /* Already set in .common-section-heading */
+    /* font-family: 'Poppins', sans-serif; */ /* Already set in .common-section-heading */
+    /* font-weight: 700; */ /* Already set in .common-section-heading */
+    /* font-size: 3.5rem; */ /* Size is now controlled by .common-section-heading */
+}
+
+/* Keep specific padding/margin if needed for .about-us-section .section-title */
+.about-us-section .section-title {
+  margin-bottom: 2rem; /* Adjust as needed */
+}
+
+/* Specific style for Why Choose Us heading - remove font size here */
+.why-choose-us-section h2 {
+  text-align: left; /* Ensure left alignment */
+  margin-bottom: 2rem; /* Ensure consistent margin */
+  color: var(--primary-color); /* Keep color specific */
+  font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
+  font-weight: 700; /* Ensure bold weight */
+  /* font-size: 2.8rem; */ /* Size is now controlled by .common-section-heading */
 }
 
 .features-grid {
@@ -151,18 +166,9 @@
     margin: 0 auto 2rem auto;
   }
 
-  .why-choose-us-container h2,
-  .why-choose-us-content .section-title,
-  .about-us-content .section-title {
-    font-size: 3.0rem; /* Match responsive hero title size */
-  }
-
-  .about-us-section .section-title { /* Responsive size for About Us */
-    font-size: 3.0rem; /* Match responsive hero title size */
-  }
-
-  .why-choose-us-section h2 { /* Responsive size for Why Choose Us */
-    font-size: 2.5rem; /* Corrected: Slightly smaller responsive size */
+  /* Update common heading size for medium screens */
+  .common-section-heading {
+    font-size: 2.2rem; /* Slightly smaller than previous responsive size */
   }
 }
 
@@ -181,18 +187,9 @@
    .feature-description {
        font-size: 0.95rem;
    }
-   .why-choose-us-container h2,
-   .why-choose-us-content .section-title,
-   .about-us-content .section-title {
-       font-size: 2.6rem; /* Match responsive hero title size */
-   }
-
-   .about-us-section .section-title { /* Responsive size for About Us */
-    font-size: 2.6rem; /* Match responsive hero title size */
-  }
-
-  .why-choose-us-section h2 { /* Responsive size for Why Choose Us */
-    font-size: 2.2rem; /* Corrected: Slightly smaller responsive size */
+  /* Update common heading size for small screens */
+  .common-section-heading {
+    font-size: 2rem; /* Adjust responsive size */
   }
 }
 
@@ -294,4 +291,40 @@
    .about-us-content .section-title {
        font-size: 2.6rem; /* Match responsive hero title size */
    }
+}
+
+.trust-icons-section {
+  padding: 4rem 0; /* Add vertical padding */
+  /* Removed background-color */
+  text-align: center; /* Center heading and grid */
+}
+
+.trust-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid columns */
+  gap: 2rem;
+  margin-top: 2.5rem;
+  max-width: 900px; /* Limit width and center the grid */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.trust-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content vertically */
+  text-align: center; /* Center text horizontally */
+}
+
+.trust-icon {
+  width: 60px; /* Placeholder size */
+  height: 60px;
+  background-color: transparent; /* Removed background color */
+  border-radius: 50%; /* Make it round */
+  margin-bottom: 1rem;
+  color: var(--primary-color, #6D4C41); /* Set icon color */
+}
+
+.container {
+  max-width: 1200px;
 }
