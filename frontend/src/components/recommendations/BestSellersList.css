@@ -81,7 +81,7 @@
 .best-seller-price {
   font-size: 1em;
   font-weight: bold;
-  color: var(--accent-color, #007bff); /* Or your primary price color */
+  color: #1e7e34; /* Changed to match the green price color */
   margin: 8px 0;
 }
 
@@ -91,33 +91,6 @@
   font-weight: 500;
   margin-top: 4px;
 }
-
-/* --- NEW STYLES FOR ADD TO CART BUTTON --- */
-.btn-add-to-cart-recommendation {
-  background-color: var(--primary-color, #6f42c1); /* Example: Your primary button color */
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 0.9em;
-  font-weight: 500;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  width: 100%; /* Make button full width of card padding */
-  margin-top: auto; /* Pushes button to bottom if card content is short */
-}
-
-.btn-add-to-cart-recommendation:hover:not(:disabled) {
-  background-color: var(--primary-color-dark, #5a32a3); /* Darker shade on hover */
-}
-
-.btn-add-to-cart-recommendation:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-/* --- END NEW STYLES --- */
-
 
 /* --- NOTIFICATION STYLES (simple version) --- */
 .recommendation-notification {
