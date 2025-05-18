@@ -284,10 +284,7 @@
     margin-top: 0.5rem; /* Add some space if it wraps */
     width: 100%; /* Ensure its child button can also be 100% if needed */
   }
-  .products-page-cta-button {
-     /* If the container takes full width, you might want the button to as well */
-    /* width: 100%; */
-  }
+
 }
 
 @media (max-width: 600px) {

@@ -1,0 +1,68 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RecommendationsPage > matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="recommendations-page-container"
+    style="padding-top: 20px; padding-bottom: 20px;"
+  >
+    <header
+      class="recommendations-page-header"
+    >
+      <h1>
+        Discover Products You Might Like
+      </h1>
+      <p>
+        Based on current trends and popular items.
+      </p>
+    </header>
+    <section
+      class="recommendation-section"
+    >
+      <div
+        data-testid="mock-best-sellers"
+      >
+        <h2
+          data-testid="section-title"
+        >
+          Top Selling Products This Month
+        </h2>
+        <p
+          data-testid="limit-info"
+        >
+          Limit: 12
+        </p>
+        <p
+          data-testid="time-window-info"
+        >
+          Time Window: 30 days
+        </p>
+      </div>
+    </section>
+    <section
+      class="recommendation-section"
+      style="margin-top: 40px;"
+    >
+      <div
+        data-testid="mock-best-sellers"
+      >
+        <h2
+          data-testid="section-title"
+        >
+          Trending This Week
+        </h2>
+        <p
+          data-testid="limit-info"
+        >
+          Limit: 8
+        </p>
+        <p
+          data-testid="time-window-info"
+        >
+          Time Window: 7 days
+        </p>
+      </div>
+    </section>
+  </div>
+</DocumentFragment>
+`;
