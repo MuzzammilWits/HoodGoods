@@ -72,11 +72,25 @@ const AppContent: React.FC = () => {
                   <BestSellersList limit={6} title="Popular This Week" />
                 </section>
 
+                {/* --- Section Divider --- */}
+                <div className="section-divider">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
+                  </svg>
+                </div>
+
                 <section aria-labelledby="why-choose-us-heading" style={{ backgroundColor: 'var(--background-color, #fff)', padding: '20px 0' }}>
                    {/* Visually hidden h2 for "Our Values" removed as requested */}
                   <WhyChooseUs />
                 </section>
                 {/* Other homepage sections might follow here */}
+
+                {/* --- Section Divider before Footer --- */}
+                <div className="section-divider">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
+                  </svg>
+                </div>
               </>
             } />
 
@@ -109,7 +123,7 @@ const AppContent: React.FC = () => {
                 <ProtectedRoute allowedRoles={['buyer', 'seller']}>
                   <CheckoutPage />
                 </ProtectedRoute>
-              </section>
+              </section> 
             } />
 
             {/* Order Confirmation Route (Protected) */}

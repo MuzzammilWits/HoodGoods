@@ -10,38 +10,36 @@ interface FeatureProps {
 
 const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
   return (
-    <article className="feature">
-      <figure className="feature-icon">
+    <article className="selling-point-item">
+      <figure className="selling-point-icon">
         {icon}
       </figure>
-      <h3 className="feature-title">{title}</h3>
-      <p className="feature-description">{description}</p>
+      <h3>{title}</h3>
+      <p>{description}</p>
     </article>
   );
 };
 
 const WhyChooseUs: React.FC = () => {
   return (
-    <section id="about-us" className="why-choose-us light-purple-bg">
+    <section id="about-us" className="why-choose-us-container">
       <main className="container">
-        {/* First row: About Us */}
-        <article className="about-us-content">
-          <h2 className="section-title">About Us</h2>
-          <p className="about-us-text">
-            HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
-          </p>
-        </article>
+        <section className="about-us-section">
+            <h2 className="section-title common-section-heading">About Us</h2>
+            <p className="about-us-text">
+                HoodsGoods is a vibrant marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Founded in 2020, our platform supports independent creators throughout South Africa, providing them with a digital space to showcase their unique skills and products. We believe that behind every handmade item is a story of passion, creativity, and craftsmanship. Our mission is to celebrate these stories while promoting sustainable shopping practices and supporting local economies. When you shop at HoodsGoods, you're not just buying a product - you're investing in a community of makers and the authentic art of handmade creation.
+            </p>
+        </section>
 
-        {/* Second row: Why Choose Us + Image */}
-        <section className="why-choose-us-row">
-          <article className="why-choose-us-content">
-            <h2 className="section-title">Why Choose Us</h2>
+        <section className="why-choose-us-section">
+            <h2 className="common-section-heading">Why Choose Us?</h2>
 
-            <section className="features-grid">
+            <section className="selling-points-grid">
               <Feature
                 icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="none" stroke="currentColor" strokeWidth="2" d="M4 14h16M4 10h16M7 18l-3 4M17 18l3 4" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                 }
                 title="Secure & Trusted Shopping"
@@ -50,8 +48,9 @@ const WhyChooseUs: React.FC = () => {
 
               <Feature
                 icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="none" stroke="currentColor" strokeWidth="2" d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 6v6l4 2" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
                   </svg>
                 }
                 title="Truly Handmade Treasures"
@@ -60,8 +59,9 @@ const WhyChooseUs: React.FC = () => {
 
               <Feature
                 icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="none" stroke="currentColor" strokeWidth="2" d="M22 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9 9 4 9 9zM8 15l3-3-3-3M12 12h6" />
+                  <svg xmlns="http://www.w3.org/000/svg" viewBox="0 0 24 24" width="50" height="50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="3" width="22" height="18" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
                   </svg>
                 }
                 title="Careful & Reliable Delivery"
@@ -70,22 +70,19 @@ const WhyChooseUs: React.FC = () => {
 
               <Feature
                 icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="none" stroke="currentColor" strokeWidth="2" d="M3 6h18M3 12h18M3 18h18" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
                   </svg>
                 }
                 title="Easy to Shop"
                 description="Browse, discover, and buy with ease. Our clean, simple interface makes finding something special a breeze."
               />
             </section>
-          </article>
-
-          {/* <figure className="why-choose-us-image">
-            <img
-              src={marketplaceImg}
-              alt="Artisan marketplace products display"
-            />
-          </figure> */}
         </section>
       </main>
     </section>

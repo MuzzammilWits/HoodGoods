@@ -55,14 +55,24 @@
 
 /* Section title within this component */
 .why-choose-us-content .section-title,
-.about-us-content .section-title {
+.about-us-section .section-title { /* Targeting About Us heading */
     text-align: left; /* Ensure left alignment */
     margin-bottom: 2rem;
-    color: black;
-    font-size: 2rem;
-    font-weight: 700;
+    color: var(--primary-color); /* Corrected: Use primary color */
+    font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
+    font-weight: 700; /* Ensure bold weight */
+    font-size: 3.5rem; /* Base size for About Us (Keep this size) */
 }
 
+/* Specific style for Why Choose Us heading to make it smaller */
+.why-choose-us-section h2 {
+    text-align: left; /* Ensure left alignment */
+    margin-bottom: 2rem;
+    color: var(--primary-color); /* Keep color specific */
+    font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
+    font-weight: 700; /* Ensure bold weight */
+    font-size: 2.8rem; /* Corrected: Smaller size for Why Choose Us */
+}
 
 .features-grid {
   display: grid;
@@ -141,8 +151,19 @@
     margin: 0 auto 2rem auto;
   }
 
-  
-  
+  .why-choose-us-container h2,
+  .why-choose-us-content .section-title,
+  .about-us-content .section-title {
+    font-size: 3.0rem; /* Match responsive hero title size */
+  }
+
+  .about-us-section .section-title { /* Responsive size for About Us */
+    font-size: 3.0rem; /* Match responsive hero title size */
+  }
+
+  .why-choose-us-section h2 { /* Responsive size for Why Choose Us */
+    font-size: 2.5rem; /* Corrected: Slightly smaller responsive size */
+  }
 }
 
 @media (max-width: 768px) {
@@ -160,9 +181,117 @@
    .feature-description {
        font-size: 0.95rem;
    }
+   .why-choose-us-container h2,
    .why-choose-us-content .section-title,
    .about-us-content .section-title {
-       /* text-align: center; */ /* Optional: re-center titles on mobile */
-       font-size: 1.8rem;
+       font-size: 2.6rem; /* Match responsive hero title size */
+   }
+
+   .about-us-section .section-title { /* Responsive size for About Us */
+    font-size: 2.6rem; /* Match responsive hero title size */
+  }
+
+  .why-choose-us-section h2 { /* Responsive size for Why Choose Us */
+    font-size: 2.2rem; /* Corrected: Slightly smaller responsive size */
+  }
+}
+
+.why-choose-us-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px; /* Increased padding */
+  background-color: var(--light-purple); /* Subtle background */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.why-choose-us-container h2 {
+  text-align: left; /* Changed to left align */
+  margin-bottom: 30px; /* More space below heading */
+  color: var(--primary-color); /* Using primary color */
+  font-family: 'Poppins', sans-serif; /* Use primary font */
+  /* Keep the size here for the main h2 inside the container if needed, or remove */
+}
+
+.why-choose-us-intro {
+  text-align: center;
+  margin-bottom: 40px; /* Space below intro text */
+  color: var(--text-color); /* Consistent text color */
+  font-size: 1.1em;
+  line-height: 1.6;
+  max-width: 800px; /* Limit width for readability */
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Hind', sans-serif; /* Use secondary font */
+}
+
+.selling-points-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Changed to 2 fixed columns */
+  gap: 30px; /* Space between grid items */
+}
+
+.selling-point-item {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  text-align: center; /* Center content in each item */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selling-point-item h3 {
+  margin-top: 15px; /* Space below icon/image */
+  margin-bottom: 10px;
+  color: var(--primary-color); /* Consistent heading color */
+  font-size: 1.4em;
+  font-family: 'Poppins', sans-serif; /* Primary font for subheadings */
+}
+
+.selling-point-item p {
+  color: var(--text-color); /* Consistent text color */
+  font-size: 1em;
+  line-height: 1.5;
+  font-family: 'Hind', sans-serif; /* Secondary font for body text */
+}
+
+/* Placeholder for icon/image */
+.selling-point-icon {
+  width: 50px;
+  height: 50px;
+  /* Add styling for icons or images here */
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  /* Keep the two-column layout until 768px or adjust if needed */
+  .why-choose-us-container h2,
+  .why-choose-us-content .section-title,
+  .about-us-content .section-title {
+    font-size: 3.0rem; /* Match responsive hero title size */
+  }
+}
+
+@media (max-width: 768px) {
+  .selling-points-grid {
+    grid-template-columns: 1fr; /* Collapse to single column on smaller screens */
+    gap: 20px;
+  }
+  .why-choose-us-image {
+    height: 300px;
+  }
+   .about-us-text {
+       font-size: 1.1rem;
+       /* text-align: left; */ /* Already set */
+   }
+   .feature-description {
+       font-size: 0.95rem;
+   }
+   .why-choose-us-container h2,
+   .why-choose-us-content .section-title,
+   .about-us-content .section-title {
+       font-size: 2.6rem; /* Match responsive hero title size */
    }
 }
