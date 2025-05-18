@@ -166,7 +166,7 @@ export default function SellerDashboardPage() {
                                     <p><strong>Pickup Point:</strong> {sellerOrder.order.pickupPoint}</p>
                                     <p><strong>Delivery Method:</strong> {sellerOrder.deliveryMethod} (R{sellerOrder.deliveryPrice.toFixed(2)})</p>
                                     <p><strong>Delivery Deadline:</strong> {sellerOrder.deliveryTimeEstimate} days</p>
-                                    <p><strong>Your Total for this Order:</strong> R{sellerOrder.sellerTotal.toFixed(2)}</p>
+                                    <p className="order-total"><strong>Your Total for this Order:</strong> R{sellerOrder.sellerTotal.toFixed(2)}</p>
                                 </div>
                                 <div className="items-section">
                                     <h4>Items in this Shipment:</h4>

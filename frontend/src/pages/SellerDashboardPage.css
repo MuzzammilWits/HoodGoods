@@ -41,7 +41,7 @@
 .earnings-display {
     font-size: 1.3em;
     font-weight: bold;
-    color: #28a745; /* Bootstrap success green */
+    color: #97C9BA; /* Changed to logo green */
     margin-top: 0.5rem;
 }
 
@@ -140,8 +140,8 @@
 
 .order-header h3 { /* Target h3 inside card header */
     margin: 0;
-    font-size: 1.1em;
-    color: #0056b3;
+    font-size: 1.3em; /* Increased font size */
+    color: var(--primary-color); /* Changed to our purple */
 }
 
 .order-details {
@@ -157,6 +157,12 @@
     margin-bottom: 0; /* Remove margin on last p */
 }
 
+.order-total {
+    font-size: 1.1em; /* Increased font size for total */
+    font-weight: bold; /* Make it bold */
+    margin-top: 0.5rem; /* Add some space above */
+    color: #333; /* Default text color or a specific color if desired */
+}
 
 .items-section {
     margin-top: 1rem;

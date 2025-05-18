@@ -47,19 +47,19 @@
 }
 
 .csv-button {
-  background-color: #2ecc71; /* Green */
+  background-color: #97C9BA; /* Logo green */
   color: white;
 }
 .csv-button:hover {
-  background-color: #27ae60;
+  background-color: #7ab8a5; /* Darker green on hover */
 }
 
 .pdf-button {
-  background-color: #e74c3c; /* Red */
+  background-color: #97C9BA; /* Logo green */
   color: white;
 }
 .pdf-button:hover {
-  background-color: #c0392b;
+  background-color: #7ab8a5; /* Darker green on hover */
 }
 
 .loading-message, .error-message, .info-message {
