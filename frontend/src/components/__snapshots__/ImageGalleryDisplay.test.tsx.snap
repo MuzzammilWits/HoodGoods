@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ImageGalleryDisplay Component > should match snapshot when galleryImages is empty (renders null) 1`] = `null`;
+
+exports[`ImageGalleryDisplay Component > should match snapshot when images are provided 1`] = `
+<section
+  style="margin: 2rem 0px;"
+>
+  <h2
+    style="margin-bottom: 1rem;"
+  >
+    Recently Uploaded Images (via Supabase)
+  </h2>
+  <figure
+    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"
+  >
+    <img
+      alt="Gallery item 1"
+      src="https://example.com/image1.jpg"
+      style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;"
+    />
+    <img
+      alt="Gallery item 2"
+      src="https://example.com/image2.png"
+      style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;"
+    />
+    <img
+      alt="Gallery item 3"
+      src="https://example.com/image3.gif"
+      style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;"
+    />
+  </figure>
+</section>
+`;

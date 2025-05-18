@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SubmissionStatus Component > should match snapshot when both error and success are present 1`] = `
+NodeList [
+  <output
+    class="error-message"
+  >
+    Snapshot error
+  </output>,
+  <output
+    class="success-message"
+  >
+    Snapshot success
+  </output>,
+]
+`;
+
+exports[`SubmissionStatus Component > should match snapshot when no messages are present (renders null) 1`] = `null`;
+
+exports[`SubmissionStatus Component > should match snapshot when only error is present 1`] = `
+<output
+  class="error-message"
+>
+  Snapshot error
+</output>
+`;
+
+exports[`SubmissionStatus Component > should match snapshot when only success is present 1`] = `
+<output
+  class="success-message"
+>
+  Snapshot success
+</output>
+`;
