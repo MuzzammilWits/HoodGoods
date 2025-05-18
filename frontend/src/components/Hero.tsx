@@ -123,7 +123,7 @@ const Hero: React.FC = () => {
             </Link>
             {/* --- NEW LINK TO RECOMMENDATIONS PAGE --- */}
             <Link to="/recommendations" className="btn btn-secondary" style={{ marginLeft: '10px' }}>
-              Discover Picks
+              Discover
             </Link>
             {/* --- END NEW LINK --- */}
           </nav>

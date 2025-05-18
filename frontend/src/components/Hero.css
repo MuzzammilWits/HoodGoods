@@ -55,9 +55,12 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 .hero-buttons {
   margin-top: 1rem;
+  display: flex;
+  gap: 10px;
 }
 
-.hero-buttons .btn-primary {
+.hero-buttons .btn-primary,
+.hero-buttons .btn-secondary {
   padding: 1rem 2.5rem;
   font-size: 1.15rem;
   display: inline-block;
