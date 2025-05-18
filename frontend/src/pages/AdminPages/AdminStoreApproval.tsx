@@ -32,7 +32,7 @@ interface Store {
 const AdminStoreApproval = () => {
     const [stores, setStores] = useState<Store[]>([]);
     const [loading, setLoading] = useState(true);
-    const [products, setProducts] = useState<Product[]>([]);
+   // const [products, setProducts] = useState<Product[]>([]);
     const [notification, setNotification] = useState<{ 
         message: string; 
         type: 'success' | 'error' | null 
