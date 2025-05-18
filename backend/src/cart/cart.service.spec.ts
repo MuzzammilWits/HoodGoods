@@ -35,11 +35,12 @@ const mockCartItem2: CartItem = {
 };
 
 const mockProduct1: Product = {
-    isActive: true,
+    isActive: false,
     userId: mockUserId,
     store: {
         storeId: mockStoreId1,  
         userId: mockUserId,
+        isActive: false,
 storeName: 'Store A',
 standardPrice: 9.99,
 standardTime: "24 hours",    
@@ -66,11 +67,12 @@ user: {
 };
 
 const mockProduct2: Product = {
-    isActive: true,
+    isActive: false,
     userId: mockUserId,
     store: {
         storeId: mockStoreId1,  
         userId: mockUserId,
+        isActive: false,
 storeName: 'Store A',
 standardPrice: 5.00,
 standardTime: "24 hours",    

@@ -32,7 +32,7 @@ const mockStore: Store = {
   standardPrice: 10.50,
   expressTime: '24 hours',
   expressPrice: 20.00,
-  isActiveStore: false,
+  isActive: false,
   user: { userId: mockUserId } as any, // Mock user object, adjust fields as needed
   products: [],
 };
