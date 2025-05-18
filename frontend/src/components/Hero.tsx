@@ -109,10 +109,12 @@ const Hero: React.FC = () => {
       {/* The Vanta effect is applied to this section's background */}
       <article className="hero-container">
         <header className="hero-header">
-          <h1 className="hero-title">
-            Find Your Kind<br />
-            Of Handmade
-          </h1>
+          <div className="hero-title-container">
+            <h1 className="hero-title">
+              Find Your Kind<br />
+              Of Handmade
+            </h1>
+          </div>
           <p className="hero-text">
             From bold and modern to cozy and traditional, every shop here brings something unique.
             Browse through passionate creators and find pieces that match your style, your story, and your space.
@@ -144,6 +146,8 @@ const Hero: React.FC = () => {
         {/* <main className="hero-images">
         // ... (your commented out image grid) ...
         </main> */}
+        {/* Add the logo image to the right column */}
+        <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" />
       </article>
     </section>
   );

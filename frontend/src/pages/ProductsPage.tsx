@@ -265,18 +265,17 @@ const ProductsPage = () => {
   }
 
   return (
-    <main className="products-container">
-      {notification.type && (
-        <div className={`notification-modal ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
+    <>
+      <main className="products-container">
+        {notification.type && (
+          <div className={`notification-modal ${notification.type}`}>
+            {notification.message}
+          </div>
+        )}
 
-      {/* MODIFIED: filters-container structure */}
-      <section className="filters-container" aria-labelledby="filters-heading">
-          {/* NEW: Wrapper for search bar and recommendations button */}
+        <section className="filters-container" aria-labelledby="filters-heading">
           <div className="filter-row-search-recs">
-            <div className="search-bar filters"> {/* .filters class for consistent styling of label/input */}
+            <div className="search-bar filters">
               <label htmlFor="product-search">Search Products:</label>
               <input
                 id="product-search"
@@ -294,8 +293,7 @@ const ProductsPage = () => {
             </div>
           </div>
 
-          {/* Category and Store filters will now naturally be on new lines if filters-container is column or they are block */}
-          <div className="category-filter filters"> {/* .filters class for consistent styling of label/input */}
+          <div className="category-filter filters">
             <label htmlFor="category-select">Filter by Category:</label>
             <select
               id="category-select"
@@ -311,7 +309,7 @@ const ProductsPage = () => {
             </select>
           </div>
           
-          <div className="store-filter filters"> {/* .filters class for consistent styling of label/input */}
+          <div className="store-filter filters">
             <label htmlFor="store-select">Filter by Store:</label>
             <select
               id="store-select"
@@ -326,89 +324,96 @@ const ProductsPage = () => {
               ))}
             </select>
           </div>
-      </section>
+        </section>
 
-      {/* ... (rest of your JSX: products-grid, etc.) ... */}
-      <ul className="products-grid">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => {
-            const isOwner = isAuthenticated && product.userId === user?.sub;
-            const isOutOfStock = product.productquantity <= 0;
-            
-            let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching); 
-            if (!isDisabled && currentUserRole === 'admin') { 
-              isDisabled = true;
-            }
+        <ul className="products-grid">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => {
+              const isOwner = isAuthenticated && product.userId === user?.sub;
+              const isOutOfStock = product.productquantity <= 0;
+              
+              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching); 
+              if (!isDisabled && currentUserRole === 'admin') { 
+                isDisabled = true;
+              }
 
-            let buttonText = 'Add to Cart';
-            if (isAuth0Loading || isRoleFetching) {
-                buttonText = 'Verifying...';
-            } else if (currentUserRole === 'admin') {
-                buttonText = 'Admin View'; 
-            } else if (isOwner) {
-                buttonText = 'Your Product';
-            } else if (isOutOfStock) {
-                buttonText = 'Out of Stock';
-            }
+              let buttonText = 'Add to Cart';
+              if (isAuth0Loading || isRoleFetching) {
+                  buttonText = 'Verifying...';
+              } else if (currentUserRole === 'admin') {
+                  buttonText = 'Admin View'; 
+              } else if (isOwner) {
+                  buttonText = 'Your Product';
+              } else if (isOutOfStock) {
+                  buttonText = 'Out of Stock';
+              }
 
-            return (
-              <li key={product.prodId} className="product-card">
-                <article>
-                  <figure className="product-image-container">
-                    <img
-                      src={product.imageUrl || '/placeholder-product.jpg'}
-                      alt={product.name || 'Product image'}
-                      className="product-image"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (target.src !== '/placeholder-product.jpg') {
-                          target.src = '/placeholder-product.jpg';
-                          target.alt = 'Placeholder image';
-                          target.classList.add('placeholder');
+              return (
+                <li key={product.prodId} className="product-card">
+                  <article className="product-card-content">
+                    <figure className="product-image-container">
+                      <img
+                        src={product.imageUrl || '/placeholder-product.jpg'}
+                        alt={product.name || 'Product image'}
+                        className="product-image"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== '/placeholder-product.jpg') {
+                            target.src = '/placeholder-product.jpg';
+                            target.alt = 'Placeholder image';
+                            target.classList.add('placeholder');
+                          }
+                        }}
+                        loading="lazy"
+                      />
+                    </figure>
+                    <section className="product-details">
+                      <h2 className="product-name">{product.name}</h2>
+                      <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                      <p className="product-description">{product.description}</p>
+                      <p className="product-category">Category: {product.category}</p>
+                      <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
+                      <p className="product-quantity">
+                        {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                      </p>
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        className="add-to-cart-btn"
+                        aria-label={
+                          currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
+                          : isOwner ? `Cannot add own product ${product.name}`
+                          : isOutOfStock ? `${product.name} is out of stock`
+                          : `Add ${product.name} to cart`
                         }
-                      }}
-                      loading="lazy"
-                    />
-                  </figure>
-                  <section className="product-details">
-                    <h2 className="product-name">{product.name}</h2>
-                    <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
-                    <p className="product-description">{product.description}</p>
-                    <p className="product-category">Category: {product.category}</p>
-                    <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
-                    <p className="product-quantity">
-                      {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
-                    </p>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="add-to-cart-btn"
-                      aria-label={
-                        currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
-                        : isOwner ? `Cannot add own product ${product.name}`
-                        : isOutOfStock ? `${product.name} is out of stock`
-                        : `Add ${product.name} to cart`
-                      }
-                      type="button"
-                      disabled={isDisabled}
-                    >
-                      {buttonText}
-                    </button>
-                  </section>
-                </article>
-              </li>
-            );
-          })
-        ) : (
-          <li className="no-products">
-            <p>
-              {selectedCategory || selectedStore || searchQuery
-                ? 'No products found matching your criteria.'
-                : 'No products available at the moment.'}
-            </p>
-          </li>
-        )}
-      </ul>
-    </main>
+                        type="button"
+                        disabled={isDisabled}
+                      >
+                        {buttonText}
+                      </button>
+                    </section>
+                  </article>
+                </li>
+              );
+            })
+          ) : (
+            <li className="no-products">
+              <p>
+                {selectedCategory || selectedStore || searchQuery
+                  ? 'No products found matching your criteria.'
+                  : 'No products available at the moment.'}
+              </p>
+            </li>
+          )}
+        </ul>
+      </main>
+
+      {/* --- Section Divider before Footer --- */}
+      <div className="section-divider">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
+        </svg>
+      </div>
+    </>
   );
 };
 

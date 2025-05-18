@@ -11,7 +11,10 @@ section, article, aside, main, figure, figcaption, ul, li {
 }
 
 .hero-section {
-  padding: 9rem 0;
+  padding: 6rem 0; /* Reduced vertical padding */
+  display: flex; /* Enable Flexbox */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
   position: relative; /* Needed for potential absolute children and Vanta positioning */
   min-height: 60vh; /* <-- ADD THIS: Ensure the section takes up height */
   /* height: 100vh; */ /* Alternative */
@@ -23,9 +26,10 @@ section, article, aside, main, figure, figcaption, ul, li {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr; /* Make the main row take up available height */
   gap: 3rem;
   padding: 0 1rem;
-  align-items: start;
+  align-items: center; /* Vertically center grid items within their cells */
   position: relative; /* Ensure content is positioned relative to hero-section */
   z-index: 1; /* Ensure content stays above Vanta canvas (if Vanta sets its z-index) */
 }
@@ -33,7 +37,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 .hero-header {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* Vertically center content */
 }
 
 .hero-title {
@@ -43,6 +47,13 @@ section, article, aside, main, figure, figcaption, ul, li {
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
+}
+
+.hero-logo {
+  height: auto; /* Allow height to adjust based on width */
+  width: 300px; /* Set a larger width for the logo */
+  justify-self: center; /* Center the logo horizontally within its grid cell */
+  align-self: center; /* Center the logo vertically within its grid cell */
 }
 
 .hero-text {
@@ -72,8 +83,6 @@ section, article, aside, main, figure, figcaption, ul, li {
 }
 
 .hero-images {
-  position: relative;
-  top: 1.5rem;
   min-width: 0;
 }
 

@@ -11,6 +11,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
+  align-items: stretch; /* Ensure grid items stretch to fill the cell height */
 }
 
 .product-card {
@@ -24,6 +25,12 @@
 .product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-card-content {
+  display: flex;
+  flex-direction: column; /* Stack image and details vertically */
+  height: 100%; /* Ensure it takes full height of the list item */
 }
 
 .product-image-container {
@@ -51,6 +58,10 @@
 
 .product-details {
   padding: 1.25rem;
+  background-color: #F5F2F8;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow details section to grow and fill space */
 }
 
 .product-name {
@@ -62,7 +73,8 @@
 .product-description {
   color: #666;
   font-size: 0.9rem;
-  margin: 0 0 1rem 0;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -103,12 +115,11 @@
   gap: 1rem; /* This gap is between .filter-row-search-recs and the category/store filters */
   margin-bottom: 2rem;
   padding: 1rem;
-  background: #F9F6FD;
+  background: #ECE4F1;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Row for search bar and recommendations button */
 /* Row for search bar and recommendations button */
 .filter-row-search-recs {
   display: flex;
@@ -126,6 +137,11 @@
   /* You might add a very small padding to .filters itself if you want a global inner space,
      but this won't create the specific grey strip between label and input */
   /* padding: 0.1rem 0; */ /* Example: Small vertical padding within each filter group */
+  padding-left: 1rem; /* Add left padding to filter groups */
+  padding-top: 0.5rem; /* Add space above the label */
+  padding-right: 0.5rem;
+  padding-bottom: 0.7rem;
+  border-radius: 8px;
 }
 
 .search-bar.filters {
@@ -144,7 +160,7 @@
      The background of .filters-container will show if this margin is > 0
      and if .filters has no background of its own.
   */
-  margin-bottom: 0.1rem; /* Let's try a very small value first. If still too much grey, change to 0 */
+  margin-bottom: 0; /* Remove space between label and input/select */
   /* Or, for absolutely no space: */
   /* margin-bottom: 0; */
 }
@@ -292,4 +308,33 @@
     width: 100%;
     box-sizing: border-box;
   }
+}
+
+.add-to-cart-btn {
+  margin-top: auto; /* Push button to the bottom */
+}
+
+/* Optional: Ensure global box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* --- Section Divider Style --- */
+.section-divider {
+  position: relative; /* Needed for absolute positioning of SVG */
+  width: 100%; /* Make container full width */
+  height: 100px; /* Adjust height of the divider area as needed */
+  margin: 0; /* Remove margin from the div itself */
+  overflow: hidden; /* Hide overflowing parts of the SVG */
+  background-color: #97C9BA; /* Changed background to green */
+}
+
+.section-divider svg {
+  display: block; /* Remove extra space below SVG */
+  width: 100%; /* SVG spans full width */
+  height: 100%; /* SVG takes full height of container */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  fill: var(--light-purple); /* Match the background color of the section below */
 }
