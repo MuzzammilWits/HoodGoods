@@ -136,12 +136,6 @@ export class StoreService {
     if (!store) throw new NotFoundException('Store not found');
     store.isActive = true;
     await this.storeRepository.save(store);
-
-    await this.productRepository.update(
-      { storeId: storeId },          // condition: all products with this storeId
-      { isActive: true }      // update: set isActiveProduct = true
-    );
-
     return store;
   }
 
