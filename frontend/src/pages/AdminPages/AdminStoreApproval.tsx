@@ -93,32 +93,6 @@ const AdminStoreApproval = () => {
         }
     };
 
-    const handleApproveProduct = async (productId: number) => {
-        try {
-            await axios.patch(`${baseUrl}/products/${productId}/approve`);
-            setProducts(products.filter(p => p.prodId !== productId));
-            showNotification('Product approved successfully!', 'success');
-        } catch (error) {
-            showNotification(
-                error instanceof Error ? error.message : 'Failed to approve product',
-                'error'
-            );
-        }
-    };
-
-    const handleRejectProduct = async (productId: number) => {
-        try {
-            await axios.delete(`${baseUrl}/products/${productId}`);
-            setProducts(products.filter(p => p.prodId !== productId));
-            showNotification('Product rejected successfully!', 'success');
-        } catch (error) {
-            showNotification(
-                error instanceof Error ? error.message : 'Failed to reject product',
-                'error'
-            );
-        }
-    };
-
     if (loading) {
         return (
             <div className="loading-container">
@@ -169,7 +143,7 @@ const AdminStoreApproval = () => {
                 className="approve-button"
                 onClick={e => {
                   e.stopPropagation();
-                  handleApprove(store.storeId);
+                  handleApproveStore(store.storeId);
                  
                 }}
               >
@@ -179,7 +153,7 @@ const AdminStoreApproval = () => {
                 className="reject-button"
                 onClick={e => {
                   e.stopPropagation();
-                  handleReject(store.storeId);
+                  handleRejectStore(store.storeId);
                 }}
               >
                 Reject Store
