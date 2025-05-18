@@ -239,9 +239,17 @@ main {
   color: white;
 }
 
+.checkout-btn:hover {
+  background-color: #3b1a54; /* Slightly darker purple */
+}
+
 .clear-cart-btn {
   background-color: #ccc;
   color: black;
+}
+
+.clear-cart-btn:hover {
+  background-color: #7fbbaa; /* Slightly darker teal */
 }
 
 /* Standardized Add to Cart Button Styles */
@@ -273,4 +281,29 @@ main {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Optional: Ensure global box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* --- Section Divider Style --- */
+.section-divider {
+  position: relative; /* Needed for absolute positioning of SVG */
+  width: 100%; /* Make container full width */
+  height: 100px; /* Adjust height of the divider area as needed */
+  margin: 0; /* Remove margin from the div itself */
+  overflow: hidden; /* Hide overflowing parts of the SVG */
+  background-color: #97C9BA; /* Changed background to green */
+}
+
+.section-divider svg {
+  display: block; /* Remove extra space below SVG */
+  width: 100%; /* SVG spans full width */
+  height: 100%; /* SVG takes full height of container */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  fill: var(--light-purple); /* Match the background color of the section below */
 }

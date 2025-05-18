@@ -37,9 +37,9 @@ section, article, aside, main, figure, figcaption, ul, li {
 }
 
 .hero-title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: var(--white, rgb(255, 255, 255)); /* Consider changing if background changes */
+  font-size: 3.5rem; /* Reverted to original size */
+  font-weight: 700; /* Reverted to original weight */
+  color: var(--white, rgb(255, 255, 255)); /* Keep color specific */
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
@@ -167,7 +167,7 @@ section, article, aside, main, figure, figcaption, ul, li {
     align-items: start;
   }
   .hero-images { top: 1rem; }
-  .hero-title { font-size: 3.0rem; }
+  .hero-title { font-size: 3.0rem; } /* Reverted responsive size */
   .hero-text { font-size: 1.1rem; }
   .hero-section {
     padding: 7rem 0;
@@ -206,9 +206,7 @@ section, article, aside, main, figure, figcaption, ul, li {
     max-width: 100%;
     font-size: 1.1rem;
   }
-  .hero-title {
-    font-size: 2.6rem;
-  }
+  .hero-title { font-size: 2.6rem; } /* Reverted responsive size */
   .hero-buttons {
     align-self: center;
   }
