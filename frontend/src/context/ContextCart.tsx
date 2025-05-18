@@ -3,7 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 
 // --- INTERFACE CHANGES ---
-interface CartItemUI {
+export interface CartItemUI {
   cartID?: number;
   productId: number;
   productName: string;
