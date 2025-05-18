@@ -128,120 +128,68 @@ const AdminStoreApproval = () => {
         );
     }
 
-    return (
-        <div className="admin-stores-container">
-            {notification.type && (
-                <div className={`notification-modal ${notification.type}`}>
-                    {notification.message}
-                </div>
-            )}
+   return (
+    <div className="admin-stores-container">
 
-            <header className="admin-header">
-                <h1>Store Management</h1>
-                <button 
-                    onClick={() => navigate('/admin-dashboard')} 
-                    className="back-button"
-                >
-                    Back to Dashboard
-                </button>
-            </header>
-
-            <div className="stores-list">
-                {stores.map(store => (
-                    <div className="store-card" key={store.storeId}>
-                        <div 
-                            className="store-header" 
-                            onClick={() => toggleStoreExpand(store.storeId)}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="store-info">
-                                <h2>{store.storeName}</h2>
-                                <div className="pricing-info">
-                                    <div>
-                                        <h4>Standard Service</h4>
-                                        <p>Price: {store.standardPrice?.toFixed(2) || 'N/A'}</p>
-                                        <p>Time: {store.standardTime || 'Not specified'}</p>
-                                    </div>
-                                    <div>
-                                        <h4>Express Service</h4>
-                                        <p>Price: {store.expressPrice?.toFixed(2) || 'N/A'}</p>
-                                        <p>Time: {store.expressTime || 'Not specified'}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`toggle-arrow ${expandedStoreId === store.storeId ? 'expanded' : ''}`}>
-                                ▼
-                            </div>
-
-                            <div className="store-actions">
-                                <button
-                                    className="approve-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleApproveStore(store.storeId);
-                                    }}
-                                >
-                                    Approve Store
-                                </button>
-                                <button
-                                    className="reject-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRejectStore(store.storeId);
-                                    }}
-                                >
-                                    Reject Store
-                                </button>
-                            </div>
-                        </div>
-                        
-                        {expandedStoreId === store.storeId && store.products && (
-                            <div className="store-products">
-                                <h3>Pending Products</h3>
-                                {store.products.length === 0 ? (
-                                    <p className="no-products">No pending products.</p>
-                                ) : (
-                                    <div className="products-grid">
-                                        {store.products.map(product => (
-                                            <div className="product-card" key={product.prodId}>
-                                                <div className="product-image">
-                                                    <img
-                                                        src={product.imageUrl || '/placeholder-product.jpg'}
-                                                        alt={product.name}
-                                                    />
-                                                </div>
-                                                <div className="product-details">
-                                                    <h4>{product.name}</h4>
-                                                    <p>R{product.price.toFixed(2)}</p>
-                                                    <p>{product.category}</p>
-                                                    <div className="product-actions">
-                                                        <button
-                                                            className="edit-button2"
-                                                            onClick={() => handleApproveProduct(product.prodId)}
-                                                        >
-                                                            Approve
-                                                        </button>
-                                                        <button
-                                                            className="remove-button2"
-                                                            onClick={() => handleRejectProduct(product.prodId)}
-                                                        >
-                                                            Reject
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+        {/* Notification Modal */}
+        {notification.type && (
+        <div className={`notification-modal ${notification.type}`}>
+          {notification.message}
         </div>
-    );
+        )}
+
+      <header className="admin-header">
+        <h1>Store Management</h1>
+        <button onClick={() => navigate('/admin-dashboard')} className="back-button">
+          Back to Dashboard
+        </button>
+      </header>
+
+      <div className="stores-list">
+        {stores.map(store => (
+          <div className="store-card" key={store.storeId}>
+            <div className="store-header" onClick={() => toggleStoreExpand(store.storeId)}>
+              <div className="store-info">
+                <h2>{store.storeName}</h2>
+                <div className="pricing-info">
+                  <div>
+                    <h4>Standard Service</h4>
+                    <p>Price: {store.standardPrice}</p>
+                    <p>Time: {store.standardTime || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h4>Express Service</h4>
+                    <p>Price: {store.expressPrice}</p>
+                    <p>Time: {store.expressTime || 'Not specified'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="approve-button"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleApprove(store.storeId);
+                 
+                }}
+              >
+                Approve Store
+              </button>
+              <button
+                className="reject-button"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleReject(store.storeId);
+                }}
+              >
+                Reject Store
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default AdminStoreApproval;
