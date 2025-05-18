@@ -1,7 +1,7 @@
 // src/pages/AdminProductApproval.tsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate , Link} from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import  { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import './AdminProductApproval.css'; 
 
@@ -27,7 +27,7 @@ const AdminProductApproval = () => {
   const navigate = useNavigate();
   //const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   //const [actionError, setActionError] = useState<string | null>(null);
-  const { getAccessTokenSilently } = useAuth0();
+  // const { getAccessTokenSilently } = useAuth0();
 
   //const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0();
 
@@ -68,9 +68,9 @@ const AdminProductApproval = () => {
     fetchInactiveProducts();
   }, []);
 
-  const handleEdit = (prodId: number) => {
-    navigate(`/admin/products/edit/${prodId}`);
-  };
+  // const handleEdit = (prodId: number) => {
+  //   navigate(`/admin/products/edit/${prodId}`);
+  // };
 
   const handleApproveProduct = async (productId: number) => {
     try {
@@ -98,17 +98,17 @@ const AdminProductApproval = () => {
 
 
   //Admin Remove Product - Start
-  const handleRemove = async (prodId: number) => {
-    if (!window.confirm('Are you sure you want to remove this product?')) return;
+  // const handleRemove = async (prodId: number) => {
+  //   if (!window.confirm('Are you sure you want to remove this product?')) return;
     
-    try {
-      await axios.delete(`${baseUrl}/products/${prodId}`);
-      setProducts(products.filter(p => p.prodId !== prodId));
-    } catch (err) {
-      setError('Failed to remove product');
-      console.error(err);
-    }
-  };
+  //   try {
+  //     await axios.delete(`${baseUrl}/products/${prodId}`);
+  //     setProducts(products.filter(p => p.prodId !== prodId));
+  //   } catch (err) {
+  //     setError('Failed to remove product');
+  //     console.error(err);
+  //   }
+  // };
 
   
   //Admin Remove Product - End
