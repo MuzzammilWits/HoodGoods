@@ -28,9 +28,14 @@ export class ProductsService {
     return query.getMany();
   }
 
-  async findAllInactive(): Promise<Product[]> {
+ async findAllInactive(): Promise<Product[]> {
     return this.productRepository.find({ 
-      where: { isActive: false },
+      where: { 
+        isActive: false,
+        store: {isActive: true,
+        },
+       },
+       relations: ['store'],
       order: { prodId: 'ASC' }
     });
   }
