@@ -47,12 +47,18 @@ main {
 
 .btn {
   padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
   font-weight: 500;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  border: none; /* Added to ensure consistency */
-  cursor: pointer; /* Added */
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary {
@@ -67,14 +73,16 @@ main {
 }
 
 .btn-secondary {
-  background-color: white;
+  background-color: #97C9BA;
   /* Uses the defined secondary color */
-  color: var(--secondary-color);
+  color: white;
   border: 1px solid var(--secondary-color);
 }
 
 .btn-secondary:hover {
-  background-color: #f5f5f5;
+  background-color: #7ab8a5;
+  color: white;
+  border-color: #7ab8a5;
 }
 
 .flex-center {
@@ -234,4 +242,35 @@ main {
 .clear-cart-btn {
   background-color: #ccc;
   color: black;
+}
+
+/* Standardized Add to Cart Button Styles */
+.add-to-cart-btn,
+.btn-add-to-cart-recommendation {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #432C53;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-to-cart-btn:hover:not(:disabled),
+.btn-add-to-cart-recommendation:hover:not(:disabled) {
+  background-color: #97c9ba;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-to-cart-btn:disabled,
+.btn-add-to-cart-recommendation:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
