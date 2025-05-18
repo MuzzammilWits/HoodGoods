@@ -35,6 +35,7 @@ const mockBuyerUser: User = { userID: mockUserId, role: 'buyer' };
 const mockSellerUser: User = { userID: mockSellerUserId, role: 'seller' };
 
 const mockStore: Store = {
+  isActive: false,
   storeId: mockStoreId,
   userId: mockSellerUserId, // Belongs to the seller
   storeName: 'Mock Seller Store',
