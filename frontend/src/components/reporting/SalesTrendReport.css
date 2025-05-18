@@ -47,14 +47,14 @@
   padding: 11px 15px;
   border: none;
   border-radius: 5px;
-  background-color: #2ecc71; /* Green */
+  background-color: #97C9BA; /* Logo green */
   color: white;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
 .sales-trend-report .csv-button:hover {
-  background-color: #27ae60;
+  background-color: #7ab8a5; /* Darker green on hover */
 }
 
 /* Styles for the PDF button specifically within the sales trend report */
@@ -62,14 +62,14 @@
   padding: 11px 15px;
   border: none;
   border-radius: 5px;
-  background-color: #e74c3c; /* Red */
+  background-color: #97C9BA; /* Logo green */
   color: white;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
 .sales-trend-report .pdf-button:hover {
-    background-color: #c0392b; /* Darker red on hover */
+    background-color: #7ab8a5; /* Darker green on hover */
 }
 
 

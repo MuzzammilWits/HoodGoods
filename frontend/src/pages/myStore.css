@@ -9,13 +9,13 @@ main.my-store-container {
 
 header.store-header {
   display: flex;
-  flex-wrap: wrap;           /* Allow wrapping */
-  justify-content: space-between; /* Less relevant now, but keep */
-  align-items: flex-start;
-  gap: 20px;                  /* Gap between wrapped rows */
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  flex-direction: column;
+  gap: 1rem; /* This gap is between .filter-row-search-recs and the category/store filters */
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: #ECE4F1;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 .info-message {
   color: #0066cc;
@@ -87,7 +87,7 @@ header.store-header h1 {
 /* === Delivery Info Section Styles === */
 section.delivery-info-display {
   background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  border: 1px solid #432C53;
   border-radius: 6px;
   padding: 15px 20px;
   margin-top: 15px; /* Add some space below the H1 */
@@ -208,75 +208,84 @@ button:disabled, .button-link:disabled, a.button-secondary:disabled, a.button-pr
 }
 
 /* Primary action button */
-.button-primary,
-.add-product-toggle-btn {
+.button-primary {
   background-color: #97c9ba;
   color: white;
   border-color: #97c9ba;
 }
-.button-primary:hover:not(:disabled),
-.add-product-toggle-btn:hover:not(:disabled) {
+button.add-product-toggle-btn {
+  background-color: var(--primary-color);
+  color: #ffffff !important;
+  border: 1px solid var(--primary-color);
+}
+.button-primary:hover:not(:disabled) {
   background-color: #432C53;
   border-color: #432C53;
   color: white;
+}
+.add-product-toggle-btn:hover:not(:disabled) {
+    background-color: #362245;
+    border-color: #362245;
+    color: #ffffff;
 }
 
 /* Secondary action button */
 .button-secondary,
 .view-orders-btn {
-  background-color: #6c757d;
+  background-color: #97C9BA;
   color: white;
-  border-color: #6c757d;
+  border-color: transparent;
 }
 .button-secondary:hover:not(:disabled),
 .view-orders-btn:hover:not(:disabled) {
-  background-color: #5a6268;
-  border-color: #545b62;
+  background-color: #7ab8a5;
+  border-color: #7ab8a5;
   color: white;
   text-decoration: none;
 }
 
 /* Confirm action button */
 .button-confirm {
-  background-color: #97c9ba;
+  background-color: var(--primary-color);
   color: white;
-  border-color: #97c9ba;
+  border-color: var(--primary-color);
 }
 .button-confirm:hover:not(:disabled) {
-  background-color: #432C53;
-  border-color: #432C53;
+  background-color: #362245;
+  border-color: #362245;
   color: white;
 }
 
 /* Cancel action button */
 .button-cancel {
-  background-color: #6c757d;
+  background-color: #97c9ba;
   color: white;
-  border-color: #6c757d;
+  border-color: #97c9ba;
 }
 .button-cancel:hover:not(:disabled) {
-  background-color: #5a6268;
-  border-color: #545b62;
+  background-color: #7ab8a5;
+  border-color: #7ab8a5;
+  color: white;
 }
 
 /* Edit action button */
 .button-edit {
-  background-color: #e9ecef;
-  color: #495057;
-  border-color: #ced4da;
+  background-color: var(--primary-color); /* Match App.css .btn-primary */
+  color: white;
+  border-color: var(--primary-color); /* Set border color to match */
   padding: 5px 10px;
   font-size: 0.85rem;
 }
 .button-edit:hover:not(:disabled) {
-  background-color: #dee2e6;
-  border-color: #adb5bd;
-  color: #212529;
+  background-color: #362245; /* Match App.css .btn-primary:hover */
+  border-color: #362245; /* Match hover border color */
+  color: white;
 }
 
 /* Delete action button */
 .button-delete {
   background-color: #f8d7da;
-  color: #721c24;
+  color: #e74c3c;
   border-color: #f5c6cb;
   padding: 5px 10px;
   font-size: 0.85rem;
@@ -604,7 +613,7 @@ dialog.edit-product-modal footer.modal-actions { justify-content: flex-end; }
 
 /* Delete Confirmation Modal Specific Styles */
 dialog.delete-confirm-modal { max-width: 450px; text-align: center; }
-dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #721c24; font-size: 1.4rem; font-weight: 600; }
+dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #e74c3c; font-size: 1.4rem; font-weight: 600; }
 dialog.delete-confirm-modal p { margin-bottom: 10px; line-height: 1.6; color: #444; }
 dialog.delete-confirm-modal p strong { color: #333; font-weight: 600; }
 dialog.delete-confirm-modal footer.modal-actions { justify-content: center; gap: 15px; }
@@ -678,4 +687,24 @@ dialog.delete-confirm-modal footer.modal-actions { justify-content: center; gap:
   form.delivery-edit-form label { margin-top: 12px; font-size: 0.9rem; }
   form.delivery-edit-form input, form.delivery-edit-form select { padding: 8px 10px; font-size: 0.95rem; }
   section.add-product-form-section form input, section.add-product-form-section form textarea, section.add-product-form-section form select, dialog.edit-product-modal form input, dialog.edit-product-modal form textarea, dialog.edit-product-modal form select { padding: 8px 10px; font-size: 0.95rem; }
+}
+
+/* --- Section Divider Style --- */
+.section-divider {
+  position: relative; /* Needed for absolute positioning of SVG */
+  width: 100%; /* Make container full width */
+  height: 100px; /* Adjust height of the divider area as needed */
+  margin: 0; /* Remove margin from the div itself */
+  overflow: hidden; /* Hide overflowing parts of the SVG */
+  background-color: #97C9BA; /* Changed background to green */
+}
+
+.section-divider svg {
+  display: block; /* Remove extra space below SVG */
+  width: 100%; /* SVG spans full width */
+  height: 100%; /* SVG takes full height of container */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  fill: var(--light-purple); /* Match the background color of the section below */
 }

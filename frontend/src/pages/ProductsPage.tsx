@@ -149,7 +149,7 @@ const ProductsPage = () => {
       }
       if (searchQuery) {
         const normalizedQuery = normalizeSearchTerm(searchQuery);
-        if (normalizedQuery) {
+        if (normalizedQuery) {``
           result = result.filter(product => {
             const searchFields = [
               product.name,

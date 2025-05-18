@@ -40,37 +40,59 @@
 
 .report-nav {
   display: flex;
-  justify-content: center;
-  gap: 10px; /* Reduced gap slightly */
-  margin-bottom: 30px; /* Increased margin to separate from content */
-  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  width: 100%;
+  gap: 0; /* Keep gap at 0, use margin for spacing */
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #ddd;
 }
 
 .report-nav button {
-  padding: 10px 20px;
+  flex-grow: 1;
+  text-align: center;
+  padding: 10px 30px;
   font-size: 1em;
   cursor: pointer;
-  border: 1px solid #ddd; /* Subtle border */
-  border-radius: 5px; /* More pronounced pill shape */
-  background-color: #ffffff; /* White background */
-  color: #432C53; /* Primary blue */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  background-color: #ffffff;
+  color: #432C53;
+  box-shadow: none;
   transition: all 0.2s ease-in-out;
   font-weight: 500;
+  margin-bottom: -1px;
+  margin-right: 5px; /* Add margin to the right */
+}
+
+.report-nav button:last-child {
+  margin-right: 0; /* Remove margin from the last button */
 }
 
 .report-nav button:hover {
-  background-color: #f8f9fa; /* Very light grey on hover */
-  border-color: #bdc3c7; /* Slightly darker border on hover */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  background-color: #f8f9fa;
+  border-color: #bdc3c7;
+  box-shadow: none;
 }
 
 .report-nav button.active {
-  background-color: #432C53; /* Primary blue for active */
+  background-color: #432C53;
   color: white;
-  font-weight: bold;
-  border-color: #432C53; /* Darker blue border for active */
-  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.4); /* Subtle shadow for active button */
+  border-color: #432C53;
+  font-weight: 700;
+  border-bottom: 1px solid #432C53; /* Match bottom border with background */
+}
+
+.report-nav button:not(.active) {
+  background-color: white;
+  color: #432C53;
+  border-color: #ddd;
+}
+
+.report-nav button:not(.active):hover {
+  background-color: #362245;
+  border-color: #362245;
+  color: white;
 }
 
 .report-nav button:disabled {
