@@ -1,8 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react'; // Removed fireEvent, act, within as they are not used in the remaining tests
+import { render, screen } from '@testing-library/react'; // Removed fireEvent, act, within as they are not used in the remaining tests
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, beforeEach, afterEach, test, expect } from 'vitest';
-import axios, { AxiosError as RealAxiosError } from 'axios';
+import axios from 'axios';
 
 import CheckoutPage from './CheckoutPage';
 
