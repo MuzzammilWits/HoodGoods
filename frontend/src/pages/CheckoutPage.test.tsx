@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'; // Removed fireEvent, act, within as they are not used in the remaining tests
+import { render, screen} from '@testing-library/react'; // Removed fireEvent, act, within as they are not used in the remaining tests
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, beforeEach, afterEach, test, expect } from 'vitest';
@@ -19,10 +19,10 @@ type CartItemDisplay = {
 };
 // StoreDeliveryDetails and DeliveryOptionsResponse might not be strictly needed if not used in remaining tests,
 // but keeping them for context if defaultCartItems or other helpers still reference them.
-interface StoreDeliveryDetails {
-  storeId: string; standardPrice: number; standardTime: string; expressPrice: number; expressTime: string; storeName?: string;
-}
-type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
+// interface StoreDeliveryDetails {
+//   storeId: string; standardPrice: number; standardTime: string; expressPrice: number; expressTime: string; storeName?: string;
+// }
+// type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
 
 
 // --- Mocks ---
@@ -76,9 +76,9 @@ const defaultCartItems: CartItemDisplay[] = [ // Kept for context if setDefaultC
   { id: '2', productId: 2, name: 'Product B', productName: 'Product B', price: 50, productPrice: 50, quantity: 2, storeName: 'Store One', storeId: 'store1' },
 ];
 // defaultDeliveryOptions is no longer directly used by the remaining tests, but kept if helpers expect it
-const defaultDeliveryOptions: DeliveryOptionsResponse = {
-  store1: { storeId: 'store1', storeName: 'Store One', standardPrice: 50, standardTime: '3-5 days', expressPrice: 100, expressTime: '1-2 days' },
-};
+// const defaultDeliveryOptions: DeliveryOptionsResponse = {
+//   store1: { storeId: 'store1', storeName: 'Store One', standardPrice: 50, standardTime: '3-5 days', expressPrice: 100, expressTime: '1-2 days' },
+// };
 
 const setDefaultCartMock = (overrides = {}) => {
   mockUseCart.mockReturnValue({
