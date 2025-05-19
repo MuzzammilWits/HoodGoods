@@ -7,7 +7,7 @@ import {
 } from '../types'; // Assuming your types are in 'src/types/index.ts' or 'src/types/reporting.ts' and exported
 
 // The VITE_API_URL should point to your NestJS backend's /api route
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const REPORTING_ENDPOINT_PREFIX = `${API_BASE_URL}/reporting`;
 
 
