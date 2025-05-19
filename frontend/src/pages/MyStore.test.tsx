@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BrowserRouter, Link } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -47,7 +47,8 @@ const mockStoreData = {
     standardPrice: 50,
     standardTime: '3-5',
     expressPrice: 100,
-    expressTime: '0-1'
+    expressTime: '0-1',
+    isActiveStore: 'true'
   },
   products: [
     {
@@ -73,6 +74,18 @@ const mockStoreData = {
       storeId: '123',
       userId: 'user-123',
       isActive: true
+    },
+    {
+      prodId: 3,
+      name: 'Test Product 3',
+      description: 'Another test product 3',
+      price: 34.50,
+      category: 'Art',
+      productquantity: 5,
+      imageUrl: 'https://example.com/test3.jpg',
+      storeId: '123',
+      userId: 'user-123',
+      isActive: false
     }
   ]
 };
@@ -305,4 +318,75 @@ describe('MyStore Component', () => {
       expect(mockSessionStorage.getItem).toHaveBeenCalledWith('access_token');
     });
   });
+
+  it('renders Add New Product button', async () => {
+    renderWithRouter(<MyStore />);
+    
+    // Wait for the store data to load to ensure the button appears after fetch
+    await waitFor(() => {
+      expect(screen.getByText('Add New Product')).toBeInTheDocument();
+    });
+    
+    // Alternatively, if the button has a role and accessible name:
+    const addButton = screen.getByRole('button', { name: /add new product/i });
+    expect(addButton).toBeInTheDocument();
+  });
+
+  it('renders product with prodId=3 in the Pending Approval section', async () => {
+    renderWithRouter(<MyStore />);
+    
+    // Wait for store data and products to load
+    await waitFor(() => {
+      // Check the "Pending Approval" section exists
+      const pendingHeading = screen.getByRole('heading', { name: /pending approval/i });
+      const pendingSection = pendingHeading.parentElement;
+      expect(pendingSection).toBeInTheDocument();
+      
+      // Inside that section, check if product with name "Test Product 3" appears
+      expect(within(pendingSection!).getByText('Test Product 3')).toBeInTheDocument();
+    });
+  });
+
+  it('renders products correctly in Approved and Pending Approval sections', async () => {
+    renderWithRouter(<MyStore />);
+    
+    await waitFor(() => {
+      // Check "Approved Products" section
+      const approvedHeading = screen.getByRole('heading', { name: /approved products/i });
+      const approvedSection = approvedHeading.parentElement;
+      expect(approvedSection).toBeInTheDocument();
+      
+      // prodId=1 and prodId=2 products names appear in Approved section
+      expect(within(approvedSection!).getByText('Test Product 1')).toBeInTheDocument();
+      expect(within(approvedSection!).getByText('Test Product 2')).toBeInTheDocument();
+    
+    });
+  });
+
+  it('shows no pending products message when pendingProducts is empty', async () => {
+    // Mock fetch to return store data with no pending products
+    const mockNoPendingProductsData = {
+      store: mockStoreData.store,
+      products: mockStoreData.products.filter(product => product.isActive) // only active products, no pending
+    };
+  
+    // Override fetch mock for this test
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockNoPendingProductsData,
+    });
+  
+    renderWithRouter(<MyStore />);
+  
+    await waitFor(() => {
+      // Check the "Pending Approval" heading is present
+      const pendingHeading = screen.getByRole('heading', { name: /pending approval/i });
+      const pendingSection = pendingHeading.parentElement;
+      expect(pendingSection).toBeInTheDocument();
+  
+      // Check the message appears when no pending products exist
+      expect(within(pendingSection!).getByText(/no products pending approval/i)).toBeInTheDocument();
+    });
+  });
+
 });
