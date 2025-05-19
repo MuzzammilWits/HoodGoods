@@ -55,7 +55,7 @@ describe('recommendationsService', () => {
     vi.resetAllMocks(); // Reset spies, axios mock calls, etc.
 
     // Use vi.stubEnv to set the environment variable for Vite
-    vi.stubEnv('VITE_API_BASE_URL', MOCK_API_URL);
+    vi.stubEnv('VITE_API_BASE_URLs', MOCK_API_URL);
 
     // Dynamically import the module AFTER stubbing the environment.
     // This ensures the API_URL constant in your service gets the mocked value.
