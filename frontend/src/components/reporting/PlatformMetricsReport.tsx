@@ -271,9 +271,13 @@ const PlatformMetricsReport: React.FC = () => {
           {selectedPeriod === 'custom' && (
             <input type="date" aria-label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginLeft: '10px' }}/>
           )}
-           <button onClick={fetchReportData} style={{ marginLeft: '10px' }} disabled={loading}>Refresh Report</button>
         </div>
       </header>
+
+      {/* New container for the Refresh Report button */}
+      <div className="refresh-button-container">
+         <button onClick={fetchReportData} className="refresh-report-btn" disabled={loading}>Refresh Report</button>
+      </div>
 
       <section className="card-body report-content">
         <div className="report-summary">

@@ -579,428 +579,428 @@ const MyStore: React.FC = () => {
 
     return (
         <>
-            <main className="my-store-container">
-                <header className="store-header">
-                    <h1>{store.storeName}</h1>
-                    <section className="delivery-info-display">
-                        <div className="delivery-header">
-                            <h2>Delivery Settings</h2>
-                            {!isEditingDelivery && (
-                                <button onClick={toggleEditDeliveryMode} className="button-edit button-small">
-                                    Edit Delivery
-                                </button>
-                            )}
-                        </div>
-                        {!isEditingDelivery ? (
-                            <Fragment>
-                                <dl>
-                                    <Fragment> 
-                                        <dt>Standard Delivery:</dt> 
-                                        <dd> 
-                                            {store.standardPrice !== null ? `R${store.standardPrice.toFixed(2)}` : 'N/A'} 
-                                            {' / '} 
-                                            {store.standardTime ? `${store.standardTime} Days` : 'N/A'} 
-                                        </dd> 
-                                    </Fragment>
-                                    <Fragment> 
-                                        <dt>Express Delivery:</dt> 
-                                        <dd> 
-                                            {store.expressPrice !== null ? `R${store.expressPrice.toFixed(2)}` : 'N/A'} 
-                                            {' / '} 
-                                            {store.expressTime ? `${store.expressTime} Days` : 'N/A'} 
-                                        </dd> 
-                                    </Fragment>
-                                </dl>
-                                <p className="info-text">Use the 'Edit Delivery' button to modify settings.</p>
-                            </Fragment>
-                        ) : (
-                            <form onSubmit={(e) => { e.preventDefault(); handleSaveDeliveryOptions(); }} className="delivery-edit-form">
-                                {actionError && !isSavingDelivery && <p className="error-message">{actionError}</p>}
-                                <label htmlFor="editStdPrice">Standard Price (R):</label> 
-                                <input 
-                                    id="editStdPrice" 
-                                    type="number" 
-                                    value={editDeliveryData.standardPrice} 
-                                    onChange={(e) => handleDeliveryFieldChange('standardPrice', e.target.value)} 
-                                    required 
-                                    min="0" 
-                                    step="0.01" 
-                                    disabled={isSavingDelivery}
-                                />
-                                <label htmlFor="editStdTime">Standard Time:</label> 
-                                <select 
-                                    id="editStdTime" 
-                                    value={editDeliveryData.standardTime} 
-                                    onChange={(e) => handleDeliveryFieldChange('standardTime', e.target.value)} 
-                                    required 
-                                    disabled={isSavingDelivery}
-                                > 
-                                    {STANDARD_DELIVERY_TIMES.map(time => 
-                                        <option key={`std-${time}`} value={time}>{time} Days</option>
-                                    )} 
-                                </select>
-                                <label htmlFor="editExpPrice">Express Price (R):</label> 
-                                <input 
-                                    id="editExpPrice" 
-                                    type="number" 
-                                    value={editDeliveryData.expressPrice} 
-                                    onChange={(e) => handleDeliveryFieldChange('expressPrice', e.target.value)} 
-                                    required 
-                                    min="0" 
-                                    step="0.01" 
-                                    disabled={isSavingDelivery}
-                                />
-                                <label htmlFor="editExpTime">Express Time:</label> 
-                                <select 
-                                    id="editExpTime" 
-                                    value={editDeliveryData.expressTime} 
-                                    onChange={(e) => handleDeliveryFieldChange('expressTime', e.target.value)} 
-                                    required 
-                                    disabled={isSavingDelivery}
-                                > 
-                                    {EXPRESS_DELIVERY_TIMES.map(time => 
-                                        <option key={`exp-${time}`} value={time}>{time} Days</option>
-                                    )} 
-                                </select>
-                                <div className="delivery-edit-actions"> 
-                                    <button type="submit" className="button-confirm" disabled={isSavingDelivery}>
-                                        {isSavingDelivery ? 'Saving...' : 'Save Delivery Options'}
-                                    </button> 
-                                    <button type="button" className="button-cancel" onClick={handleCancelEditDelivery} disabled={isSavingDelivery}>
-                                        Cancel
-                                    </button> 
-                                </div>
-                            </form>
-                        )}
-                    </section>
-                    <div className="store-actions-container">
-                        <button 
-                            onClick={() => setIsAddingProductFormVisible(prev => !prev)} 
-                            className="add-product-toggle-btn"
-                        >
-                            {isAddingProductFormVisible ? 'Cancel Add Product' : 'Add New Product'}
-                        </button>
-                        <Link to="/seller-dashboard" className="button-secondary view-orders-btn">
-                            View Current Orders
-                        </Link>
-                        <Link to="/seller/analytics" className="button-secondary view-orders-btn">
-                            View Analytics
-                        </Link>
-                    </div>
-                </header>
-
-                {isAddingProductFormVisible && (
-                    <section className="add-product-form-section">
-                        <h2>Add New Product</h2>
-                        <form onSubmit={(e)=>{e.preventDefault();handleAddProduct();}}>
-                            {actionError && !isAddingProductLoading && <p className="error-message">{actionError}</p>}
-                            <label htmlFor="newProdName">Product Name:</label>
-                            <input 
-                                id="newProdName" 
-                                type="text" 
-                                value={newProduct.name??''} 
-                                onChange={(e)=>handleNewProductChange('name',e.target.value)} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            />
-                            <label htmlFor="newProdDesc">Description:</label>
-                            <textarea 
-                                id="newProdDesc" 
-                                value={newProduct.description??''} 
-                                onChange={(e)=>handleNewProductChange('description',e.target.value)} 
-                                disabled={isAddingProductLoading}
-                            ></textarea>
-                            <label htmlFor="newProdPrice">Price (R):</label>
-                            <input 
-                                id="newProdPrice" 
-                                type="number" 
-                                value={newProduct.price??''} 
-                                onChange={(e)=>handleNewProductChange('price',e.target.value)} 
-                                required 
-                                min="0.01" 
-                                step="0.01" 
-                                disabled={isAddingProductLoading}
-                            />
-                            <label htmlFor="newProdQuantity">Quantity:</label>
-                            <input 
-                                id="newProdQuantity" 
-                                type="number" 
-                                value={newProduct.productQuantity??''} 
-                                onChange={(e)=>handleNewProductChange('productQuantity',e.target.value)} 
-                                required 
-                                min="0" 
-                                step="1" 
-                                disabled={isAddingProductLoading}
-                            />
-                            <label htmlFor="newProdCategory">Category:</label>
-                            <select 
-                                id="newProdCategory" 
-                                value={newProduct.category??''} 
-                                onChange={(e)=>handleNewProductChange('category',e.target.value)} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            >
-                                <option value="" disabled>Select...</option>
-                                {PRODUCT_CATEGORIES.map(cat=>
-                                    <option key={cat} value={cat}>{cat}</option>
-                                )}
-                            </select>
-                            <label htmlFor="newProdImage">Image:</label>
-                            <input 
-                                id="newProdImage" 
-                                type="file" 
-                                accept="image/*" 
-                                ref={addFileInputRef} 
-                                onChange={handleNewProductImageChange} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            />
-                            {newProduct.imagePreviewUrl && 
-                                <img src={newProduct.imagePreviewUrl} alt="Preview" className="image-preview"/>
-                            }
-                            <footer className="add-form-actions">
-                                <button 
-                                    type="submit" 
-                                    disabled={isAddingProductLoading} 
-                                    className="button-confirm"
-                                >
-                                    {isAddingProductLoading?'Adding...':'Confirm Add Product'}
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={()=>{
-                                        setIsAddingProductFormVisible(false);  // Fixed this line
-                                        setActionError(null); 
-                                        setNewProduct({
-                                            name: '', 
-                                            description: '', 
-                                            price: '', 
-                                            category: '', 
-                                            productQuantity: '', 
-                                            imageFile: null, 
-                                            imagePreviewUrl: null
-                                        }); 
-                                        if (addFileInputRef.current) addFileInputRef.current.value = '';
-                                    }} 
-                                    disabled={isAddingProductLoading} 
-                                    className="button-cancel"
-                                >
-                                    Cancel
-                                </button>
-                            </footer>
-                        </form>
-                    </section>
-                )}
-
-                <section className="products-section">
-                    {/* Approved Products Section */}
-                    <div className="product-status-section">
-                        <h2>Approved Products</h2>
-                        {approvedProducts.length > 0 ? (
-                            <ul className="product-list">
-                                {approvedProducts.map((product) => (
-                                    <li key={product.prodId} className="product-list-item">
-                                        <article className="product-card active">
-                                            <div className="product-image">
-                                                <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
-                                            </div>
-                                            <div className="product-details">
-                                                <h3>{product.name}</h3>
-                                                <p className="product-description">{product.description}</p>
-                                                <p className="product-category">Category: {product.category}</p>
-                                                <p className="product-price">Price: R{product.price.toFixed(2)}</p>
-                                                <p className="product-quantity">Quantity: {product.productquantity}</p>
-                                            </div>
-                                            <div className="product-actions">
-                                                <button 
-                                                    onClick={()=>openEditModal(product)} 
-                                                    className="button-edit" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    onClick={()=>handleDeleteClick(product)} 
-                                                    className="button-delete" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
-                                                </button>
-                                            </div>
-                                        </article>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="no-products">No approved products yet.</p>
+        <main className="my-store-container">
+            <header className="store-header">
+                <h1>{store.storeName}</h1>
+                <section className="delivery-info-display">
+                    <div className="delivery-header">
+                        <h2>Delivery Settings</h2>
+                        {!isEditingDelivery && (
+                            <button onClick={toggleEditDeliveryMode} className="button-edit button-small">
+                                Edit Delivery
+                            </button>
                         )}
                     </div>
-
-                    {/* Pending Products Section */}
-                    <div className="product-status-section">
-                        <h2>Pending Approval</h2>
-                        {pendingProducts.length > 0 ? (
-                            <ul className="product-list">
-                                {pendingProducts.map((product) => (
-                                    <li key={product.prodId} className="product-list-item">
-                                        <article className="product-card inactive">
-                                            <span className="product-status-badge">Pending Approval</span>
-                                            <div className="product-image">
-                                                <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
-                                            </div>
-                                            <div className="product-details">
-                                                <h3>{product.name}</h3>
-                                                <p className="product-description">{product.description}</p>
-                                                <p className="product-category">Category: {product.category}</p>
-                                                <p className="product-price">Price: R{product.price.toFixed(2)}</p>
-                                                <p className="product-quantity">Quantity: {product.productquantity}</p>
-                                            </div>
-                                            <div className="product-actions">
-                                                <button 
-                                                    onClick={()=>openEditModal(product)} 
-                                                    className="button-edit" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    onClick={()=>handleDeleteClick(product)} 
-                                                    className="button-delete" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
-                                                </button>
-                                            </div>
-                                        </article>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="no-products">No products pending approval.</p>
-                        )}
-                    </div>
-                </section>
-
-                <dialog ref={editDialogRef} onClose={closeEditModal} className="edit-product-modal">
-                    {editingProduct && (
-                        <form onSubmit={(e)=>{e.preventDefault();handleUpdateProduct();}} method="dialog">
-                            <h2>Edit: {editingProduct.name}</h2>
-                            {actionError && !isSavingEdit && (
-                                <p className={actionError.includes("review") ? "info-message" : "error-message"}>
-                                    {actionError}
-                                </p>
-                            )}
-                            <label htmlFor="editProdName">Name:</label>
-                            <input 
-                                id="editProdName" 
-                                type="text" 
-                                value={editFormData.name||''} 
-                                onChange={(e)=>handleEditFormChange('name',e.target.value)} 
-                                required 
-                                disabled={isSavingEdit}
-                            />
-                            <label htmlFor="editProdDesc">Description:</label>
-                            <textarea 
-                                id="editProdDesc" 
-                                value={editFormData.description||''} 
-                                onChange={(e)=>handleEditFormChange('description',e.target.value)} 
-                                disabled={isSavingEdit}
-                            ></textarea>
-                            <label htmlFor="editProdPrice">Price (R):</label>
-                            <input 
-                                id="editProdPrice" 
-                                type="number" 
-                                value={editFormData.price||''} 
-                                onChange={(e)=>handleEditFormChange('price',e.target.value)} 
-                                required 
-                                min="0.01" 
-                                step="0.01" 
-                                disabled={isSavingEdit}
-                            />
-                            <label htmlFor="editProdQuantity">Quantity:</label>
-                            <input 
-                                id="editProdQuantity" 
-                                type="number" 
-                                value={editFormData.productQuantity||''} 
-                                onChange={(e)=>handleEditFormChange('productQuantity',e.target.value)} 
-                                required 
-                                min="0" 
-                                step="1" 
-                                disabled={isSavingEdit}
-                            />
-                            <label htmlFor="editProdCategory">Category:</label>
-                            <select 
-                                id="editProdCategory" 
-                                value={editFormData.category||''} 
-                                onChange={(e)=>handleEditFormChange('category',e.target.value)} 
-                                required 
-                                disabled={isSavingEdit}
-                            >
-                                <option value="" disabled>Select...</option>
-                                {PRODUCT_CATEGORIES.map(cat=>
-                                    <option key={cat} value={cat}>{cat}</option>
-                                )}
-                            </select>
-                            <label htmlFor="editProdImage">Replace Image (Optional):</label>
-                            <input 
-                                id="editProdImage" 
-                                type="file" 
-                                accept="image/*" 
-                                ref={editFileInputRef} 
-                                onChange={handleEditImageChange} 
-                                disabled={isSavingEdit}
-                            />
-                            {editProductPreview && 
-                                <img src={editProductPreview} alt="Preview" className="image-preview"/>
-                            }
-                            <footer className="modal-actions">
-                                <button 
-                                    type="submit" 
-                                    disabled={isSavingEdit} 
-                                    className="button-confirm"
-                                >
-                                    {isSavingEdit?'Saving...':'Save Changes'}
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={closeEditModal} 
-                                    disabled={isSavingEdit} 
-                                    className="button-cancel"
-                                >
-                                    Cancel
-                                </button>
-                            </footer>
-                        </form>
-                    )}
-                </dialog>
-
-                <dialog ref={deleteDialogRef} onClose={closeDeleteModal} className="delete-confirm-modal">
-                    {productToDelete && (
+                    {!isEditingDelivery ? (
                         <Fragment>
-                            <h2>Confirm Deletion</h2>
-                            <p>Are you sure you want to delete the product: <strong>{productToDelete.name}</strong>?</p>
-                            <p>This action cannot be undone.</p>
-                            {actionError && <p className="error-message">{actionError}</p>}
-                            <footer className="modal-actions">
-                                <button 
-                                    onClick={executeDeleteProduct} 
-                                    className="button-delete" 
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? 'Deleting...' : 'Yes, Delete Product'}
-                                </button>
-                                <button 
-                                    onClick={closeDeleteModal} 
-                                    className="button-cancel" 
-                                    disabled={isDeleting}
-                                >
-                                    Cancel
-                                </button>
-                            </footer>
+                            <dl>
+                                <Fragment> 
+                                    <dt>Standard Delivery:</dt> 
+                                    <dd> 
+                                        {store.standardPrice !== null ? `R${store.standardPrice.toFixed(2)}` : 'N/A'} 
+                                        {' / '} 
+                                        {store.standardTime ? `${store.standardTime} Days` : 'N/A'} 
+                                    </dd> 
+                                </Fragment>
+                                <Fragment> 
+                                    <dt>Express Delivery:</dt> 
+                                    <dd> 
+                                        {store.expressPrice !== null ? `R${store.expressPrice.toFixed(2)}` : 'N/A'} 
+                                        {' / '} 
+                                        {store.expressTime ? `${store.expressTime} Days` : 'N/A'} 
+                                    </dd> 
+                                </Fragment>
+                            </dl>
+                            <p className="info-text">Use the 'Edit Delivery' button to modify settings.</p>
                         </Fragment>
+                    ) : (
+                        <form onSubmit={(e) => { e.preventDefault(); handleSaveDeliveryOptions(); }} className="delivery-edit-form">
+                            {actionError && !isSavingDelivery && <p className="error-message">{actionError}</p>}
+                            <label htmlFor="editStdPrice">Standard Price (R):</label> 
+                            <input 
+                                id="editStdPrice" 
+                                type="number" 
+                                value={editDeliveryData.standardPrice} 
+                                onChange={(e) => handleDeliveryFieldChange('standardPrice', e.target.value)} 
+                                required 
+                                min="0" 
+                                step="0.01" 
+                                disabled={isSavingDelivery}
+                            />
+                            <label htmlFor="editStdTime">Standard Time:</label> 
+                            <select 
+                                id="editStdTime" 
+                                value={editDeliveryData.standardTime} 
+                                onChange={(e) => handleDeliveryFieldChange('standardTime', e.target.value)} 
+                                required 
+                                disabled={isSavingDelivery}
+                            > 
+                                {STANDARD_DELIVERY_TIMES.map(time => 
+                                    <option key={`std-${time}`} value={time}>{time} Days</option>
+                                )} 
+                            </select>
+                            <label htmlFor="editExpPrice">Express Price (R):</label> 
+                            <input 
+                                id="editExpPrice" 
+                                type="number" 
+                                value={editDeliveryData.expressPrice} 
+                                onChange={(e) => handleDeliveryFieldChange('expressPrice', e.target.value)} 
+                                required 
+                                min="0" 
+                                step="0.01" 
+                                disabled={isSavingDelivery}
+                            />
+                            <label htmlFor="editExpTime">Express Time:</label> 
+                            <select 
+                                id="editExpTime" 
+                                value={editDeliveryData.expressTime} 
+                                onChange={(e) => handleDeliveryFieldChange('expressTime', e.target.value)} 
+                                required 
+                                disabled={isSavingDelivery}
+                            > 
+                                {EXPRESS_DELIVERY_TIMES.map(time => 
+                                    <option key={`exp-${time}`} value={time}>{time} Days</option>
+                                )} 
+                            </select>
+                            <div className="delivery-edit-actions"> 
+                                <button type="submit" className="button-confirm" disabled={isSavingDelivery}>
+                                    {isSavingDelivery ? 'Saving...' : 'Save Delivery Options'}
+                                </button> 
+                                <button type="button" className="button-cancel" onClick={handleCancelEditDelivery} disabled={isSavingDelivery}>
+                                    Cancel
+                                </button> 
+                            </div>
+                        </form>
                     )}
-                </dialog>
-            </main>
+                </section>
+                <div className="store-actions-container">
+                    <button 
+                        onClick={() => setIsAddingProductFormVisible(prev => !prev)} 
+                            className="add-product-toggle-btn"
+                    >
+                        {isAddingProductFormVisible ? 'Cancel Add Product' : 'Add New Product'}
+                    </button>
+                    <Link to="/seller-dashboard" className="button-secondary view-orders-btn">
+                        View Current Orders
+                    </Link>
+                    <Link to="/seller/analytics" className="button-secondary view-orders-btn">
+                        View Analytics
+                    </Link>
+                </div>
+            </header>
+
+            {isAddingProductFormVisible && (
+                <section className="add-product-form-section">
+                    <h2>Add New Product</h2>
+                    <form onSubmit={(e)=>{e.preventDefault();handleAddProduct();}}>
+                        {actionError && !isAddingProductLoading && <p className="error-message">{actionError}</p>}
+                        <label htmlFor="newProdName">Product Name:</label>
+                        <input 
+                            id="newProdName" 
+                            type="text" 
+                            value={newProduct.name??''} 
+                            onChange={(e)=>handleNewProductChange('name',e.target.value)} 
+                            required 
+                            disabled={isAddingProductLoading}
+                        />
+                        <label htmlFor="newProdDesc">Description:</label>
+                        <textarea 
+                            id="newProdDesc" 
+                            value={newProduct.description??''} 
+                            onChange={(e)=>handleNewProductChange('description',e.target.value)} 
+                            disabled={isAddingProductLoading}
+                        ></textarea>
+                        <label htmlFor="newProdPrice">Price (R):</label>
+                        <input 
+                            id="newProdPrice" 
+                            type="number" 
+                            value={newProduct.price??''} 
+                            onChange={(e)=>handleNewProductChange('price',e.target.value)} 
+                            required 
+                            min="0.01" 
+                            step="0.01" 
+                            disabled={isAddingProductLoading}
+                        />
+                        <label htmlFor="newProdQuantity">Quantity:</label>
+                        <input 
+                            id="newProdQuantity" 
+                            type="number" 
+                            value={newProduct.productQuantity??''} 
+                            onChange={(e)=>handleNewProductChange('productQuantity',e.target.value)} 
+                            required 
+                            min="0" 
+                            step="1" 
+                            disabled={isAddingProductLoading}
+                        />
+                        <label htmlFor="newProdCategory">Category:</label>
+                        <select 
+                            id="newProdCategory" 
+                            value={newProduct.category??''} 
+                            onChange={(e)=>handleNewProductChange('category',e.target.value)} 
+                            required 
+                            disabled={isAddingProductLoading}
+                        >
+                            <option value="" disabled>Select...</option>
+                            {PRODUCT_CATEGORIES.map(cat=>
+                                <option key={cat} value={cat}>{cat}</option>
+                            )}
+                        </select>
+                        <label htmlFor="newProdImage">Image:</label>
+                        <input 
+                            id="newProdImage" 
+                            type="file" 
+                            accept="image/*" 
+                            ref={addFileInputRef} 
+                            onChange={handleNewProductImageChange} 
+                            required 
+                            disabled={isAddingProductLoading}
+                        />
+                        {newProduct.imagePreviewUrl && 
+                            <img src={newProduct.imagePreviewUrl} alt="Preview" className="image-preview"/>
+                        }
+                        <footer className="add-form-actions">
+                            <button 
+                                type="submit" 
+                                disabled={isAddingProductLoading} 
+                                className="button-confirm"
+                            >
+                                {isAddingProductLoading?'Adding...':'Confirm Add Product'}
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={()=>{
+                                    setIsAddingProductFormVisible(false);  // Fixed this line
+                                    setActionError(null); 
+                                    setNewProduct({
+                                        name: '', 
+                                        description: '', 
+                                        price: '', 
+                                        category: '', 
+                                        productQuantity: '', 
+                                        imageFile: null, 
+                                        imagePreviewUrl: null
+                                    }); 
+                                    if (addFileInputRef.current) addFileInputRef.current.value = '';
+                                }} 
+                                disabled={isAddingProductLoading} 
+                                className="button-cancel"
+                            >
+                                Cancel
+                            </button>
+                        </footer>
+                    </form>
+                </section>
+            )}
+
+            <section className="products-section">
+                {/* Approved Products Section */}
+                <div className="product-status-section">
+                    <h2>Approved Products</h2>
+                    {approvedProducts.length > 0 ? (
+                        <ul className="product-list">
+                            {approvedProducts.map((product) => (
+                                <li key={product.prodId} className="product-list-item">
+                                    <article className="product-card active">
+                                        <div className="product-image">
+                                            <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
+                                        </div>
+                                        <div className="product-details">
+                                            <h3>{product.name}</h3>
+                                            <p className="product-description">{product.description}</p>
+                                            <p className="product-category">Category: {product.category}</p>
+                                            <p className="product-price">Price: R{product.price.toFixed(2)}</p>
+                                            <p className="product-quantity">Quantity: {product.productquantity}</p>
+                                        </div>
+                                        <div className="product-actions">
+                                            <button 
+                                                onClick={()=>openEditModal(product)} 
+                                                className="button-edit" 
+                                                disabled={isDeleting || isSavingEdit || isAddingProductLoading}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button 
+                                                onClick={()=>handleDeleteClick(product)} 
+                                                className="button-delete" 
+                                                disabled={isDeleting || isSavingEdit || isAddingProductLoading}
+                                            >
+                                                {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
+                                            </button>
+                                        </div>
+                                    </article>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="no-products">No approved products yet.</p>
+                    )}
+                </div>
+
+                {/* Pending Products Section */}
+                <div className="product-status-section">
+                    <h2>Pending Approval</h2>
+                    {pendingProducts.length > 0 ? (
+                        <ul className="product-list">
+                            {pendingProducts.map((product) => (
+                                <li key={product.prodId} className="product-list-item">
+                                    <article className="product-card inactive">
+                                        <span className="product-status-badge">Pending Approval</span>
+                                        <div className="product-image">
+                                            <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
+                                        </div>
+                                        <div className="product-details">
+                                            <h3>{product.name}</h3>
+                                            <p className="product-description">{product.description}</p>
+                                            <p className="product-category">Category: {product.category}</p>
+                                            <p className="product-price">Price: R{product.price.toFixed(2)}</p>
+                                            <p className="product-quantity">Quantity: {product.productquantity}</p>
+                                        </div>
+                                        <div className="product-actions">
+                                            <button 
+                                                onClick={()=>openEditModal(product)} 
+                                                className="button-edit" 
+                                                disabled={isDeleting || isSavingEdit || isAddingProductLoading}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button 
+                                                onClick={()=>handleDeleteClick(product)} 
+                                                className="button-delete" 
+                                                disabled={isDeleting || isSavingEdit || isAddingProductLoading}
+                                            >
+                                                {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
+                                            </button>
+                                        </div>
+                                    </article>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="no-products">No products pending approval.</p>
+                    )}
+                </div>
+            </section>
+
+            <dialog ref={editDialogRef} onClose={closeEditModal} className="edit-product-modal">
+                {editingProduct && (
+                    <form onSubmit={(e)=>{e.preventDefault();handleUpdateProduct();}} method="dialog">
+                        <h2>Edit: {editingProduct.name}</h2>
+                        {actionError && !isSavingEdit && (
+                            <p className={actionError.includes("review") ? "info-message" : "error-message"}>
+                                {actionError}
+                            </p>
+                        )}
+                        <label htmlFor="editProdName">Name:</label>
+                        <input 
+                            id="editProdName" 
+                            type="text" 
+                            value={editFormData.name||''} 
+                            onChange={(e)=>handleEditFormChange('name',e.target.value)} 
+                            required 
+                            disabled={isSavingEdit}
+                        />
+                        <label htmlFor="editProdDesc">Description:</label>
+                        <textarea 
+                            id="editProdDesc" 
+                            value={editFormData.description||''} 
+                            onChange={(e)=>handleEditFormChange('description',e.target.value)} 
+                            disabled={isSavingEdit}
+                        ></textarea>
+                        <label htmlFor="editProdPrice">Price (R):</label>
+                        <input 
+                            id="editProdPrice" 
+                            type="number" 
+                            value={editFormData.price||''} 
+                            onChange={(e)=>handleEditFormChange('price',e.target.value)} 
+                            required 
+                            min="0.01" 
+                            step="0.01" 
+                            disabled={isSavingEdit}
+                        />
+                        <label htmlFor="editProdQuantity">Quantity:</label>
+                        <input 
+                            id="editProdQuantity" 
+                            type="number" 
+                            value={editFormData.productQuantity||''} 
+                            onChange={(e)=>handleEditFormChange('productQuantity',e.target.value)} 
+                            required 
+                            min="0" 
+                            step="1" 
+                            disabled={isSavingEdit}
+                        />
+                        <label htmlFor="editProdCategory">Category:</label>
+                        <select 
+                            id="editProdCategory" 
+                            value={editFormData.category||''} 
+                            onChange={(e)=>handleEditFormChange('category',e.target.value)} 
+                            required 
+                            disabled={isSavingEdit}
+                        >
+                            <option value="" disabled>Select...</option>
+                            {PRODUCT_CATEGORIES.map(cat=>
+                                <option key={cat} value={cat}>{cat}</option>
+                            )}
+                        </select>
+                        <label htmlFor="editProdImage">Replace Image (Optional):</label>
+                        <input 
+                            id="editProdImage" 
+                            type="file" 
+                            accept="image/*" 
+                            ref={editFileInputRef} 
+                            onChange={handleEditImageChange} 
+                            disabled={isSavingEdit}
+                        />
+                        {editProductPreview && 
+                            <img src={editProductPreview} alt="Preview" className="image-preview"/>
+                        }
+                        <footer className="modal-actions">
+                            <button 
+                                type="submit" 
+                                disabled={isSavingEdit} 
+                                className="button-confirm"
+                            >
+                                {isSavingEdit?'Saving...':'Save Changes'}
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={closeEditModal} 
+                                disabled={isSavingEdit} 
+                                className="button-cancel"
+                            >
+                                Cancel
+                            </button>
+                        </footer>
+                    </form>
+                )}
+            </dialog>
+
+            <dialog ref={deleteDialogRef} onClose={closeDeleteModal} className="delete-confirm-modal">
+                {productToDelete && (
+                    <Fragment>
+                        <h2>Confirm Deletion</h2>
+                        <p>Are you sure you want to delete the product: <strong>{productToDelete.name}</strong>?</p>
+                        <p>This action cannot be undone.</p>
+                        {actionError && <p className="error-message">{actionError}</p>}
+                        <footer className="modal-actions">
+                            <button 
+                                onClick={executeDeleteProduct} 
+                                className="button-delete" 
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? 'Deleting...' : 'Yes, Delete Product'}
+                            </button>
+                            <button 
+                                onClick={closeDeleteModal} 
+                                className="button-cancel" 
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </button>
+                        </footer>
+                    </Fragment>
+                )}
+            </dialog>
+        </main>
 
             {/* --- Section Divider before Footer --- */}
             <div className="section-divider">
