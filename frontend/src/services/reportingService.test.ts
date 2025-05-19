@@ -18,7 +18,7 @@ import {
   AdminPlatformMetricsData,
 } from '../types';
 
-const ACTUAL_SERVICE_API_BASE_URL = 'http://localhost:3000/api';
+const ACTUAL_SERVICE_API_BASE_URL = import.meta.env.VITE_API_BASE_URLs || 'http://localhost:3000/api';
 const EXPECTED_REPORTING_ENDPOINT_PREFIX = `${ACTUAL_SERVICE_API_BASE_URL}/reporting`;
 
 vi.mock('import.meta', () => ({
