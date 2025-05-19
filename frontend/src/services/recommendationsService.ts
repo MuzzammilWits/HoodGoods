@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { PopularProductDto } from '../types'; // Or '../types/recommendations' if you created a separate file
 
-const API_URL = import.meta.env.VITE_API_BASE_URLs ;
+const API_URL = import.meta.env.VITE_API_BASE_URLs || 'http://localhost:3000/api';
 
 export const getBestSellingProducts = async (
   limit?: number,
