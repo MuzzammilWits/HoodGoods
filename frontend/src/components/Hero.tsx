@@ -147,7 +147,7 @@ const Hero: React.FC = () => {
         // ... (your commented out image grid) ...
         </main> */}
         {/* Add the logo image to the right column */}
-        <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" />
+ {/* <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" /> */}
       </article>
     </section>
   );
