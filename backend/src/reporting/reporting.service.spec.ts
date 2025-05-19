@@ -1,7 +1,6 @@
-// backend/src/reporting/reporting.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, Between, Brackets, ObjectLiteral } from 'typeorm';
+import { Repository, Between, ObjectLiteral } from 'typeorm';
 import { ReportingService } from './reporting.service';
 import { Store } from '../store/entities/store.entity';
 import { Product } from '../products/entities/product.entity';
@@ -272,10 +271,10 @@ describe('ReportingService', () => {
     (orderRepository.find as jest.Mock).mockResolvedValue([]);
 
 
-    jest.spyOn(service['logger'], 'log').mockImplementation(() => {});
-    jest.spyOn(service['logger'], 'warn').mockImplementation(() => {});
-    jest.spyOn(service['logger'], 'error').mockImplementation(() => {});
-    jest.spyOn(service['logger'], 'debug').mockImplementation(() => {});
+    jest.spyOn(service['logger'], 'log').mockImplementation(() => { });
+    jest.spyOn(service['logger'], 'warn').mockImplementation(() => { });
+    jest.spyOn(service['logger'], 'error').mockImplementation(() => { });
+    jest.spyOn(service['logger'], 'debug').mockImplementation(() => { });
 
     resetDateMock();
   });
@@ -342,6 +341,29 @@ describe('ReportingService', () => {
       expect(productRepository.find).toHaveBeenCalledWith({ where: { storeId, isActive: true } });
     });
 
+    it('should handle products with different stock levels', async () => {
+      const mockProducts: any[] = [
+        { prodId: '1', name: 'Product A', productquantity: 0, price: 10, category: 'Category 1' },
+        { prodId: '2', name: 'Product B', productquantity: 3, price: 20, category: 'Category 2' },
+        { prodId: '3', name: 'Product C', productquantity: 10, price: 30, category: 'Category 1' },
+      ];
+      productRepository.find!.mockResolvedValue(mockProducts);
+
+      const result = await service.getInventoryStatus(auth0UserId);
+
+      expect(result.outOfStockItems).toEqual([{ prodId: '1', productName: 'Product A' }]);
+      expect(result.lowStockItems).toEqual([{ prodId: '2', productName: 'Product B', currentQuantity: 3 }]);
+      expect(result.fullInventory).toEqual([
+        { prodId: '1', productName: 'Product A', quantity: 0, price: 10, category: 'Category 1' },
+        { prodId: '2', productName: 'Product B', quantity: 3, price: 20, category: 'Category 2' },
+        { prodId: '3', productName: 'Product C', quantity: 10, price: 30, category: 'Category 1' },
+      ]);
+      expect(result.stockBreakdown.totalProducts).toBe(3);
+      expect(result.stockBreakdown.outOfStockPercent).toBeCloseTo(33.33, 2);
+      expect(result.stockBreakdown.lowStockPercent).toBeCloseTo(33.33, 2);
+      expect(result.stockBreakdown.inStockPercent).toBeCloseTo(33.33, 2);
+    });
+
 
 
     it('should throw InternalServerErrorException if productRepository.find fails', async () => {
@@ -394,21 +416,20 @@ describe('ReportingService', () => {
       expect(result.summary.endDate).toBe('2024-05-19'); // Display end date
       expect(result.reportGeneratedAt).toEqual(mockReportDate);
     });
-    // ... other getSalesTrends tests from previous response
-        it('should return empty sales data and zero summary if no orders found', async () => {
-        mockQueryBuilder.getRawMany.mockResolvedValue([]);
-        const result = await service.getSalesTrends(auth0UserId, TimePeriod.DAILY, '2024-05-10');
+    it('should return empty sales data and zero summary if no orders found', async () => {
+      mockQueryBuilder.getRawMany.mockResolvedValue([]);
+      const result = await service.getSalesTrends(auth0UserId, TimePeriod.DAILY, '2024-05-10');
 
-        expect(result.salesData).toEqual([]);
-        expect(result.summary.totalSales).toBe(0);
-        expect(result.summary.averageDailySales).toBe(0);
-        expect(result.summary.startDate).toBe('2024-05-10'); // from calculateDateRange
-        expect(result.summary.endDate).toBe('2024-05-10'); // Display end date for daily is same as start
+      expect(result.salesData).toEqual([]);
+      expect(result.summary.totalSales).toBe(0);
+      expect(result.summary.averageDailySales).toBe(0);
+      expect(result.summary.startDate).toBe('2024-05-10'); // from calculateDateRange
+      expect(result.summary.endDate).toBe('2024-05-10'); // Display end date for daily is same as start
     });
 
     it('should throw InternalServerErrorException on query builder error', async () => {
-        mockQueryBuilder.getRawMany.mockRejectedValue(new Error('DB Query Failed'));
-        await expect(service.getSalesTrends(auth0UserId, TimePeriod.MONTHLY)).rejects.toThrow(InternalServerErrorException);
+      mockQueryBuilder.getRawMany.mockRejectedValue(new Error('DB Query Failed'));
+      await expect(service.getSalesTrends(auth0UserId, TimePeriod.MONTHLY)).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -433,22 +454,22 @@ describe('ReportingService', () => {
     });
 
     afterEach(() => {
-        resetDateMock();
-        jest.restoreAllMocks(); // Important to restore spies on internal methods like calculateDateRange
+      resetDateMock();
+      jest.restoreAllMocks(); // Important to restore spies on internal methods like calculateDateRange
     });
 
     it('should fetch metrics for "allTime", determining date range from orders', async () => {
       (orderRepository.find as jest.Mock)
         .mockImplementation(({ order }) => {
-          if (order && order.orderDate === 'ASC') return Promise.resolve([{ orderDate: new Date('2023-01-01T10:00:00Z')} as Order]);
-          if (order && order.orderDate === 'DESC') return Promise.resolve([{ orderDate: new Date('2023-12-31T10:00:00Z')} as Order]);
+          if (order && order.orderDate === 'ASC') return Promise.resolve([{ orderDate: new Date('2023-01-01T10:00:00Z') } as Order]);
+          if (order && order.orderDate === 'DESC') return Promise.resolve([{ orderDate: new Date('2023-12-31T10:00:00Z') } as Order]);
           return Promise.resolve([]);
         });
 
       const result = await service.getAdminPlatformMetrics('allTime');
 
       expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', undefined); // No date condition for sum
-      expect(orderRepository.count).toHaveBeenCalledWith({where: undefined}); // No date condition for count
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: undefined }); // No date condition for count
       expect(userRepository.count).toHaveBeenCalledWith({ where: { role: 'seller' } });
       expect(userRepository.count).toHaveBeenCalledWith({ where: { role: 'buyer' } });
       expect(result.overallMetrics.totalSales).toBe(10000);
@@ -472,7 +493,7 @@ describe('ReportingService', () => {
       const result = await service.getAdminPlatformMetrics(TimePeriod.DAILY, customDate);
 
       expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) });
-      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) }});
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) } });
       expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.orderDate >= :queryStartDate', { queryStartDate });
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.orderDate < :queryEndDate', { queryEndDate });
 
@@ -482,20 +503,151 @@ describe('ReportingService', () => {
       expect(result.periodCovered.startDate).toBe('2024-03-15');
       expect(result.periodCovered.endDate).toBe('2024-03-15'); // Display end date for daily
     });
-    // ... other getAdminPlatformMetrics tests
+
+    it('should fetch metrics for a specific TimePeriod (WEEKLY) with customStartDateStr', async () => {
+      const customDate = '2024-03-15'; // A Friday
+      const queryStartDate = new Date(Date.UTC(2024, 2, 11)); // Monday before 2024-03-15
+      const queryEndDate = new Date(Date.UTC(2024, 2, 18));   // Monday after 2024-03-15
+
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { date: '2024-03-11', totalSales: '100.00', totalOrders: '1' },
+        { date: '2024-03-15', totalSales: '200.00', totalOrders: '2' },
+      ]);
+
+      const result = await service.getAdminPlatformMetrics(TimePeriod.WEEKLY, customDate);
+
+      expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) });
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) } });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.orderDate >= :queryStartDate', { queryStartDate });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.orderDate < :queryEndDate', { queryEndDate });
+      expect(result.overallMetrics.totalSales).toBe(10000);
+      expect(result.timeSeriesMetrics).toEqual([
+        { date: '2024-03-11', totalSales: 100, totalOrders: 1 },
+        { date: '2024-03-15', totalSales: 200, totalOrders: 2 },
+      ]);
+      expect(result.periodCovered.period).toBe(TimePeriod.WEEKLY);
+      expect(result.periodCovered.startDate).toBe('2024-03-11');
+      expect(result.periodCovered.endDate).toBe('2024-03-17');
+    });
+
+    it('should fetch metrics for a specific TimePeriod (MONTHLY) with customStartDateStr', async () => {
+      const customDate = '2024-03-15';
+      const queryStartDate = new Date(Date.UTC(2024, 2, 1));
+      const queryEndDate = new Date(Date.UTC(2024, 3, 1));
+
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { date: '2024-03-01', totalSales: '300.00', totalOrders: '3' },
+        { date: '2024-03-15', totalSales: '400.00', totalOrders: '4' },
+      ]);
+
+      const result = await service.getAdminPlatformMetrics(TimePeriod.MONTHLY, customDate);
+
+      expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) });
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) } });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.orderDate >= :queryStartDate', { queryStartDate });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.orderDate < :queryEndDate', { queryEndDate });
+      expect(result.overallMetrics.totalSales).toBe(10000);
+      expect(result.timeSeriesMetrics).toEqual([
+        { date: '2024-03-01', totalSales: 300, totalOrders: 3 },
+        { date: '2024-03-15', totalSales: 400, totalOrders: 4 },
+      ]);
+      expect(result.periodCovered.period).toBe(TimePeriod.MONTHLY);
+      expect(result.periodCovered.startDate).toBe('2024-03-01');
+      expect(result.periodCovered.endDate).toBe('2024-03-31');
+    });
+
+    it('should fetch metrics for a specific TimePeriod (YEARLY) with customStartDateStr', async () => {
+      const customDate = '2024-03-15';
+      const queryStartDate = new Date(Date.UTC(2024, 0, 1));
+      const queryEndDate = new Date(Date.UTC(2025, 0, 1));
+
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { date: '2024-01-10', totalSales: '600.00', totalOrders: '6' },
+        { date: '2024-05-20', totalSales: '700.00', totalOrders: '7' },
+      ]);
+
+      const result = await service.getAdminPlatformMetrics(TimePeriod.YEARLY, customDate);
+
+      expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) });
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) } });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.orderDate >= :queryStartDate', { queryStartDate });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.orderDate < :queryEndDate', { queryEndDate });
+      expect(result.overallMetrics.totalSales).toBe(10000);
+      expect(result.timeSeriesMetrics).toEqual([
+        { date: '2024-01-10', totalSales: 600, totalOrders: 6 },
+        { date: '2024-05-20', totalSales: 700, totalOrders: 7 },
+      ]);
+      expect(result.periodCovered.period).toBe(TimePeriod.YEARLY);
+      expect(result.periodCovered.startDate).toBe('2024-01-01');
+      expect(result.periodCovered.endDate).toBe('2024-12-31');
+    });
+
+    it('should handle custom date ranges', async () => {
+      const customStartDate = '2024-03-01';
+      const customEndDate = '2024-03-15';
+      const queryStartDate = new Date('2024-03-01T00:00:00.000Z');
+      const queryEndDate = new Date('2024-03-16T00:00:00.000Z');
+
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { date: '2024-03-05', totalSales: '800.00', totalOrders: '8' },
+        { date: '2024-03-10', totalSales: '900.00', totalOrders: '9' },
+      ]);
+
+      const result = await service.getAdminPlatformMetrics('custom', customStartDate, customEndDate);
+
+      expect(orderRepository.sum).toHaveBeenCalledWith('grandTotal', { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) });
+      expect(orderRepository.count).toHaveBeenCalledWith({ where: { orderDate: Between(queryStartDate, new Date(queryEndDate.getTime() - 1)) } });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.orderDate >= :queryStartDate', { queryStartDate });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.orderDate < :queryEndDate', { queryEndDate });
+      expect(result.overallMetrics.totalSales).toBe(10000);
+      expect(result.timeSeriesMetrics).toEqual([
+        { date: '2024-03-05', totalSales: 800, totalOrders: 8 }, { date: '2024-03-10', totalSales: 900, totalOrders: 9 },
+      ]);
+      expect(result.periodCovered.period).toBe('custom');
+      expect(result.periodCovered.startDate).toBe('2024-03-01');
+      expect(result.periodCovered.endDate).toBe('2024-03-15');
+    });
   });
 
   describe('generateCSVData', () => {
-    // ... generateCSVData tests from previous response (they are generally fine)
+
+
+    it('should handle commas and quotes in data values by escaping them', () => {
+      const data = [
+        { id: 1, name: 'Product, C', price: 10, description: 'A "good" product' },
+      ];
+      const expectedCsv =
+        'id,name,price,description\n1,"Product, C",10,"A ""good"" product"';
+      expect(service.generateCSVData(data, 'Products')).toBe(expectedCsv);
+    });
+
+    it('should handle newlines in data values', () => {
+      const data = [
+        { id: 1, name: 'Product\nNew Line', price: 10, },
+      ];
+      const expectedCsv = 'id,name,price\n1,"Product\nNew Line",10';
+      expect(service.generateCSVData(data, 'Products')).toBe(expectedCsv);
+    });
+
     it('should return "No data available" for empty data', () => {
       expect(service.generateCSVData([], 'Test Report')).toBe('No data available for Test Report report.');
     });
 
-
-     it('should handle null and undefined values as empty strings in CSV', () => {
+    it('should handle null and undefined values as empty strings in CSV', () => {
       const data = [{ id: 1, name: null, price: undefined, notes: "note" }];
       const expectedCsv = 'id,name,price,notes\n1,,,note';
       expect(service.generateCSVData(data, 'Nullable Report')).toBe(expectedCsv);
     });
+
+    it('should handle empty object', () => {
+      const data = [{}];
+      const expectedCsv = '\n';
+      expect(service.generateCSVData(data, 'Empty Report')).toBe(expectedCsv);
+    });
+
+
+
+
   });
 });
+
