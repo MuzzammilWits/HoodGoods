@@ -13,6 +13,7 @@ section.create-store-container { /* Updated selector */
 .loading-container { /* Added for consistency */
   text-align: center;
   padding: 50px 0;
+  
   color: #666;
 }
 
@@ -24,7 +25,10 @@ section.create-store-container > header { /* Updated selector */
 
 section.create-store-container > header h1 { /* Updated selector */
   margin-bottom: 20px;
-  color: #333;
+  color: var(--primary-color, #432C53); /* Use our purple color */
+  font-size: 2.5rem; /* Make it bigger, slightly adjusted from previous attempt */
+  /* Keeping the font-family to see if it's applied */
+  font-weight: 600;
 }
 
 section.create-store-container > header .instructions { /* Updated selector */
@@ -51,11 +55,127 @@ section.create-store-container > header .instructions { /* Updated selector */
   border-radius: 4px;
 }
 
+/* Styles for main section headings (Store Name, Delivery Options, Products) */
+h2.section-heading {
+  color: var(--primary-color, #432C53); /* Use primary color variable or fallback purple */
+  font-size: 1.5rem; /* Standard size for main section headings */
+  font-weight: 600; /* Keep consistent bolding */
+  margin-top: 30px; /* Space above the heading */
+  margin-bottom: 15px; /* Space below the heading */
+  text-align: left; /* Align the heading left */
+}
+
+/* Remove specific styling from the old h2 locations if they somehow persist */
+.store-info-section h2,
+fieldset.delivery-options h2,
+.product-list-section h2 {
+    display: none; /* Hide if they still render */
+}
+
+/* Adjust top margin for the content sections that follow the new headings */
+.store-info-section,
+fieldset.delivery-options,
+.product-list-section {
+    margin-top: 0; /* Remove default top margin as space is handled by heading's margin-bottom */
+}
+
+/* Styles for section headings */
+.store-info-section h2,
+fieldset.delivery-options h2,
+.product-list-section h2 {
+  color: var(--primary-color, #432C53); /* Use primary color variable or fallback purple */
+  font-size: 1.5rem; /* Standard size for main section headings */
+  font-weight: 600; /* Keep consistent bolding */
+  margin-bottom: 20px; /* Consistent space below heading */
+  text-align: left; /* Align left within their sections */
+}
+
+/* Ensure the legend styling for delivery options is removed now that it's an h2 */
+fieldset.delivery-options legend {
+    display: none; /* Hide the original legend if it somehow still renders */
+}
 
 /* Styles assuming StoreInfoForm/ProductList use these internally */
 /* These might need adjustment based on child component structure */
 .form-group {
   margin-bottom: 20px;
+}
+
+/* Remove default fieldset border in store info section */
+.store-info-section fieldset.form-group {
+  border: none;
+  padding: 0; /* Also remove default padding */
+  margin-bottom: 0; /* Adjust margin if needed after removing default fieldset margin */
+}
+
+/* Remove default fieldset border and padding within product sections */
+.product-section fieldset.form-group {
+  border: none;
+  padding: 0;
+  /* Keep margin-bottom from the general .form-group rule */
+}
+
+/* Styles for the delivery options section */
+fieldset.delivery-options {
+  background-color: #f9f9f9; /* Grey background */
+  padding: 20px; /* Same padding as store-info-section */
+  border-radius: 8px; /* Same border-radius as store-info-section */
+  margin-bottom: 30px; /* Same margin-bottom as store-info-section */
+  border: 1px solid #eaeaea; /* Same border as store-info-section */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+fieldset.delivery-options h2 {
+  margin-bottom: 20px; /* Keep space below the main heading */
+}
+
+/* Style for subheadings within delivery options */
+fieldset.delivery-options h3 {
+    font-size: 1.1em; /* Slightly smaller than main h2 */
+    font-weight: 600; /* Bold */
+    color: var(--primary-color, #432C53); /* Purple color */
+    margin-top: 20px; /* Space above subheading */
+    margin-bottom: 10px; /* Space below subheading */
+    padding-bottom: 5px; /* Padding below text before potential border */
+    border-bottom: 1px solid #eaeaea; /* Separator line */
+}
+
+/* Remove top border from the first subheading */
+fieldset.delivery-options h3:first-of-type {
+    margin-top: 0; /* No top margin for the first subheading after the main h2 */
+    border-top: none; /* No top border for the first subheading */
+    padding-top: 0; /* No top padding for the first subheading */
+    padding-bottom: 5px; /* Keep space below the subheading text before border */
+
+}
+
+fieldset.delivery-options label {
+    display: block; /* Ensure labels are block elements */
+    font-weight: 600; /* Keep consistent font weight */
+    color: #333; /* Dark text color for labels */
+    margin-top: 10px; /* Space above each label */
+    margin-bottom: 8px; /* Keep space below label before input/select */
+}
+
+/* Remove border and padding from the old expressPrice label rule */
+fieldset.delivery-options label[for="expressPrice"] {
+    border-top: none; /* Remove the border */
+    padding-top: 0; /* Remove the padding */
+    margin-top: 10px; /* Revert to standard label margin-top */
+}
+
+/* Apply margin bottom to all input/selects except the very last one in the fieldset */
+fieldset.delivery-options input[type="number"],
+fieldset.delivery-options select {
+    margin-bottom: 15px; /* Consistent space below each input/select */
+}
+
+fieldset.delivery-options *:last-child {
+     margin-bottom: 0; /* Remove bottom margin from the absolute last child in the fieldset */
+}
+
+fieldset.delivery-options legend {
+  display: none; /* Hide the original legend if it somehow still renders */
 }
 
 .form-row {
@@ -89,6 +209,17 @@ select {
   transition: border-color 0.3s;
 }
 
+/* Remove borders for inputs/textareas/selects within product sections */
+.product-section fieldset.form-group input[type="text"],
+.product-section fieldset.form-group input[type="number"],
+.product-section fieldset.form-group textarea,
+.product-section fieldset.form-group select {
+    /* Removed explicit border: none; rule */
+    /* Potentially adjust background or box-shadow if needed to visually separate */
+    /* background-color: #fff; */
+    /* box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06); */
+}
+
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
@@ -106,6 +237,7 @@ select:focus {
   border-radius: 8px;
   margin-bottom: 30px;
   border: 1px solid #eaeaea;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
 }
 
 .product-section h3 { /* Assuming this is inside ProductList/ProductForm */
@@ -144,17 +276,27 @@ select:focus {
 }
 
 .add-product-btn { /* Assuming this is inside ProductList */
-  color: #4a90e2;
-  border: 1px dashed #4a90e2;
-  background-color: rgba(74, 144, 226, 0.05); /* Slightly less prominent */
+  color: white;
+  border: none;
+  background-color: #97C9BA; /* Green color */
   margin-bottom: 30px;
   width: 100%;
-  text-align: center; /* Ensure text is centered */
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .add-product-btn:hover { /* Assuming this is inside ProductList */
-  background-color: rgba(74, 144, 226, 0.1);
-  color: #3a7bc8; /* Darker blue on hover */
+  background-color: #7ab8a5; /* Darker green on hover */
+}
+
+.add-product-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .remove-product-btn { /* Assuming this is inside ProductList/ProductForm */
@@ -192,7 +334,7 @@ select:focus {
 
 /* Styles for the submit button */
 .create-store-btn {
-  background-color: #4caf50;
+  background-color: #432C53; /* Purple color */
   color: white;
   border: none;
   padding: 15px 30px;
@@ -204,7 +346,7 @@ select:focus {
 }
 
 .create-store-btn:hover {
-  background-color: #388e3c;
+  background-color: #362245; /* Darker purple on hover */
 }
 
 .create-store-btn:disabled {
@@ -231,3 +373,51 @@ select:focus {
      margin-bottom: 0; /* Remove margin from last item */
   }
 }
+
+/* Styles for the product list instructions bullet points */
+.product-list-section p ul {
+    list-style-type: circle; /* Change bullet point style to circle */
+    margin-top: 10px; /* Add some space above the list */
+    margin-bottom: 10px; /* Add some space below the list */
+    padding-left: 20px; /* Adjust indentation */
+}
+
+.product-list-section p ul li {
+    margin-bottom: 5px; /* Space between list items */
+    line-height: 1.5; /* Improve readability */
+    color: #555; /* Slightly lighter text color for list items */
+}
+
+/* --- NEW Styles for the product requirements note box --- */
+.product-list-section .product-requirements-note {
+    background-color: #fee; /* Light red background */
+    border: 1px solid #d32f2f; /* Red border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 15px; /* Inner space */
+    margin-bottom: 20px; /* Space below the box */
+}
+
+.product-requirements-note h4 {
+    color: var(--primary-color, #432C53); /* Purple color for title */
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 10px; /* Space below title */
+    font-size: 1.1em; /* Consistent with subheadings */
+}
+
+.product-requirements-note p {
+    margin-bottom: 10px; /* Space below paragraph before list */
+}
+
+.product-requirements-note ul {
+    list-style-type: circle; /* Circle bullet points */
+    padding-left: 20px; /* Indentation for bullets */
+    margin-top: 0; /* Space handled by paragraph margin */
+    margin-bottom: 0; /* Space handled by container margin */
+}
+
+.product-requirements-note li {
+     margin-bottom: 5px; /* Space between list items */
+     line-height: 1.5; /* Improve readability */
+     /* Color inherited or set explicitly if needed */
+}
+/* --- END NEW Styles --- */

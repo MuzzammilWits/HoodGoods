@@ -13,9 +13,8 @@ const StoreInfoForm: React.FC<StoreInfoFormProps> = ({
 }) => {
   return (
     <section className="store-info-section">
-      <h2>Store Information</h2>
+      <h2>Store Name</h2>
       <fieldset className="form-group">
-        <label htmlFor="storeName">Store Name</label>
         <input
           type="text"
           id="storeName"

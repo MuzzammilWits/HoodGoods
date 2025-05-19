@@ -306,6 +306,8 @@ const CreateYourStore: React.FC = () => {
             <ImageGalleryDisplay galleryImages={galleryImages} />
 
             <form onSubmit={handleSubmit}>
+                {/* Heading for Store Name */}
+                <h2 className="section-heading">Store Name</h2> {/* Add class for styling */}
                 {/* Component for Store Name */}
                 <StoreInfoForm
                     storeName={formData.storeName}
@@ -313,12 +315,16 @@ const CreateYourStore: React.FC = () => {
                     isSubmitting={isSubmitting}
                 />
 
-                {/* --- Placeholder: Add Delivery Options Inputs/Selects Here --- */}
+                {/* Heading for Delivery Options */}
+                <h2 className="section-heading">Delivery Options</h2> {/* Add class for styling */}
+                {/* Delivery Options Inputs/Selects */}
                 <fieldset className="delivery-options"> {/* Use fieldset for grouping */}
-                     <legend>Delivery Options</legend> {/* Provide context */}
+                     {/* Remove the h2 that was previously here */}
 
-                     {/* Standard Delivery */}
-                     <label htmlFor="standardPrice">Standard Delivery Price:</label>
+                    {/* Standard Delivery Section */}
+                    <h3>Standard Delivery</h3> {/* Subheading for Standard Delivery */}
+                     {/* Standard Delivery Price */}
+                     <label htmlFor="standardPrice">Price:</label>
                      <input
                          type="number"
                          id="standardPrice"
@@ -331,7 +337,8 @@ const CreateYourStore: React.FC = () => {
                          required // HTML5 validation
                          disabled={isSubmitting}
                      />
-                     <label htmlFor="standardTime">Standard Delivery Time:</label>
+                     {/* Standard Delivery Time */}
+                     <label htmlFor="standardTime">Time:</label>
                      <select
                          id="standardTime"
                          name="standardTime"
@@ -345,8 +352,10 @@ const CreateYourStore: React.FC = () => {
                          ))}
                      </select>
 
-                     {/* Express Delivery */}
-                     <label htmlFor="expressPrice">Express Delivery Price:</label>
+                    {/* Express Delivery Section */}
+                    <h3>Express Delivery</h3> {/* Subheading for Express Delivery */}
+                     {/* Express Delivery Price */}
+                     <label htmlFor="expressPrice">Price:</label>
                      <input
                          type="number"
                          id="expressPrice"
@@ -359,7 +368,8 @@ const CreateYourStore: React.FC = () => {
                          required
                          disabled={isSubmitting}
                      />
-                     <label htmlFor="expressTime">Express Delivery Time:</label>
+                     {/* Express Delivery Time */}
+                     <label htmlFor="expressTime">Time:</label>
                      <select
                          id="expressTime"
                          name="expressTime"
@@ -375,7 +385,8 @@ const CreateYourStore: React.FC = () => {
                  </fieldset>
                  {/* --- End Delivery Options Section --- */}
 
-
+                {/* Heading for Products */}
+                <h2 className="section-heading">Products</h2> {/* Add class for styling */}
                 {/* Component for Product Inputs */}
                 <ProductList
                     products={formData.products}
