@@ -1,9 +1,11 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/ContextCart';
 import './App.css';
+import ScrollToTop from './components/ScrollToTop';
+import { useEffect } from 'react';
 
 // Import Components and Pages
 import Navbar from './components/Navbar';
@@ -49,6 +51,7 @@ const AppContent: React.FC = () => {
       cacheLocation="localstorage"
     >
       <CartProvider>
+        <ScrollToTop />
         <header>
           <Navbar />
         </header>
@@ -78,12 +81,23 @@ const AppContent: React.FC = () => {
                   <WhyChooseUs />
                 </section>
 
-                {/* --- Section Divider before Footer (div replaced with figure) --- */}
-                <figure className="section-divider" role="presentation">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
-                  </svg>
-                </figure>
+                {/* Scroll to About Us if requested via state */}
+                {(() => {
+                  const location = useLocation();
+                  useEffect(() => {
+                    if (location.state && location.state.scrollToAbout) {
+                      const scrollToAbout = () => {
+                        const aboutSection = document.getElementById('about-us');
+                        if (aboutSection) {
+                          aboutSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      };
+                      scrollToAbout();
+                      setTimeout(scrollToAbout, 60);
+                    }
+                  }, [location]);
+                  return null;
+                })()}
               </>
             } />
 

@@ -1,16 +1,22 @@
 /* In WhyChooseUs.css */
 
 .why-choose-us-container {
-  max-width: 1200px;
+  max-width: 1260px;
   margin: 0 auto;
   padding: 40px;
   background-color: var(--light-purple);
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
 
-.why-choose-us-container .container { /* Target the main element with class container */
-  max-width: 1200px; /* Ensure this is not overriding the parent's max-width in a conflicting way */
+.why-choose-us-container .container {
+  width: 100%;
+  max-width: 1200px;
 }
 
 /* About Us section styling */
@@ -98,7 +104,8 @@ figure.trust-icon svg {
 ul.selling-points-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
+  column-gap: 40px;
+  row-gap: 60px;
   /* Reset list styles */
   list-style: none;
   padding: 0;
@@ -106,18 +113,21 @@ ul.selling-points-grid {
 }
 
 ul.selling-points-grid li {
-    /* Styles for li if any needed, otherwise Feature's article style takes over */
+  /* height: 100%; */
 }
 
-.selling-point-item { /* This is the <article> inside the <li> */
+.selling-point-item {
+  /* height: 100%; */
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background-color: #fff;
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .selling-point-item h3 {
@@ -166,4 +176,8 @@ figure.selling-point-icon {
   .selling-point-item p { /* Adjust description font size for smaller screens */
     font-size: 0.95rem;
   }
+}
+
+#about-us {
+  scroll-margin-top: 80px;
 }

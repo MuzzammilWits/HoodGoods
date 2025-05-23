@@ -47,7 +47,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   font-weight: 700;
   color: var(--white, rgb(255, 255, 255));
   line-height: 1.15;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   margin-top: 0;
 }
 
@@ -61,22 +61,53 @@ section, article, aside, main, figure, figcaption, ul, li {
 .hero-text {
   font-size: 1.2rem;
   line-height: 1.7;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.2rem;
   max-width: 550px;
   color: rgba(from var(--white, #ffffff) r g b / 0.9);
 }
 
 .hero-buttons {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   display: flex;
   gap: 10px;
 }
 
-.hero-buttons .btn-primary,
-.hero-buttons .btn-secondary {
+.hero-buttons .btn-primary {
+  background: #fff;
+  color: #181818;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
   padding: 1rem 2.5rem;
   font-size: 1.15rem;
   display: inline-block;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hero-buttons .btn-primary:hover,
+.hero-buttons .btn-primary:focus {
+  background: #f0f0f0;
+  color: #181818;
+}
+
+.hero-buttons .btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  padding: 1rem 2.5rem;
+  font-size: 1.15rem;
+  display: inline-block;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hero-buttons .btn-secondary:hover,
+.hero-buttons .btn-secondary:focus {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
 }
 
 .btn:focus-visible {

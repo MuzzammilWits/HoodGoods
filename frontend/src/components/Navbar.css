@@ -90,15 +90,23 @@ body {
 }
 
 .sign-in-btn {
-  background-color: var(--primary-color, #432C53);
-  color: var(--white, #fff);
-  border-color: var(--primary-color, #432C53);
+  background: var(--primary-color, #432C53);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  padding-top: 0.7em;
+  padding-bottom: 0.7em;
+  padding-left: 1.1em;
+  padding-right: 1.1em;
+  font-size: 1.05rem;
+  transition: background 0.2s, color 0.2s;
 }
 
 .sign-in-btn:hover,
 .sign-in-btn:focus {
-  background-color: #362245;
-  border-color: #362245;
+  background: #362245;
+  color: #fff;
 }
 
 .auth-user {
@@ -108,7 +116,7 @@ body {
 }
 
 p.user-greeting {
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   color: var(--text-color, #333);
   font-weight: 500;
   white-space: nowrap;
@@ -116,16 +124,24 @@ p.user-greeting {
 }
 
 .sign-out-btn {
-  background-color: var(--white, #fff);
-  color: var(--primary-color, #432C53);
-  border: 1px solid var(--primary-color, #432C53);
+  background: var(--primary-color, #432C53);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  margin-left: 0.3em;
+  padding-top: 0.7em;
+  padding-bottom: 0.7em;
+  padding-left: 1.1em;
+  padding-right: 1.1em;
+  font-size: 1.05rem;
+  transition: background 0.2s, color 0.2s;
 }
 
 .sign-out-btn:hover,
 .sign-out-btn:focus {
-  background-color: #f8f8f8;
-  border-color: #362245;
-  color: #362245;
+  background: #362245;
+  color: #fff;
 }
 
 .sign-in-btn:focus-visible,
@@ -145,6 +161,29 @@ p.user-greeting {
   transition: color 0.2s ease;
   font-size: 25px; /* Set a base size for emoji icons */
   text-decoration: none;
+  position: relative;
+}
+
+.icon-help-text {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 110%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #432C53;
+  padding: 0.25em 0.7em;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+
+.icon-link:hover .icon-help-text,
+.icon-link:focus .icon-help-text {
+  display: block;
 }
 
 .icon-link:hover,
@@ -178,4 +217,15 @@ p.user-greeting {
   .nav-icons {
     gap: 0.8rem;
   }
+}
+
+.auth-user + .icon-actions {
+  margin-left: 2.5em;
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.auth-user + .first-icon-link {
+  margin-left: 2.5em;
 }
