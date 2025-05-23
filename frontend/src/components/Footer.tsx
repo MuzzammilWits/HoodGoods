@@ -25,6 +25,14 @@ const Footer: React.FC = () => {
     }
   };
 
+  // Products link handler
+  const handleProductsClick = (e: React.MouseEvent) => {
+    if (location.pathname === '/products') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="footer">
       <section className="footer-divider-section">
@@ -48,8 +56,8 @@ const Footer: React.FC = () => {
 
         <nav className="footer-menu" aria-label="Footer Menu">
           <ul className="footer-menu-list">
-            <li><Link to="/" className="nav-link" onClick={handleHomeClick}>Shop</Link></li>
-            <li><Link to="/products" className="nav-link">Products</Link></li>
+            <li><Link to="/" className="nav-link" onClick={handleHomeClick}>Home</Link></li>
+            <li><Link to="/products" className="nav-link" onClick={handleProductsClick}>Products</Link></li>
             <li>
               <Link
                 to={{ pathname: '/', hash: '#about-us' }}

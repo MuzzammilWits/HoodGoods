@@ -211,8 +211,8 @@ section.filters { /* Targeting general filter group section */
 
 section.search-bar.filters { /* Targeting search bar section */
   flex-grow: 1;
-  width: auto; /* Allow it to take up space */
-  min-width: 250px; /* Increased min-width */
+  width: auto;
+  min-width: 250px; 
 }
 
 section.filters label {
@@ -380,4 +380,274 @@ figure.section-divider svg {
   bottom: 0;
   left: 0;
   fill: var(--light-purple); /* This should ideally match the page background or the section below it */
+}
+
+/* Purple filter box */
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #ECE4F1;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(67,44,83,0.04);
+}
+
+.filter-row-sidebyside {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  justify-content: flex-start;
+}
+.category-filter.filters,
+.store-filter.filters {
+  flex: 1 1 0;
+  min-width: 220px;
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.category-filter.filters label,
+.store-filter.filters label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color, #432C53);
+  font-size: 1.05rem;
+  display: block;
+}
+.category-filter.filters select,
+.store-filter.filters select {
+  width: 100%;
+  padding: 1rem;
+  border: 1.5px solid #e0d6ea;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  background: #fff;
+  margin-bottom: 0;
+}
+
+.recommendations-link-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+.products-page-cta-button {
+  background: var(--primary-color, #432C53);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(67,44,83,0.08);
+  text-align: center;
+  width: 220px;
+}
+.products-page-cta-button:hover,
+.products-page-cta-button:focus {
+  background: #362245;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .filter-row-sidebyside {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .recommendations-link-container {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .search-bar-standalone input[type="search"] {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+  .category-filter.filters select,
+  .store-filter.filters select {
+    font-size: 0.98rem;
+    padding: 0.8rem;
+  }
+  .products-page-cta-button {
+    width: 100%;
+    padding: 1rem 0;
+    font-size: 1rem;
+  }
+}
+
+/* --- Search Bar in Filters (Current) --- */
+.search-bar-in-filters {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1.2rem;
+}
+
+.search-bar-in-filters .search-label {
+  font-weight: 600;
+  color: var(--primary-color, #432C53);
+  font-size: 1.1rem;
+  margin-bottom: 0.2rem;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.search-bar-in-filters input[type="search"] {
+  flex: 1;
+  height: 48px;
+  padding: 0 1rem;
+  border: 1.5px solid #e0d6ea;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(67,44,83,0.04);
+  margin: 0;
+}
+
+.search-products-btn {
+  background: var(--primary-color, #432C53);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 0 2.2rem;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(67,44,83,0.08);
+  white-space: nowrap;
+}
+
+.search-products-btn:hover,
+.search-products-btn:focus {
+  background: #362245;
+  color: #fff;
+}
+
+/* Headings styling */
+.search-label, .filter-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--primary-color, #432C53);
+  margin-bottom: 0.2rem;
+  margin-top: 0;
+  line-height: 1;
+  display: block;
+}
+
+.search-bar-in-filters input[type="search"],
+.category-filter.filters select,
+.store-filter.filters select {
+  margin-top: 0;
+}
+
+/* Filter dropdowns - same height as search bar and button */
+.category-filter.filters select,
+.store-filter.filters select {
+  width: 100%;
+  height: 48px;
+  padding: 0 2.5rem 0 1rem;
+  border: 1.5px solid #e0d6ea;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  background: #fff;
+  margin-bottom: 0;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23432C53" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+}
+
+.category-filter.filters select:focus,
+.store-filter.filters select:focus {
+  border-color: var(--primary-color, #432C53);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67, 44, 83, 0.2);
+}
+
+/* Add right padding for dropdown arrow */
+.category-filter.filters select,
+.store-filter.filters select {
+  padding-right: 2.5rem;
+}
+
+/* Recommendations button below filter box, left aligned */
+.recommendations-link-below {
+  margin-top: 1.2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.products-page-cta-button {
+  background: var(--primary-color, #432C53);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0 2.5rem;
+  height: 48px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(67,44,83,0.08);
+  text-align: center;
+  width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.products-page-cta-button:hover,
+.products-page-cta-button:focus {
+  background: #362245;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .filter-row-sidebyside {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .recommendations-link-below {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .search-input-group {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .search-bar-in-filters input[type="search"] {
+    width: 100%;
+  }
+  .search-products-btn {
+    width: 100%;
+    padding: 0;
+    font-size: 1rem;
+  }
+  .products-page-cta-button {
+    width: 100%;
+    padding: 0;
+    font-size: 1rem;
+  }
 }
