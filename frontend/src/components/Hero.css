@@ -1,4 +1,7 @@
+/* frontend/src/components/Hero.css */
+
 /* --- Reset semantic elements in Hero --- */
+/* Note: This is a very aggressive reset. It makes semantic tags behave like divs. */
 section, article, aside, main, figure, figcaption, ul, li {
   all: unset;
   display: block;
@@ -7,18 +10,17 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 /* Base styles and tweaks for hero section */
 .light-purple-bg {
-  background-color: var(--accent-background, #f9f6fd); /* <-- Comment out temporarily for testing */
+  background-color: var(--accent-background, #f9f6fd);
 }
 
 .hero-section {
-  padding: 6rem 0; /* Reduced vertical padding */
-  display: flex; /* Enable Flexbox */
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
-  position: relative; /* Needed for potential absolute children and Vanta positioning */
-  min-height: 60vh; /* <-- ADD THIS: Ensure the section takes up height */
-  /* height: 100vh; */ /* Alternative */
-  overflow: hidden; /* May prevent scrollbars if Vanta canvas slightly overflows */
+  padding: 6rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 60vh;
+  overflow: hidden;
 }
 
 .hero-container {
@@ -26,34 +28,34 @@ section, article, aside, main, figure, figcaption, ul, li {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr; /* Make the main row take up available height */
+  grid-template-rows: 1fr;
   gap: 3rem;
   padding: 0 1rem;
-  align-items: center; /* Vertically center grid items within their cells */
-  position: relative; /* Ensure content is positioned relative to hero-section */
-  z-index: 1; /* Ensure content stays above Vanta canvas (if Vanta sets its z-index) */
+  align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-header {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically center content */
+  justify-content: center;
 }
 
 .hero-title {
-  font-size: 3.5rem; /* Reverted to original size */
-  font-weight: 700; /* Reverted to original weight */
-  color: var(--white, rgb(255, 255, 255)); /* Keep color specific */
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--white, rgb(255, 255, 255));
   line-height: 1.15;
   margin-bottom: 1.5rem;
   margin-top: 0;
 }
 
 .hero-logo {
-  height: auto; /* Allow height to adjust based on width */
-  width: 300px; /* Set a larger width for the logo */
-  justify-self: center; /* Center the logo horizontally within its grid cell */
-  align-self: center; /* Center the logo vertically within its grid cell */
+  height: auto;
+  width: 300px;
+  justify-self: center;
+  align-self: center;
 }
 
 .hero-text {
@@ -61,7 +63,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   line-height: 1.7;
   margin-bottom: 2.5rem;
   max-width: 550px;
-  color: rgba(from var(--white, #ffffff) r g b / 0.9); /* Consider changing if background changes */
+  color: rgba(from var(--white, #ffffff) r g b / 0.9);
 }
 
 .hero-buttons {
@@ -131,7 +133,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   position: absolute;
   bottom: -30px;
   left: -25px;
-  z-index: -1; /* Kept behind grid images */
+  z-index: -1;
   opacity: 0.4;
 }
 
@@ -147,7 +149,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 
 .hero-seller-prompt p {
   font-size: 0.95rem;
-  color: var(--white, #fff); /* Consider contrast */
+  color: var(--white, #fff);
   line-height: 1.6;
   margin: 0;
 }
@@ -157,7 +159,7 @@ section, article, aside, main, figure, figcaption, ul, li {
   border: none;
   padding: 0;
   font: inherit;
-  color: var(--white, #fff); /* Consider contrast */
+  color: var(--white, #fff);
   text-decoration: underline;
   cursor: pointer;
   font-weight: 600;
@@ -176,12 +178,11 @@ section, article, aside, main, figure, figcaption, ul, li {
     align-items: start;
   }
   .hero-images { top: 1rem; }
-  .hero-title { font-size: 3.0rem; } /* Reverted responsive size */
+  .hero-title { font-size: 3.0rem; }
   .hero-text { font-size: 1.1rem; }
   .hero-section {
     padding: 7rem 0;
-     min-height: unset; /* Adjust height for smaller screens if needed */
-     /* height: auto; */
+    min-height: unset;
   }
   .hero-seller-prompt {
     margin-top: 3rem;
@@ -191,8 +192,7 @@ section, article, aside, main, figure, figcaption, ul, li {
 @media (max-width: 768px) {
   .hero-section {
     padding: 4rem 0;
-     min-height: unset; /* Adjust height */
-     /* height: auto; */
+    min-height: unset;
   }
   .hero-container {
     grid-template-columns: 1fr;
@@ -215,7 +215,7 @@ section, article, aside, main, figure, figcaption, ul, li {
     max-width: 100%;
     font-size: 1.1rem;
   }
-  .hero-title { font-size: 2.6rem; } /* Reverted responsive size */
+  .hero-title { font-size: 2.6rem; }
   .hero-buttons {
     align-self: center;
   }

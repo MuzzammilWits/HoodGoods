@@ -1,6 +1,7 @@
+// frontend/src/components/Navbar.tsx
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Link, useNavigate } from 'react-router-dom';  // Import useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import { logo } from './utils/ImageImports';
 
@@ -19,7 +20,7 @@ const Navbar: React.FC = () => {
   const [role, setRole] = useState<string | null>(null);
   const [isRoleLoading, setIsRoleLoading] = useState<boolean>(true);
 
-  const navigate = useNavigate();  // useNavigate hook to programmatically navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTokenAndRole = async () => {
@@ -60,23 +61,20 @@ const Navbar: React.FC = () => {
     };
 
     fetchTokenAndRole();
-  }, [isAuthenticated, getAccessTokenSilently, isLoading, backendUrl]);
+  }, [isAuthenticated, getAccessTokenSilently, isLoading]);
 
-  // Handle cart icon click to refresh the cart page
   const handleCartClick = () => {
-    navigate('/cart');  // Navigate to cart page
-    window.location.reload();  // Reload the page to refresh the cart
+    navigate('/cart');
+    window.location.reload();
   };
 
   return (
     <nav className="navbar">
       <header className="navbar-container">
-        {/* Logo Section */}
         <figure className="logo-container">
           <img src={logo} alt="Hood Goods" className="logo" />
         </figure>
 
-        {/* Navigation Menu Links */}
         <ul className="nav-menu">
           <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
           <li className="nav-item"><Link to="products" className="nav-link">Products</Link></li>
@@ -85,15 +83,13 @@ const Navbar: React.FC = () => {
               to="/#about-us"
               className="nav-link"
               onClick={(e) => {
-                // If already on Home, scroll smoothly
                 if (window.location.pathname === '/') {
-                  e.preventDefault(); // Prevent default Link behavior
+                  e.preventDefault();
                   const aboutSection = document.getElementById('about-us');
                   if (aboutSection) {
                     aboutSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }
-                // If not on Home, Link will handle navigation automatically
               }}
             >
               About Us
@@ -119,7 +115,6 @@ const Navbar: React.FC = () => {
           )}
         </ul>
 
-        {/* Icons and Authentication Section */}
         <section className="nav-icons">
           {isLoading ? null : (
             !isAuthenticated ? (
@@ -131,7 +126,7 @@ const Navbar: React.FC = () => {
               </button>
             ) : (
               <article className="auth-user">
-                <span className="user-greeting">Hi, {user?.given_name ?? user?.name ?? 'User'}</span>
+                <p className="user-greeting">Hi, {user?.given_name ?? user?.name ?? 'User'}</p>
                 <button
                   className="sign-out-btn"
                   onClick={() => logout({
@@ -144,21 +139,15 @@ const Navbar: React.FC = () => {
             )
           )}
 
-
-          {/* --- MODIFIED: Orders Icon Link --- */}
-          {/* Show Orders icon only if authenticated */}
           {isAuthenticated && (
             <Link to="/my-orders" className="icon-link" title="My Orders">
-              📋 {/* Orders Icon (Clipboard) */}
+              📋
             </Link>
           )}
-          {/* --- END MODIFICATION --- */}
 
-          {/* Cart Icon Link */}
-          {/* Consider showing cart only if authenticated or based on role */}
-          {isAuthenticated && ( // Example: Show cart only when logged in
+          {isAuthenticated && (
              <Link to="/cart" className="icon-link" title="Cart" onClick={handleCartClick}>
-               🛒 {/* Cart Icon */}
+               🛒
              </Link>
           )}
         </section>

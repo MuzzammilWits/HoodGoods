@@ -1,330 +1,168 @@
 /* In WhyChooseUs.css */
 
-/* --- Reset semantic elements used in the component if needed --- */
-/* section, article, aside, main, figure, figcaption, ul, li {
-  all: unset;
-  display: block;
-} */
-/* --- End reset --- */
+.why-choose-us-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: var(--light-purple);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
 
-
-.why-choose-us {
-  padding: 4rem 0;
-  /* background-color: var(--accent-background, #F5F1EC); */
+.why-choose-us-container .container { /* Target the main element with class container */
+  max-width: 1200px; /* Ensure this is not overriding the parent's max-width in a conflicting way */
 }
 
 /* About Us section styling */
-.about-us-content {
+.about-us-section {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--border-color, #e0e0e0);
-  /* --- ADDED: Match .why-choose-us-row container --- */
-  max-width: 1200px; /* Or your desired shared max-width */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;  /* Match padding */
-  padding-right: 1rem; /* Match padding */
-  /* --- End Added --- */
 }
 
 .about-us-text {
   font-size: 1.2rem;
   line-height: 1.7;
   color: var(--text-color, #444);
-  /* max-width: 900px; */ /* <-- REMOVED (optional, let parent control width) */
-  text-align: left;   /* Ensure left alignment */
+  text-align: left;
 }
 
-/* Why Choose Us row layout */
-.why-choose-us-row {
-  /* display: grid; */ /* <-- Comment out or remove */
-  /* grid-template-columns: 3fr 1fr; */ /* <-- Comment out or remove */
-  /* gap: 2rem; */ /* <-- Gap is likely not needed if it's not a grid */
-  /* align-items: start; */ /* <-- Alignment for grid items */
-
-  /* Keep these properties to center the content block */
-  max-width: 1200px; /* Consistent max-width */
-  margin: 0 auto;   /* Center the row */
-  padding: 0 1rem;  /* Consistent padding */
-}
-
-/* .why-choose-us-content {
-  display: flex;
-  flex-direction: column;
-} */
-
-/* Common styling for main section headings in this component */
 .common-section-heading {
-  text-align: left; /* Ensure left alignment */
-  margin-bottom: 2rem; /* Space below heading */
-  color: var(--primary-color); /* Consistent color */
-  font-family: 'Poppins', sans-serif; /* Consistent font */
-  font-weight: 700; /* Consistent weight */
-  font-size: 2.5rem; /* Set the common size (slightly smaller than previous Why Choose Us) */
+  text-align: left;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 2.5rem;
 }
 
-/* Section title within this component */
-.why-choose-us-content .section-title,
-.about-us-section .section-title {
-    /* text-align: left; */ /* Already set in .common-section-heading */
-    margin-bottom: 2rem;
-    /* color: var(--primary-color); */ /* Already set in .common-section-heading */
-    /* font-family: 'Poppins', sans-serif; */ /* Already set in .common-section-heading */
-    /* font-weight: 700; */ /* Already set in .common-section-heading */
-    /* font-size: 3.5rem; */ /* Size is now controlled by .common-section-heading */
+.about-us-section .section-title { /* This class is used for the "About Us" h2 */
+  /* Inherits from .common-section-heading */
+  /* Add any specific overrides for .about-us-section .section-title if needed */
 }
 
-/* Keep specific padding/margin if needed for .about-us-section .section-title */
-.about-us-section .section-title {
-  margin-bottom: 2rem; /* Adjust as needed */
-}
-
-/* Specific style for Why Choose Us heading - remove font size here */
-.why-choose-us-section h2 {
-  text-align: left; /* Ensure left alignment */
-  margin-bottom: 2rem; /* Ensure consistent margin */
-  color: var(--primary-color); /* Keep color specific */
-  font-family: 'Poppins', sans-serif; /* Ensure Poppins font */
-  font-weight: 700; /* Ensure bold weight */
-  /* font-size: 2.8rem; */ /* Size is now controlled by .common-section-heading */
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem 4rem; /* Your change here is correct */
-  margin-top: 2rem;
-}
-
-.feature {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left; /* Ensure text inside aligns left */
-}
-
-.feature-icon {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.feature-icon svg {
-  width: 24px;
-  height: 24px;
-  color: var(--secondary-color, #B48C77);
-}
-
-.feature-title {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: black;
-  text-align: left; /* Ensure left alignment */
-}
-
-.feature-description {
-  font-size: 1rem;
-  color: var(--text-color, #666);
-  line-height: 1.6;
-  text-align: left; /* Ensure left alignment */
-}
-
-.why-choose-us-image {
-  border-radius: 8px;
-  overflow: hidden;
-  height: 100%;
-  align-self: center;
-}
-
-.why-choose-us-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(27, 27, 27, 0.1);
-  display: block;
-}
-
-/* Responsive styling */
-@media (max-width: 992px) {
-  .why-choose-us-row {
-    grid-template-columns: 1fr;
-  }
-
-  .why-choose-us-image {
-    order: -1;
-    height: 350px;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto 2rem auto;
-  }
-
-  /* Update common heading size for medium screens */
-  .common-section-heading {
-    font-size: 2.2rem; /* Slightly smaller than previous responsive size */
-  }
-}
-
-@media (max-width: 768px) {
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  .why-choose-us-image {
-    height: 300px;
-  }
-   .about-us-text {
-       font-size: 1.1rem;
-       /* text-align: left; */ /* Already set */
-   }
-   .feature-description {
-       font-size: 0.95rem;
-   }
-  /* Update common heading size for small screens */
-  .common-section-heading {
-    font-size: 2rem; /* Adjust responsive size */
-  }
-}
-
-.why-choose-us-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px; /* Increased padding */
-  background-color: var(--light-purple); /* Subtle background */
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.why-choose-us-container h2 {
-  text-align: left; /* Changed to left align */
-  margin-bottom: 30px; /* More space below heading */
-  color: var(--primary-color); /* Using primary color */
-  font-family: 'Poppins', sans-serif; /* Use primary font */
-  /* Keep the size here for the main h2 inside the container if needed, or remove */
-}
-
-.why-choose-us-intro {
+.trust-icons-section {
+  padding: 2rem 0; /* Adjusted padding */
   text-align: center;
-  margin-bottom: 40px; /* Space below intro text */
-  color: var(--text-color); /* Consistent text color */
-  font-size: 1.1em;
-  line-height: 1.6;
-  max-width: 800px; /* Limit width for readability */
+}
+
+ul.trust-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2.5rem;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
-  font-family: 'Hind', sans-serif; /* Use secondary font */
+  /* Reset list styles */
+  list-style: none;
+  padding: 0;
 }
 
-.selling-points-grid {
+li.trust-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+li.trust-icon-item p {
+    margin: 0; /* Reset paragraph margin if needed */
+    color: var(--text-color, #444);
+}
+
+figure.trust-icon {
+  width: 60px;
+  height: 60px;
+  background-color: transparent;
+  border-radius: 50%;
+  margin: 0 0 1rem 0; /* Reset figure margin and add bottom margin */
+  color: var(--primary-color, #6D4C41);
+  display: flex; /* To center SVG if it's smaller */
+  align-items: center;
+  justify-content: center;
+}
+
+figure.trust-icon svg {
+    width: 100%; /* Make SVG fill the figure */
+    height: 100%;
+}
+
+
+.why-choose-us-section h2 { /* This targets "Why Choose Us?" heading */
+  /* Inherits from .common-section-heading */
+  /* Add specific overrides if needed, but .common-section-heading should cover it */
+}
+
+ul.selling-points-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Changed to 2 fixed columns */
-  gap: 30px; /* Space between grid items */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  /* Reset list styles */
+  list-style: none;
+  padding: 0;
+  margin: 0; /* Reset default ul margin */
 }
 
-.selling-point-item {
+ul.selling-points-grid li {
+    /* Styles for li if any needed, otherwise Feature's article style takes over */
+}
+
+.selling-point-item { /* This is the <article> inside the <li> */
   background-color: #fff;
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  text-align: center; /* Center content in each item */
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .selling-point-item h3 {
-  margin-top: 15px; /* Space below icon/image */
+  margin-top: 15px;
   margin-bottom: 10px;
-  color: var(--primary-color); /* Consistent heading color */
+  color: var(--primary-color);
   font-size: 1.4em;
-  font-family: 'Poppins', sans-serif; /* Primary font for subheadings */
+  font-family: 'Poppins', sans-serif;
 }
 
 .selling-point-item p {
-  color: var(--text-color); /* Consistent text color */
+  color: var(--text-color);
   font-size: 1em;
   line-height: 1.5;
-  font-family: 'Hind', sans-serif; /* Secondary font for body text */
+  font-family: 'Hind', sans-serif;
+  margin: 0; /* Reset paragraph margin */
 }
 
-/* Placeholder for icon/image */
-.selling-point-icon {
+figure.selling-point-icon {
   width: 50px;
   height: 50px;
-  /* Add styling for icons or images here */
+  margin: 0 0 15px 0; /* Reset figure margin and control spacing */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
-  /* Keep the two-column layout until 768px or adjust if needed */
-  .why-choose-us-container h2,
-  .why-choose-us-content .section-title,
-  .about-us-content .section-title {
-    font-size: 3.0rem; /* Match responsive hero title size */
+  .common-section-heading {
+    font-size: 2.2rem;
   }
 }
 
 @media (max-width: 768px) {
-  .selling-points-grid {
-    grid-template-columns: 1fr; /* Collapse to single column on smaller screens */
+  ul.selling-points-grid {
+    grid-template-columns: 1fr;
     gap: 20px;
   }
-  .why-choose-us-image {
-    height: 300px;
+  .about-us-text {
+    font-size: 1.1rem;
   }
-   .about-us-text {
-       font-size: 1.1rem;
-       /* text-align: left; */ /* Already set */
-   }
-   .feature-description {
-       font-size: 0.95rem;
-   }
-   .why-choose-us-container h2,
-   .why-choose-us-content .section-title,
-   .about-us-content .section-title {
-       font-size: 2.6rem; /* Match responsive hero title size */
-   }
-}
-
-.trust-icons-section {
-  padding: 4rem 0; /* Add vertical padding */
-  /* Removed background-color */
-  text-align: center; /* Center heading and grid */
-}
-
-.trust-icons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid columns */
-  gap: 2rem;
-  margin-top: 2.5rem;
-  max-width: 900px; /* Limit width and center the grid */
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.trust-icon-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Center content vertically */
-  text-align: center; /* Center text horizontally */
-}
-
-.trust-icon {
-  width: 60px; /* Placeholder size */
-  height: 60px;
-  background-color: transparent; /* Removed background color */
-  border-radius: 50%; /* Make it round */
-  margin-bottom: 1rem;
-  color: var(--primary-color, #6D4C41); /* Set icon color */
-}
-
-.container {
-  max-width: 1200px;
+  .common-section-heading {
+    font-size: 2rem;
+  }
+  .selling-point-item p { /* Adjust description font size for smaller screens */
+    font-size: 0.95rem;
+  }
 }
