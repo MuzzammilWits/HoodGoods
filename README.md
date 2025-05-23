@@ -5,15 +5,11 @@
   <a href="https://sonarcloud.io/summary/new_code?id=MuzzammilWits_HoodGoods">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=MuzzammilWits_HoodGoods&metric=coverage" alt="Code Coverage">
   </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  </a>
   <a href="https://github.com/muzzammilwits/hoodgoods/releases/latest">
     <img src="https://img.shields.io/github/v/release/muzzammilwits/hoodgoods.svg" alt="Latest Release">
   </a>
 </p>
-# HoodGoods
-... (rest of your README) ...
+
 
 
 # 🧵 HoodsGoods - Handmade Marketplace
