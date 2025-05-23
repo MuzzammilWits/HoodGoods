@@ -1,340 +1,315 @@
 /* src/pages/SellerDashboardPage.css */
 
-.seller-dashboard-container {
-    padding: 2rem;
-    font-family: Arial, sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    background-color: #f0f2f5; /* Light background for the whole page */
+main.seller-dashboard-container { /* Changed from .seller-dashboard-container div */
+  padding: 2rem;
+  font-family: 'Hind', sans-serif; /* Consistent font */
+  max-width: 1200px;
+  margin: 2rem auto; /* Added top/bottom margin */
+  background-color: #f0f2f5; /* Light background for the whole page */
+  border-radius: 8px; /* Added border-radius to main container */
 }
 
-.seller-dashboard-container h1,
-.seller-dashboard-container h2 {
-    color: #333;
-}
-
-.dashboard-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background-color: #ffffff; /* White background for sections */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Softer shadow */
-}
-
-.error-message {
-    color: #dc3545; /* Bootstrap danger red */
-    font-weight: bold;
-    margin-top: 0.5rem;
-    font-size: 0.9em;
-}
-
-.update-error { /* Used for status update errors below list */
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
-    color: #721c24; /* Ensure text color contrasts */
-}
-
-
-.earnings-display {
-    font-size: 1.3em;
-    font-weight: bold;
-    color: #97C9BA; /* Changed to logo green */
-    margin-top: 0.5rem;
-}
-
-/* --- Styles for Orders Section Header & Filter --- */
-.orders-header {
-    display: flex;
-    flex-wrap: wrap; /* Allow filter to wrap below title on small screens */
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem; /* Space below header */
-    gap: 1rem; /* Space between title and filter */
-    border-bottom: 1px solid #eee; /* Optional separator */
-    padding-bottom: 1rem; /* Optional padding */
-}
-
-.orders-header h2 {
-    margin: 0; /* Remove default margin */
-}
-
-.order-filter-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem; /* Space between label and select */
-}
-
-.order-filter-container label {
-    font-weight: 500; /* Match status update label */
-    font-size: 0.95em;
-    margin-bottom: 0; /* Remove default bottom margin */
-    flex-shrink: 0; /* Prevent label from shrinking */
-}
-
-/* Style for the filter select - reuse/adapt .status-select styles */
-.status-filter-select {
-    padding: 0.6rem 0.8rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    min-width: 180px; /* Provide ample width */
-    background-color: #fff;
-    cursor: pointer;
-    font-size: 0.9em;
-    /* Add focus styles consistent with other inputs if desired */
-}
-
-.status-filter-select:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-/* --- End Styles --- */
-
-
-.order-list {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Responsive grid */
-}
-
-.no-orders-message { /* Added class for styling empty state */
-    padding: 2rem;
+header.page-main-header { /* For the top H1 and welcome */
     text-align: center;
-    color: #6c757d;
-    background-color: #f8f9fa;
-    border: 1px dashed #dee2e6;
-    border-radius: 6px;
-    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+header.page-main-header h1 {
+  color: var(--primary-color, #432C53);
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.2rem;
+  margin: 0 0 0.5rem 0;
+}
+header.page-main-header p.welcome-message {
+    font-size: 1.1rem;
+    color: #555;
+    margin:0;
 }
 
-
-.order-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1.25rem;
+p.auth-loading-message, p.login-prompt-message, p.no-orders-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: #555;
     background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: box-shadow 0.2s ease-in-out;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.order-card:hover {
-     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
 
-.order-header { /* Ensure styles here don't conflict with .orders-header */
-    /* Styles specific to the card header */
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
+section.dashboard-section {
+  margin-bottom: 2.5rem; /* Increased space between sections */
+  padding: 1.5rem 2rem; /* Adjusted padding */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07); /* Softer, more diffused shadow */
+}
+section.dashboard-section h2 { /* Target h2 within dashboard sections */
+    color: var(--primary-color-darker, #362245); /* Darker primary for section titles */
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem; /* Larger section titles */
+    margin-top:0;
     margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.order-header h3 { /* Target h3 inside card header */
-    margin: 0;
-    font-size: 1.3em; /* Increased font size */
-    color: var(--primary-color); /* Changed to our purple */
+
+p.error-message { /* General error message styling */
+  color: #dc3545;
+  font-weight: 500; /* Not too bold */
+  margin-top: 0.5rem;
+  font-size: 0.9em;
+  padding: 0.5rem 0.75rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
 }
 
-.order-details {
-    font-size: 0.95em;
-    line-height: 1.6;
+p.error-message.update-error { /* More specific for update errors */
+  margin-top: 1rem; /* Add space above if it's a general update error */
+}
+
+
+p.earnings-display {
+  font-size: 1.5em; /* Larger earnings display */
+  font-weight: bold;
+  color: #97C9BA;
+  margin-top: 0.5rem;
+  text-align: center; /* Center earnings */
+}
+p.loading-text { /* For simple loading text like "Loading earnings..." */
+    font-style: italic;
     color: #555;
 }
 
-.order-details p {
-    margin-bottom: 0.4rem;
-}
-.order-details p:last-child {
-    margin-bottom: 0; /* Remove margin on last p */
-}
 
-.order-total {
-    font-size: 1.1em; /* Increased font size for total */
-    font-weight: bold; /* Make it bold */
-    margin-top: 0.5rem; /* Add some space above */
-    color: #333; /* Default text color or a specific color if desired */
+/* --- Styles for Orders Section Header & Filter --- */
+header.orders-header { /* Changed div.orders-header to header */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  /* border-bottom: 1px solid #eee; */ /* Removed, section has its own border */
+  /* padding-bottom: 1rem; */
 }
-
-.items-section {
-    margin-top: 1rem;
-    border-top: 1px solid #eee;
-    padding-top: 1rem;
-}
-
-.items-section h4 {
-    margin-bottom: 0.75rem;
-    font-size: 1em;
-    color: #444;
-}
-
-.item-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px dashed #eee;
-}
-
-.item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+header.orders-header h2 {
+  margin: 0; /* Reset as it's inside another h2's section */
+  font-size: 1.5rem; /* Sub-section title size */
+  border-bottom: none; /* No border for this h2 */
+  padding-bottom: 0;
 }
 
 
-.item-image {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #eee;
-    background-color: #f8f9fa;
-    flex-shrink: 0;
+section.order-filter-container { /* Changed div to section */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.item-details {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.9em;
-    color: #666;
+section.order-filter-container label {
+  font-weight: 500;
+  font-size: 0.95em;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  color: #495057;
 }
 
-.item-details span:first-child {
-    font-weight: 500;
-    color: #333;
+select.status-filter-select { /* Shared with status-select below */
+  padding: 0.6rem 0.8rem;
+  border-radius: 5px;
+  border: 1px solid #ced4da; /* Standardized border */
+  min-width: 200px; /* Increased min-width */
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-family: 'Hind', sans-serif;
+}
+select.status-filter-select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 
-.status-update-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+ul.order-list { /* Changed div.order-list to ul */
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Slightly wider cards */
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.status-update-section label {
-    font-weight: 500;
-    font-size: 0.95em;
-    margin-bottom: 0; /* Align with select */
+p.no-orders-message {
+  padding: 2rem; text-align: center; color: #6c757d;
+  background-color: #f8f9fa; border: 1px dashed #dee2e6;
+  border-radius: 6px; margin-top: 1rem;
 }
 
-/* Style used for BOTH update and filter selects */
-.status-select,
-.status-filter-select {
-    padding: 0.6rem 0.8rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    min-width: 160px;
-    background-color: #fff;
-    cursor: pointer;
-    font-size: 0.9em;
-    line-height: 1.4; /* Match button line-height */
+li.order-card-item {
+    /* Structural, no specific style needed if article has it all */
 }
 
-.status-select:disabled,
-.status-filter-select:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
-    opacity: 0.7; /* Added opacity */
+article.order-card { /* Target article for the card */
+  border: 1px solid #d1d9e6;
+  border-radius: 8px;
+  padding: 1.5rem; /* Increased padding */
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* Increased gap */
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  height: 100%; /* Ensure cards in a row are same height if grid stretches */
+}
+article.order-card:hover {
+   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* More prominent hover shadow */
+   transform: translateY(-3px); /* Slight lift */
 }
 
-.updating-indicator {
-    margin-left: 10px;
-    font-style: italic;
-    color: #6c757d;
-    font-size: 0.9em;
+header.order-header-card { /* Specific class for header within order-card article */
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+  margin-bottom: 0; /* Rely on parent gap */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+header.order-header-card h3 {
+  margin: 0;
+  font-size: 1.3em;
+  color: var(--primary-color, #432C53);
 }
 
-/* Status Badge Styles */
+
+section.order-details { /* Changed div.order-details to section */
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #495057;
+}
+section.order-details p { margin: 0 0 0.4rem 0; }
+section.order-details p:last-child { margin-bottom: 0; }
+section.order-details strong { color: #343a40; }
+
+p.order-total strong { /* Targeting the strong tag within .order-total */
+  font-size: 1.1em;
+  color: var(--primary-color-darker, #362245);
+}
+
+section.items-section { /* Changed div.items-section to section */
+  margin-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+section.items-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.05em; /* Slightly larger */
+  color: #444;
+  font-family: 'Poppins', sans-serif;
+}
+
+ul.item-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+li.item {
+  display: flex; align-items: center; gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+li.item:not(:last-child) { border-bottom: 1px dashed #e9ecef; }
+
+
+figure.item-image-figure { /* Added for the image */
+    width: 60px; height: 60px; flex-shrink: 0;
+    margin: 0; border-radius: 4px; overflow: hidden;
+}
+img.item-image {
+  width: 100%; height: 100%; object-fit: cover;
+  border: 1px solid #dee2e6; background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+article.item-details-info { /* Changed div.item-details to article, added class */
+  display: flex; flex-direction: column; font-size: 0.9em; color: #555; gap: 0.2rem;
+}
+article.item-details-info p { margin: 0; }
+p.item-name-id { font-weight: 500; color: #333; font-size: 0.95em; }
+p.item-qty-price, p.item-line-total { font-size: 0.85em; }
+
+
+form.status-update-section { /* Changed div.status-update-section to form */
+  margin-top: 1.25rem; /* Increased space */
+  padding-top: 1.25rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+form.status-update-section label {
+  font-weight: 500; font-size: 0.95em; margin-bottom: 0; color: #495057;
+}
+
+select.status-select { /* Shared with .status-filter-select */
+  padding: 0.6rem 0.8rem; border-radius: 5px; border: 1px solid #ced4da;
+  min-width: 180px; background-color: #fff; cursor: pointer;
+  font-size: 0.9em; line-height: 1.4; font-family: 'Hind', sans-serif;
+}
+select.status-select:disabled {
+  background-color: #e9ecef; cursor: not-allowed; opacity: 0.7;
+}
+select.status-select:focus, select.status-filter-select:focus {
+  border-color: var(--primary-color-light, #9e8aa8); outline: none;
+  box-shadow: 0 0 0 3px rgba(158, 138, 168, 0.25); /* Primary light focus */
+}
+
+
+output.updating-indicator { /* Changed span to output */
+  margin-left: 10px; font-style: italic; color: #6c757d; font-size: 0.9em;
+}
+
+/* Status Badge Styles (applied to strong) */
 .status-badge {
-    padding: 0.25em 0.6em;
-    border-radius: 0.25rem;
-    font-size: 0.85em;
-    font-weight: bold;
-    color: #fff; /* Default text color */
-    text-align: center;
-    white-space: nowrap;
+  padding: 0.3em 0.7em; border-radius: 0.25rem; font-size: 0.85em;
+  font-weight: bold; color: #fff; text-align: center; white-space: nowrap;
+  line-height: 1.2; vertical-align: middle;
 }
-
-.status-processing { background-color: #ffc107; color: #333; } /* Yellowish */
-.status-packaging { background-color: #17a2b8; } /* Teal */
-.status-ready, /* Use same color for Ready for Pickup */
-.status-ready-for-pickup /* Allow for space in name */ { background-color: #007bff; } /* Blue */
-.status-shipped { background-color: #fd7e14; } /* Orange */
-.status-delivered { background-color: #28a745; } /* Green */
-.status-cancelled { background-color: #dc3545; text-decoration: line-through; } /* Red */
-.status-unknown { background-color: #6c757d; } /* Gray for default/unknown */
-
-/* Add focus styles for selects for accessibility */
-.status-select:focus,
-.status-filter-select:focus {
-  border-color: #97c9ba; /* Match your primary color */
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(151, 201, 186, 0.25); /* Adjusted focus shadow */
-}
+.status-processing { background-color: #ffc107; color: #212529; }
+.status-packaging { background-color: #17a2b8; }
+.status-ready, .status-ready-for-pickup { background-color: #007bff; }
+.status-shipped { background-color: #fd7e14; }
+.status-delivered { background-color: #28a745; }
+.status-cancelled { background-color: #dc3545; text-decoration: line-through; }
+.status-unknown { background-color: #6c757d; }
 
 
 /* === Loading Spinner Styles === */
-.loading-container {
-  display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
-  justify-content: center;
-  align-items: center;
-  min-height: 300px; /* Give it some vertical space for standalone loading */
-  padding: 2rem;
-  text-align: center;
-  color: #555; /* Text color */
+section.loading-container {
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: center; min-height: 200px; /* Reduced from 300px */
+  padding: 2rem; text-align: center; color: #555;
+}
+/* Specific for inline loading within orders section */
+section.dashboard-section > section.loading-container.orders-loading-inline {
+  min-height: 150px; padding: 1rem 0; background-color: transparent; box-shadow: none;
 }
 
-/* Adjustments for inline loading (within page content) */
-.dashboard-section > .loading-container { /* Target only direct children */
-    min-height: 150px; /* Reduce height when shown inline */
-    padding: 1rem 0; /* Reduce padding when inline */
-    background-color: transparent; /* Ensure it doesn't override section bg */
-    box-shadow: none; /* Ensure it doesn't override section shadow */
+figure.spinner {
+  width: 48px; height: 48px; border: 5px solid rgba(0,0,0,0.1);
+  border-top-color: var(--primary-color, #432C53); /* Use primary color for spinner */
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin: 0 0 1rem 0; /* Reset figure margin and add bottom space */
 }
+@keyframes spin { to { transform: rotate(360deg); } }
+section.loading-container p { font-size: 1.1em; color: #555; margin:0; }
 
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #ccc; /* Light grey base border */
-  /* Use your primary color for the spinning part */
-  border-top-color: #97c9ba; /* Your primary green color */
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite; /* Reference the spin animation */
-  margin-bottom: 1rem; /* Space between spinner and text */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  header.orders-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  section.order-filter-container { width: 100%; }
+  select.status-filter-select { width: 100%; }
+  ul.order-list { grid-template-columns: 1fr; } /* Stack order cards */
 }
-
-/* The spin animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading text style */
-.loading-container p {
-  font-size: 1.1em;
-  color: #555;
-}
-/* === End Loading Spinner Styles === */

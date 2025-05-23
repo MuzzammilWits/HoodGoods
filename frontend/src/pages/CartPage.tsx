@@ -1,3 +1,4 @@
+// frontend/src/pages/CartPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/ContextCart'; // Assuming path is correct
 import { Link } from 'react-router-dom';
@@ -22,7 +23,6 @@ const CartPage: React.FC = () => {
     isLoading
   } = useCart();
 
-  // NEW: Local loading state
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
 
   useEffect(() => {
@@ -33,13 +33,12 @@ const CartPage: React.FC = () => {
     return () => clearTimeout(timer); // Clean up timer
   }, []);
 
-  // Updated loading logic
   if (isLoading || isLoadingLocal) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div> {/* Spinner element */}
+      <section className="loading-container" aria-label="Loading cart contents">
+        <figure className="spinner" role="img" aria-label="Loading animation"></figure>
         <p>Loading cart...</p>
-      </div>
+      </section>
     );
   }
 
@@ -58,13 +57,13 @@ const CartPage: React.FC = () => {
         </section>
       ) : (
         <section className="cart-content">
-          <section className="cart-items">
+          <ul className="cart-items"> {/* Changed from section to ul */}
             {cartItems.map((item: CartItemDisplay) => (
-              <article key={item.productId} className="cart-item">
+              <li key={item.productId} className="cart-item"> {/* Changed from article to li */}
                 <figure className="item-image-container">
                   <img src={item.imageUrl || '/placeholder.png'} alt={item.productName} className="item-image" />
                 </figure>
-                <section className="item-details">
+                <article className="item-details"> {/* Changed from section to article */}
                   <h3 className="item-name">{item.productName}</h3>
                   <p className="item-price">R{Number(item.productPrice).toFixed(2)}</p>
                   <section className="quantity-controls">
@@ -101,7 +100,7 @@ const CartPage: React.FC = () => {
                   <p className="item-subtotal">
                     Subtotal: R{(Number(item.productPrice) * item.quantity).toFixed(2)}
                   </p>
-                </section>
+                </article>
                 <button
                   onClick={() => removeFromCart(item.productId)}
                   className="remove-btn"
@@ -109,9 +108,9 @@ const CartPage: React.FC = () => {
                 >
                   ×
                 </button>
-              </article>
+              </li>
             ))}
-          </section>
+          </ul>
 
           <footer className="cart-summary">
             <h3 className="summary-title">Order Summary</h3>
@@ -128,7 +127,7 @@ const CartPage: React.FC = () => {
               </Link>
               <button
                 onClick={clearCart}
-                className="checkout-btn"
+                className="checkout-btn clear-cart-btn" /* Added clear-cart-btn for distinct styling if needed */
               >
                 Clear Cart
               </button>
