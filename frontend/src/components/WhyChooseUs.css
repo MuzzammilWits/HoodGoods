@@ -3,7 +3,7 @@
 .why-choose-us-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 40px;
   background-color: var(--light-purple);
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -16,8 +16,8 @@
 /* About Us section styling */
 .about-us-section {
   margin-bottom: 3rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: 0;
+  /* border-bottom: 1px solid var(--border-color, #e0e0e0); */
 }
 
 .about-us-text {
@@ -42,7 +42,8 @@
 }
 
 .trust-icons-section {
-  padding: 2rem 0; /* Adjusted padding */
+  margin-bottom: 3rem;
+  padding: 0;
   text-align: center;
 }
 
