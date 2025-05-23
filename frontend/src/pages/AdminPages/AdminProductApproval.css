@@ -1,196 +1,258 @@
-/* src/pages/AdminProductApproval.css */
-.admin-products-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+/* src/pages/AdminPages/AdminProductApproval.css */
+main.admin-products-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-header h1 {
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color, #432C53);
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background-color: #432C53;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #5a3a6f;
+}
+
+section.products-table-container {
+  overflow-x: auto;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* Removed background, shadow, radius from here as it's on the container */
+}
+
+.products-table th, 
+.products-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.products-table th {
+  background-color: #f9f6fd;
+  font-weight: 600;
+  color: #432C53;
+  font-family: 'Poppins', sans-serif;
+}
+
+.products-table tr:last-child td {
+    border-bottom: none; /* Remove border from last row */
+}
+
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #eee; /* Optional: adds a slight border */
+}
+
+p.status-badge { /* Changed from span.status-badge */
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block; /* Make it behave like a badge */
+  margin: 0; /* Reset default paragraph margin */
+  text-align: center;
+  min-width: 70px; /* Ensure a minimum width for consistency */
+}
+
+p.status-badge.active {
+  background-color: #e6f7ee;
+  color: #00a854;
+}
+
+p.status-badge.inactive { /* Will show 'Pending' */
+  background-color: #fff2f0;
+  color: #f5222d;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center; /* Vertically align buttons if they wrap */
+}
+
+/* Base Button Styles */
+.action-button2 {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Hind', sans-serif;
+  transition: all 0.2s;
+  height: 36px; /* Consistent height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px; /* Ensure buttons have some minimum width */
+  line-height: 1; /* Prevent extra space from line-height */
+}
+
+/* Specific Button Types */
+.edit-button2 { /* Approve button */
+  /* composes: action-button2; (CSS Modules syntax, handled by direct styling here) */
+  background-color: #97c9ba; /* Softer Green */
+  color: white;
+}
+
+.remove-button2 { /* Reject button */
+  /* composes: action-button2; (CSS Modules syntax, handled by direct styling here) */
+  background-color: #ff7875; /* Softer Red */
+  color: white;
+}
+
+/* Hover States */
+.edit-button2:hover:not(:disabled) {
+  background-color: #7ab8a5; /* Darker Green */
+}
+
+.remove-button2:hover:not(:disabled) {
+  background-color: #ff4d4f; /* Darker Red */
+}
+
+/* Loading State */
+section.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #666;
+  font-family: 'Hind', sans-serif;
+}
+
+figure.spinner { /* Changed from div.spinner */
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #432C53; /* Primary color for spinner */
+  animation: spin 1s ease infinite;
+  margin: 0 0 1rem 0; /* Figure margin reset and bottom space */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
+  100% {
+    transform: rotate(360deg);
   }
-  
-  .back-button {
-    padding: 0.5rem 1rem;
+}
+
+/* Error State */
+section.error-message-container { /* Changed from .error-message */
+  text-align: center;
+  padding: 2rem;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  color: #d93026;
+  font-family: 'Hind', sans-serif;
+}
+
+.error-message-container h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.retry-button {
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
     background-color: #432C53;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
-  }
-  
-  .back-button:hover {
+    font-weight: 500;
+}
+.retry-button:hover {
     background-color: #5a3a6f;
-  }
-  
-  .products-table-container {
-    overflow-x: auto;
-  }
-  
-  .products-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Notification Modal */
+aside.notification-modal { /* Changed from .notification-modal */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  color: white;
+  font-family: 'Hind', sans-serif;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1050; /* High z-index to appear above other content */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+aside.notification-modal.success {
+  background-color: #4CAF50; /* Green for success */
+}
+
+aside.notification-modal.error {
+  background-color: #f44336; /* Red for error */
+}
+
+.no-products-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: #666;
+    font-family: 'Hind', sans-serif;
+    background-color: #f9f9f9;
     border-radius: 8px;
-    overflow: hidden;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
-  
   .products-table th, 
   .products-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .products-table th {
-    background-color: #f9f6fd;
-    font-weight: 600;
-    color: #432C53;
-  }
-  
-  .product-thumbnail {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  
-  .status-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  
-  .status-badge.active {
-    background-color: #e6f7ee;
-    color: #00a854;
-  }
-  
-  .status-badge.inactive {
-    background-color: #fff2f0;
-    color: #f5222d;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
   }
   
   .actions-cell {
-    display: flex;
-    gap: 0.5rem;
+    flex-direction: column; /* Stack buttons vertically on small screens */
+    align-items: stretch; /* Make buttons full width of cell */
   }
-  
-  .edit-button, 
-  .remove-button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  
-  .edit-button {
-    background-color: #97c9ba;
-    color: white;
-  }
-  
-  .edit-button:hover {
-    background-color: #7ab8a5;
-  }
-  
-  .remove-button {
-    background-color: #ff7875;
-    color: white;
-  }
-  
-  .remove-button:hover {
-    background-color: #ff4d4f;
-  }
-  
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-  }
-  
-  .error {
-    text-align: center;
-    padding: 2rem;
-    color: #f5222d;
-  }
-  
-  @media (max-width: 768px) {
-    .products-table th, 
-    .products-table td {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    .edit-button, 
-    .remove-button {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-    }
-  }
-
-  /*Different style attempt*/
-
-  .actions-container {
-    display: flex;
-    gap: 8px;
-    padding: 8px 0;
-  }
-  
-  /* Base Button Styles */
   .action-button2 {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 80px;
+    width: 100%;
   }
-  
-  /* Specific Button Types */
-  .edit-button2 {
-    composes: action-button;
-    background-color: #97c9ba;
-    color: white;
-  }
-  
-  .remove-button2 {
-    composes: action-button;
-    background-color: #ff7875;
-    color: white;
-  }
-  
-  /* Hover States */
-  .edit-button2:hover:not(:disabled) {
-    background-color: #7ab8a5;
-  }
-  
-  .remove-button2:hover:not(:disabled) {
-    background-color: #ff4d4f;
-  }
-  
-  /* Responsive Adjustments */
-  @media (max-width: 768px) {
-    .actions-container2 {
-      flex-direction: column;
-    }
-    
-    .action-button2 {
-      width: 100%;
-      max-width: none;
-    }
-  }
+}

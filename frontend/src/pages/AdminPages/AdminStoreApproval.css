@@ -1,6 +1,6 @@
-/* src/pages/AdminStoreApproval2.css */
+/* src/pages/AdminPages/AdminStoreApproval.css */
 
-.admin-stores-container {
+main.admin-stores-container {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -16,6 +16,11 @@
   border-bottom: 1px solid #eee;
 }
 
+.admin-header h1 {
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color, #432C53);
+}
+
 .back-button {
   padding: 0.5rem 1rem;
   background-color: #432C53;
@@ -27,25 +32,27 @@
   transition: background-color 0.2s;
 }
 
-
 .back-button:hover {
   background-color: #5a3a6f;
 }
 
-.stores-list {
+ul.stores-list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  list-style: none; /* Reset list style */
+  padding: 0; /* Reset list padding */
+  margin: 0; /* Reset list margin */
 }
 
-.store-card {
+li.store-card {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
-.store-header {
+section.store-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -56,34 +63,57 @@
   background-color: #f9f6fd;
   user-select: none;
 }
-
-.store-info h2 {
-  margin: 0;
-  color: #432C53;
+section.store-header:focus { /* Accessibility focus style */
+    outline: 2px solid var(--primary-color, #432C53);
+    outline-offset: -2px;
 }
 
-.pricing-info {
+
+article.store-info h2 {
+  margin: 0 0 0.5rem 0;
+  color: #432C53;
+  font-family: 'Poppins', sans-serif;
+}
+
+section.pricing-info {
   display: flex;
   gap: 2rem;
   font-size: 0.9rem;
   color: #555;
 }
 
-.pricing-info h4 {
+section.pricing-info section { /* Targets the inner sections for standard/express */
+    /* No specific styles needed unless distinct visual separation is required */
+}
+
+section.pricing-info h4 {
   margin: 0 0 0.25rem 0;
   font-weight: 600;
   color: #432C53;
+  font-family: 'Poppins', sans-serif;
+}
+section.pricing-info p {
+    margin: 0.2rem 0;
+}
+
+
+section.store-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
 }
 
 .approve-button,
 .reject-button {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem; /* Slightly larger padding */
   border: none;
   border-radius: 4px;
   font-weight: 600;
+  font-family: 'Hind', sans-serif;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  min-width: 100px;
+  min-width: 120px; /* Ensure buttons have a decent width */
+  text-align: center;
 }
 
 .approve-button {
@@ -104,65 +134,60 @@
   background-color: #ff4d4f;
 }
 
-/* Toggle Arrow */
-.toggle-arrow {
-  font-size: 1.2rem;
-  color: #432C53;
-  transition: transform 0.3s ease;
-  user-select: none;
-  margin-right: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.toggle-arrow.expanded {
-  transform: rotate(180deg);
-}
-
-/* Products Section */
-
-.store-products {
+/* Products Section (if expanded) */
+section.store-products {
   padding: 1rem 1.5rem;
   border-top: 1px solid #eee;
   background-color: #fff;
 }
 
-.store-products h3 {
+section.store-products h3 {
   margin-top: 0;
+  margin-bottom: 1rem;
   color: #432C53;
   font-weight: 600;
+  font-family: 'Poppins', sans-serif;
 }
 
-.no-products {
+p.no-products {
   font-style: italic;
   color: #888;
+  padding: 1rem 0;
 }
 
-.products-grid {
+ul.products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
   gap: 1rem;
   margin-top: 1rem;
+  list-style: none; /* Reset list style */
+  padding: 0; /* Reset list padding */
 }
 
-.product-card {
+li.product-card-item { /* Changed from .product-card to avoid conflict */
   background-color: #f9f6fd;
   border-radius: 8px;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* Softer shadow */
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.product-image img {
+figure.product-image { /* Changed from .product-image */
   width: 100%;
   height: 150px;
-  object-fit: cover;
+  overflow: hidden;
+  margin: 0; /* Reset figure margin */
   border-bottom: 1px solid #ddd;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px 8px 0 0; /* Round top corners */
+}
+figure.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.product-details {
+article.product-details-item { /* Changed from .product-details */
   padding: 0.75rem 1rem;
   flex-grow: 1;
   display: flex;
@@ -170,63 +195,38 @@
   justify-content: space-between;
 }
 
-.product-details h4 {
+article.product-details-item h4 {
   margin: 0 0 0.3rem 0;
   color: #432C53;
+  font-family: 'Poppins', sans-serif;
 }
 
-.product-details p {
+article.product-details-item p {
   margin: 0 0 0.25rem 0;
   color: #555;
   font-size: 0.9rem;
 }
 
-/* Action Buttons on product cards */
-
-.edit-button2,
-.remove-button2 {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  min-width: 80px;
-  color: white;
-}
-
-.edit-button2 {
-  background-color: #97c9ba;
-}
-
-.edit-button2:hover:not(:disabled) {
-  background-color: #7ab8a5;
-}
-
-.remove-button2 {
-  background-color: #ff7875;
-}
-
-.remove-button2:hover:not(:disabled) {
-  background-color: #ff4d4f;
-}
 
 /* Loading and error states */
-
-.loading-container {
+section.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
   text-align: center;
-  padding: 2rem;
   color: #666;
 }
 
-.spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #432C53;
+figure.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #432C53;
   border-radius: 50%;
   width: 36px;
   height: 36px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1rem; /* Figure margin reset */
 }
 
 @keyframes spin {
@@ -234,39 +234,66 @@
   100% { transform: rotate(360deg); }
 }
 
-.error {
-  text-align: center;
-  padding: 2rem;
-  color: #f5222d;
+/* Notification Modal */
+aside.notification-modal {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  color: white;
+  font-family: 'Hind', sans-serif;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1050;
 }
 
-/* Responsive */
+aside.notification-modal.success {
+  background-color: #4CAF50;
+}
 
+aside.notification-modal.error {
+  background-color: #f44336;
+}
+
+p.no-stores-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: #666;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+
+/* Responsive */
 @media (max-width: 768px) {
-  .store-header {
+  section.store-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem; /* Increased gap for stacked layout */
   }
 
-  .pricing-info {
-    gap: 1rem;
-    flex-wrap: wrap;
+  section.store-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Stack buttons on small screens */
+    gap: 0.5rem;
   }
 
   .approve-button,
   .reject-button {
-    width: 100%;
-    min-width: unset;
+    width: 100%; /* Make buttons full width */
   }
 
-  .products-grid {
+  section.pricing-info {
+    gap: 1rem;
+    flex-direction: column; /* Stack pricing info sections */
+    align-items: flex-start;
+  }
+
+  ul.products-grid {
     grid-template-columns: 1fr;
-  }
-
-  .edit-button2,
-  .remove-button2 {
-    width: 100%;
-    min-width: unset;
   }
 }
