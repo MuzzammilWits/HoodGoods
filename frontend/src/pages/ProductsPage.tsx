@@ -56,6 +56,9 @@ const ProductsPage: React.FC = () => {
   const selectedStore = searchParams.get('store') || '';
   const searchQuery = searchParams.get('search') || '';
 
+  // Local state for search input
+  const [searchInput, setSearchInput] = useState(searchQuery);
+
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({message, type});
     setTimeout(() => {
@@ -127,6 +130,11 @@ const ProductsPage: React.FC = () => {
         fetchRole();
     }
   }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading, backendUrl]);
+
+  // Update search input when searchQuery changes (e.g., on navigation)
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -200,8 +208,8 @@ const ProductsPage: React.FC = () => {
 
   if (isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching)) {
     return (
-      <section className="loading-container" aria-label="Loading products and user data"> {/* Changed div to section */}
-        <figure className="spinner" role="img" aria-label="Loading animation"></figure> {/* Changed div to figure */}
+      <section className="loading-container" aria-label="Loading products and user data">
+        <figure className="spinner" role="img" aria-label="Loading animation"></figure>
         <p>Loading products and user data...</p>
       </section>
     );
@@ -223,44 +231,57 @@ const ProductsPage: React.FC = () => {
     <>
       <main className="products-container">
         {notification.type && (
-          <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}> {/* Changed div to aside */}
+          <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
             {notification.message}
           </aside>
         )}
 
         <section className="filters-container" aria-labelledby="filters-heading">
-          <h2 id="filters-heading" className="visually-hidden">Product Filters</h2> {/* Added for accessibility */}
-          <section className="filter-row-search-recs"> {/* Changed div to section */}
-            <section className="search-bar filters"> {/* Changed div to section */}
-              <label htmlFor="product-search">Search Products:</label>
+          <h2 id="filters-heading" className="search-label">Search Products:</h2>
+          {/* Search bar at the top of the purple box */}
+          <section className="search-bar-in-filters">
+            <section className="search-input-group">
               <input
-                id="product-search" type="search" placeholder="Search by name, description, store..."
-                value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)}
+                id="product-search"
+                type="search"
+                placeholder="Search by name, description, store..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
                 aria-label="Search products"
               />
-            </section>
-            <section className="recommendations-link-container"> {/* Changed div to section */}
-              <Link to="/recommendations" className="products-page-cta-button">
-                Recommendations
-              </Link>
+              <button
+                className="search-products-btn"
+                onClick={() => handleSearchChange(searchInput)}
+                type="button"
+                aria-label="Search"
+              >
+                Search
+              </button>
             </section>
           </section>
 
-          <section className="category-filter filters"> {/* Changed div to section */}
-            <label htmlFor="category-select">Filter by Category:</label>
-            <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)}>
-              <option value="">All Categories</option>
-              {categories.map(category => (<option key={category} value={category}>{category}</option>))}
-            </select>
+          <section className="filter-row-sidebyside">
+            <section className="category-filter filters">
+              <h3 className="filter-label">Filter by Category:</h3>
+              <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)}>
+                <option value="">All Categories</option>
+                {categories.map(category => (<option key={category} value={category}>{category}</option>))}
+              </select>
+            </section>
+            <section className="store-filter filters">
+              <h3 className="filter-label">Filter by Store:</h3>
+              <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)}>
+                <option value="">All Stores</option>
+                {stores.map(store => (<option key={store} value={store}>{store}</option>))}
+              </select>
+            </section>
           </section>
-          
-          <section className="store-filter filters"> {/* Changed div to section */}
-            <label htmlFor="store-select">Filter by Store:</label>
-            <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)}>
-              <option value="">All Stores</option>
-              {stores.map(store => (<option key={store} value={store}>{store}</option>))}
-            </select>
-          </section>
+        </section>
+        {/* Recommended for you button below the purple box, aligned left */}
+        <section className="recommendations-link-below">
+          <Link to="/recommendations" className="products-page-cta-button">
+            Recommended for you
+          </Link>
         </section>
 
         <ul className="products-grid">
