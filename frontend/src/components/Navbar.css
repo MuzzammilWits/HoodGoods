@@ -1,27 +1,19 @@
 /* In Navbar.css */
 
-/* Ensure variables are defined in index.css :root */
-
 .navbar {
   background-color: #ECE4F1;
   padding: 0.8rem 0;
-  /* --- MODIFIED: Changed position to fixed for always-visible navbar --- */
-  position: fixed;   /* Changed from sticky */
-  top: 0;            /* Stick to the top */
-  left: 0;           /* Align to the left edge */
-  width: 100%;       /* Span full viewport width */
-  /* --- END MODIFICATION --- */
-  z-index: 100;      /* Ensure it's above other content */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* --- ADDED: Padding for body to prevent overlap --- */
-/* Add this rule to your global CSS or where appropriate */
-/* Adjust the padding-top value based on your navbar's actual height */
-body { /* Or your main content wrapper class/id */
-  padding-top: 70px; /* Example value - MUST ADJUST based on navbar height! */
+body {
+  padding-top: 70px;
 }
-/* --- END ADDED --- */
 
 .navbar-container {
   max-width: 1200px;
@@ -34,6 +26,7 @@ body { /* Or your main content wrapper class/id */
 
 .logo-container {
   flex-shrink: 0;
+  margin: 0; /* Reset default figure margin */
 }
 
 .logo {
@@ -55,8 +48,8 @@ body { /* Or your main content wrapper class/id */
 }
 
 .nav-link {
-  all: unset; /* 👈 Reset all native button styles /
-  display: inline-block; / 👈 Make it behave like a link */
+  all: unset;
+  display: inline-block;
   color: var(--text-color, #333);
   font-weight: 500;
   text-decoration: none;
@@ -77,7 +70,6 @@ body { /* Or your main content wrapper class/id */
   outline-offset: 2px;
   border-radius: 2px;
 }
-
 
 .nav-icons {
   display: flex;
@@ -115,11 +107,12 @@ body { /* Or your main content wrapper class/id */
   gap: 0.8rem;
 }
 
-.user-greeting {
+p.user-greeting {
   font-size: 0.9rem;
   color: var(--text-color, #333);
   font-weight: 500;
   white-space: nowrap;
+  margin: 0; /* Reset default paragraph margin */
 }
 
 .sign-out-btn {
@@ -142,7 +135,6 @@ body { /* Or your main content wrapper class/id */
 }
 /* --- End Authentication Button Styling --- */
 
-
 /* --- Icon Link Styling --- */
 .icon-link {
   color: var(--text-color, #333);
@@ -151,17 +143,13 @@ body { /* Or your main content wrapper class/id */
   justify-content: center;
   padding: 0.25rem;
   transition: color 0.2s ease;
+  font-size: 25px; /* Set a base size for emoji icons */
+  text-decoration: none;
 }
 
 .icon-link:hover,
 .icon-link:focus {
   color: var(--secondary-color, #B48C77);
-}
-
-.icon-link svg {
-  /* --- ADJUSTED: Increased icon size --- */
-  width: 25px;
-  height: 25px;
 }
 
 .icon-link:focus-visible {
@@ -170,7 +158,6 @@ body { /* Or your main content wrapper class/id */
    border-radius: 50%;
 }
 /* --- End Icon Link Styling --- */
-
 
 /* --- Responsive Styling --- */
 @media (max-width: 768px) {
@@ -182,13 +169,13 @@ body { /* Or your main content wrapper class/id */
     justify-content: space-between;
   }
 
-  .user-greeting {
+  p.user-greeting {
     display: none;
   }
   .auth-user {
     gap: 0.5rem;
   }
   .nav-icons {
-      gap: 0.8rem;
+    gap: 0.8rem;
   }
 }
