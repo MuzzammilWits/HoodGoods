@@ -153,26 +153,26 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
 
   // Main loading for products list
   if (loading) {
-    return <div className="best-sellers-loading">Loading best sellers...</div>;
+    return <p className="best-sellers-loading">Loading best sellers...</p>;
   }
 
   if (error) {
-    return <div className="best-sellers-error">Error: {error}</div>;
+    return <p className="best-sellers-error">Error: {error}</p>;
   }
 
   if (products.length === 0 && !loading) { // Ensure not to show if still loading
-    return <div className="best-sellers-empty">No best selling products found for the selected period.</div>;
+    return <p className="best-sellers-empty">No best selling products found for the selected period.</p>;
   }
 
   return (
-    <div className="best-sellers-container">
+    <section className="best-sellers-container">
       <h2>{title}</h2>
       {notification.type && (
-        <div className={`recommendation-notification ${notification.type} notification-modal`}> {/* Added notification-modal for consistency if styles exist */}
+        <aside className={`recommendation-notification ${notification.type} notification-modal`}> {/* Added notification-modal for consistency if styles exist */}
           {notification.message}
-        </div>
+        </aside>
       )}
-      <div className="best-sellers-grid">
+      <ol className="best-sellers-grid">
         {products.map((product) => {
           const isOwner = isAuthenticated && product.userId === user?.sub;
           const isOutOfStock = typeof product.productquantity === 'number' && product.productquantity <= 0;
@@ -202,7 +202,7 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
           }
 
           return (
-            <div key={product.productId} className="best-seller-card">
+            <li key={product.productId} className="best-seller-card">
               <img
                 src={product.imageUrl || '/placeholder-image.png'} // Ensure you have a placeholder
                 alt={product.name}
@@ -214,7 +214,7 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
                   }
                 }}
               />
-              <div className="best-seller-info">
+              <article className="best-seller-info">
                 <h3 className="best-seller-name">{product.name}</h3>
                 {product.storeName && (
                   <p className="best-seller-store">Sold by: {product.storeName}</p>
@@ -223,7 +223,7 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
                 <p className="best-seller-stock">
                   {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
                 </p>
-              </div>
+              </article>
               <button
                 onClick={() => handleAddToCartFromRecommendation(product)}
                 className="btn-add-to-cart-recommendation" // Make sure this class exists and is styled
@@ -239,11 +239,11 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
               >
                 {buttonText}
               </button>
-            </div>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ol>
+    </section>
   );
 };
 

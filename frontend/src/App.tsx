@@ -1,8 +1,7 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { Routes, Route, useNavigate } // Removed Link as it's not directly used in App.tsx, but in components like Hero/Navbar
-from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/ContextCart';
 import './App.css';
 
@@ -23,14 +22,12 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import SellerDashboardPage from './pages/SellerDashboardPage';
 import MyOrdersPage from './pages/MyOrdersPage';
-// --- RESTORED IMPORTS for Analytics Pages ---
 import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
-
 // --- NEW IMPORTS FOR RECOMMENDATIONS ---
 import BestSellersList from './components/recommendations/BestSellersList';
-import RecommendationsPage from './pages/RecommendationsPage'; // Assuming you've created this page
+import RecommendationsPage from './pages/RecommendationsPage'; 
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -56,41 +53,37 @@ const AppContent: React.FC = () => {
           <Navbar />
         </header>
 
-        <main className="app-main-content"> {/* Added a class for potential global main styling */}
+        <main className="app-main-content">
           <Routes>
             {/* Public Home Route */}
             <Route path="/" element={
               <>
                 <section aria-labelledby="hero-heading">
-                  {/* Visually hidden h2 for "Main Showcase" removed as requested */}
                   <Hero />
                 </section>
 
-                {/* --- ADDED BestSellersList (Popular Products) right above WhyChooseUs --- */}
                 <section aria-labelledby="popular-products-heading" className="homepage-recommendations" style={{ padding: '20px 15px', backgroundColor: 'var(--background-color-light, #f9f9f9)' }}>
-                  <h2 id="popular-products-heading" className="visually-hidden">Popular Products</h2> {/* Keeping this one as BestSellersList has its own visible title */}
+                  <h2 id="popular-products-heading" className="visually-hidden">Popular Products</h2>
                   <BestSellersList limit={6} title="Popular This Week" />
                 </section>
 
-                {/* --- Section Divider --- */}
-                <div className="section-divider">
+                {/* --- Section Divider (div replaced with figure) --- */}
+                <figure className="section-divider" role="presentation">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
                   </svg>
-                </div>
+                </figure>
 
                 <section aria-labelledby="why-choose-us-heading" style={{ backgroundColor: 'var(--background-color, #fff)', padding: '20px 0' }}>
-                   {/* Visually hidden h2 for "Our Values" removed as requested */}
                   <WhyChooseUs />
                 </section>
-                {/* Other homepage sections might follow here */}
 
-                {/* --- Section Divider before Footer --- */}
-                <div className="section-divider">
+                {/* --- Section Divider before Footer (div replaced with figure) --- */}
+                <figure className="section-divider" role="presentation">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
                   </svg>
-                </div>
+                </figure>
               </>
             } />
 
@@ -160,7 +153,6 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             } />
             
-            {/* --- RESTORED Seller Analytics Page Route --- */}
             <Route
               path="/seller/analytics"
               element={
@@ -182,7 +174,7 @@ const AppContent: React.FC = () => {
 
 
             <Route path="/admin/product-approval" element={
-              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+              <ProtectedRoute allowedRoles={['admin']}>
                 <article>
                   <AdminProductApproval /> 
                 </article>
@@ -190,7 +182,7 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/admin/store-approval" element={
-              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+              <ProtectedRoute allowedRoles={['admin']}>
                 <article>
                   <AdminStoreApproval /> 
                 </article>
@@ -198,19 +190,16 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/admin/reports" element={
-              <ProtectedRoute allowedRoles={['admin']}> {/* Adjust roles as needed */}
+              <ProtectedRoute allowedRoles={['admin']}>
                 <article>
                   <AdminStoreApproval /> 
                 </article>
               </ProtectedRoute>
             } />
 
-            {/* *** ADDED My Orders Route (for any logged-in user) *** */}
-
-            {/* --- RESTORED Admin Analytics Page Route --- */}
             <Route path="/admin/analytics" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <section aria-label="Admin Platform Analytics"> {/* Changed from <article> to <section> for consistency with SellerAnalytics */}
+                <section aria-label="Admin Platform Analytics">
                   <AdminAnalyticsPage />
                 </section>
               </ProtectedRoute>
@@ -224,9 +213,6 @@ const AppContent: React.FC = () => {
                 </article>
               </ProtectedRoute>
             } />
-
-            {/* Consider a 404 Not Found Route */}
-            {/* <Route path="*" element={<NotFoundPage />} /> */}
 
           </Routes>
         </main>
