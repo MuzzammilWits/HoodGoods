@@ -1,133 +1,139 @@
+/* src/pages/myStore.css */
+
 /* === Base and Layout Styles === */
-main.my-store-container {
+main.my-store-container { /* Targeting main element */
   max-width: 1200px;
   margin: 40px auto;
-  padding: 0 20px;
-  font-family: sans-serif;
+  padding: 0 20px 40px 20px; /* Added bottom padding */
+  font-family: 'Hind', sans-serif; /* Consistent base font */
   color: #333;
 }
 
-header.store-header {
+header.store-header { /* Targets main page header */
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* This gap is between .filter-row-search-recs and the category/store filters */
+  gap: 1rem;
   margin-bottom: 2rem;
   padding: 2rem;
-  background: #ECE4F1;
+  background: #ECE4F1; /* Light lavender background */
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-.info-message {
-  color: #0066cc;
-  background-color: #e6f2ff;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-}
-/* Add these styles to your CSS file */
-.product-card.inactive {
-  position: relative;
-  opacity: 0.8;
-  border-left: 4px solid #ff9800; /* Orange border for pending status */
+
+header.store-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color, #432C53); /* Use primary color */
+  font-family: 'Poppins', sans-serif; /* Consistent heading font */
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center; /* Center main store title */
 }
 
-.product-status-badge {
+p.info-message, /* General info message */
+p.error-message { /* General error message */
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  border-left-width: 5px;
+  border-left-style: solid;
+  font-size: 0.95em;
+}
+p.info-message {
+  color: #004085; /* Darker blue text */
+  background-color: #cce5ff; /* Lighter blue background */
+  border-left-color: #007bff; /* Blue accent */
+}
+p.error-message {
+  background-color: #ffebee;
+  border-left-color: #d32f2f;
+  color: #c62828;
+}
+
+
+p.product-status-badge { /* Replaced span.product-status-badge */
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: #ff9800;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-/* Add to your myStore.css */
-.product-status-section {
-  margin-bottom: 2rem;
-}
-
-.product-status-section h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
-}
-
-.product-card.inactive {
-  opacity: 0.8;
-  position: relative;
-  border-left: 4px solid #ff9800;
-}
-
-.product-status-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #ff9800;
+  background-color: #ff9800; /* Orange for pending */
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: bold;
+  margin: 0; /* Reset paragraph margin */
+  line-height: 1.2; /* Adjust line height for small badge */
 }
 
-.product-card.active {
-  border-left: 4px solid #4caf50;
+section.product-status-section { /* Changed from div.product-status-section */
+  margin-bottom: 2rem;
 }
-header.store-header h1 {
-  font-size: 2.5rem;
+
+section.product-status-section h2 {
+  font-size: 1.8rem; /* Slightly larger for section titles */
+  margin-bottom: 1.5rem; /* Increased space */
   color: #333;
-  margin: 0;
-  width: 100%; /* Force H1 to take full width -> puts it on its own line */
-  box-sizing: border-box; /* Include padding/border in width calculation */
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.75rem; /* Increased padding */
+  font-family: 'Poppins', sans-serif;
 }
+
+article.product-card.inactive { /* Styling for inactive (pending) product cards */
+  opacity: 0.85; /* Slightly less opacity */
+  position: relative;
+  border-left: 4px solid #ff9800; /* Orange left border */
+}
+
+article.product-card.active { /* Styling for active product cards */
+  border-left: 4px solid #4caf50; /* Green left border */
+}
+
 
 /* === Delivery Info Section Styles === */
 section.delivery-info-display {
   background-color: #f8f9fa;
-  border: 1px solid #432C53;
+  border: 1px solid #dee2e6; /* Subtler border */
   border-radius: 6px;
-  padding: 15px 20px;
-  margin-top: 15px; /* Add some space below the H1 */
-  width: 100%;     /* Force Delivery section to take full width -> puts it on its own line */
+  padding: 20px 25px; /* Increased padding */
+  margin-top: 1.5rem; /* Space from store title */
+  width: 100%;
   box-sizing: border-box;
 }
 
-.delivery-header {
+section.delivery-header { /* Changed div.delivery-header */
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
   border-bottom: 1px solid #dee2e6;
-  padding-bottom: 8px;
+  padding-bottom: 10px; /* Increased padding */
 }
 
 section.delivery-info-display h2 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #495057;
+  font-size: 1.3rem; /* Increased size */
+  color: #495057; /* Darker grey */
+  font-family: 'Poppins', sans-serif;
 }
 
-.delivery-header .button-edit {
-  padding: 4px 12px;
+section.delivery-header .button-edit.button-small { /* More specific selector for small edit button */
+  padding: 6px 14px; /* Adjusted padding */
   font-size: 0.9em;
-  flex-shrink: 0;
 }
 
 section.delivery-info-display dl {
   margin: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px 15px;
-  font-size: 0.95em;
+  grid-template-columns: auto 1fr; /* Label column auto, value column takes rest */
+  gap: 10px 15px; /* Increased gap */
+  font-size: 1em; /* Slightly larger font */
 }
 
 section.delivery-info-display dt {
   font-weight: 600;
   color: #495057;
   grid-column: 1;
+  padding-right: 10px; /* Add some space for alignment */
 }
 
 section.delivery-info-display dd {
@@ -137,7 +143,7 @@ section.delivery-info-display dd {
 }
 
 p.info-text {
-  font-size: 0.85em;
+  font-size: 0.9em; /* Increased size */
   color: #6c757d;
   margin-top: 15px;
   margin-bottom: 0;
@@ -150,238 +156,141 @@ form.delivery-edit-form {
   border-top: 1px dashed #dee2e6;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px; /* Increased gap between form elements */
+}
+form.delivery-edit-form label { /* Styling for labels within this specific form */
+    margin-top: 10px;
+    font-weight: 500; /* Medium weight for these labels */
+}
+form.delivery-edit-form label:first-of-type { margin-top: 0; }
+form.delivery-edit-form input, form.delivery-edit-form select {
+    margin-bottom: 5px; /* Reduced margin as gap handles spacing */
 }
 
-form.delivery-edit-form label {
-  margin-top: 10px;
-}
-form.delivery-edit-form label:first-of-type {
-  margin-top: 0;
-}
 
-.delivery-edit-actions {
+footer.delivery-edit-actions { /* Changed div.delivery-edit-actions */
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px; /* Increased gap */
   margin-top: 20px;
   padding-top: 15px;
   border-top: 1px solid #eee;
 }
 
-
 /* === Store Actions Container (Add Product / View Orders buttons) === */
-.store-actions-container {
+nav.store-actions-container { /* Changed div.store-actions-container */
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around; /* Space out buttons more evenly */
   align-items: center;
-  margin-top: 20px; /* Keep margin below delivery section */
-  margin-bottom: 10px;
+  margin: 25px 0; /* Increased vertical margin */
+  padding: 15px 0; /* Add some padding */
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px; /* Increased gap */
 }
-
 
 /* === General Button Styles === */
 button, .button-link, a.button-secondary, a.button-primary {
-  display: inline-block;
+  display: inline-flex; /* Align text and icons nicely if any */
+  align-items: center;
+  justify-content: center;
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 1rem; /* Standardized button font size */
   font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
-  line-height: 1.4;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s, transform 0.1s ease;
+  line-height: 1.5; /* Improved line height */
   box-sizing: border-box;
-  vertical-align: middle;
+  font-family: 'Poppins', sans-serif; /* Consistent button font */
 }
 button:disabled, .button-link:disabled, a.button-secondary:disabled, a.button-primary:disabled {
-  cursor: not-allowed;
-  opacity: 0.65 !important;
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-  color: #666666 !important;
+  cursor: not-allowed; opacity: 0.65 !important; background-color: #cccccc !important;
+  border-color: #cccccc !important; color: #666666 !important; transform: none !important;
+}
+button:hover:not(:disabled), .button-link:hover:not(:disabled), 
+a.button-secondary:hover:not(:disabled), a.button-primary:hover:not(:disabled) {
+    transform: translateY(-1px); /* Subtle lift on hover for all buttons */
 }
 
-/* Primary action button */
-.button-primary {
-  background-color: #97c9ba;
-  color: white;
-  border-color: #97c9ba;
-}
+
 button.add-product-toggle-btn {
-  background-color: var(--primary-color);
+  background-color: var(--primary-color, #432C53);
   color: #ffffff !important;
-  border: 1px solid var(--primary-color);
+  border-color: var(--primary-color, #432C53);
 }
-.button-primary:hover:not(:disabled) {
-  background-color: #432C53;
-  border-color: #432C53;
-  color: white;
-}
-.add-product-toggle-btn:hover:not(:disabled) {
-    background-color: #362245;
-    border-color: #362245;
-    color: #ffffff;
-}
-
-/* Secondary action button */
-.button-secondary,
-.view-orders-btn {
-  background-color: #97C9BA;
-  color: white;
-  border-color: transparent;
-}
-.button-secondary:hover:not(:disabled),
-.view-orders-btn:hover:not(:disabled) {
-  background-color: #7ab8a5;
-  border-color: #7ab8a5;
-  color: white;
-  text-decoration: none;
-}
-
-/* Confirm action button */
-.button-confirm {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-.button-confirm:hover:not(:disabled) {
-  background-color: #362245;
+button.add-product-toggle-btn:hover:not(:disabled) {
+  background-color: #362245; /* Darker primary */
   border-color: #362245;
+}
+
+a.button-secondary.view-orders-btn { /* Specific to view orders link button */
+  background-color: #6c757d; /* Bootstrap secondary grey */
   color: white;
+  border-color: #6c757d;
+}
+a.button-secondary.view-orders-btn:hover:not(:disabled) {
+  background-color: #5a6268;
+  border-color: #545b62;
 }
 
-/* Cancel action button */
-.button-cancel {
-  background-color: #97c9ba;
-  color: white;
-  border-color: #97c9ba;
-}
-.button-cancel:hover:not(:disabled) {
-  background-color: #7ab8a5;
-  border-color: #7ab8a5;
-  color: white;
-}
-
-/* Edit action button */
-.button-edit {
-  background-color: var(--primary-color); /* Match App.css .btn-primary */
-  color: white;
-  border-color: var(--primary-color); /* Set border color to match */
-  padding: 5px 10px;
-  font-size: 0.85rem;
-}
-.button-edit:hover:not(:disabled) {
-  background-color: #362245; /* Match App.css .btn-primary:hover */
-  border-color: #362245; /* Match hover border color */
-  color: white;
-}
-
-/* Delete action button */
-.button-delete {
-  background-color: #f8d7da;
-  color: #e74c3c;
-  border-color: #f5c6cb;
-  padding: 5px 10px;
-  font-size: 0.85rem;
-}
-.button-delete:hover:not(:disabled) {
-  background-color: #f1b0b7;
-  border-color: #ee9a9a;
-  color: #491217;
-}
-
-
-/* === Messages and Loading States === */
-p.error-message {
-  background-color: #ffebee;
-  border: 1px solid #ef9a9a;
-  border-left: 5px solid #d32f2f;
-  color: #c62828;
-  padding: 10px 15px;
-  margin-top: 15px;
-  margin-bottom: 15px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  line-height: 1.5;
-}
-
-/* Error message specifically within delivery edit section */
-form.delivery-edit-form .error-message {
-    margin-bottom: 0;
-}
+.button-confirm { background-color: #28a745; color: white; border-color: #28a745; } /* Green */
+.button-confirm:hover:not(:disabled) { background-color: #218838; border-color: #1e7e34; }
+.button-cancel { background-color: #6c757d; color: white; border-color: #6c757d; } /* Grey */
+.button-cancel:hover:not(:disabled) { background-color: #5a6268; border-color: #545b62; }
+.button-edit { background-color: #007bff; color: white; border-color: #007bff; padding: 5px 10px; font-size: 0.85rem;} /* Blue */
+.button-edit:hover:not(:disabled) { background-color: #0069d9; border-color: #0062cc; }
+.button-delete { background-color: #dc3545; color: white; border-color: #dc3545; padding: 5px 10px; font-size: 0.85rem;} /* Red */
+.button-delete:hover:not(:disabled) { background-color: #c82333; border-color: #bd2130; }
 
 /* Styles for full section errors/states */
-section.my-store-error,
-section.no-store {
-  text-align: center;
-  padding: 50px 20px;
-  color: #666;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  margin-top: 30px;
+main.my-store-container.no-store, /* Target main for these page states */
+main.my-store-container.my-store-error {
+  text-align: center; padding: 50px 20px; color: #666; background-color: #f8f9fa;
+  border: 1px solid #e9ecef; border-radius: 8px; margin-top: 30px;
 }
-section.my-store-error h2,
-section.no-store h2 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #444;
+main.my-store-container.no-store header h2, /* Ensure header is targeted within */
+main.my-store-container.my-store-error header h2 {
+  margin-top: 0; margin-bottom: 15px; color: #444;
+  font-family: 'Poppins', sans-serif; font-size: 1.8rem;
 }
-section.my-store-error p,
-section.no-store p {
-  color: #555;
-  line-height: 1.6;
+main.my-store-container.no-store p,
+main.my-store-container.my-store-error p {
+  color: #555; line-height: 1.6; margin-bottom: 20px;
 }
-section.my-store-error button,
-section.no-store a.button-primary {
+main.my-store-container.no-store .button-primary, /* For the Link styled as button */
+main.my-store-container.my-store-error .button-secondary { /* For the retry button */
   margin-top: 20px;
 }
 
 
 /* === Add/Edit Product Form Styles === */
 section.add-product-form-section {
-  background-color: #fdfdfd;
-  padding: 20px 25px;
-  border-radius: 8px;
-  margin-top: 30px;
-  margin-bottom: 40px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  background-color: #fdfdfd; padding: 25px 30px; /* Increased padding */
+  border-radius: 8px; margin: 30px 0 40px 0; /* Adjusted margins */
+  border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 section.add-product-form-section h2 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  color: #333;
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 600;
+  margin-top: 0; margin-bottom: 25px; color: #333; text-align: center;
+  font-size: 1.8rem; font-weight: 600; font-family: 'Poppins', sans-serif;
 }
 
 section.add-product-form-section form,
 dialog.edit-product-modal form {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display: flex; flex-direction: column; gap: 10px; /* Increased gap for form elements */
 }
 
 section.add-product-form-section form label,
 dialog.edit-product-modal form label {
-  display: block;
-  font-weight: 600;
-  color: #444;
-  font-size: 0.95em;
-  margin-top: 15px;
+  display: block; font-weight: 600; color: #444; font-size: 0.95em; margin-top: 15px;
 }
-section.add-product-form-section form label:first-of-type,
-dialog.edit-product-modal form label:first-of-type {
-  margin-top: 0;
-}
+section.add-product-form-section form label:first-of-type, /* No top margin for first label */
+dialog.edit-product-modal form label:first-of-type { margin-top: 0; }
 
 section.add-product-form-section form input,
 section.add-product-form-section form textarea,
@@ -389,13 +298,10 @@ section.add-product-form-section form select,
 dialog.edit-product-modal form input,
 dialog.edit-product-modal form textarea,
 dialog.edit-product-modal form select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box;
+  width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 4px;
+  font-size: 1rem; box-sizing: border-box; 
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-family: 'Hind', sans-serif; /* Ensure form inputs use base font */
 }
 
 section.add-product-form-section form input:focus,
@@ -404,307 +310,185 @@ section.add-product-form-section form select:focus,
 dialog.edit-product-modal form input:focus,
 dialog.edit-product-modal form textarea:focus,
 dialog.edit-product-modal form select:focus {
-  border-color: #97c9ba;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(151, 201, 186, 0.25);
+  border-color: var(--primary-color, #432C53); /* Use primary color for focus */
+  outline: none; box-shadow: 0 0 0 3px rgba(67, 44, 83, 0.25); /* Adjusted shadow color */
 }
 
 section.add-product-form-section form textarea,
-dialog.edit-product-modal form textarea {
-  min-height: 80px;
-  line-height: 1.5;
-}
+dialog.edit-product-modal form textarea { min-height: 80px; line-height: 1.5; }
 
 section.add-product-form-section form input[type="file"],
-dialog.edit-product-modal form input[type="file"] {
-    padding: 5px;
-}
+dialog.edit-product-modal form input[type="file"] { padding: 8px; /* Adjusted padding */ }
 section.add-product-form-section form input[type="file"]::file-selector-button,
 dialog.edit-product-modal form input[type="file"]::file-selector-button {
-   padding: 8px 15px;
-   margin-right: 10px;
-   border-radius: 4px;
-   border: 1px solid #ced4da;
-   background-color: #e9ecef;
-   color: #495057;
-   cursor: pointer;
-   transition: background-color 0.2s;
+  padding: 8px 15px; margin-right: 10px; border-radius: 4px; border: 1px solid #ced4da;
+  background-color: #e9ecef; color: #495057; cursor: pointer; transition: background-color 0.2s;
+  font-family: 'Poppins', sans-serif; /* Ensure button uses consistent font */
 }
 section.add-product-form-section form input[type="file"]::file-selector-button:hover,
-dialog.edit-product-modal form input[type="file"]::file-selector-button:hover {
-   background-color: #dee2e6;
-}
+dialog.edit-product-modal form input[type="file"]::file-selector-button:hover { background-color: #dee2e6; }
 
-/* Add product form actions container */
-section.add-product-form-section footer.add-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+footer.add-form-actions { /* For Add Product form */
+  display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px;
+  padding-top: 20px; border-top: 1px solid #eee;
 }
-
 
 /* === Image Preview Styles === */
-img.image-preview {
-  margin-top: 10px;
-  max-width: 120px;
-  max-height: 120px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  display: block;
-  object-fit: cover;
+img.image-preview { /* targets img directly if it's the preview */
+  margin-top: 10px; max-width: 150px; max-height: 150px; /* Slightly larger preview */
+  border: 1px solid #ddd; border-radius: 4px; display: block; object-fit: cover;
   background-color: #f8f9fa;
 }
 
-
 /* === Products Display Section === */
-section.products-section {
-  margin-top: 40px;
-}
-section.products-section h2 {
-  margin-bottom: 25px;
-  color: #333;
-  font-weight: 600;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+section.products-section { margin-top: 40px; }
+section.products-section > section.product-status-section > h2 { /* More specific for Approved/Pending */
+  margin-bottom: 25px; color: var(--primary-color-darker, #362245); font-weight: 600;
+  border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 1.6rem;
 }
 p.no-products {
-  text-align: center;
-  padding: 40px 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  color: #666;
-  border: 1px dashed #ddd;
+  text-align: center; padding: 40px 20px; background-color: #f9f9f9;
+  border-radius: 8px; color: #666; border: 1px dashed #ddd;
 }
 
 ul.product-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px; list-style: none; padding: 0; margin: 0;
 }
-li.product-list-item {
-    transition: all 0.3s ease;
-}
+li.product-list-item { transition: all 0.3s ease; } /* For potential animations */
 
 /* === Product Card Styles === */
 article.product-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
+  border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  height: 100%;
-  box-sizing: border-box;
+  display: flex; flex-direction: column; background-color: #fff;
+  height: 100%; box-sizing: border-box;
 }
-article.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
+article.product-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); }
 
-.product-image {
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
+figure.product-image { /* Changed div.product-image to figure */
+  width: 100%; height: 220px; overflow: hidden; border-bottom: 1px solid #eee;
+  background-color: #f8f9fa; margin: 0; /* Reset figure margin */
 }
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+figure.product-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.product-details {
-    padding: 15px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+article.product-details { /* Changed div.product-details to article */
+  padding: 15px; flex-grow: 1; display: flex; flex-direction: column;
 }
+article.product-details h3 {
+  margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 600; /* Adjusted size */
+  color: #222; line-height: 1.3; font-family: 'Poppins', sans-serif;
+}
+article.product-details p { margin-bottom: 6px; line-height: 1.5; } /* Consistent paragraph margin */
+article.product-details p:last-child { margin-bottom: 0; }
 
-.product-details h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #222;
-  line-height: 1.3;
-}
-.product-details .product-category {
-  color: #6c757d;
-  font-size: 0.8rem;
-  margin: 0 0 10px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.product-details .product-price {
-  font-weight: 700;
-  color: #1e7e34;
-  margin: 0 0 4px 0;
-  font-size: 1.1em;
-}
-.product-details .product-quantity {
-   color: #495057;
-   font-size: 0.9em;
-   margin: 0 0 10px 0;
-}
+p.product-category { color: #6c757d; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+p.product-price { font-weight: 700; color: #1e7e34; font-size: 1.1em; }
+p.product-quantity { color: #495057; font-size: 0.9em; }
+p.product-description { color: #495057; font-size: 0.95em; }
 
-.product-details .product-description {
-  color: #495057;
-  font-size: 0.95em;
-  line-height: 1.5;
-  margin-bottom: 10px;
+footer.product-actions { /* Changed div.product-actions to footer */
+  padding: 10px 15px; border-top: 1px solid #f0f0f0; display: flex;
+  justify-content: flex-end; gap: 10px; background-color: #f8f9fa; margin-top: auto;
 }
-
-/* Card Actions Container */
-.product-actions {
-  padding: 10px 15px;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  background-color: #f8f9fa;
-  margin-top: auto;
-}
-
 
 /* === Modal Styles (Shared and Specific) === */
-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
+dialog::backdrop { background-color: rgba(0, 0, 0, 0.65); } /* Darker backdrop */
+dialog.edit-product-modal, dialog.delete-confirm-modal {
+  background-color: white; padding: 30px 35px; /* Increased padding */
+  border-radius: 8px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  width: 90%; border: none; max-height: 90vh; overflow-y: auto; box-sizing: border-box;
 }
-
-dialog.edit-product-modal,
-dialog.delete-confirm-modal {
-  background-color: white;
-  padding: 25px 30px;
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
-  width: 90%;
-  border: none;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-sizing: border-box;
+dialog footer.modal-actions { /* Targets footers in dialogs */
+  display: flex; gap: 15px; /* Increased gap */
+  margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;
+  justify-content: flex-end; /* Align buttons to right by default */
 }
-
-dialog footer.modal-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
-
-dialog p.error-message {
-  margin-top: 0;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-/* Edit Product Modal Specific Styles */
+dialog p.error-message { margin-top: 0; margin-bottom: 20px; text-align: center; }
 dialog.edit-product-modal { max-width: 550px; }
-dialog.edit-product-modal h2 { margin-top: 0; margin-bottom: 25px; color: #333; font-size: 1.5rem; text-align: center; font-weight: 600; }
-dialog.edit-product-modal footer.modal-actions { justify-content: flex-end; }
-
-/* Delete Confirmation Modal Specific Styles */
+dialog.edit-product-modal h2 { margin-top: 0; margin-bottom: 25px; color: #333; font-size: 1.6rem; text-align: center; font-weight: 600; font-family: 'Poppins', sans-serif; }
 dialog.delete-confirm-modal { max-width: 450px; text-align: center; }
-dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #e74c3c; font-size: 1.4rem; font-weight: 600; }
+dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #e74c3c; font-size: 1.5rem; font-weight: 600; font-family: 'Poppins', sans-serif; }
 dialog.delete-confirm-modal p { margin-bottom: 10px; line-height: 1.6; color: #444; }
 dialog.delete-confirm-modal p strong { color: #333; font-weight: 600; }
 dialog.delete-confirm-modal footer.modal-actions { justify-content: center; gap: 15px; }
 
-
 /* === Loading Spinner Styles === */
-.loading-container {
-  display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
-  justify-content: center;
-  align-items: center;
-  min-height: 300px; /* Give it some vertical space */
-  padding: 2rem;
-  text-align: center;
-  color: #555; /* Text color */
+section.loading-container { /* Changed div.loading-container to section */
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  min-height: 300px; padding: 2rem; text-align: center; color: #555;
 }
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #ccc; /* Light grey base border */
-  /* Use your primary color for the spinning part */
-  border-top-color: #97c9ba; /* Your primary green color */
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite; /* Reference the spin animation */
-  margin-bottom: 1rem; /* Space between spinner and text */
+figure.spinner { /* Changed div.spinner to figure */
+  width: 48px; height: 48px; border: 5px solid #ccc; border-top-color: #97c9ba;
+  border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 0 1rem 0; /* Reset figure margin */
 }
-
-/* The spin animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading text style */
-.loading-container p {
-  font-size: 1.1em;
-  color: #555;
-}
-/* === End Loading Spinner Styles === */
+@keyframes spin { to { transform: rotate(360deg); } }
+section.loading-container p { font-size: 1.1em; color: #555; margin: 0; }
 
 
 /* === Responsive Adjustments === */
 @media (max-width: 768px) {
   header.store-header { align-items: stretch; }
   header.store-header h1 { text-align: center; font-size: 2rem; }
-  section.delivery-info-display { max-width: none; }
-  .store-actions-container { flex-direction: column; align-items: stretch; }
-  .store-actions-container > * { width: 100%; text-align: center; }
+  section.delivery-info-display { max-width: none; padding: 15px;}
+  nav.store-actions-container { flex-direction: column; align-items: stretch; }
+  nav.store-actions-container > * { width: 100%; text-align: center; }
   section.delivery-info-display dl { grid-template-columns: 1fr; gap: 5px 0; }
   section.delivery-info-display dt { margin-bottom: 2px; }
   section.delivery-info-display dd { margin-bottom: 8px; }
-  .delivery-header { flex-direction: column; align-items: flex-start; gap: 10px;}
+  section.delivery-header { flex-direction: column; align-items: flex-start; gap: 10px;}
   ul.product-list { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 20px; width: 90%; }
+  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 20px; width: 95%; }
 }
 
 @media (max-width: 480px) {
   main.my-store-container { margin: 20px auto; padding: 0 15px; }
   header.store-header h1 { font-size: 1.8rem; }
   ul.product-list { grid-template-columns: 1fr; }
-  .product-actions { flex-direction: row; justify-content: space-around; padding: 8px 10px; }
-  .product-actions button { flex-grow: 1; margin: 0 5px; padding: 6px 10px; font-size: 0.8rem; }
-  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 15px; width: 95%; max-height: 95vh; }
+  footer.product-actions { flex-direction: column; gap: 8px; align-items: stretch;} /* Stack buttons */
+  footer.product-actions button { width: 100%; margin: 0; } /* Full width buttons in stacked layout */
+  dialog.edit-product-modal, dialog.delete-confirm-modal { padding: 15px; width: calc(100% - 20px); max-height: 95vh; margin: auto;}
   dialog.edit-product-modal h2 { font-size: 1.3rem; }
   dialog.delete-confirm-modal h2 { font-size: 1.25rem; }
-  dialog footer.modal-actions, section.add-product-form-section footer.add-form-actions, .delivery-edit-actions { flex-direction: column; gap: 10px; align-items: stretch; }
-  dialog footer.modal-actions button, section.add-product-form-section footer.add-form-actions button, .delivery-edit-actions button { width: 100%; }
-  form.delivery-edit-form { gap: 3px; }
+  dialog footer.modal-actions, 
+  section.add-product-form-section footer.add-form-actions, 
+  footer.delivery-edit-actions { 
+    flex-direction: column; gap: 10px; align-items: stretch; 
+  }
+  dialog footer.modal-actions button, 
+  section.add-product-form-section footer.add-form-actions button, 
+  footer.delivery-edit-actions button { 
+    width: 100%; 
+  }
+  form.delivery-edit-form { gap: 8px; } /* Slightly more gap */
   form.delivery-edit-form label { margin-top: 12px; font-size: 0.9rem; }
-  form.delivery-edit-form input, form.delivery-edit-form select { padding: 8px 10px; font-size: 0.95rem; }
-  section.add-product-form-section form input, section.add-product-form-section form textarea, section.add-product-form-section form select, dialog.edit-product-modal form input, dialog.edit-product-modal form textarea, dialog.edit-product-modal form select { padding: 8px 10px; font-size: 0.95rem; }
+  form.delivery-edit-form input, form.delivery-edit-form select { padding: 10px 12px; font-size: 0.95rem; }
+  section.add-product-form-section form input, 
+  section.add-product-form-section form textarea, 
+  section.add-product-form-section form select, 
+  dialog.edit-product-modal form input, 
+  dialog.edit-product-modal form textarea, 
+  dialog.edit-product-modal form select { 
+    padding: 10px 12px; font-size: 0.95rem; 
+  }
 }
 
 /* --- Section Divider Style --- */
-.section-divider {
-  position: relative; /* Needed for absolute positioning of SVG */
-  width: 100%; /* Make container full width */
-  height: 100px; /* Adjust height of the divider area as needed */
-  margin: 0; /* Remove margin from the div itself */
-  overflow: hidden; /* Hide overflowing parts of the SVG */
-  background-color: #97C9BA; /* Changed background to green */
+figure.section-divider { /* Changed div to figure */
+  position: relative;
+  width: 100%;
+  height: 100px;
+  margin: 0; /* Reset figure margin */
+  overflow: hidden;
+  background-color: #97C9BA; 
 }
 
-.section-divider svg {
-  display: block; /* Remove extra space below SVG */
-  width: 100%; /* SVG spans full width */
-  height: 100%; /* SVG takes full height of container */
+figure.section-divider svg {
+  display: block;
+  width: 100%;
+  height: 100%;
   position: absolute;
   bottom: 0;
   left: 0;
-  fill: var(--light-purple); /* Match the background color of the section below */
+  fill: var(--light-purple); /* Should match the background of the section BELOW this divider */
 }

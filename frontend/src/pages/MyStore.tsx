@@ -1,3 +1,4 @@
+// src/pages/MyStore.tsx
 import React, { useState, useEffect, useCallback, useRef, ChangeEvent, Fragment } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
@@ -59,13 +60,7 @@ const MyStore: React.FC = () => {
     const [isAddingProductFormVisible, setIsAddingProductFormVisible] = useState(false);
     const [isAddingProductLoading, setIsAddingProductLoading] = useState(false);
     const [newProduct, setNewProduct] = useState<NewProductFields>({ 
-        name: '', 
-        description: '', 
-        price: '', 
-        category: '', 
-        productQuantity: '', 
-        imageFile: null, 
-        imagePreviewUrl: null 
+        name: '', description: '', price: '', category: '', productQuantity: '', imageFile: null, imagePreviewUrl: null 
     });
     const addFileInputRef = useRef<HTMLInputElement>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -83,7 +78,7 @@ const MyStore: React.FC = () => {
     const [isEditingDelivery, setIsEditingDelivery] = useState(false);
     const [isSavingDelivery, setIsSavingDelivery] = useState(false);
     const [editDeliveryData, setEditDeliveryData] = useState<EditableDeliveryFields>({
-        standardPrice: '', standardTime: '', expressPrice: '', expressTime: ''
+        standardPrice: '', standardTime: STANDARD_DELIVERY_TIMES[0], expressPrice: '', expressTime: EXPRESS_DELIVERY_TIMES[0]
     });
 
     const getToken = useCallback(async (): Promise<string | null> => {
@@ -101,11 +96,8 @@ const MyStore: React.FC = () => {
             console.error('Error getting access token:', error);
             sessionStorage.removeItem('access_token');
             if (error instanceof Error && (error.message.includes('consent_required') || error.message.includes('login_required'))) {
-                try {
-                     await loginWithRedirect({ appState: { returnTo: window.location.pathname } });
-                } catch (redirectError) {
-                    console.error("Redirect to login failed:", redirectError);
-                }
+                try { await loginWithRedirect({ appState: { returnTo: window.location.pathname } }); } 
+                catch (redirectError) { console.error("Redirect to login failed:", redirectError); }
             }
             return null;
         }
@@ -115,9 +107,7 @@ const MyStore: React.FC = () => {
         const imgFormData = new FormData();
         imgFormData.append('file', file);
         const res = await fetch(`${baseUrl}/upload/image`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: imgFormData,
+            method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: imgFormData,
         });
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({ message: 'Failed to parse upload error response' }));
@@ -131,76 +121,43 @@ const MyStore: React.FC = () => {
     };
 
     const fetchStoreData = useCallback(async (currentToken?: string) => {
-        setLoading(true); 
-        setError(null); 
-        setActionError(null);
+        setLoading(true); setError(null); setActionError(null);
         const token = currentToken || await getToken();
         if (!token) {
-             setError("Authentication failed.");
-             setLoading(false);
-             setCheckingAuth(false);
-             return;
+            setError("Authentication failed. Please log in."); setLoading(false); setCheckingAuth(false); return;
         }
         try {
             const response = await fetch(`${baseUrl}/stores/my-store`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) {
-                if (response.status === 404) { 
-                    setError("Store not found. You might need to create your store first."); 
-                    setStoreData(null); 
-                }
-                else { 
-                    const e = await response.json().catch(()=>(null)); 
-                    throw new Error(e?.message || `Error fetching store data: ${response.statusText}`); 
-                }
+                if (response.status === 404) { setError("Store not found. You might need to create your store first."); setStoreData(null); }
+                else { const e = await response.json().catch(()=>(null)); throw new Error(e?.message || `Error fetching store data: ${response.statusText}`); }
             } else {
-                 const fetchedData: { store: Store; products: Product[] } = await response.json();
-                 if (!fetchedData || !fetchedData.store) { throw new Error("Invalid data received."); }
-                 fetchedData.products = Array.isArray(fetchedData.products) ? fetchedData.products : [];
-                 setStoreData(fetchedData);
-                 setIsEditingDelivery(false);
+                const fetchedData: { store: Store; products: Product[] } = await response.json();
+                if (!fetchedData || !fetchedData.store) { throw new Error("Invalid data received for store."); }
+                fetchedData.products = Array.isArray(fetchedData.products) ? fetchedData.products : [];
+                setStoreData(fetchedData);
+                setIsEditingDelivery(false); // Ensure edit mode is off on fresh data load
             }
         } catch (err: any) {
             console.error("Error fetching store data:", err);
-             if (!(err instanceof Error && err.message.includes("Store not found"))) {
-                  setError(err.message || "Unknown error fetching store data.");
-             }
-             setStoreData(null);
-        } finally {
-            setLoading(false);
-            setCheckingAuth(false);
-        }
+            if (!(err instanceof Error && err.message.includes("Store not found"))) {
+                setError(err.message || "Unknown error fetching store data.");
+            }
+            setStoreData(null);
+        } finally { setLoading(false); setCheckingAuth(false); }
     }, [baseUrl, getToken]);
 
     useEffect(() => {
         const checkAuthAndLoad = async () => {
-            if (!isAuthLoading && isAuthenticated) {
-                 await fetchStoreData();
-            } else if (!isAuthLoading && !isAuthenticated) {
-                setCheckingAuth(false);
-                setLoading(false);
-            } else {
-                 setCheckingAuth(true);
-                 setLoading(true);
-            }
+            if (!isAuthLoading && isAuthenticated) { await fetchStoreData(); } 
+            else if (!isAuthLoading && !isAuthenticated) { setCheckingAuth(false); setLoading(false); setError("Please log in to manage your store.");} 
+            else { setCheckingAuth(true); setLoading(true); }
         };
         checkAuthAndLoad();
     }, [isAuthenticated, isAuthLoading, fetchStoreData]);
 
-    useEffect(() => {
-        const dialog = editDialogRef.current; 
-        if (dialog) { 
-            if (isEditModalOpen) dialog.showModal(); 
-            else dialog.close(); 
-        }
-    }, [isEditModalOpen]);
-
-    useEffect(() => {
-        const dialog = deleteDialogRef.current; 
-        if (dialog) { 
-            if (isDeleteModalOpen) dialog.showModal(); 
-            else dialog.close(); 
-        }
-    }, [isDeleteModalOpen]);
+    useEffect(() => { const dialog = editDialogRef.current; if (dialog) { if (isEditModalOpen) dialog.showModal(); else dialog.close(); } }, [isEditModalOpen]);
+    useEffect(() => { const dialog = deleteDialogRef.current; if (dialog) { if (isDeleteModalOpen) dialog.showModal(); else dialog.close(); } }, [isDeleteModalOpen]);
 
     const toggleEditDeliveryMode = () => {
         if (!storeData) return;
@@ -211,12 +168,9 @@ const MyStore: React.FC = () => {
                 expressPrice: storeData.store.expressPrice?.toString() ?? '',
                 expressTime: storeData.store.expressTime ?? EXPRESS_DELIVERY_TIMES[0],
             });
-            setActionError(null);
-            setIsEditingDelivery(true);
-        } else {
-            setIsEditingDelivery(false);
-            setActionError(null);
         }
+        setIsEditingDelivery(!isEditingDelivery);
+        setActionError(null); 
     };
 
     const handleDeliveryFieldChange = (field: keyof EditableDeliveryFields, value: string) => {
@@ -225,77 +179,34 @@ const MyStore: React.FC = () => {
 
     const handleSaveDeliveryOptions = async () => {
         if (!storeData) { setActionError("Store data not available."); return; }
-        setActionError(null); 
-        setIsSavingDelivery(true);
-        const token = await getToken(); 
-        if (!token) { 
-            setActionError("Authentication error."); 
-            setIsSavingDelivery(false); 
-            return; 
-        }
-        const standardPriceNum = parseFloat(editDeliveryData.standardPrice); 
-        const expressPriceNum = parseFloat(editDeliveryData.expressPrice);
-        if (isNaN(standardPriceNum) || standardPriceNum < 0) { 
-            setActionError("Standard price invalid."); 
-            setIsSavingDelivery(false); 
-            return; 
-        }
-        if (isNaN(expressPriceNum) || expressPriceNum < 0) { 
-            setActionError("Express price invalid."); 
-            setIsSavingDelivery(false); 
-            return; 
-        }
-        if (!editDeliveryData.standardTime) { 
-            setActionError("Select standard time."); 
-            setIsSavingDelivery(false); 
-            return; 
-        }
-        if (!editDeliveryData.expressTime) { 
-            setActionError("Select express time."); 
-            setIsSavingDelivery(false); 
-            return; 
-        }
-        const payload: Partial<Store> = {}; 
-        const originalStore = storeData.store;
+        setActionError(null); setIsSavingDelivery(true);
+        const token = await getToken(); if (!token) { setActionError("Authentication error."); setIsSavingDelivery(false); return; }
+        const standardPriceNum = parseFloat(editDeliveryData.standardPrice); const expressPriceNum = parseFloat(editDeliveryData.expressPrice);
+        if (isNaN(standardPriceNum) || standardPriceNum < 0) { setActionError("Standard price must be a non-negative number."); setIsSavingDelivery(false); return; }
+        if (isNaN(expressPriceNum) || expressPriceNum < 0) { setActionError("Express price must be a non-negative number."); setIsSavingDelivery(false); return; }
+        if (!editDeliveryData.standardTime) { setActionError("Please select a standard delivery time."); setIsSavingDelivery(false); return; }
+        if (!editDeliveryData.expressTime) { setActionError("Please select an express delivery time."); setIsSavingDelivery(false); return; }
+        
+        const payload: Partial<Store> = {}; const originalStore = storeData.store;
         if (standardPriceNum !== originalStore.standardPrice) payload.standardPrice = standardPriceNum; 
         if (editDeliveryData.standardTime !== originalStore.standardTime) payload.standardTime = editDeliveryData.standardTime; 
         if (expressPriceNum !== originalStore.expressPrice) payload.expressPrice = expressPriceNum; 
         if (editDeliveryData.expressTime !== originalStore.expressTime) payload.expressTime = editDeliveryData.expressTime;
-        if (Object.keys(payload).length === 0) { 
-            setActionError("No changes made."); 
-            setIsSavingDelivery(false); 
-            setIsEditingDelivery(false); 
-            return; 
-        }
+        
+        if (Object.keys(payload).length === 0) { setActionError("No changes made to delivery options."); setIsSavingDelivery(false); setIsEditingDelivery(false); return; }
         try {
             const response = await fetch(`${baseUrl}/stores/my-store/delivery`, { 
-                method: 'PATCH', 
-                headers: { 
-                    'Authorization': `Bearer ${token}`, 
-                    'Content-Type': 'application/json' 
-                }, 
-                body: JSON.stringify(payload) 
+                method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) 
             });
-            if (!response.ok) { 
-                const e=await response.json().catch(()=>({message:'Save failed'})); 
-                throw new Error(e.message || `Error: ${response.statusText}`); 
-            }
+            if (!response.ok) { const e=await response.json().catch(()=>({message:'Failed to save delivery options'})); throw new Error(e.message || `Error: ${response.statusText}`); }
             const updatedStore: Store = await response.json();
             setStoreData(prevData => prevData ? { ...prevData, store: updatedStore } : null); 
             setIsEditingDelivery(false);
-        } catch (err: any) { 
-            console.error("Error saving delivery options:", err); 
-            setActionError(err.message || "Unknown error saving delivery options."); 
-        }
-        finally { 
-            setIsSavingDelivery(false); 
-        }
+        } catch (err: any) { console.error("Error saving delivery options:", err); setActionError(err.message || "Unknown error saving delivery options."); }
+        finally { setIsSavingDelivery(false); }
     };
 
-    const handleCancelEditDelivery = () => {
-        setIsEditingDelivery(false);
-        setActionError(null);
-    };
+    const handleCancelEditDelivery = () => { setIsEditingDelivery(false); setActionError(null); };
 
     const handleNewProductChange = (field: keyof Omit<NewProductFields, 'imageFile' | 'imagePreviewUrl'>, value: string) => {
         setNewProduct(prev => ({ ...prev, [field]: value }));
@@ -303,144 +214,54 @@ const MyStore: React.FC = () => {
 
     const handleNewProductImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]; 
-        if(file){ 
-            const r=new FileReader(); 
-            r.onloadend=()=>setNewProduct(p=>({...p, imageFile:file, imagePreviewUrl:r.result as string})); 
-            r.readAsDataURL(file); 
-        } else { 
-            setNewProduct(p=>({...p, imageFile:null, imagePreviewUrl:null})); 
-        }
+        if(file){ const r=new FileReader(); r.onloadend=()=>setNewProduct(p=>({...p, imageFile:file, imagePreviewUrl:r.result as string})); r.readAsDataURL(file); } 
+        else { setNewProduct(p=>({...p, imageFile:null, imagePreviewUrl:null})); }
     };
 
     const handleAddProduct = async () => {
-        if (!storeData?.store) { setActionError("Store data missing."); return; } 
-        setActionError(null); 
-        setIsAddingProductLoading(true); 
-        const token = await getToken(); 
-        if (!token) { 
-            setActionError("Auth error."); 
-            setIsAddingProductLoading(false); 
-            return; 
-        } 
-        if (!newProduct.name||!newProduct.price||!newProduct.category||!newProduct.productQuantity||!newProduct.imageFile) { 
-            setActionError("Fill required fields & image."); 
-            setIsAddingProductLoading(false); 
-            return; 
-        } 
-        const priceNum=parseFloat(newProduct.price); 
-        const quantityNum=parseInt(newProduct.productQuantity,10); 
-        if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0){ 
-            setActionError("Valid price/quantity needed."); 
-            setIsAddingProductLoading(false); 
-            return; 
-        }
+        if (!storeData?.store) { setActionError("Store data missing. Cannot add product."); return; } 
+        setActionError(null); setIsAddingProductLoading(true); 
+        const token = await getToken(); if (!token) { setActionError("Authentication error."); setIsAddingProductLoading(false); return; } 
+        if (!newProduct.name||!newProduct.price||!newProduct.category||!newProduct.productQuantity||!newProduct.imageFile) { setActionError("Please fill all required product fields and select an image."); setIsAddingProductLoading(false); return; } 
+        const priceNum=parseFloat(newProduct.price); const quantityNum=parseInt(newProduct.productQuantity,10); 
+        if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0){ setActionError("Price must be positive, quantity non-negative."); setIsAddingProductLoading(false); return; }
         try { 
             const imageUrl = await uploadImageToBackend(newProduct.imageFile, token); 
-            const payload={
-                name:newProduct.name,
-                description:newProduct.description||'',
-                price:priceNum,
-                category:newProduct.category,
-                imageUrl:imageUrl,
-                productquantity:quantityNum
-            }; 
-            const res = await fetch(`${baseUrl}/stores/products`, { 
-                method: 'POST', 
-                headers: { 
-                    'Authorization': `Bearer ${token}`, 
-                    'Content-Type': 'application/json' 
-                }, 
-                body: JSON.stringify(payload) 
-            }); 
-            if (!res.ok) { 
-                const e=await res.json().catch(()=>({message:'Failed to add product'})); 
-                throw new Error(e.message || `Error: ${res.statusText}`); 
-            } 
-            setNewProduct({
-                name: '', 
-                description: '', 
-                price: '', 
-                category: '', 
-                productQuantity: '', 
-                imageFile: null, 
-                imagePreviewUrl: null
-            });
+            const payload={ name:newProduct.name, description:newProduct.description||'', price:priceNum, category:newProduct.category, imageUrl:imageUrl, productquantity:quantityNum }; 
+            const res = await fetch(`${baseUrl}/stores/products`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); 
+            if (!res.ok) { const e=await res.json().catch(()=>({message:'Failed to add product'})); throw new Error(e.message || `Error: ${res.statusText}`); } 
+            setNewProduct({ name: '', description: '', price: '', category: '', productQuantity: '', imageFile: null, imagePreviewUrl: null });
             setIsAddingProductFormVisible(false); 
             if (addFileInputRef.current) addFileInputRef.current.value = ''; 
-            await fetchStoreData(token);
-        } catch (err: any) { 
-            console.error("Error adding product:", err); 
-            setActionError(err.message || "Unknown error adding product."); 
-        } finally { 
-            setIsAddingProductLoading(false); 
-        }
+            await fetchStoreData(token); // Refresh store data
+        } catch (err: any) { console.error("Error adding product:", err); setActionError(err.message || "Unknown error adding product."); } 
+        finally { setIsAddingProductLoading(false); }
     };
 
     const openEditModal = (product: Product) => {
         setEditingProduct(product); 
-        setEditFormData({ 
-            name: product.name, 
-            description: product.description, 
-            price: product.price.toString(), 
-            category: product.category, 
-            productQuantity: product.productquantity.toString() 
-        }); 
-        setEditProductImage(null); 
-        setEditProductPreview(product.imageUrl || ''); 
-        setActionError(null); 
-        setIsEditModalOpen(true);
+        setEditFormData({ name: product.name, description: product.description, price: product.price.toString(), category: product.category, productQuantity: product.productquantity.toString() }); 
+        setEditProductImage(null); setEditProductPreview(product.imageUrl || ''); setActionError(null); setIsEditModalOpen(true);
     };
-
     const closeEditModal = () => {
-        setIsEditModalOpen(false); 
-        setEditingProduct(null); 
-        setEditFormData({}); 
-        setEditProductImage(null); 
-        setEditProductPreview(''); 
+        setIsEditModalOpen(false); setEditingProduct(null); setEditFormData({}); setEditProductImage(null); setEditProductPreview(''); 
         if (editFileInputRef.current) editFileInputRef.current.value = '';
     };
-
     const handleEditFormChange = (field: keyof EditableProductFields, value: string) => {
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
-
     const handleEditImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-         const file = e.target.files?.[0]; 
-         if(file){ 
-             setEditProductImage(file); 
-             const r=new FileReader(); 
-             r.onloadend=()=>setEditProductPreview(r.result as string); 
-             r.readAsDataURL(file); 
-         }
+        const file = e.target.files?.[0]; if(file){ setEditProductImage(file); const r=new FileReader(); r.onloadend=()=>setEditProductPreview(r.result as string); r.readAsDataURL(file); }
     };
 
     const handleUpdateProduct = async () => {
-        if (!editingProduct) { setActionError("No product selected."); return; }
-        setActionError(null);
-        setIsSavingEdit(true);
-        const token = await getToken();
-        
-        if (!token) { 
-            setActionError("Auth error."); 
-            setIsSavingEdit(false); 
-            return; 
-        }
-
-        const priceNum = parseFloat(editFormData.price??'');
-        const quantityNum = parseInt(editFormData.productQuantity??'',10);
-        
-        if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0) { 
-            setActionError("Valid price/quantity."); 
-            setIsSavingEdit(false); 
-            return; 
-        }
-
+        if (!editingProduct) { setActionError("No product selected for update."); return; }
+        setActionError(null); setIsSavingEdit(true);
+        const token = await getToken(); if (!token) { setActionError("Authentication error."); setIsSavingEdit(false); return; }
+        const priceNum = parseFloat(editFormData.price??''); const quantityNum = parseInt(editFormData.productQuantity??'',10);
+        if(isNaN(priceNum)||priceNum<=0||isNaN(quantityNum)||quantityNum<0) { setActionError("Price must be positive, quantity non-negative."); setIsSavingEdit(false); return; }
         try {
-            let imageUrl = editingProduct.imageUrl;
-            if (editProductImage) {
-                imageUrl = await uploadImageToBackend(editProductImage, token);
-            }
-
+            let imageUrl = editingProduct.imageUrl; if (editProductImage) { imageUrl = await uploadImageToBackend(editProductImage, token); }
             const payload: Partial<Product & { imageUrl?: string | null }> = {};
             if (editFormData.name !== editingProduct.name) payload.name = editFormData.name;
             if (editFormData.description !== editingProduct.description) payload.description = editFormData.description;
@@ -449,127 +270,92 @@ const MyStore: React.FC = () => {
             if (quantityNum !== editingProduct.productquantity) payload.productquantity = quantityNum;
             if (imageUrl !== editingProduct.imageUrl) payload.imageUrl = imageUrl;
 
-            if (Object.keys(payload).length > 0) {
-                payload.isActive = false;
-                setActionError("Your changes have been saved and will be reviewed by an admin before appearing on the site.");
-            } else {
-                setActionError("No changes detected.");
-                setIsSavingEdit(false);
-                return;
-            }
+            if (Object.keys(payload).length > 0) { payload.isActive = false; setActionError("Your changes have been saved and will be reviewed by an admin before appearing on the site.");} 
+            else { setActionError("No changes detected."); setIsSavingEdit(false); return; }
 
             const res = await fetch(`${baseUrl}/stores/products/${editingProduct.prodId}`, {
-                method: 'PATCH',
-                headers: { 
-                    'Authorization': `Bearer ${token}`, 
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify(payload)
+                method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
-
-            if (!res.ok) {
-                const e = await res.json().catch(() => ({message: 'Failed update'}));
-                throw new Error(e.message || `Error: ${res.statusText}`);
-            }
-
-            closeEditModal();
-            await fetchStoreData(token);
-        } catch (err: any) {
-            console.error(`Error updating product ${editingProduct.prodId}:`, err);
-            setActionError(err.message || "Unknown error saving.");
-        } finally {
-            setIsSavingEdit(false);
-        }
+            if (!res.ok) { const e = await res.json().catch(() => ({message: 'Failed to update product'})); throw new Error(e.message || `Error: ${res.statusText}`); }
+            closeEditModal(); await fetchStoreData(token);
+        } catch (err: any) { console.error(`Error updating product ${editingProduct.prodId}:`, err); setActionError(err.message || "Unknown error saving product."); } 
+        finally { setIsSavingEdit(false); }
     };
 
-    const handleDeleteClick = (product: Product) => {
-        setProductToDelete(product);
-        setIsDeleteModalOpen(true);
-        setActionError(null);
-    };
-
-    const closeDeleteModal = () => {
-        setIsDeleteModalOpen(false);
-        setProductToDelete(null);
-        setActionError(null);
-    };
-
+    const handleDeleteClick = (product: Product) => { setProductToDelete(product); setIsDeleteModalOpen(true); setActionError(null); };
+    const closeDeleteModal = () => { setIsDeleteModalOpen(false); setProductToDelete(null); setActionError(null);};
     const executeDeleteProduct = async () => {
-        if (!productToDelete) return; 
-        setActionError(null); 
-        setIsDeleting(true); 
-        const prodIdToDelete = productToDelete.prodId; 
-        const token = await getToken(); 
-        if (!token) { 
-            setActionError("Auth error."); 
-            setIsDeleting(false); 
-            return; 
-        }
+        if (!productToDelete) return; setActionError(null); setIsDeleting(true); 
+        const prodIdToDelete = productToDelete.prodId; const token = await getToken(); 
+        if (!token) { setActionError("Authentication error."); setIsDeleting(false); return; }
         try { 
-            const response = await fetch(`${baseUrl}/stores/products/${prodIdToDelete}`, { 
-                method: 'DELETE', 
-                headers: { 'Authorization': `Bearer ${token}` } 
-            }); 
-            if (!response.ok && response.status !== 204) { 
-                const e = await response.json().catch(()=>({message:'Failed delete'})); 
-                throw new Error(e.message || `Error: ${response.statusText}`); 
-            } 
-            closeDeleteModal(); 
-            await fetchStoreData(token);
-        } catch (err: any) { 
-            console.error(`Error deleting product ${prodIdToDelete}:`, err); 
-            setActionError(err.message || "Unknown error deleting."); 
-        } finally { 
-            setIsDeleting(false); 
-        }
+            const response = await fetch(`${baseUrl}/stores/products/${prodIdToDelete}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); 
+            if (!response.ok && response.status !== 204) { const e = await response.json().catch(()=>({message:'Failed to delete product'})); throw new Error(e.message || `Error: ${response.statusText}`); } 
+            closeDeleteModal(); await fetchStoreData(token);
+        } catch (err: any) { console.error(`Error deleting product ${prodIdToDelete}:`, err); setActionError(err.message || "Unknown error deleting product."); } 
+        finally { setIsDeleting(false); }
     };
 
-    if (checkingAuth) {
+    if (checkingAuth || (isAuthLoading && !isAuthenticated)) { // Combined initial loading state
         return (
             <main className="my-store-container">
-                <div className="loading-container">
-                    <div className="spinner"></div>
+                <section className="loading-container" aria-label="Checking authentication">
+                    <figure className="spinner" role="img" aria-label="Loading animation"></figure>
                     <p>Checking Authentication...</p>
-                </div>
+                </section>
+            </main>
+        );
+    }
+    
+    if (!isAuthenticated && !isAuthLoading) { // Explicitly handle not authenticated after loading
+        return (
+            <main className="my-store-container no-store">
+                 <header><h2>Access Denied</h2></header>
+                <p>Please log in to manage your store.</p>
+                <button onClick={() => loginWithRedirect({ appState: { returnTo: window.location.pathname }})} className="button-primary">
+                    Log In / Sign Up
+                </button>
             </main>
         );
     }
 
-    if (loading) {
+
+    if (loading) { // This is for store data loading AFTER auth check
         return (
             <main className="my-store-container">
-                <div className="loading-container">
-                    <div className="spinner"></div>
+                <section className="loading-container" aria-label="Loading your store data">
+                    <figure className="spinner" role="img" aria-label="Loading animation"></figure>
                     <p>Loading Your Store...</p>
-                </div>
+                </section>
             </main>
         );
     }
 
     if (error && error.includes("Store not found")) {
         return (
-            <section className="my-store-container no-store">
-                <h2>Store Not Found</h2>
+            <main className="my-store-container no-store"> {/* Use main for page-level content */}
+                <header><h2>Store Not Found</h2></header>
                 <p>It looks like you haven't created your store yet.</p>
                 <Link to="/create-store" className="button-primary">Create Your Store</Link>
-            </section>
+            </main>
         );
     }
     if (error) {
         return (
-            <section className="my-store-container my-store-error">
-                <h2>Error Loading Store</h2>
+            <main className="my-store-container my-store-error"> {/* Use main */}
+                 <header><h2>Error Loading Store</h2></header>
                 <p>{error}</p>
                 <button onClick={() => fetchStoreData()} className="button-secondary">Retry</button>
-            </section>
+            </main>
         );
     }
-    if (!storeData) {
+    if (!storeData) { // Fallback if storeData is null after loading and no specific error
         return (
-            <section className="my-store-container">
-                <p>Store data could not be loaded.</p>
+            <main className="my-store-container"> {/* Use main */}
+                 <header><h2>Store Unavailable</h2></header>
+                <p>Store data could not be loaded. Please try again.</p>
                 <button onClick={() => fetchStoreData()} className="button-secondary">Retry</button>
-            </section>
+            </main>
         );
     }
 
@@ -578,19 +364,19 @@ const MyStore: React.FC = () => {
     const approvedProducts = products.filter(product => product.isActive);
 
     return (
-        <>
+        <Fragment> {/* Use Fragment for the top-level grouping to avoid an extra DOM element */}
             <main className="my-store-container">
                 <header className="store-header">
                     <h1>{store.storeName}</h1>
                     <section className="delivery-info-display">
-                        <div className="delivery-header">
+                        <section className="delivery-header"> {/* Changed div to section */}
                             <h2>Delivery Settings</h2>
                             {!isEditingDelivery && (
                                 <button onClick={toggleEditDeliveryMode} className="button-edit button-small">
                                     Edit Delivery
                                 </button>
                             )}
-                        </div>
+                        </section>
                         {!isEditingDelivery ? (
                             <Fragment>
                                 <dl>
@@ -617,66 +403,34 @@ const MyStore: React.FC = () => {
                             <form onSubmit={(e) => { e.preventDefault(); handleSaveDeliveryOptions(); }} className="delivery-edit-form">
                                 {actionError && !isSavingDelivery && <p className="error-message">{actionError}</p>}
                                 <label htmlFor="editStdPrice">Standard Price (R):</label> 
-                                <input 
-                                    id="editStdPrice" 
-                                    type="number" 
-                                    value={editDeliveryData.standardPrice} 
-                                    onChange={(e) => handleDeliveryFieldChange('standardPrice', e.target.value)} 
-                                    required 
-                                    min="0" 
-                                    step="0.01" 
-                                    disabled={isSavingDelivery}
-                                />
+                                <input id="editStdPrice" type="number" value={editDeliveryData.standardPrice} onChange={(e) => handleDeliveryFieldChange('standardPrice', e.target.value)} required min="0" step="0.01" disabled={isSavingDelivery} aria-required="true"/>
                                 <label htmlFor="editStdTime">Standard Time:</label> 
-                                <select 
-                                    id="editStdTime" 
-                                    value={editDeliveryData.standardTime} 
-                                    onChange={(e) => handleDeliveryFieldChange('standardTime', e.target.value)} 
-                                    required 
-                                    disabled={isSavingDelivery}
-                                > 
-                                    {STANDARD_DELIVERY_TIMES.map(time => 
-                                        <option key={`std-${time}`} value={time}>{time} Days</option>
-                                    )} 
+                                <select id="editStdTime" value={editDeliveryData.standardTime} onChange={(e) => handleDeliveryFieldChange('standardTime', e.target.value)} required disabled={isSavingDelivery} aria-required="true"> 
+                                    {STANDARD_DELIVERY_TIMES.map(time => <option key={`std-${time}`} value={time}>{time} Days</option>)} 
                                 </select>
                                 <label htmlFor="editExpPrice">Express Price (R):</label> 
-                                <input 
-                                    id="editExpPrice" 
-                                    type="number" 
-                                    value={editDeliveryData.expressPrice} 
-                                    onChange={(e) => handleDeliveryFieldChange('expressPrice', e.target.value)} 
-                                    required 
-                                    min="0" 
-                                    step="0.01" 
-                                    disabled={isSavingDelivery}
-                                />
+                                <input id="editExpPrice" type="number" value={editDeliveryData.expressPrice} onChange={(e) => handleDeliveryFieldChange('expressPrice', e.target.value)} required min="0" step="0.01" disabled={isSavingDelivery} aria-required="true"/>
                                 <label htmlFor="editExpTime">Express Time:</label> 
-                                <select 
-                                    id="editExpTime" 
-                                    value={editDeliveryData.expressTime} 
-                                    onChange={(e) => handleDeliveryFieldChange('expressTime', e.target.value)} 
-                                    required 
-                                    disabled={isSavingDelivery}
-                                > 
-                                    {EXPRESS_DELIVERY_TIMES.map(time => 
-                                        <option key={`exp-${time}`} value={time}>{time} Days</option>
-                                    )} 
+                                <select id="editExpTime" value={editDeliveryData.expressTime} onChange={(e) => handleDeliveryFieldChange('expressTime', e.target.value)} required disabled={isSavingDelivery} aria-required="true"> 
+                                    {EXPRESS_DELIVERY_TIMES.map(time => <option key={`exp-${time}`} value={time}>{time} Days</option>)} 
                                 </select>
-                                <div className="delivery-edit-actions"> 
+                                <footer className="delivery-edit-actions"> {/* Changed div to footer */}
                                     <button type="submit" className="button-confirm" disabled={isSavingDelivery}>
                                         {isSavingDelivery ? 'Saving...' : 'Save Delivery Options'}
                                     </button> 
                                     <button type="button" className="button-cancel" onClick={handleCancelEditDelivery} disabled={isSavingDelivery}>
                                         Cancel
                                     </button> 
-                                </div>
+                                </footer>
                             </form>
                         )}
                     </section>
-                    <div className="store-actions-container">
+                    <nav className="store-actions-container"> {/* Changed div to nav */}
                         <button 
                             onClick={() => setIsAddingProductFormVisible(prev => !prev)} 
                             className="add-product-toggle-btn"
+                            aria-expanded={isAddingProductFormVisible}
+                            aria-controls="add-product-form"
                         >
                             {isAddingProductFormVisible ? 'Cancel Add Product' : 'Add New Product'}
                         </button>
@@ -686,105 +440,37 @@ const MyStore: React.FC = () => {
                         <Link to="/seller/analytics" className="button-secondary view-orders-btn">
                             View Analytics
                         </Link>
-                    </div>
+                    </nav>
                 </header>
 
                 {isAddingProductFormVisible && (
-                    <section className="add-product-form-section">
+                    <section className="add-product-form-section" id="add-product-form">
                         <h2>Add New Product</h2>
                         <form onSubmit={(e)=>{e.preventDefault();handleAddProduct();}}>
                             {actionError && !isAddingProductLoading && <p className="error-message">{actionError}</p>}
                             <label htmlFor="newProdName">Product Name:</label>
-                            <input 
-                                id="newProdName" 
-                                type="text" 
-                                value={newProduct.name??''} 
-                                onChange={(e)=>handleNewProductChange('name',e.target.value)} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            />
+                            <input id="newProdName" type="text" value={newProduct.name??''} onChange={(e)=>handleNewProductChange('name',e.target.value)} required disabled={isAddingProductLoading} aria-required="true"/>
                             <label htmlFor="newProdDesc">Description:</label>
-                            <textarea 
-                                id="newProdDesc" 
-                                value={newProduct.description??''} 
-                                onChange={(e)=>handleNewProductChange('description',e.target.value)} 
-                                disabled={isAddingProductLoading}
-                            ></textarea>
+                            <textarea id="newProdDesc" value={newProduct.description??''} onChange={(e)=>handleNewProductChange('description',e.target.value)} disabled={isAddingProductLoading}></textarea>
                             <label htmlFor="newProdPrice">Price (R):</label>
-                            <input 
-                                id="newProdPrice" 
-                                type="number" 
-                                value={newProduct.price??''} 
-                                onChange={(e)=>handleNewProductChange('price',e.target.value)} 
-                                required 
-                                min="0.01" 
-                                step="0.01" 
-                                disabled={isAddingProductLoading}
-                            />
+                            <input id="newProdPrice" type="number" value={newProduct.price??''} onChange={(e)=>handleNewProductChange('price',e.target.value)} required min="0.01" step="0.01" disabled={isAddingProductLoading} aria-required="true"/>
                             <label htmlFor="newProdQuantity">Quantity:</label>
-                            <input 
-                                id="newProdQuantity" 
-                                type="number" 
-                                value={newProduct.productQuantity??''} 
-                                onChange={(e)=>handleNewProductChange('productQuantity',e.target.value)} 
-                                required 
-                                min="0" 
-                                step="1" 
-                                disabled={isAddingProductLoading}
-                            />
+                            <input id="newProdQuantity" type="number" value={newProduct.productQuantity??''} onChange={(e)=>handleNewProductChange('productQuantity',e.target.value)} required min="0" step="1" disabled={isAddingProductLoading} aria-required="true"/>
                             <label htmlFor="newProdCategory">Category:</label>
-                            <select 
-                                id="newProdCategory" 
-                                value={newProduct.category??''} 
-                                onChange={(e)=>handleNewProductChange('category',e.target.value)} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            >
+                            <select id="newProdCategory" value={newProduct.category??''} onChange={(e)=>handleNewProductChange('category',e.target.value)} required disabled={isAddingProductLoading} aria-required="true">
                                 <option value="" disabled>Select...</option>
-                                {PRODUCT_CATEGORIES.map(cat=>
-                                    <option key={cat} value={cat}>{cat}</option>
-                                )}
+                                {PRODUCT_CATEGORIES.map(cat=> <option key={cat} value={cat}>{cat}</option> )}
                             </select>
                             <label htmlFor="newProdImage">Image:</label>
-                            <input 
-                                id="newProdImage" 
-                                type="file" 
-                                accept="image/*" 
-                                ref={addFileInputRef} 
-                                onChange={handleNewProductImageChange} 
-                                required 
-                                disabled={isAddingProductLoading}
-                            />
+                            <input id="newProdImage" type="file" accept="image/*" ref={addFileInputRef} onChange={handleNewProductImageChange} required disabled={isAddingProductLoading} aria-required="true"/>
                             {newProduct.imagePreviewUrl && 
-                                <img src={newProduct.imagePreviewUrl} alt="Preview" className="image-preview"/>
+                                <img src={newProduct.imagePreviewUrl} alt="New product preview" className="image-preview"/>
                             }
                             <footer className="add-form-actions">
-                                <button 
-                                    type="submit" 
-                                    disabled={isAddingProductLoading} 
-                                    className="button-confirm"
-                                >
+                                <button type="submit" disabled={isAddingProductLoading} className="button-confirm">
                                     {isAddingProductLoading?'Adding...':'Confirm Add Product'}
                                 </button>
-                                <button 
-                                    type="button" 
-                                    onClick={()=>{
-                                        setIsAddingProductFormVisible(false);  // Fixed this line
-                                        setActionError(null); 
-                                        setNewProduct({
-                                            name: '', 
-                                            description: '', 
-                                            price: '', 
-                                            category: '', 
-                                            productQuantity: '', 
-                                            imageFile: null, 
-                                            imagePreviewUrl: null
-                                        }); 
-                                        if (addFileInputRef.current) addFileInputRef.current.value = '';
-                                    }} 
-                                    disabled={isAddingProductLoading} 
-                                    className="button-cancel"
-                                >
+                                <button type="button" onClick={()=>{ setIsAddingProductFormVisible(false); setActionError(null); setNewProduct({ name: '', description: '', price: '', category: '', productQuantity: '', imageFile: null, imagePreviewUrl: null}); if (addFileInputRef.current) addFileInputRef.current.value = ''; }} disabled={isAddingProductLoading} className="button-cancel">
                                     Cancel
                                 </button>
                             </footer>
@@ -793,182 +479,96 @@ const MyStore: React.FC = () => {
                 )}
 
                 <section className="products-section">
-                    {/* Approved Products Section */}
-                    <div className="product-status-section">
+                    <section className="product-status-section"> {/* Changed div to section */}
                         <h2>Approved Products</h2>
                         {approvedProducts.length > 0 ? (
                             <ul className="product-list">
                                 {approvedProducts.map((product) => (
                                     <li key={product.prodId} className="product-list-item">
                                         <article className="product-card active">
-                                            <div className="product-image">
+                                            <figure className="product-image"> {/* Changed div to figure */}
                                                 <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
-                                            </div>
-                                            <div className="product-details">
+                                            </figure>
+                                            <article className="product-details"> {/* Changed div to article */}
                                                 <h3>{product.name}</h3>
                                                 <p className="product-description">{product.description}</p>
                                                 <p className="product-category">Category: {product.category}</p>
                                                 <p className="product-price">Price: R{product.price.toFixed(2)}</p>
                                                 <p className="product-quantity">Quantity: {product.productquantity}</p>
-                                            </div>
-                                            <div className="product-actions">
-                                                <button 
-                                                    onClick={()=>openEditModal(product)} 
-                                                    className="button-edit" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    onClick={()=>handleDeleteClick(product)} 
-                                                    className="button-delete" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
+                                            </article>
+                                            <footer className="product-actions"> {/* Changed div to footer */}
+                                                <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button>
+                                                <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>
                                                     {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
                                                 </button>
-                                            </div>
+                                            </footer>
                                         </article>
                                     </li>
                                 ))}
                             </ul>
-                        ) : (
-                            <p className="no-products">No approved products yet.</p>
-                        )}
-                    </div>
+                        ) : ( <p className="no-products">No approved products yet.</p> )}
+                    </section>
 
-                    {/* Pending Products Section */}
-                    <div className="product-status-section">
+                    <section className="product-status-section"> {/* Changed div to section */}
                         <h2>Pending Approval</h2>
                         {pendingProducts.length > 0 ? (
                             <ul className="product-list">
                                 {pendingProducts.map((product) => (
                                     <li key={product.prodId} className="product-list-item">
                                         <article className="product-card inactive">
-                                            <span className="product-status-badge">Pending Approval</span>
-                                            <div className="product-image">
+                                            <p className="product-status-badge">Pending Approval</p> {/* Changed span to p */}
+                                            <figure className="product-image"> {/* Changed div to figure */}
                                                 <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} />
-                                            </div>
-                                            <div className="product-details">
+                                            </figure>
+                                            <article className="product-details"> {/* Changed div to article */}
                                                 <h3>{product.name}</h3>
                                                 <p className="product-description">{product.description}</p>
                                                 <p className="product-category">Category: {product.category}</p>
                                                 <p className="product-price">Price: R{product.price.toFixed(2)}</p>
                                                 <p className="product-quantity">Quantity: {product.productquantity}</p>
-                                            </div>
-                                            <div className="product-actions">
-                                                <button 
-                                                    onClick={()=>openEditModal(product)} 
-                                                    className="button-edit" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button 
-                                                    onClick={()=>handleDeleteClick(product)} 
-                                                    className="button-delete" 
-                                                    disabled={isDeleting || isSavingEdit || isAddingProductLoading}
-                                                >
+                                            </article>
+                                            <footer className="product-actions"> {/* Changed div to footer */}
+                                                <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button>
+                                                <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}>
                                                     {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'}
                                                 </button>
-                                            </div>
+                                            </footer>
                                         </article>
                                     </li>
                                 ))}
                             </ul>
-                        ) : (
-                            <p className="no-products">No products pending approval.</p>
-                        )}
-                    </div>
+                        ) : ( <p className="no-products">No products pending approval.</p> )}
+                    </section>
                 </section>
 
                 <dialog ref={editDialogRef} onClose={closeEditModal} className="edit-product-modal">
                     {editingProduct && (
                         <form onSubmit={(e)=>{e.preventDefault();handleUpdateProduct();}} method="dialog">
                             <h2>Edit: {editingProduct.name}</h2>
-                            {actionError && !isSavingEdit && (
-                                <p className={actionError.includes("review") ? "info-message" : "error-message"}>
-                                    {actionError}
-                                </p>
-                            )}
+                            {actionError && !isSavingEdit && ( <p className={actionError.includes("review") ? "info-message" : "error-message"}> {actionError} </p> )}
                             <label htmlFor="editProdName">Name:</label>
-                            <input 
-                                id="editProdName" 
-                                type="text" 
-                                value={editFormData.name||''} 
-                                onChange={(e)=>handleEditFormChange('name',e.target.value)} 
-                                required 
-                                disabled={isSavingEdit}
-                            />
+                            <input id="editProdName" type="text" value={editFormData.name||''} onChange={(e)=>handleEditFormChange('name',e.target.value)} required disabled={isSavingEdit} aria-required="true"/>
                             <label htmlFor="editProdDesc">Description:</label>
-                            <textarea 
-                                id="editProdDesc" 
-                                value={editFormData.description||''} 
-                                onChange={(e)=>handleEditFormChange('description',e.target.value)} 
-                                disabled={isSavingEdit}
-                            ></textarea>
+                            <textarea id="editProdDesc" value={editFormData.description||''} onChange={(e)=>handleEditFormChange('description',e.target.value)} disabled={isSavingEdit}></textarea>
                             <label htmlFor="editProdPrice">Price (R):</label>
-                            <input 
-                                id="editProdPrice" 
-                                type="number" 
-                                value={editFormData.price||''} 
-                                onChange={(e)=>handleEditFormChange('price',e.target.value)} 
-                                required 
-                                min="0.01" 
-                                step="0.01" 
-                                disabled={isSavingEdit}
-                            />
+                            <input id="editProdPrice" type="number" value={editFormData.price||''} onChange={(e)=>handleEditFormChange('price',e.target.value)} required min="0.01" step="0.01" disabled={isSavingEdit} aria-required="true"/>
                             <label htmlFor="editProdQuantity">Quantity:</label>
-                            <input 
-                                id="editProdQuantity" 
-                                type="number" 
-                                value={editFormData.productQuantity||''} 
-                                onChange={(e)=>handleEditFormChange('productQuantity',e.target.value)} 
-                                required 
-                                min="0" 
-                                step="1" 
-                                disabled={isSavingEdit}
-                            />
+                            <input id="editProdQuantity" type="number" value={editFormData.productQuantity||''} onChange={(e)=>handleEditFormChange('productQuantity',e.target.value)} required min="0" step="1" disabled={isSavingEdit} aria-required="true"/>
                             <label htmlFor="editProdCategory">Category:</label>
-                            <select 
-                                id="editProdCategory" 
-                                value={editFormData.category||''} 
-                                onChange={(e)=>handleEditFormChange('category',e.target.value)} 
-                                required 
-                                disabled={isSavingEdit}
-                            >
+                            <select id="editProdCategory" value={editFormData.category||''} onChange={(e)=>handleEditFormChange('category',e.target.value)} required disabled={isSavingEdit} aria-required="true">
                                 <option value="" disabled>Select...</option>
-                                {PRODUCT_CATEGORIES.map(cat=>
-                                    <option key={cat} value={cat}>{cat}</option>
-                                )}
+                                {PRODUCT_CATEGORIES.map(cat=> <option key={cat} value={cat}>{cat}</option> )}
                             </select>
                             <label htmlFor="editProdImage">Replace Image (Optional):</label>
-                            <input 
-                                id="editProdImage" 
-                                type="file" 
-                                accept="image/*" 
-                                ref={editFileInputRef} 
-                                onChange={handleEditImageChange} 
-                                disabled={isSavingEdit}
-                            />
+                            <input id="editProdImage" type="file" accept="image/*" ref={editFileInputRef} onChange={handleEditImageChange} disabled={isSavingEdit}/>
                             {editProductPreview && 
-                                <img src={editProductPreview} alt="Preview" className="image-preview"/>
+                                <img src={editProductPreview} alt="Edit product preview" className="image-preview"/>
                             }
                             <footer className="modal-actions">
-                                <button 
-                                    type="submit" 
-                                    disabled={isSavingEdit} 
-                                    className="button-confirm"
-                                >
+                                <button type="submit" disabled={isSavingEdit} className="button-confirm">
                                     {isSavingEdit?'Saving...':'Save Changes'}
                                 </button>
-                                <button 
-                                    type="button" 
-                                    onClick={closeEditModal} 
-                                    disabled={isSavingEdit} 
-                                    className="button-cancel"
-                                >
-                                    Cancel
-                                </button>
+                                <button type="button" onClick={closeEditModal} disabled={isSavingEdit} className="button-cancel"> Cancel </button>
                             </footer>
                         </form>
                     )}
@@ -982,34 +582,22 @@ const MyStore: React.FC = () => {
                             <p>This action cannot be undone.</p>
                             {actionError && <p className="error-message">{actionError}</p>}
                             <footer className="modal-actions">
-                                <button 
-                                    onClick={executeDeleteProduct} 
-                                    className="button-delete" 
-                                    disabled={isDeleting}
-                                >
+                                <button onClick={executeDeleteProduct} className="button-delete" disabled={isDeleting}>
                                     {isDeleting ? 'Deleting...' : 'Yes, Delete Product'}
                                 </button>
-                                <button 
-                                    onClick={closeDeleteModal} 
-                                    className="button-cancel" 
-                                    disabled={isDeleting}
-                                >
-                                    Cancel
-                                </button>
+                                <button onClick={closeDeleteModal} className="button-cancel" disabled={isDeleting}> Cancel </button>
                             </footer>
                         </Fragment>
                     )}
                 </dialog>
             </main>
 
-            {/* --- Section Divider before Footer --- */}
-            <div className="section-divider">
+            <figure className="section-divider" role="presentation"> {/* Changed div to figure */}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
+                    <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
                 </svg>
-            </div>
-
-        </>
+            </figure>
+        </Fragment>
     );
 };
 

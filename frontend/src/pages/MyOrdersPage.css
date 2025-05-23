@@ -1,180 +1,235 @@
 /* src/pages/MyOrdersPage.css */
 
-.my-orders-container {
+main.my-orders-container { /* Changed from .my-orders-container */
+  padding: 2rem;
+  font-family: 'Hind', sans-serif; /* Consistent font */
+  max-width: 900px;
+  margin: 2rem auto; /* Added top/bottom margin */
+  background-color: #f0f2f5;
+  border-radius: 8px; /* Added border radius to main container */
+}
+
+main.my-orders-container .page-top-header { /* Targets the header with the H1 */
+    text-align: center;
+    margin-bottom: 2rem;
+}
+main.my-orders-container .page-top-header h1 {
+  color: var(--primary-color, #432C53); /* Use primary color */
+  font-family: 'Poppins', sans-serif; /* Consistent heading font */
+  font-size: 2.2rem; /* Adjust size as needed */
+  margin: 0;
+}
+main.my-orders-container h2,
+main.my-orders-container h3,
+main.my-orders-container h4 {
+  color: #333;
+  font-family: 'Poppins', sans-serif; /* Consistent heading font */
+}
+
+p.auth-loading-message,
+p.login-prompt-message,
+p.no-orders-message {
+    text-align: center;
     padding: 2rem;
-    font-family: Arial, sans-serif;
-    max-width: 900px;
-    margin: 0 auto;
-    background-color: #f0f2f5; /* Light background */
-}
-
-.my-orders-container h1,
-.my-orders-container h2,
-.my-orders-container h3,
-.my-orders-container h4 {
-    color: #333;
-}
-
-.error-message {
-    color: #dc3545; /* Bootstrap danger red */
-    font-weight: bold;
-    background-color: #f8d7da; /* Light red background for errors */
-    border: 1px solid #f5c6cb;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 1rem;
-    border-radius: 0.25rem;
-}
-
-.order-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.order-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 1.5rem;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.order-header h2 {
-    margin: 0;
-    font-size: 1.3em;
-}
-
-.order-header span {
-    font-size: 0.9em;
-    color: #666;
-}
-
-.order-details-overall {
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    font-size: 1em;
-    color: #444;
-}
-
-.order-details-overall p {
-    margin-bottom: 0.5rem;
-}
-
-.shipments-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.shipments-section h3 {
-    margin-bottom: 1rem;
-    font-size: 1.1em;
-}
-
-.shipment-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    background-color: #f9f9f9;
-}
-
-.shipment-card:last-child {
-    margin-bottom: 0;
-}
-
-.shipment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px dashed #ddd;
-    padding-bottom: 0.75rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.shipment-header h4 {
-    margin: 0;
-    font-size: 1em;
+    font-size: 1.1rem;
     color: #555;
 }
 
-.shipment-details {
-    font-size: 0.9em;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-    color: #666;
+
+.error-message {
+  color: #dc3545;
+  font-weight: bold;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
 }
 
-.shipment-details p {
-    margin-bottom: 0.3rem;
+ul.order-list { /* Changed from .order-list */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  list-style: none; /* Reset list styles */
+  padding: 0;       /* Reset list padding */
+  margin: 0;        /* Reset list margin */
 }
 
-.item-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+li.order-card-item { /* Added class for li wrapping order-card */
+    /* No specific styles for li itself, article.order-card handles visual */
 }
 
-.item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px dashed #eee;
+article.order-card { /* Changed from .order-card div to article */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Softer shadow */
 }
 
-.item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+header.order-header { /* Already header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.item-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #eee;
-    background-color: #f8f9fa;
-    flex-shrink: 0;
+header.order-header h2 {
+  margin: 0;
+  font-size: 1.4em; /* Increased size */
+  color: var(--primary-color-darker, #362245);
 }
 
-.item-details {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.9em;
-    color: #666;
+p.order-placed-date { /* Changed from span */
+  font-size: 0.9em;
+  color: #666;
+  margin: 0; /* Reset paragraph margin */
 }
 
-.item-details span:first-child {
-    font-weight: 500;
+section.order-details-overall { /* Changed from div */
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  font-size: 1em;
+  color: #444;
+}
+
+section.order-details-overall p {
+  margin-bottom: 0.5rem;
+}
+section.order-details-overall p strong {
     color: #333;
 }
 
-/* Status Badge Styles */
+section.shipments-section { /* Changed from div */
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+section.shipments-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2em; /* Increased size */
+  color: var(--primary-color, #432C53);
+}
+
+section.shipment-card { /* Already section */
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  background-color: #f9f9f9; /* Light background for each shipment */
+}
+
+section.shipment-card:last-child {
+  margin-bottom: 0;
+}
+
+header.shipment-header { /* Already header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+header.shipment-header h4 {
+  margin: 0;
+  font-size: 1.1em; /* Increased size */
+  color: #555;
+}
+p.status-line { /* Added for the status paragraph */
+    margin:0;
+}
+
+
+section.shipment-details { /* Changed from div */
+  font-size: 0.9em;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  color: #666;
+}
+
+section.shipment-details p {
+  margin-bottom: 0.3rem;
+}
+section.shipment-details p strong {
+    color: #444;
+}
+
+
+ul.item-list { /* Already ul */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+li.item { /* Already li */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+li.item:not(:last-child) {
+  border-bottom: 1px dashed #eee;
+}
+
+
+figure.item-image-figure { /* Added wrapper for img */
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    margin: 0; /* Reset figure margin */
+}
+img.item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  background-color: #f8f9fa;
+}
+
+article.item-details-info { /* Changed div.item-details to article */
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9em;
+  color: #666;
+  gap: 0.2rem; /* Small gap between item detail lines */
+}
+
+article.item-details-info p { /* Target new p tags */
+    margin: 0; /* Reset paragraph margins */
+}
+
+p.item-name-snapshot { /* New class for product name */
+  font-weight: 500;
+  color: #333;
+}
+p.item-qty-price, p.item-line-total {
+    font-size: 0.85em; /* Slightly smaller for these details */
+}
+
+
+/* Status Badge Styles (applied to strong tag) */
 .status-badge {
-    padding: 0.25em 0.6em;
-    border-radius: 0.25rem;
-    font-size: 0.85em;
-    font-weight: bold;
-    color: #fff; /* Default text color */
-    text-align: center;
-    white-space: nowrap;
+  padding: 0.3em 0.7em; /* Adjusted padding */
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1; /* Ensure consistent height */
 }
 
 .status-processing { background-color: #ffc107; color: #333; }
@@ -187,44 +242,41 @@
 
 
 /* === Loading Spinner Styles === */
-.loading-container {
+section.loading-container { /* Changed div to section */
   display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 300px; /* Give it some vertical space for standalone loading */
+  min-height: 300px;
   padding: 2rem;
   text-align: center;
-  color: #555; /* Text color */
+  color: #555;
 }
 
-/* Adjustments for inline loading (within page content) */
-.my-orders-container > .loading-container {
-    min-height: 150px; /* Reduce height when shown inline */
-    padding: 1rem 0; /* Reduce padding when inline */
+/* Adjustments for inline loading */
+main.my-orders-container > section.loading-container { /* Target section within main */
+  min-height: 150px;
+  padding: 1rem 0;
 }
 
-.spinner {
+figure.spinner { /* Changed div to figure */
   width: 48px;
   height: 48px;
-  border: 5px solid #ccc; /* Light grey base border */
-  /* Use your primary color for the spinning part */
-  border-top-color: #97c9ba; /* Your primary green color */
+  border: 5px solid #ccc;
+  border-top-color: #97c9ba;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite; /* Reference the spin animation */
-  margin-bottom: 1rem; /* Space between spinner and text */
+  animation: spin 0.7s linear infinite;
+  margin: 0 0 1rem 0; /* Reset figure margin and add bottom margin */
 }
 
-/* The spin animation */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Loading text style */
-.loading-container p {
+section.loading-container p {
   font-size: 1.1em;
   color: #555;
+  margin: 0;
 }
-/* === End Loading Spinner Styles === */

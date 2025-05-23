@@ -1,20 +1,17 @@
 // frontend/src/pages/ProductsPage.tsx
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useCart } from '../context/ContextCart';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import './ProductsPage.css';
 
-// ... (interfaces, normalizeSearchTerm, backendUrl, etc. remain the same) ...
-// Search normalizer function
 const normalizeSearchTerm = (term: string) => {
   if (!term) return '';
   return term
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s]/g, '')
-    // .replace(/\b(s|es|ies|ing|ed|er)\b/g, '') // Consider if this aggressive stemming is always desired
     .replace(/\s+/g, ' ')
     .trim();
 };
@@ -44,19 +41,14 @@ interface AddToCartItem {
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-
-const ProductsPage = () => {
-  // ... (all your existing state, useEffects, and functions remain the same) ...
+const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // For products loading
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
-  // Updated Auth0 destructuring
   const { user, isAuthenticated, getAccessTokenSilently, isLoading: isAuth0Loading } = useAuth0();
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | null}>({message: '', type: null});
-
-  // New state for user role
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [isRoleFetching, setIsRoleFetching] = useState(true);
 
@@ -71,7 +63,6 @@ const ProductsPage = () => {
     }, 3000);
   };
 
-  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
@@ -93,7 +84,7 @@ const ProductsPage = () => {
               storeId: String(p.storeId ?? 'unknown'),
               productquantity: Number(p.productquantity) || 0
           }))
-          .filter(p => p.productquantity > 0 && p.isActive); // Ensure isActive is considered
+          .filter(p => p.productquantity > 0 && p.isActive);
         setProducts(validatedProducts);
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
@@ -111,10 +102,9 @@ const ProductsPage = () => {
     fetchProducts();
   }, []);
 
-  // Fetch user role
   useEffect(() => {
     const fetchRole = async () => {
-      if (isAuthenticated && user && !isAuth0Loading) { // Check !isAuth0Loading
+      if (isAuthenticated && user && !isAuth0Loading) {
         setIsRoleFetching(true);
         try {
           const token = await getAccessTokenSilently();
@@ -124,54 +114,47 @@ const ProductsPage = () => {
           setCurrentUserRole(response.data.role);
         } catch (e) {
           console.error("Failed to fetch user role:", e);
-          setCurrentUserRole(null); // Fallback or error state
+          setCurrentUserRole(null);
         } finally {
           setIsRoleFetching(false);
         }
-      } else if (!isAuth0Loading) { // If Auth0 is done loading and user is not authenticated
+      } else if (!isAuth0Loading) {
         setCurrentUserRole(null);
         setIsRoleFetching(false);
       }
     };
-    // Only trigger if Auth0 is not loading to prevent race conditions or premature calls
     if (!isAuth0Loading) {
         fetchRole();
     }
-  }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading]); // Added isAuth0Loading dependency
+  }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading, backendUrl]);
 
   const filteredProducts = useMemo(() => {
-      let result = [...products];
-      if (selectedCategory) {
-        result = result.filter(product => product.category === selectedCategory);
+    let result = [...products];
+    if (selectedCategory) {
+      result = result.filter(product => product.category === selectedCategory);
+    }
+    if (selectedStore) {
+      result = result.filter(product => product.storeName === selectedStore);
+    }
+    if (searchQuery) {
+      const normalizedQuery = normalizeSearchTerm(searchQuery);
+      if (normalizedQuery) {
+        result = result.filter(product => {
+          const searchFields = [
+            product.name, product.description, product.storeName, product.category
+          ].map(field => normalizeSearchTerm(field || ''));
+          return searchFields.some(field => field.includes(normalizedQuery));
+        });
       }
-      if (selectedStore) {
-        result = result.filter(product => product.storeName === selectedStore);
-      }
-      if (searchQuery) {
-        const normalizedQuery = normalizeSearchTerm(searchQuery);
-        if (normalizedQuery) {``
-          result = result.filter(product => {
-            const searchFields = [
-              product.name,
-              product.description,
-              product.storeName,
-              product.category
-            ].map(field => normalizeSearchTerm(field || ''));
-            return searchFields.some(field => field.includes(normalizedQuery));
-          });
-        }
-      }
-      return result;
+    }
+    return result;
   }, [selectedCategory, selectedStore, searchQuery, products]);
 
   const handleFilterChange = (filterType: 'category' | 'store' | 'search', value: string) => {
-      const newParams = new URLSearchParams(searchParams);
-      if (value) {
-          newParams.set(filterType, value);
-      } else {
-          newParams.delete(filterType);
-      }
-      setSearchParams(newParams, { replace: true });
+    const newParams = new URLSearchParams(searchParams);
+    if (value) { newParams.set(filterType, value); } 
+    else { newParams.delete(filterType); }
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleCategoryChange = (category: string) => handleFilterChange('category', category);
@@ -179,56 +162,32 @@ const ProductsPage = () => {
   const handleSearchChange = (query: string) => handleFilterChange('search', query);
 
   const handleAddToCart = async (product: Product) => {
-    // Prevent action if Auth0 or role is still loading
     if (isAuth0Loading || isRoleFetching) {
       showNotification("Please wait, verifying user permissions...", "error");
       return;
     }
-
-    // Check if the user is an admin
     if (currentUserRole === 'admin') {
-      alert("An admin cannot add products to cart."); // Use alert as requested
-      return; // Prevent adding to cart for admins
+      alert("An admin cannot add products to cart.");
+      return;
     }
-
-    // Original logic for non-admin users
     try {
       if (!isAuthenticated) {
         showNotification('Please sign in or create an account to add items to your cart', 'error');
         return;
       }
-      if (!product || typeof product.prodId === 'undefined') {
-        throw new Error('Product data is invalid or missing ID');
-      }
+      if (!product || typeof product.prodId === 'undefined') { throw new Error('Product data is invalid or missing ID'); }
       const price = Number(product.price);
-      if (isNaN(price)) {
-        throw new Error('Product price is invalid');
-      }
-      if (!product.storeId || product.storeId === 'unknown') {
-        console.error("Product missing valid storeId:", product);
-        throw new Error('Product is missing store information.');
-      }
-      if (product.productquantity <= 0) {
-        showNotification(`${product.name} is currently out of stock.`, 'error');
-        return;
-      }
-      if (user?.sub === product.userId) { // No need to check isAuthenticated again here, already done
-        showNotification("You cannot add your own product to the cart.", 'error');
-        return;
-      }
+      if (isNaN(price)) { throw new Error('Product price is invalid'); }
+      if (!product.storeId || product.storeId === 'unknown') { console.error("Product missing valid storeId:", product); throw new Error('Product is missing store information.'); }
+      if (product.productquantity <= 0) { showNotification(`${product.name} is currently out of stock.`, 'error'); return; }
+      if (user?.sub === product.userId) { showNotification("You cannot add your own product to the cart.", 'error'); return; }
 
       const itemToAdd: AddToCartItem = {
-        productId: product.prodId,
-        productName: product.name,
-        productPrice: price,
-        storeId: product.storeId,
-        storeName: product.storeName,
-        imageUrl: product.imageUrl || undefined
+        productId: product.prodId, productName: product.name, productPrice: price,
+        storeId: product.storeId, storeName: product.storeName, imageUrl: product.imageUrl || undefined
       };
-
       await addToCart(itemToAdd);
-      showNotification(`${product.name} added to cart!`, 'success'); // Original success message
-
+      showNotification(`${product.name} added to cart!`, 'success');
     } catch (error) {
       console.error('Error adding to cart:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to add item to cart';
@@ -237,27 +196,23 @@ const ProductsPage = () => {
   };
 
   const categories = useMemo(() => [...new Set(products.map(product => product.category))], [products]);
-  const stores = useMemo(() => [...new Set(products.map(product => product.storeName).filter(Boolean))], [products]); // Ensure storeName is not null/undefined
+  const stores = useMemo(() => [...new Set(products.map(product => product.storeName).filter(Boolean))], [products]);
 
-  // Updated loading condition to include Auth0 and role fetching
   if (isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching)) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading products and user data...</p> {/* Updated message */}
-      </div>
+      <section className="loading-container" aria-label="Loading products and user data"> {/* Changed div to section */}
+        <figure className="spinner" role="img" aria-label="Loading animation"></figure> {/* Changed div to figure */}
+        <p>Loading products and user data...</p>
+      </section>
     );
   }
 
-  if (error && !isLoading) { // This error is for product fetching
+  if (error && !isLoading) {
     return (
       <section className="error-message" role="alert" aria-live="assertive">
         <h2>Error Loading Products</h2>
         <p>{error}</p>
-        <button
-          onClick={() => window.location.reload()} // Consider a more targeted refetch for products
-          className="retry-button"
-        >
+        <button onClick={() => window.location.reload()} className="retry-button">
           Retry
         </button>
       </section>
@@ -268,62 +223,44 @@ const ProductsPage = () => {
     <>
       <main className="products-container">
         {notification.type && (
-          <div className={`notification-modal ${notification.type}`}>
+          <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}> {/* Changed div to aside */}
             {notification.message}
-          </div>
+          </aside>
         )}
 
         <section className="filters-container" aria-labelledby="filters-heading">
-          <div className="filter-row-search-recs">
-            <div className="search-bar filters">
+          <h2 id="filters-heading" className="visually-hidden">Product Filters</h2> {/* Added for accessibility */}
+          <section className="filter-row-search-recs"> {/* Changed div to section */}
+            <section className="search-bar filters"> {/* Changed div to section */}
               <label htmlFor="product-search">Search Products:</label>
               <input
-                id="product-search"
-                type="search"
-                placeholder="Search by name, description, store..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                id="product-search" type="search" placeholder="Search by name, description, store..."
+                value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)}
                 aria-label="Search products"
               />
-            </div>
-            <div className="recommendations-link-container">
+            </section>
+            <section className="recommendations-link-container"> {/* Changed div to section */}
               <Link to="/recommendations" className="products-page-cta-button">
                 Recommendations
               </Link>
-            </div>
-          </div>
+            </section>
+          </section>
 
-          <div className="category-filter filters">
+          <section className="category-filter filters"> {/* Changed div to section */}
             <label htmlFor="category-select">Filter by Category:</label>
-            <select
-              id="category-select"
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-            >
+            <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)}>
               <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
+              {categories.map(category => (<option key={category} value={category}>{category}</option>))}
             </select>
-          </div>
+          </section>
           
-          <div className="store-filter filters">
+          <section className="store-filter filters"> {/* Changed div to section */}
             <label htmlFor="store-select">Filter by Store:</label>
-            <select
-              id="store-select"
-              value={selectedStore}
-              onChange={(e) => handleStoreChange(e.target.value)}
-            >
+            <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)}>
               <option value="">All Stores</option>
-              {stores.map(store => (
-                <option key={store} value={store}>
-                  {store}
-                </option>
-              ))}
+              {stores.map(store => (<option key={store} value={store}>{store}</option>))}
             </select>
-          </div>
+          </section>
         </section>
 
         <ul className="products-grid">
@@ -331,22 +268,13 @@ const ProductsPage = () => {
             filteredProducts.map((product) => {
               const isOwner = isAuthenticated && product.userId === user?.sub;
               const isOutOfStock = product.productquantity <= 0;
-              
               let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching); 
-              if (!isDisabled && currentUserRole === 'admin') { 
-                isDisabled = true;
-              }
-
+              if (!isDisabled && currentUserRole === 'admin') { isDisabled = true; }
               let buttonText = 'Add to Cart';
-              if (isAuth0Loading || isRoleFetching) {
-                  buttonText = 'Verifying...';
-              } else if (currentUserRole === 'admin') {
-                  buttonText = 'Admin View'; 
-              } else if (isOwner) {
-                  buttonText = 'Your Product';
-              } else if (isOutOfStock) {
-                  buttonText = 'Out of Stock';
-              }
+              if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
+              else if (currentUserRole === 'admin') { buttonText = 'Admin View'; } 
+              else if (isOwner) { buttonText = 'Your Product'; } 
+              else if (isOutOfStock) { buttonText = 'Out of Stock'; }
 
               return (
                 <li key={product.prodId} className="product-card">
@@ -379,14 +307,8 @@ const ProductsPage = () => {
                       <button
                         onClick={() => handleAddToCart(product)}
                         className="add-to-cart-btn"
-                        aria-label={
-                          currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
-                          : isOwner ? `Cannot add own product ${product.name}`
-                          : isOutOfStock ? `${product.name} is out of stock`
-                          : `Add ${product.name} to cart`
-                        }
-                        type="button"
-                        disabled={isDisabled}
+                        aria-label={ currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` : isOwner ? `Cannot add own product ${product.name}` : isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+                        type="button" disabled={isDisabled}
                       >
                         {buttonText}
                       </button>
@@ -407,12 +329,11 @@ const ProductsPage = () => {
         </ul>
       </main>
 
-      {/* --- Section Divider before Footer --- */}
-      <div className="section-divider">
+      <figure className="section-divider" role="presentation"> {/* Changed div to figure */}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
           <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
         </svg>
-      </div>
+      </figure>
     </>
   );
 };
