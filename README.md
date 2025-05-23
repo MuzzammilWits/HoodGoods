@@ -1,9 +1,7 @@
-<p align="center">
+<p align="left">
   <img src="https://github.com/muzzammilwits/hoodgoods/actions/workflows/ci.yml/badge.svg" alt="CI/CD Status">
   &nbsp;&nbsp;&nbsp;
-  &nbsp;&nbsp;&nbsp;
   <img src="https://sonarcloud.io/api/project_badges/measure?project=MuzzammilWits_HoodGoods&metric=coverage" alt="Code Coverage">
-  &nbsp;&nbsp;&nbsp;
   &nbsp;&nbsp;&nbsp;
   <img src="https://img.shields.io/github/v/release/muzzammilwits/hoodgoods.svg" alt="Latest Release">
 </p>
