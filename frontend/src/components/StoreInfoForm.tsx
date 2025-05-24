@@ -1,3 +1,4 @@
+// src/components/StoreInfoForm.tsx
 import React from 'react';
 
 interface StoreInfoFormProps {
@@ -13,9 +14,11 @@ const StoreInfoForm: React.FC<StoreInfoFormProps> = ({
 }) => {
   return (
     <section className="store-info-section">
-      <h2>Store Information</h2>
+      <h2>Store Name</h2>
+      <p className="store-name-disclaimer"> {/* Added className here */}
+        Your store name is your unique brand on our platform and cannot be changed later. Choose wisely!
+      </p>
       <fieldset className="form-group">
-        <label htmlFor="storeName">Store Name</label>
         <input
           type="text"
           id="storeName"
