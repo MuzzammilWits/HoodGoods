@@ -2,20 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience: 'https://hoodgoods-api.com',
-      issuer: 'https://dev-vp08yyf1exxzeenl.us.auth0.com/',
+      audience: configService.get<string>('AUTH0_AUDIENCE'), 
+      issuer: `${configService.get<string>('AUTH0_DOMAIN')}`, 
       algorithms: ['RS256'],
       secretOrKeyProvider: jwksRsa.passportJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: 'https://dev-vp08yyf1exxzeenl.us.auth0.com/.well-known/jwks.json',
+        jwksUri: `${configService.get<string>('AUTH0_DOMAIN')}.well-known/jwks.json`, 
       }),
     });
   }
