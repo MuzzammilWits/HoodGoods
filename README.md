@@ -1,9 +1,19 @@
-<p align="left">
-  <img src="https://github.com/muzzammilwits/hoodgoods/actions/workflows/ci.yml/badge.svg" alt="CI/CD Status">
+<p align="center">
+  <img src="frontend/src/assets/logo.svg" alt="HoodGoods Logo" width="200"/>
+</p>
+
+<p align="center">
+  <a href="https://github.com/muzzammilwits/hoodgoods/actions/workflows/ci.yml">
+    <img src="https://github.com/muzzammilwits/hoodgoods/actions/workflows/ci.yml/badge.svg" alt="CI/CD Status">
+  </a>
   &nbsp;&nbsp;&nbsp;
-  <img src="https://sonarcloud.io/api/project_badges/measure?project=MuzzammilWits_HoodGoods&metric=coverage" alt="Code Coverage">
+  <a href="https://sonarcloud.io/summary/new_code?id=MuzzammilWits_HoodGoods">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=MuzzammilWits_HoodGoods&metric=coverage" alt="Code Coverage">
+  </a>
   &nbsp;&nbsp;&nbsp;
-  <img src="https://img.shields.io/github/v/release/muzzammilwits/hoodgoods.svg" alt="Latest Release">
+  <a href="https://github.com/muzzammilwits/hoodgoods/releases/latest">
+    <img src="https://img.shields.io/github/v/release/muzzammilwits/hoodgoods.svg" alt="Latest Release">
+  </a>
 </p>
 
 
