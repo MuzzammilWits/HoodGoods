@@ -1,0 +1,68 @@
+/* frontend/src/pages/OrderConfirmationPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&family=Hind:wght@400;600;700&display=swap');
+
+.order-confirmation-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* MODIFIED: Ensures container tries to fill full viewport height */
+  padding: 2rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  background-image: url("https://euudlgzarnvbsvzlizcu.supabase.co/storage/v1/object/public/images//background.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  box-sizing: border-box; /* Add box-sizing to include padding in height calculation */
+}
+
+.order-confirmation-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem 3.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  max-width: 550px;
+  width: 100%;
+}
+
+.order-confirmation-card .title {
+  color: #97C9BA;
+  margin-bottom: 1.5rem;
+  font-size: 2.5em;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.order-confirmation-card .message {
+  font-size: 1.15em;
+  color: #4A4A4A;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+.order-confirmation-card .order-details {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.continue-shopping-button {
+  display: inline-block;
+  background-color: #432C53;
+  color: #fff;
+  padding: 12px 30px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  border: none;
+}
+
+.continue-shopping-button:hover {
+  background-color: #5a3a6f;
+  transform: translateY(-1px);
+  color: #fff;
+}
