@@ -1,9 +1,10 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { Auth0Provider, AppState } from '@auth0/auth0-react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate }
+from 'react-router-dom';
 import { CartProvider } from './context/ContextCart';
-import './App.css';
+import './App.css'; // Relies on this for layout
 import ScrollToTop from './components/ScrollToTop';
 import { useEffect } from 'react';
 
@@ -27,15 +28,22 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import BestSellersList from './components/recommendations/BestSellersList';
-import RecommendationsPage from './pages/RecommendationsPage'; 
+import RecommendationsPage from './pages/RecommendationsPage';
 import SellerAgreementPage from './pages/SellerAgreementPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsAndConditionsPage from './pages/TermsAndConditionsPage'; // <-- Added import for the actual page
+
+// The inline placeholder for TermsAndConditionsPage has been removed.
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState?: AppState) => {
     console.log("Auth0 onRedirectCallback triggered. AppState:", appState);
-    navigate(appState?.returnTo || window.location.pathname || '/');
+    const targetPath = appState?.returnTo && appState.returnTo !== window.location.pathname
+      ? appState.returnTo
+      : window.location.pathname || '/';
+    navigate(targetPath);
   };
 
   return (
@@ -55,11 +63,11 @@ const AppContent: React.FC = () => {
           <Navbar />
         </header>
 
-        <main className="app-main-content">
+        <main className="app-main-content"> {/* This class handles main content growth */}
           <Routes>
-            {/* Public Home Route */}
+            {/* Public Home Route - uses React.Fragment */}
             <Route path="/" element={
-              <>
+              <React.Fragment>
                 <section aria-labelledby="hero-heading">
                   <Hero />
                 </section>
@@ -69,7 +77,6 @@ const AppContent: React.FC = () => {
                   <BestSellersList limit={6} title="Popular This Week" />
                 </section>
 
-                {/* --- Section Divider (div replaced with figure) --- */}
                 <figure className="section-divider" role="presentation">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
@@ -91,13 +98,13 @@ const AppContent: React.FC = () => {
                           aboutSection.scrollIntoView({ behavior: 'smooth' });
                         }
                       };
-                      scrollToAbout();
-                      setTimeout(scrollToAbout, 60);
+                      const timer = setTimeout(scrollToAbout, 60);
+                      return () => clearTimeout(timer);
                     }
                   }, [location]);
                   return null;
                 })()}
-              </>
+              </React.Fragment>
             } />
 
             {/* Public Products Route */}
@@ -107,42 +114,52 @@ const AppContent: React.FC = () => {
               </section>
             } />
 
-            {/* --- NEW: Dedicated Recommendations Page Route --- */}
             <Route path="/recommendations" element={
               <section aria-label="Product Recommendations">
                 <RecommendationsPage />
               </section>
             } />
 
+            {/* --- Policy Pages --- */}
+            <Route path="/privacy-policy" element={
+              <article aria-label="Privacy Policy">
+                <PrivacyPolicyPage />
+              </article>
+            } />
+            <Route path="/terms-and-conditions" element={
+              <article aria-label="Terms and Conditions"> {/* Wrapped in article */}
+                <TermsAndConditionsPage /> {/* Using the imported component */}
+              </article>
+            } />
+
+
             {/* Cart Route (Protected) */}
             <Route path="/cart" element={
               <section aria-label="Shopping Cart">
-                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}>
                   <CartPage />
                 </ProtectedRoute>
               </section>
             } />
 
-            {/* Checkout Route (Protected) */}
             <Route path="/checkout" element={
               <section aria-label="Checkout">
-                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}>
                   <CheckoutPage />
                 </ProtectedRoute>
-              </section> 
+              </section>
             } />
 
-            {/* Order Confirmation Route (Protected) */}
             <Route path="/order-confirmation" element={
               <section aria-label="Order Confirmation">
-                <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+                <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}>
                   <OrderConfirmationPage />
                 </ProtectedRoute>
               </section>
             } />
 
             <Route path="/seller-agreement" element={
-              <ProtectedRoute allowedRoles={['buyer']}> {/* Assuming same protection as create-store */}
+              <ProtectedRoute allowedRoles={['buyer', 'admin']}>
                 <article aria-label="Seller Agreement">
                   <SellerAgreementPage />
                 </article>
@@ -151,7 +168,7 @@ const AppContent: React.FC = () => {
 
             {/* --- Protected Routes --- */}
             <Route path="/create-store" element={
-              <ProtectedRoute allowedRoles={['buyer']}>
+              <ProtectedRoute allowedRoles={['buyer', 'admin']}>
                 <article aria-label="Create Your Store">
                   <CreateYourStore />
                 </article>
@@ -159,7 +176,7 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/my-store" element={
-              <ProtectedRoute allowedRoles={['seller']}>
+              <ProtectedRoute allowedRoles={['seller', 'admin']}>
                 <article aria-label="My Store Management">
                   <MyStore />
                 </article>
@@ -167,23 +184,23 @@ const AppContent: React.FC = () => {
             } />
 
             <Route path="/seller-dashboard" element={
-              <ProtectedRoute allowedRoles={['seller']}>
+              <ProtectedRoute allowedRoles={['seller', 'admin']}>
                 <article aria-label="Seller Dashboard">
                   <SellerDashboardPage />
                 </article>
               </ProtectedRoute>
             } />
-            
+
             <Route
               path="/seller/analytics"
               element={
-                <ProtectedRoute allowedRoles={['seller']}>
+                <ProtectedRoute allowedRoles={['seller', 'admin']}>
                   <section aria-label="Seller Analytics">
                     <SellerAnalyticsPage />
                   </section>
                 </ProtectedRoute>
               }
-            /> 
+            />
 
             <Route path="/admin-dashboard" element={
               <ProtectedRoute allowedRoles={['admin']}>
@@ -196,24 +213,24 @@ const AppContent: React.FC = () => {
 
             <Route path="/admin/product-approval" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <article>
-                  <AdminProductApproval /> 
+                <article aria-label="Admin Product Approval">
+                  <AdminProductApproval />
                 </article>
               </ProtectedRoute>
             } />
 
             <Route path="/admin/store-approval" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <article>
-                  <AdminStoreApproval /> 
+                <article aria-label="Admin Store Approval">
+                  <AdminStoreApproval />
                 </article>
               </ProtectedRoute>
             } />
 
             <Route path="/admin/reports" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <article>
-                  <AdminStoreApproval /> 
+                <article aria-label="Admin Reports">
+                  <AdminStoreApproval /> {/* Ensure this is the correct component for reports */}
                 </article>
               </ProtectedRoute>
             } />
@@ -228,12 +245,15 @@ const AppContent: React.FC = () => {
 
 
             <Route path="/my-orders" element={
-              <ProtectedRoute allowedRoles={['buyer', 'seller']}>
+              <ProtectedRoute allowedRoles={['buyer', 'seller', 'admin']}>
                 <article aria-label="My Orders">
                   <MyOrdersPage />
                 </article>
               </ProtectedRoute>
             } />
+
+            {/* Fallback route for unmatched paths */}
+            <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>
         </main>
