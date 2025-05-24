@@ -23,19 +23,19 @@
 
 
 
-# 🧵 HoodsGoods - Handmade Marketplace
+#  HoodsGoods - Handmade Marketplace
 
 **HoodsGoods** is a vibrant online marketplace connecting talented local artisans with conscious consumers who value handcrafted quality. Our platform supports independent South African creators, providing them with a digital space to showcase their unique skills and products. HoodGoods, where art meets appreciation.
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
-Follow these steps to get the project running locally.
+Follow these steps to get the project running locally:)
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 Make sure you have the following installed:
 
@@ -45,9 +45,9 @@ Make sure you have the following installed:
 
 ---
 
-## ⚙️ Setup Instructions
+##  Setup Instructions
 
-### 1. Clone the Repository
+### Step 1: Clone the Repository
 
 You should first open a git bash terminal, then cd into where you would like the repo to live, once you found the right place for it run the following commands:
 
@@ -61,7 +61,7 @@ You should see: `backend`, `frontend`, and `brunoAPI`
 
 ---
 
-### 2. Backend Setup
+### Step 2: Backend Setup
 
 ```bash
 cd backend
@@ -83,7 +83,7 @@ cd ..
 
 ---
 
-### 3. Frontend Setup
+### Step 3: Frontend Setup
 
 ```bash
 cd frontend
@@ -104,7 +104,7 @@ cd ..
 
 ---
 
-### 🚀 Daily Development Workflow
+###  Daily Development Workflow
 
 In future sessions, just run these commands in two separate terminals:
 This allows the backend and frontend to be running at the same time so you can locally test and develop the website.
@@ -125,7 +125,7 @@ npm run dev
 
 ---
 
-### 🧪 Bruno API Testing (Optional)
+###  Bruno API Testing (Optional)
 
 1. Install Bruno: [https://www.usebruno.com/downloads](https://www.usebruno.com/downloads)
 2. Start your backend:
@@ -143,7 +143,7 @@ npm run dev
    ```
 4. Click `GET test1` in the sidebar.
 5. Ensure the top bar shows: `GET http://localhost:3000/`
-6. Click the right arrow ▶️ to send the request.
+6. Click the right arrow (>) to send the request.
 7. You should receive a `200 OK` with `Hello World!` in the response.
 
 ![image](https://github.com/user-attachments/assets/f20a6be8-c851-497e-b802-4270cbd4e5b5)
@@ -153,7 +153,7 @@ Bruno is a fast, local API testing tool, similar to Postman.
 
 ---
 
-## 📂 Project Structure
+## Project Structure once you all good to go :)
 
 ```
 HoodGoods/
@@ -178,7 +178,7 @@ HoodGoods/
 
 ---
 
-## 💠 Key Technologies Used
+## Key Technologies Used
 
 ### **Frontend:**
 
