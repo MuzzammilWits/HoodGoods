@@ -1,13 +1,8 @@
 // frontend/src/pages/CartPage.tsx
-import React from 'react';
-// --- MODIFIED: Added CartItemUI to the import ---
+import React, { useState, useEffect } from 'react';
 import { useCart, CartItemUI } from '../context/ContextCart';
-import { Link } from 'react-router-dom';
-import './CartPage.css'; // Ensure this CSS file has the skeleton styles for cart
-
-// Note: The local CartItemDisplay interface is no longer strictly needed if CartItemUI from context serves the purpose.
-// However, if CartItemDisplay is intentionally different for the view layer, it can remain.
-// For this fix, we assume cartItems from useCart() provides items conforming to CartItemUI.
+import { Link, useLocation } from 'react-router-dom';
+import './CartPage.css';
 
 const CartPage: React.FC = () => {
   const {
@@ -16,17 +11,29 @@ const CartPage: React.FC = () => {
     updateQuantity,
     totalPrice,
     clearCart,
-    isLoading, 
-    cartError 
+    isLoading,
+    cartError,
+    fetchCart,
   } = useCart();
 
-  if (isLoading) {
+  const location = useLocation();
+  const [isRefreshing, setIsRefreshing] = useState(location.state?.refresh || false);
+
+  useEffect(() => {
+    if (isRefreshing) {
+      fetchCart();
+      window.history.replaceState({}, document.title);
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, fetchCart]);
+
+  if (isLoading || isRefreshing) {
     return (
-      <main className="cart-container" aria-busy="true" aria-label="Loading your shopping cart...">
+      // Changed from <main> to <div>
+      <div className="cart-container" aria-busy="true" aria-label="Loading your shopping cart...">
         <header>
           <h1 className="skeleton-item skeleton-title" aria-hidden="true"></h1>
         </header>
-
         <section className="cart-content">
           <ul className="cart-items">
             {Array.from({ length: 2 }).map((_, index) => (
@@ -40,7 +47,6 @@ const CartPage: React.FC = () => {
               </li>
             ))}
           </ul>
-
           <footer className="cart-summary">
             <h3 className="skeleton-item skeleton-summary-title" aria-hidden="true"></h3>
             <dl className="summary-details">
@@ -54,33 +60,34 @@ const CartPage: React.FC = () => {
             </section>
           </footer>
         </section>
-      </main>
+      </div>
     );
   }
 
   if (cartError) {
     return (
-        <main className="cart-container">
-            <header>
-                <h1 className="cart-title">Your Shopping Cart</h1>
-            </header>
-            <section className="error-message" role="alert"> 
-                <h2>Could Not Load Cart</h2>
-                <p>{cartError}</p>
-                 <button onClick={() => window.location.reload()} className="retry-button">
-                    Refresh Page
-                </button>
-            </section>
-        </main>
+      // Changed from <main> to <div>
+      <div className="cart-container">
+        <header>
+            <h1 className="cart-title">Your Shopping Cart</h1>
+        </header>
+        <section className="error-message" role="alert">
+            <h2>Could Not Load Cart</h2>
+            <p>{cartError}</p>
+              <button onClick={() => window.location.reload()} className="retry-button">
+                Refresh Page
+            </button>
+        </section>
+      </div>
     );
   }
 
   return (
-    <main className="cart-container">
+    // Changed from <main> to <div>
+    <div className="cart-container">
       <header>
         <h1 className="cart-title">Your Shopping Cart</h1>
       </header>
-
       {cartItems.length === 0 ? (
         <section className="empty-cart">
           <p className="empty-text">Your cart is empty</p>
@@ -91,8 +98,7 @@ const CartPage: React.FC = () => {
       ) : (
         <section className="cart-content">
           <ul className="cart-items">
-            {/* --- MODIFIED: Explicitly using CartItemUI for item type --- */}
-            {cartItems.map((item: CartItemUI) => ( 
+            {cartItems.map((item: CartItemUI) => (
               <li key={item.productId} className="cart-item">
                 <figure className="item-image-container">
                   <img src={item.imageUrl || '/placeholder.png'} alt={item.productName} className="item-image" />
@@ -145,7 +151,6 @@ const CartPage: React.FC = () => {
               </li>
             ))}
           </ul>
-
           <footer className="cart-summary">
             <h3 className="summary-title">Order Summary</h3>
             <dl className="summary-details">
@@ -169,7 +174,7 @@ const CartPage: React.FC = () => {
           </footer>
         </section>
       )}
-    </main>
+    </div>
   );
 };
 
