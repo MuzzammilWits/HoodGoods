@@ -1,9 +1,8 @@
-// src/pages/AdminProductApproval.tsx
-import  { useState, useEffect } from 'react';
+// src/pages/AdminPages/AdminProductApproval.tsx
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
-import './AdminProductApproval.css'; 
+import './AdminProductApproval.css';
 
 interface Product {
   prodId: number;
@@ -19,30 +18,20 @@ interface Product {
   isActive: boolean;
 }
 
-
-const AdminProductApproval = () => {
+const AdminProductApproval: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  //const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
-  //const [actionError, setActionError] = useState<string | null>(null);
-  // const { getAccessTokenSilently } = useAuth0();
-
-  //const { loginWithRedirect, isAuthenticated, getAccessTokenSilently } = useAuth0();
-
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | null}>({message: '', type: null});
 
-  // Show notification and auto-hide after delay
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({message, type});
     setTimeout(() => {
       setNotification({message: '', type: null});
     }, 3000);
   };
-
 
   useEffect(() => {
     const fetchInactiveProducts = async () => {
@@ -66,11 +55,7 @@ const AdminProductApproval = () => {
     };
 
     fetchInactiveProducts();
-  }, []);
-
-  // const handleEdit = (prodId: number) => {
-  //   navigate(`/admin/products/edit/${prodId}`);
-  // };
+  }, [baseUrl]);
 
   const handleApproveProduct = async (productId: number) => {
     try {
@@ -88,7 +73,7 @@ const AdminProductApproval = () => {
     try {
       await axios.delete(`${baseUrl}/products/${productId}`);
       setProducts(products.filter(p => p.prodId !== productId));
-      showNotification('Product deleted successfully!', 'success');
+      showNotification('Product rejected and deleted successfully!', 'success');
     } catch (error) {
       console.error('Error deleting product:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to delete product';
@@ -96,35 +81,18 @@ const AdminProductApproval = () => {
     }
   };
 
-
-  //Admin Remove Product - Start
-  // const handleRemove = async (prodId: number) => {
-  //   if (!window.confirm('Are you sure you want to remove this product?')) return;
-    
-  //   try {
-  //     await axios.delete(`${baseUrl}/products/${prodId}`);
-  //     setProducts(products.filter(p => p.prodId !== prodId));
-  //   } catch (err) {
-  //     setError('Failed to remove product');
-  //     console.error(err);
-  //   }
-  // };
-
-  
-  //Admin Remove Product - End
-
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
+      <section className="loading-container" aria-label="Loading products">
+        <figure className="spinner" role="img" aria-label="Loading animation"></figure>
         <p>Loading products...</p>
-      </div>
+      </section>
     );
   }
 
   if (error && !loading) {
     return (
-      <section className="error-message" role="alert" aria-live="assertive">
+      <section className="error-message-container" role="alert" aria-live="assertive">
         <h2>Error Loading Products</h2>
         <p>{error}</p>
         <button
@@ -138,13 +106,11 @@ const AdminProductApproval = () => {
   }
 
   return (
-    <div className="admin-products-container">
-
-        {/* Notification Modal */}
+    <main className="admin-products-container">
       {notification.type && (
-        <div className={`notification-modal ${notification.type}`}>
+        <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
           {notification.message}
-        </div>
+        </aside>
       )}
 
       <header className="admin-header">
@@ -154,56 +120,62 @@ const AdminProductApproval = () => {
         </button>
       </header>
 
-      <div className="products-table-container">
-        <table className="products-table">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Store</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.prodId}>
-                <td>
-                  <img 
-                    src={product.imageUrl || '/placeholder-product.jpg'} 
-                    alt={product.name}
-                    className="product-thumbnail"
-                  />
-                </td>
-                <td>{product.name}</td>
-                <td>{product.storeName}</td>
-                <td>R{product.price.toFixed(2)}</td>
-                <td>
-                  <span className={`status-badge ${product.isActive ? 'active' : 'inactive'}`}>
-                    {product.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="actions-cell">
-                  <button 
-                    onClick={() => handleApproveProduct(product.prodId)}
-                    className="edit-button2"
-                  >
-                    Approve
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteProduct(product.prodId)}
-                    className="remove-button2"
-                  >
-                    Reject
-                  </button>
-                </td>
+      {products.length === 0 ? (
+        <p className="no-products-message">No products are currently awaiting approval.</p>
+      ) : (
+        <section className="products-table-container">
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Store</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.prodId}>
+                  <td>
+                    <img 
+                      src={product.imageUrl || '/placeholder-product.jpg'} 
+                      alt={product.name}
+                      className="product-thumbnail"
+                    />
+                  </td>
+                  <td>{product.name}</td>
+                  <td>{product.storeName}</td>
+                  <td>R{product.price.toFixed(2)}</td>
+                  <td>
+                    <p className={`status-badge ${product.isActive ? 'active' : 'inactive'}`}>
+                      {product.isActive ? 'Active' : 'Pending'}
+                    </p>
+                  </td>
+                  <td className="actions-cell">
+                    <button 
+                      onClick={() => handleApproveProduct(product.prodId)}
+                      className="edit-button2 action-button2"
+                      aria-label={`Approve product ${product.name}`}
+                    >
+                      Approve
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteProduct(product.prodId)}
+                      className="remove-button2 action-button2"
+                      aria-label={`Reject product ${product.name}`}
+                    >
+                      Reject
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+    </main>
   );
 };
 

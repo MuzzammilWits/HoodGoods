@@ -1,13 +1,13 @@
-/* Define global CSS variables */
+/* frontend/src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+
+/* ... your :root variables ... */
 :root {
-  /* Define your theme colors here */
-  --primary-color: #432C53; /* Example: Using your main purple as primary */
-  --secondary-color: #432C53; /* --- DEFINED HERE (using same purple for now) --- */
-  /* You might want a different color for secondary, e.g., #8a6a9a */
-  --light-purple: #F9F6FD; /* Defined from Hero section */
-  --text-color: #333333; /* Default text color */
-  --border-color: #e0e0e0; /* Default border color */
-  /* Add any other global variables */
+  --primary-color: #432C53;
+  --secondary-color: #432C53;
+  --light-purple: #F9F6FD;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
 }
 
 .app {
@@ -20,6 +20,17 @@ main {
   flex: 1;
 }
 
+/* --- SOLUTION: Apply minimum height to the main content area --- */
+.app-main-content {
+  /* This forces the container for all your pages to have a minimum height,
+     preventing the footer from jumping up. 70vh is a good starting point,
+     leaving space for your navbar and footer. */
+  min-height: 70vh;
+  /* We also ensure it grows if the content is larger. */
+  flex-grow: 1;
+}
+/* --- End of Solution --- */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -30,6 +41,7 @@ main {
   padding: 2rem 0;
 }
 
+/* ... rest of your App.css file ... */
 .section-title {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
@@ -44,6 +56,18 @@ main {
   color: var(--secondary-color);
   text-decoration: underline;
 }
+
+/* Optional: A class for skeleton containers if you want to apply opacity transitions */
+.skeleton-container-active {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.skeleton-container-hidden {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
 
 .btn {
   padding: 0.75rem 1.5rem;

@@ -1,24 +1,23 @@
 // frontend/src/pages/ProductsPage.tsx
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useCart } from '../context/ContextCart';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import './ProductsPage.css';
 
-// ... (interfaces, normalizeSearchTerm, backendUrl, etc. remain the same) ...
-// Search normalizer function
+// Helper function to normalize search terms for more effective searching
 const normalizeSearchTerm = (term: string) => {
   if (!term) return '';
   return term
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s]/g, '')
-    // .replace(/\b(s|es|ies|ing|ed|er)\b/g, '') // Consider if this aggressive stemming is always desired
     .replace(/\s+/g, ' ')
     .trim();
 };
 
+// Interface defining the structure of a Product object
 interface Product {
   prodId: number;
   name: string;
@@ -26,13 +25,14 @@ interface Product {
   category: string;
   price: number;
   productquantity: number;
-  userId: string;
+  userId: string; // ID of the seller
   imageUrl: string;
   storeId: string;
   storeName: string;
-  isActive: boolean;
+  isActive: boolean; // To ensure only active products are shown
 }
 
+// Interface for items being added to the cart
 interface AddToCartItem {
   productId: number;
   productName: string;
@@ -42,27 +42,28 @@ interface AddToCartItem {
   storeName: string;
 }
 
+// Backend URL, dynamically set from environment variables or defaults to localhost
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-
-const ProductsPage = () => {
-  // ... (all your existing state, useEffects, and functions remain the same) ...
+const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // For products loading
+  const [isLoading, setIsLoading] = useState<boolean>(true); // For overall page load
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
-  // Updated Auth0 destructuring
   const { user, isAuthenticated, getAccessTokenSilently, isLoading: isAuth0Loading } = useAuth0();
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | null}>({message: '', type: null});
-
-  // New state for user role
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [isRoleFetching, setIsRoleFetching] = useState(true);
+
+  // --- NEW STATE: Track which product is currently being added to cart ---
+  const [addingProductId, setAddingProductId] = useState<number | null>(null);
 
   const selectedCategory = searchParams.get('category') || '';
   const selectedStore = searchParams.get('store') || '';
   const searchQuery = searchParams.get('search') || '';
+
+  const [searchInput, setSearchInput] = useState(searchQuery);
 
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({message, type});
@@ -71,14 +72,16 @@ const ProductsPage = () => {
     }, 3000);
   };
 
-  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       setError(null);
       try {
+        await new Promise(resolve => setTimeout(resolve, 300)); 
+
         const response = await axios.get<{ products: Product[] } | Product[]>(`${backendUrl}/products`);
         let fetchedProducts: Product[] = [];
+
         if (Array.isArray(response.data)) {
             fetchedProducts = response.data;
         } else if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
@@ -87,13 +90,14 @@ const ProductsPage = () => {
             console.error("Unexpected data format for products:", response.data);
             throw new Error('Invalid data format received from server for products');
         }
+
         const validatedProducts = fetchedProducts
           .map(p => ({
               ...p,
               storeId: String(p.storeId ?? 'unknown'),
               productquantity: Number(p.productquantity) || 0
           }))
-          .filter(p => p.productquantity > 0 && p.isActive); // Ensure isActive is considered
+          .filter(p => p.productquantity > 0 && p.isActive);
         setProducts(validatedProducts);
       } catch (err) {
         const errorMessage = axios.isAxiosError(err)
@@ -111,10 +115,9 @@ const ProductsPage = () => {
     fetchProducts();
   }, []);
 
-  // Fetch user role
   useEffect(() => {
     const fetchRole = async () => {
-      if (isAuthenticated && user && !isAuth0Loading) { // Check !isAuth0Loading
+      if (isAuthenticated && user && !isAuth0Loading) {
         setIsRoleFetching(true);
         try {
           const token = await getAccessTokenSilently();
@@ -124,54 +127,54 @@ const ProductsPage = () => {
           setCurrentUserRole(response.data.role);
         } catch (e) {
           console.error("Failed to fetch user role:", e);
-          setCurrentUserRole(null); // Fallback or error state
+          setCurrentUserRole(null);
         } finally {
           setIsRoleFetching(false);
         }
-      } else if (!isAuth0Loading) { // If Auth0 is done loading and user is not authenticated
+      } else if (!isAuth0Loading) {
         setCurrentUserRole(null);
         setIsRoleFetching(false);
       }
     };
-    // Only trigger if Auth0 is not loading to prevent race conditions or premature calls
     if (!isAuth0Loading) {
         fetchRole();
     }
-  }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading]); // Added isAuth0Loading dependency
+  }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading, backendUrl]);
+
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
 
   const filteredProducts = useMemo(() => {
-      let result = [...products];
-      if (selectedCategory) {
-        result = result.filter(product => product.category === selectedCategory);
+    let result = [...products];
+    if (selectedCategory) {
+      result = result.filter(product => product.category === selectedCategory);
+    }
+    if (selectedStore) {
+      result = result.filter(product => product.storeName === selectedStore);
+    }
+    if (searchQuery) {
+      const normalizedQuery = normalizeSearchTerm(searchQuery);
+      if (normalizedQuery) {
+        result = result.filter(product => {
+          const searchFields = [
+            product.name, product.description, product.storeName, product.category
+          ].map(field => normalizeSearchTerm(field || ''));
+          return searchFields.some(field => field.includes(normalizedQuery));
+        });
       }
-      if (selectedStore) {
-        result = result.filter(product => product.storeName === selectedStore);
-      }
-      if (searchQuery) {
-        const normalizedQuery = normalizeSearchTerm(searchQuery);
-        if (normalizedQuery) {``
-          result = result.filter(product => {
-            const searchFields = [
-              product.name,
-              product.description,
-              product.storeName,
-              product.category
-            ].map(field => normalizeSearchTerm(field || ''));
-            return searchFields.some(field => field.includes(normalizedQuery));
-          });
-        }
-      }
-      return result;
+    }
+    return result;
   }, [selectedCategory, selectedStore, searchQuery, products]);
 
   const handleFilterChange = (filterType: 'category' | 'store' | 'search', value: string) => {
-      const newParams = new URLSearchParams(searchParams);
-      if (value) {
-          newParams.set(filterType, value);
-      } else {
-          newParams.delete(filterType);
-      }
-      setSearchParams(newParams, { replace: true });
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set(filterType, value);
+    } else {
+      newParams.delete(filterType);
+    }
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleCategoryChange = (category: string) => handleFilterChange('category', category);
@@ -179,22 +182,23 @@ const ProductsPage = () => {
   const handleSearchChange = (query: string) => handleFilterChange('search', query);
 
   const handleAddToCart = async (product: Product) => {
-    // Prevent action if Auth0 or role is still loading
+    if (addingProductId === product.prodId) return; // Prevent multiple clicks while already adding
+
     if (isAuth0Loading || isRoleFetching) {
       showNotification("Please wait, verifying user permissions...", "error");
       return;
     }
-
-    // Check if the user is an admin
     if (currentUserRole === 'admin') {
-      alert("An admin cannot add products to cart."); // Use alert as requested
-      return; // Prevent adding to cart for admins
+      alert("An admin cannot add products to cart.");
+      return;
     }
+    
+    setAddingProductId(product.prodId); // Set loading state for this specific product
 
-    // Original logic for non-admin users
     try {
       if (!isAuthenticated) {
         showNotification('Please sign in or create an account to add items to your cart', 'error');
+        setAddingProductId(null); // Reset loading state
         return;
       }
       if (!product || typeof product.prodId === 'undefined') {
@@ -210,10 +214,12 @@ const ProductsPage = () => {
       }
       if (product.productquantity <= 0) {
         showNotification(`${product.name} is currently out of stock.`, 'error');
+        setAddingProductId(null); // Reset loading state
         return;
       }
-      if (user?.sub === product.userId) { // No need to check isAuthenticated again here, already done
+      if (user?.sub === product.userId) {
         showNotification("You cannot add your own product to the cart.", 'error');
+        setAddingProductId(null); // Reset loading state
         return;
       }
 
@@ -225,42 +231,82 @@ const ProductsPage = () => {
         storeName: product.storeName,
         imageUrl: product.imageUrl || undefined
       };
-
-      await addToCart(itemToAdd);
-      showNotification(`${product.name} added to cart!`, 'success'); // Original success message
+      
+      // --- IMPORTANT: Wait for the addToCart operation to complete ---
+      await addToCart(itemToAdd); 
+      showNotification(`${product.name} added to cart!`, 'success');
 
     } catch (error) {
       console.error('Error adding to cart:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to add item to cart';
       showNotification(errorMsg, 'error');
+    } finally {
+      setAddingProductId(null); // Reset loading state for this product in all cases
     }
   };
 
   const categories = useMemo(() => [...new Set(products.map(product => product.category))], [products]);
-  const stores = useMemo(() => [...new Set(products.map(product => product.storeName).filter(Boolean))], [products]); // Ensure storeName is not null/undefined
+  const stores = useMemo(() => [...new Set(products.map(product => product.storeName).filter(Boolean))], [products]);
 
-  // Updated loading condition to include Auth0 and role fetching
-  if (isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching)) {
+  const isPageLoading = isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching);
+
+  if (isPageLoading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading products and user data...</p> {/* Updated message */}
-      </div>
+      <main className="products-container" aria-busy="true" aria-label="Loading products...">
+        <section className="filters-container">
+          <p className="skeleton-item skeleton-header" aria-hidden="true"></p>
+          <section className="search-bar-in-filters">
+              <form className="search-input-group" onSubmit={(e) => e.preventDefault()}>
+                  <label htmlFor="skeleton-search" className="visually-hidden">Search products placeholder</label>
+                  <input type="text" id="skeleton-search" className="skeleton-item skeleton-input" disabled aria-hidden="true" />
+                  <button type="button" className="skeleton-item skeleton-search-btn" disabled aria-hidden="true"></button>
+              </form>
+          </section>
+          <section className="filter-row-sidebyside">
+              <section className="category-filter filters">
+                <label htmlFor="skeleton-cat-filter" className="visually-hidden">Category filter placeholder</label>
+                <select id="skeleton-cat-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+              </section>
+              <section className="store-filter filters">
+                <label htmlFor="skeleton-store-filter" className="visually-hidden">Store filter placeholder</label>
+                <select id="skeleton-store-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+              </section>
+          </section>
+        </section>
+        
+        <section className="recommendations-link-below">
+            <button className="skeleton-item skeleton-cta-button" disabled aria-hidden="true"></button>
+        </section>
+
+        <ul className="products-grid">
+            {Array.from({ length: 6 }).map((_, index) => (
+                <li key={index} className="product-card skeleton-card">
+                    <article className="product-card-content">
+                        <figure className="skeleton-item skeleton-image" aria-hidden="true"></figure>
+                        <section className="skeleton-details">
+                            <p className="skeleton-item skeleton-text" aria-hidden="true"></p>
+                            <p className="skeleton-item skeleton-text short" aria-hidden="true"></p>
+                            <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+                        </section>
+                    </article>
+                </li>
+            ))}
+        </ul>
+      </main>
     );
   }
 
-  if (error && !isLoading) { // This error is for product fetching
+  if (error && !isPageLoading) {
     return (
-      <section className="error-message" role="alert" aria-live="assertive">
-        <h2>Error Loading Products</h2>
-        <p>{error}</p>
-        <button
-          onClick={() => window.location.reload()} // Consider a more targeted refetch for products
-          className="retry-button"
-        >
-          Retry
-        </button>
-      </section>
+      <main className="products-container">
+        <section className="error-message" role="alert" aria-live="assertive">
+          <h2>Error Loading Products</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </section>
+      </main>
     );
   }
 
@@ -268,62 +314,58 @@ const ProductsPage = () => {
     <>
       <main className="products-container">
         {notification.type && (
-          <div className={`notification-modal ${notification.type}`}>
+          <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
             {notification.message}
-          </div>
+          </aside>
         )}
 
         <section className="filters-container" aria-labelledby="filters-heading">
-          <div className="filter-row-search-recs">
-            <div className="search-bar filters">
-              <label htmlFor="product-search">Search Products:</label>
+          <h2 id="filters-heading" className="search-label">Search Products:</h2>
+          <section className="search-bar-in-filters">
+            <form className="search-input-group" onSubmit={(e) => { e.preventDefault(); handleSearchChange(searchInput);}}>
+              <label htmlFor="product-search" className="visually-hidden">Search by name, description, store</label>
               <input
                 id="product-search"
                 type="search"
                 placeholder="Search by name, description, store..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
                 aria-label="Search products"
               />
-            </div>
-            <div className="recommendations-link-container">
-              <Link to="/recommendations" className="products-page-cta-button">
-                Recommendations
-              </Link>
-            </div>
-          </div>
+              <button
+                className="search-products-btn"
+                type="submit"
+                aria-label="Search"
+              >
+                Search
+              </button>
+            </form>
+          </section>
 
-          <div className="category-filter filters">
-            <label htmlFor="category-select">Filter by Category:</label>
-            <select
-              id="category-select"
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="store-filter filters">
-            <label htmlFor="store-select">Filter by Store:</label>
-            <select
-              id="store-select"
-              value={selectedStore}
-              onChange={(e) => handleStoreChange(e.target.value)}
-            >
-              <option value="">All Stores</option>
-              {stores.map(store => (
-                <option key={store} value={store}>
-                  {store}
-                </option>
-              ))}
-            </select>
-          </div>
+          <section className="filter-row-sidebyside">
+            <section className="category-filter filters">
+              <h3 className="filter-label" id="category-filter-label">Filter by Category:</h3>
+              <label htmlFor="category-select" className="visually-hidden">Select Category</label>
+              <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)} aria-labelledby="category-filter-label">
+                <option value="">All Categories</option>
+                {categories.map(category => (<option key={category} value={category}>{category}</option>))}
+              </select>
+            </section>
+            <section className="store-filter filters">
+              <h3 className="filter-label" id="store-filter-label">Filter by Store:</h3>
+              <label htmlFor="store-select" className="visually-hidden">Select Store</label>
+              <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)} aria-labelledby="store-filter-label">
+                <option value="">All Stores</option>
+                {stores.map(store => (<option key={store} value={store}>{store}</option>))}
+              </select>
+            </section>
+          </section>
+        </section>
+        
+        <section className="recommendations-link-below">
+          <Link to="/recommendations" className="products-page-cta-button">
+            Recommended for you
+          </Link>
         </section>
 
         <ul className="products-grid">
@@ -331,22 +373,18 @@ const ProductsPage = () => {
             filteredProducts.map((product) => {
               const isOwner = isAuthenticated && product.userId === user?.sub;
               const isOutOfStock = product.productquantity <= 0;
+              // --- MODIFIED: Check if this specific product is being added ---
+              const isCurrentlyAdding = addingProductId === product.prodId;
               
-              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching); 
-              if (!isDisabled && currentUserRole === 'admin') { 
-                isDisabled = true;
-              }
-
+              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching) || isCurrentlyAdding; 
+              if (!isDisabled && currentUserRole === 'admin') { isDisabled = true; }
+              
               let buttonText = 'Add to Cart';
-              if (isAuth0Loading || isRoleFetching) {
-                  buttonText = 'Verifying...';
-              } else if (currentUserRole === 'admin') {
-                  buttonText = 'Admin View'; 
-              } else if (isOwner) {
-                  buttonText = 'Your Product';
-              } else if (isOutOfStock) {
-                  buttonText = 'Out of Stock';
-              }
+              if (isCurrentlyAdding) { buttonText = 'Adding...'; }
+              else if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
+              else if (currentUserRole === 'admin') { buttonText = 'Admin View'; } 
+              else if (isOwner) { buttonText = 'Your Product'; } 
+              else if (isOutOfStock) { buttonText = 'Out of Stock'; }
 
               return (
                 <li key={product.prodId} className="product-card">
@@ -379,14 +417,15 @@ const ProductsPage = () => {
                       <button
                         onClick={() => handleAddToCart(product)}
                         className="add-to-cart-btn"
-                        aria-label={
-                          currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
-                          : isOwner ? `Cannot add own product ${product.name}`
-                          : isOutOfStock ? `${product.name} is out of stock`
-                          : `Add ${product.name} to cart`
+                        aria-label={ 
+                            isCurrentlyAdding ? `Adding ${product.name} to cart`
+                            : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` 
+                            : isOwner ? `Cannot add own product ${product.name}` 
+                            : isOutOfStock ? `${product.name} is out of stock` 
+                            : `Add ${product.name} to cart`
                         }
-                        type="button"
-                        disabled={isDisabled}
+                        type="button" 
+                        disabled={isDisabled} // is disabled if any of these conditions are true
                       >
                         {buttonText}
                       </button>
@@ -406,15 +445,8 @@ const ProductsPage = () => {
           )}
         </ul>
       </main>
-
-      {/* --- Section Divider before Footer --- */}
-      <div className="section-divider">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
-        </svg>
-      </div>
     </>
   );
 };
-
+ 
 export default ProductsPage;

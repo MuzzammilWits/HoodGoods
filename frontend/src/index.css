@@ -58,3 +58,15 @@ img {
   height: auto;
   display: block; /* Add display block for consistency */
 }
+
+
+/* Optional: A class for skeleton containers if you want to apply opacity transitions */
+.skeleton-container-active {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.skeleton-container-hidden {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}

@@ -1,8 +1,6 @@
 // frontend/src/components/Hero.tsx
 import React, { useEffect, useRef } from 'react';
 import './Hero.css';
-// These image imports are no longer used if the <main> section is commented out
-// import { jewelleryImg, flowerImg, honeyImg, ceramicsImg, getImage } from './utils/ImageImports'; // Adjust path if needed
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +9,6 @@ declare global {
   interface Window {
     VANTA: {
       FOG: (options: VantaFogOptions) => VantaEffect;
-      // BIRDS?: (options: VantaBirdsOptions) => VantaEffect; // Kept if you might use it
     };
   }
 }
@@ -32,26 +29,6 @@ interface VantaFogOptions {
   speed?: number;
 }
 
-// Interface for VantaBirdsOptions if you were to use it
-// interface VantaBirdsOptions {
-//   el: HTMLElement | string;
-//   mouseControls?: boolean;
-//   touchControls?: boolean;
-//   gyroControls?: boolean;
-//   minHeight?: number;
-//   minWidth?: number;
-//   backgroundColor?: number | string;
-//   color1?: number | string;
-//   color2?: number | string;
-//   birdSize?: number;
-//   wingSpan?: number;
-//   speedLimit?: number;
-//   separation?: number;
-//   alignment?: number;
-//   cohesion?: number;
-//   quantity?: number;
-// }
-
 interface VantaEffect {
   destroy: () => void;
 }
@@ -61,8 +38,7 @@ const Hero: React.FC = () => {
   const { isAuthenticated, loginWithRedirect, isLoading } = useAuth0();
   const showPrompt = !isLoading && !isAuthenticated;
 
-  // Ref for the Vanta target element
-  const vantaRef = useRef<HTMLElement>(null); // Use HTMLElement for <section>
+  const vantaRef = useRef<HTMLElement>(null);
 
   const handleLoginPrompt = () => {
     loginWithRedirect({
@@ -75,7 +51,6 @@ const Hero: React.FC = () => {
     let effectInstance: VantaEffect | null = null;
 
     if (window.VANTA && window.VANTA.FOG && vantaRef.current) {
-      console.log("Initializing Vanta Fog effect (run once)...");
       effectInstance = window.VANTA.FOG({
         el: vantaRef.current,
         mouseControls: true,
@@ -86,35 +61,28 @@ const Hero: React.FC = () => {
         highlightColor: 0x6514a4, // Purpleish highlight
         midtoneColor: 0x090909,   // Dark midtone (almost black)
         lowlightColor: 0x4920d2,  // Deeper purple lowlight
-        baseColor: 0x000000,     // Black base for the fog
+        baseColor: 0x000000,      // Black base for the fog
         blurFactor: 0.36,
         speed: 0.60,
         zoom: 0.20
       });
-    } else {
-      console.warn("Vanta.js FOG or target element not ready for initialization.");
     }
 
     return () => {
       if (effectInstance) {
         effectInstance.destroy();
-        console.log("Vanta Fog effect destroyed.");
       }
     };
-  }, []); // Empty dependency array ensures this runs only once on mount and unmount
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
-    // Attach the ref to the main section element
     <section className="hero-section light-purple-bg" ref={vantaRef}>
-      {/* The Vanta effect is applied to this section's background */}
       <article className="hero-container">
         <header className="hero-header">
-          <div className="hero-title-container">
-            <h1 className="hero-title">
-              Find Your Kind<br />
-              Of Handmade
-            </h1>
-          </div>
+          <h1 className="hero-title">
+            Find Your Kind<br />
+            Of Handmade
+          </h1>
           <p className="hero-text">
             From bold and modern to cozy and traditional, every shop here brings something unique.
             Browse through passionate creators and find pieces that match your style, your story, and your space.
@@ -123,11 +91,9 @@ const Hero: React.FC = () => {
             <Link to="products" className="btn btn-primary">
               Shop now
             </Link>
-            {/* --- NEW LINK TO RECOMMENDATIONS PAGE --- */}
             <Link to="/recommendations" className="btn btn-secondary" style={{ marginLeft: '10px' }}>
               Discover
             </Link>
-            {/* --- END NEW LINK --- */}
           </nav>
           {showPrompt && (
             <aside className="hero-seller-prompt">
@@ -142,12 +108,16 @@ const Hero: React.FC = () => {
           )}
         </header>
 
+        {/* The logo image is positioned by the grid layout */}
+        <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" />
+
         {/* --- You have commented out this section --- */}
         {/* <main className="hero-images">
         // ... (your commented out image grid) ...
         </main> */}
         {/* Add the logo image to the right column */}
  {/* <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" /> */}
+
       </article>
     </section>
   );

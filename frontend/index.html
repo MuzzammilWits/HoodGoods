@@ -26,35 +26,38 @@
 
       /* Fallback background for body while Vanta loads or if it fails */
       body {
-          /* Example fallback - adjust as needed */
-          /* background-color: #a899b5;  */
+        /* Example fallback - adjust as needed */
+        /* background-color: #a899b5;  */
       }
 
       /* Style the Vanta background container (optional if targeting section directly in React) */
-      /* If using a dedicated div like #vanta-background: */
+      /* If using a dedicated element like #vanta-background: */
       /*
-      #vanta-background {
-        position: fixed;
+      figure#vanta-background { /* Changed div to figure if it were used */
+        /* position: fixed;
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
         z-index: -1;
-      }
+        margin: 0; /* Reset figure margin */
+      /* }
       */
 
       /* Ensure React root content is visible if using fixed/absolute background */
+      /* The #root selector will still work fine with <main id="root"> */
       #root {
         position: relative;
         z-index: 1;
+        display: block; /* Ensure <main> behaves as a block-level element as div does by default */
       }
     </style>
 
   </head>
   <body>
-    <div id="root"></div>
+    <main id="root"></main>
 
     <script type="module" src="/src/main.tsx"></script>
 
-    </body>
+  </body>
 </html>

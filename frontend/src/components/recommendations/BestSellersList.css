@@ -1,13 +1,13 @@
 /* frontend/src/components/recommendations/BestSellersList.css */
-.best-sellers-container {
+section.best-sellers-container {
   margin: 20px 0;
-  padding: 20px 15px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-.best-sellers-container h2 {
+section.best-sellers-container h2 {
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 2.5rem;
@@ -17,13 +17,17 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.best-sellers-grid {
+ol.best-sellers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
+  /* Reset default list styles */
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.best-seller-card {
+li.best-seller-card {
   background-color: #F5F2F8;
   border: 1px solid #eaeaea;
   border-radius: 8px;
@@ -36,7 +40,7 @@
   overflow: hidden;
 }
 
-.best-seller-card:hover {
+li.best-seller-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
@@ -50,7 +54,7 @@
   background-color: #f0f0f0;
 }
 
-.best-seller-info {
+article.best-seller-info {
   font-size: 0.9em;
   flex-grow: 1; /* This will push the button to the bottom */
   display: flex;
@@ -58,7 +62,7 @@
   margin-bottom: 10px; /* Add space above the button */
 }
 
-.best-seller-name {
+h3.best-seller-name {
   font-size: 1.05em;
   font-weight: 600;
   margin: 5px 0;
@@ -73,20 +77,20 @@
   /* margin-bottom: auto; REMOVED - flex-grow on parent handles space */
 }
 
-.best-seller-store {
+p.best-seller-store {
   font-size: 0.8em;
   color: var(--text-secondary, #666);
   margin: 4px 0; /* Adjusted margin */
 }
 
-.best-seller-price {
+p.best-seller-price {
   font-size: 1em;
   font-weight: bold;
   color: #1e7e34; /* Changed to match the green price color */
   margin: 8px 0;
 }
 
-.best-seller-sales { /* If you re-add this */
+p.best-seller-sales { /* If you re-add this */
   font-size: 0.85em;
   color: var(--text-secondary, #555);
   font-weight: 500;
@@ -94,7 +98,7 @@
 }
 
 /* --- NOTIFICATION STYLES (simple version) --- */
-.recommendation-notification {
+aside.recommendation-notification {
   padding: 10px 15px;
   margin: 0 0 15px 0; /* Display above the grid */
   border-radius: 5px;
@@ -102,22 +106,22 @@
   font-weight: 500;
 }
 
-.recommendation-notification.success {
+aside.recommendation-notification.success {
   background-color: #d4edda; /* Greenish for success */
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
-.recommendation-notification.error {
+aside.recommendation-notification.error {
   background-color: #f8d7da; /* Reddish for error */
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
 /* --- END NOTIFICATION STYLES --- */
 
-.best-sellers-loading,
-.best-sellers-error,
-.best-sellers-empty {
+p.best-sellers-loading,
+p.best-sellers-error,
+p.best-sellers-empty {
   padding: 30px 20px;
   text-align: center;
   font-size: 1.1em;

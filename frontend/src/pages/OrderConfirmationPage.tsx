@@ -1,3 +1,4 @@
+// src/pages/OrderConfirmationPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 // Optional: Import a specific CSS file for this page if needed
@@ -10,7 +11,8 @@ const OrderConfirmationPage: React.FC = () => {
 
   return (
     <main className="order-confirmation-container" style={styles.container}>
-      <div style={styles.card}>
+      {/* Changed div to article for better semantics */}
+      <article style={styles.card} className="order-confirmation-card">
         <h1 style={styles.title}>Order Confirmed!</h1>
         <p style={styles.message}>
           Thank you for your purchase. Your order is being processed.
@@ -20,7 +22,7 @@ const OrderConfirmationPage: React.FC = () => {
         <Link to="/products" style={styles.button}>
           Continue Shopping
         </Link>
-      </div>
+      </article>
     </main>
   );
 };
@@ -34,6 +36,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: 'calc(100vh - 200px)', // Adjust based on header/footer height
     padding: '2rem',
     textAlign: 'center',
+    fontFamily: "'Hind', sans-serif", // Example: Consistent font
   },
   card: {
     backgroundColor: '#fff',
@@ -45,28 +48,32 @@ const styles: { [key: string]: React.CSSProperties } = {
   title: {
     color: '#2ecc71', // Green color for success
     marginBottom: '1rem',
-    fontSize: '2em',
+    fontSize: '2.2em', // Slightly larger
+    fontFamily: "'Poppins', sans-serif", // Example: Heading font
   },
   message: {
     fontSize: '1.1em',
     color: '#555',
-    marginBottom: '1.5rem',
+    marginBottom: '2rem', // More space before button
+    lineHeight: '1.6',
   },
   button: {
     display: 'inline-block',
-    backgroundColor: '#007bff', // Example button color
+    backgroundColor: '#007bff', // Example button color (consider using your primary color variable)
     color: '#fff',
-    padding: '0.8rem 1.5rem',
+    padding: '0.9rem 1.8rem', // Slightly larger padding
     borderRadius: '5px',
     textDecoration: 'none',
     fontWeight: 'bold',
-    transition: 'background-color 0.2s ease',
+    transition: 'background-color 0.2s ease, transform 0.1s ease',
+    fontFamily: "'Poppins', sans-serif", // Consistent button font
   },
-  // Add hover style if needed via CSS or more complex inline style logic
-  // buttonHover: {
-  //   backgroundColor: '#0056b3',
+  // To add hover styles, it's best to use a CSS file.
+  // For example, in OrderConfirmationPage.css:
+  // .order-confirmation-card .button:hover {
+  //   background-color: '#0056b3';
+  //   transform: translateY(-1px);
   // }
 };
-
 
 export default OrderConfirmationPage;

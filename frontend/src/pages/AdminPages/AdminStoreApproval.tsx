@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+// src/pages/AdminPages/AdminStoreApproval.tsx
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './AdminStoreApproval.css';
 import { useNavigate } from 'react-router-dom';
@@ -26,13 +27,12 @@ interface Store {
     expressPrice: number | null;
     expressTime: string | null;
     isActiveStore: boolean;
-    products?: Product[];
+    products?: Product[]; // Assuming products might be loaded later
 }
 
-const AdminStoreApproval = () => {
+const AdminStoreApproval: React.FC = () => {
     const [stores, setStores] = useState<Store[]>([]);
     const [loading, setLoading] = useState(true);
-   // const [products, setProducts] = useState<Product[]>([]);
     const [notification, setNotification] = useState<{ 
         message: string; 
         type: 'success' | 'error' | null 
@@ -71,7 +71,18 @@ const AdminStoreApproval = () => {
 
     const toggleStoreExpand = (storeId: string) => {
         setExpandedStoreId(expandedStoreId === storeId ? null : storeId);
+        // In a full implementation, you might fetch store.products here if not already loaded
     };
+    
+    const handleKeyDownOnStoreHeader = (
+        event: React.KeyboardEvent<HTMLElement>,
+        storeId: string
+      ) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleStoreExpand(storeId);
+        }
+      };
 
     const handleApproveStore = async (storeId: string) => {
         try {
@@ -87,7 +98,7 @@ const AdminStoreApproval = () => {
         try {
             await axios.delete(`${baseUrl}/stores/${storeId}`);
             setStores(stores.filter(s => s.storeId !== storeId));
-            showNotification('Store rejected successfully!', 'success');
+            showNotification('Store rejected and deleted successfully!', 'success');
         } catch (error) {
             showNotification('Failed to reject store', 'error');
         }
@@ -95,75 +106,112 @@ const AdminStoreApproval = () => {
 
     if (loading) {
         return (
-            <div className="loading-container">
-                <div className="spinner"></div>
+            <section className="loading-container" aria-label="Loading stores for approval">
+                <figure className="spinner" role="img" aria-label="Loading animation"></figure>
                 <p>Loading stores...</p>
-            </div>
+            </section>
         );
     }
 
-   return (
-    <div className="admin-stores-container">
+    return (
+        <main className="admin-stores-container">
+            {notification.type && (
+                <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
+                    {notification.message}
+                </aside>
+            )}
 
-        {/* Notification Modal */}
-        {notification.type && (
-        <div className={`notification-modal ${notification.type}`}>
-          {notification.message}
-        </div>
-        )}
+            <header className="admin-header">
+                <h1>Store Management</h1>
+                <button onClick={() => navigate('/admin-dashboard')} className="back-button">
+                    Back to Dashboard
+                </button>
+            </header>
 
-      <header className="admin-header">
-        <h1>Store Management</h1>
-        <button onClick={() => navigate('/admin-dashboard')} className="back-button">
-          Back to Dashboard
-        </button>
-      </header>
-
-      <div className="stores-list">
-        {stores.map(store => (
-          <div className="store-card" key={store.storeId}>
-            <div className="store-header" onClick={() => toggleStoreExpand(store.storeId)}>
-              <div className="store-info">
-                <h2>{store.storeName}</h2>
-                <div className="pricing-info">
-                  <div>
-                    <h4>Standard Service</h4>
-                    <p>Price: {store.standardPrice}</p>
-                    <p>Time: {store.standardTime || 'Not specified'}</p>
-                  </div>
-                  <div>
-                    <h4>Express Service</h4>
-                    <p>Price: {store.expressPrice}</p>
-                    <p>Time: {store.expressTime || 'Not specified'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                className="approve-button"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleApproveStore(store.storeId);
-                 
-                }}
-              >
-                Approve Store
-              </button>
-              <button
-                className="reject-button"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleRejectStore(store.storeId);
-                }}
-              >
-                Reject Store
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+            {stores.length === 0 ? (
+                 <p className="no-stores-message">No stores are currently awaiting approval.</p>
+            ) : (
+                <ul className="stores-list">
+                    {stores.map(store => (
+                        <li className="store-card" key={store.storeId}>
+                            <section 
+                                className="store-header" 
+                                onClick={() => toggleStoreExpand(store.storeId)}
+                                onKeyDown={(e) => handleKeyDownOnStoreHeader(e, store.storeId)}
+                                tabIndex={0}
+                                role="button"
+                                aria-expanded={expandedStoreId === store.storeId}
+                                aria-controls={`products-${store.storeId}`}
+                            >
+                                <article className="store-info">
+                                    <h2>{store.storeName}</h2>
+                                    <section className="pricing-info">
+                                        <section>
+                                            <h4>Standard Service</h4>
+                                            <p>Price: R {store.standardPrice !== null ? store.standardPrice.toFixed(2) : 'N/A'}</p>
+                                            <p>Time: {store.standardTime || 'Not specified'}</p>
+                                        </section>
+                                        <section>
+                                            <h4>Express Service</h4>
+                                            <p>Price: R {store.expressPrice !== null ? store.expressPrice.toFixed(2) : 'N/A'}</p>
+                                            <p>Time: {store.expressTime || 'Not specified'}</p>
+                                        </section>
+                                    </section>
+                                </article>
+                                <section className="store-actions">
+                                    <button
+                                        className="approve-button"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            handleApproveStore(store.storeId);
+                                        }}
+                                        aria-label={`Approve store ${store.storeName}`}
+                                    >
+                                        Approve Store
+                                    </button>
+                                    <button
+                                        className="reject-button"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            handleRejectStore(store.storeId);
+                                        }}
+                                        aria-label={`Reject store ${store.storeName}`}
+                                    >
+                                        Reject Store
+                                    </button>
+                                </section>
+                            </section>
+                            {expandedStoreId === store.storeId && store.products && store.products.length > 0 && (
+                                <section className="store-products" id={`products-${store.storeId}`}>
+                                    <h3>Products in this Store</h3>
+                                    <ul className="products-grid">
+                                        {store.products.map(product => (
+                                            <li key={product.prodId} className="product-card-item">
+                                                <figure className="product-image">
+                                                    <img src={product.imageUrl || '/placeholder-product.jpg'} alt={product.name} />
+                                                </figure>
+                                                <article className="product-details-item">
+                                                    <h4>{product.name}</h4>
+                                                    <p>Price: R {product.price.toFixed(2)}</p>
+                                                    <p>Quantity: {product.productquantity}</p>
+                                                    <p>Category: {product.category}</p>
+                                                </article>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                            )}
+                             {expandedStoreId === store.storeId && (!store.products || store.products.length === 0) && (
+                                <section className="store-products" id={`products-${store.storeId}`}>
+                                    <p className="no-products">No products found for this store or products are active.</p>
+                                </section>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </main>
+    );
 };
 
 export default AdminStoreApproval;

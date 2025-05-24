@@ -1,12 +1,11 @@
 /* frontend/src/components/reporting/SalesTrendReport.css */
 
 /* Styles for the main container of the sales trend report */
-.sales-trend-report {
+article.sales-trend-report {
   padding: 20px;
-  background-color: #fff; /* Changed from #f9f9f9 in PlatformMetrics to #fff here as per original */
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  /* Add any other base styles for the sales-trend-report container itself */
 }
 
 /* Styles for the main heading within the sales trend report */
@@ -16,14 +15,14 @@
   margin-bottom: 20px;
 }
 
-/* Styles for the controls section specifically within the sales trend report */
-.sales-trend-report .report-controls {
+/* Styles for the controls form specifically within the sales trend report */
+.sales-trend-report form.report-controls {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
   gap: 10px;
-  flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+  flex-wrap: wrap;
 }
 
 /* Styles for labels within the sales trend report's controls */
@@ -41,83 +40,71 @@
   font-size: 0.95em;
 }
 
-/* Styles for the CSV button specifically within the sales trend report */
-/* This assumes the CSV button might be directly within .sales-trend-report or its specific sections */
-.sales-trend-report .csv-button {
-  padding: 11px 15px;
-  border: none;
-  border-radius: 5px;
-  background-color: #97C9BA; /* Logo green */
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-.sales-trend-report .csv-button:hover {
-  background-color: #7ab8a5; /* Darker green on hover */
-}
-
-/* Styles for the PDF button specifically within the sales trend report */
+/* Styles for the CSV and PDF buttons */
+.sales-trend-report .csv-button,
 .sales-trend-report .pdf-button {
   padding: 11px 15px;
   border: none;
   border-radius: 5px;
-  background-color: #97C9BA; /* Logo green */
+  background-color: #97C9BA;
   color: white;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
+
+.sales-trend-report .csv-button:hover,
 .sales-trend-report .pdf-button:hover {
-    background-color: #7ab8a5; /* Darker green on hover */
+  background-color: #7ab8a5;
 }
 
+.sales-trend-report .pdf-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
 
-/* Styles for loading, error, and info messages specifically within the sales trend report */
-.sales-trend-report .loading-message,
-.sales-trend-report .error-message,
-.sales-trend-report .info-message {
+/* Styles for loading, error, and info messages */
+.sales-trend-report p.loading-message,
+.sales-trend-report p.error-message,
+.sales-trend-report p.info-message {
   text-align: center;
   padding: 15px;
   margin-top: 10px;
   border-radius: 4px;
 }
 
-.sales-trend-report .error-message {
-  color: #D8000C; /* Error red */
-  background-color: #FFD2D2; /* Light red background */
+.sales-trend-report p.error-message {
+  color: #D8000C;
+  background-color: #FFD2D2;
   border: 1px solid #D8000C;
 }
 
-.sales-trend-report .info-message {
-  color: #00529B; /* Info blue */
-  background-color: #BDE5F8; /* Light blue background */
+.sales-trend-report p.info-message {
+  color: #00529B;
+  background-color: #BDE5F8;
   border: 1px solid #00529B;
 }
 
-/* Styles for the chart container specifically within the sales trend report */
-/* The class .chart-container-st is already quite specific, so prefixing might be optional
-   but good for consistency if there's any doubt. */
-.sales-trend-report .chart-container-st {
+/* Styles for the chart container (figure) */
+.sales-trend-report figure.chart-container-st {
   position: relative;
-  height: 40vh; /* Or a fixed height like 300px, 400px */
-  width: 100%; /* Takes full width of its parent */
-  margin-top: 20px;
+  height: 40vh;
+  width: 100%;
+  margin: 20px 0; /* Adjusted margin for figure element */
   padding: 10px;
   border: 1px solid #eee;
   border-radius: 4px;
-  background-color: #fff; /* Ensuring chart containers have a background */
+  background-color: #fff;
 }
 
-/* Ensure the canvas itself fills the specific sales trend chart container */
+/* Ensure the canvas itself fills the chart container */
 .sales-trend-report .chart-container-st canvas {
   width: 100% !important;
   height: 100% !important;
 }
 
-
-/* Styles for the report summary section specifically within the sales trend report */
-.sales-trend-report .report-summary {
+/* Styles for the report summary section */
+.sales-trend-report section.report-summary {
   margin-top: 20px;
   padding: 15px;
   background-color: #f9f9f9;
