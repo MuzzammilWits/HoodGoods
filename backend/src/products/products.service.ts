@@ -31,11 +31,10 @@ export class ProductsService {
  async findAllInactive(): Promise<Product[]> {
     return this.productRepository.find({ 
       where: { 
-        isActive: false,
-        store: {isActive: true,
-        },
+        isActive: false, // Product's own isActive status
+        store: { isActive: true }, // Ensure the parent Store's 'isActive' property is true
        },
-       relations: ['store'],
+       relations: ['store'], 
       order: { prodId: 'ASC' }
     });
   }
