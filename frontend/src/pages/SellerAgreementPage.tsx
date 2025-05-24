@@ -54,9 +54,9 @@ function SellerAgreementPage() {
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 antialiased font-sans">
       <article className="bg-white shadow-lg rounded-lg agreement-page-article">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
-          Become a Seller: Important Information & Agreement
-        </h1>
+        <section className="main-titles">
+          <h1>Become a Seller: Important Information & Agreement</h1>
+        </section>
 
         <section
           ref={scrollableContentRef}

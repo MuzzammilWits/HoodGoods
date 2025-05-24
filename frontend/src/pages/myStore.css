@@ -9,15 +9,13 @@ main.my-store-container { /* Targeting main element */
   color: #333;
 }
 
-header.store-header { /* Targets main page header */
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+header.store-header {
+  background-color: #ECE4F1;
   padding: 2rem;
-  background: #ECE4F1; /* Light lavender background */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  position: relative;
 }
 
 header.store-header h1 {
@@ -92,12 +90,13 @@ article.product-card.active { /* Styling for active product cards */
 /* === Delivery Info Section Styles === */
 section.delivery-info-display {
   background-color: #f8f9fa;
-  border: 1px solid #dee2e6; /* Subtler border */
-  border-radius: 6px;
-  padding: 20px 25px; /* Increased padding */
-  margin-top: 1.5rem; /* Space from store title */
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 20px 25px;
+  margin-top: 1.5rem;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
 }
 
 section.delivery-header { /* Changed div.delivery-header */
@@ -111,14 +110,27 @@ section.delivery-header { /* Changed div.delivery-header */
 
 section.delivery-info-display h2 {
   margin: 0;
-  font-size: 1.3rem; /* Increased size */
-  color: #495057; /* Darker grey */
+  font-size: 1.3rem;
+  color: #495057;
   font-family: 'Poppins', sans-serif;
+  padding-bottom: 1rem;
 }
 
-section.delivery-header .button-edit.button-small { /* More specific selector for small edit button */
-  padding: 6px 14px; /* Adjusted padding */
-  font-size: 0.9em;
+.button-edit.button-small {
+  background-color: #97C9BA;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.button-edit.button-small:hover {
+  background-color: #6ea893;
 }
 
 section.delivery-info-display dl {
@@ -178,17 +190,27 @@ footer.delivery-edit-actions { /* Changed div.delivery-edit-actions */
 }
 
 /* === Store Actions Container (Add Product / View Orders buttons) === */
-nav.store-actions-container { /* Changed div.store-actions-container */
+nav.store-actions-container {
   width: 100%;
   display: flex;
-  justify-content: space-around; /* Space out buttons more evenly */
+  justify-content: center;
   align-items: center;
-  margin: 25px 0; /* Increased vertical margin */
-  padding: 15px 0; /* Add some padding */
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  margin: 25px 0 0 0;
+  padding: 15px 0 0 0;
   flex-wrap: wrap;
-  gap: 15px; /* Increased gap */
+  gap: 40px;
+}
+
+nav.store-actions-container button,
+nav.store-actions-container a.button-secondary {
+  min-width: 220px;
+  max-width: 240px;
+  width: 100%;
+  text-align: center;
+  background-color: #362245;
+  color: white;
+  border-radius: 10px;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 /* === General Button Styles === */
@@ -225,26 +247,38 @@ button.add-product-toggle-btn {
   border-color: var(--primary-color, #432C53);
 }
 button.add-product-toggle-btn:hover:not(:disabled) {
-  background-color: #362245; /* Darker primary */
+  background-color: #97C9BA; /* Darker primary */
+  border-color: #97C9BA;
+}
+
+a.button-secondary.view-orders-btn, a.button-secondary.view-analytics-btn {
+  background-color: var(--primary-color, #432C53);
+  color: white;
+  border-color: var(--primary-color, #432C53);
+}
+a.button-secondary.view-orders-btn:hover:not(:disabled), a.button-secondary.view-analytics-btn:hover:not(:disabled) {
+  background-color: #97C9BA;
+  border-color: #97C9BA;
+}
+
+.button-confirm {
+  background-color: var(--primary-color, #432C53);
+  color: white;
+  border-color: var(--primary-color, #432C53);
+}
+.button-confirm:hover:not(:disabled) {
+  background-color: #362245;
   border-color: #362245;
 }
-
-a.button-secondary.view-orders-btn { /* Specific to view orders link button */
-  background-color: #6c757d; /* Bootstrap secondary grey */
+.button-cancel {
+  background-color: #97C9BA;
   color: white;
-  border-color: #6c757d;
+  border-color: #97C9BA;
 }
-a.button-secondary.view-orders-btn:hover:not(:disabled) {
-  background-color: #5a6268;
-  border-color: #545b62;
+.button-cancel:hover:not(:disabled) {
+  background-color: #6ea893;
+  border-color: #6ea893;
 }
-
-.button-confirm { background-color: #28a745; color: white; border-color: #28a745; } /* Green */
-.button-confirm:hover:not(:disabled) { background-color: #218838; border-color: #1e7e34; }
-.button-cancel { background-color: #6c757d; color: white; border-color: #6c757d; } /* Grey */
-.button-cancel:hover:not(:disabled) { background-color: #5a6268; border-color: #545b62; }
-.button-edit { background-color: #007bff; color: white; border-color: #007bff; padding: 5px 10px; font-size: 0.85rem;} /* Blue */
-.button-edit:hover:not(:disabled) { background-color: #0069d9; border-color: #0062cc; }
 .button-delete { background-color: #dc3545; color: white; border-color: #dc3545; padding: 5px 10px; font-size: 0.85rem;} /* Red */
 .button-delete:hover:not(:disabled) { background-color: #c82333; border-color: #bd2130; }
 
@@ -400,9 +434,12 @@ dialog.edit-product-modal, dialog.delete-confirm-modal {
   width: 90%; border: none; max-height: 90vh; overflow-y: auto; box-sizing: border-box;
 }
 dialog footer.modal-actions { /* Targets footers in dialogs */
-  display: flex; gap: 15px; /* Increased gap */
-  margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;
-  justify-content: flex-end; /* Align buttons to right by default */
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 dialog p.error-message { margin-top: 0; margin-bottom: 20px; text-align: center; }
 dialog.edit-product-modal { max-width: 550px; }
@@ -412,6 +449,35 @@ dialog.delete-confirm-modal h2 { margin-top: 0; margin-bottom: 15px; color: #e74
 dialog.delete-confirm-modal p { margin-bottom: 10px; line-height: 1.6; color: #444; }
 dialog.delete-confirm-modal p strong { color: #333; font-weight: 600; }
 dialog.delete-confirm-modal footer.modal-actions { justify-content: center; gap: 15px; }
+
+footer.modal-actions .button-confirm {
+  background-color: #97C9BA;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+footer.modal-actions .button-confirm:hover:not(:disabled) {
+  background-color: #7ab8a5;
+}
+
+footer.modal-actions .button-cancel {
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+footer.modal-actions .button-cancel:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+}
 
 /* === Loading Spinner Styles === */
 section.loading-container { /* Changed div.loading-container to section */
