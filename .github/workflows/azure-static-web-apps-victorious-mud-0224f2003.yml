@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      # Add a develop branch if you have one for a staging environment
-      # - develop 
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -16,48 +14,52 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
-    
-    # This section selects the correct set of secrets based on the branch
-    environment:
-      name: ${{ (github.ref == 'refs/heads/main' && 'Production') || 'Development' }}
-      url: ${{ steps.builddeploy.outputs.static_web_app_url }}
-
     permissions:
       id-token: write
       contents: read
-
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
 
-      # The build steps can be removed from here, as the Azure SWA action handles it.
-      # - name: Set up Node.js
-      # - name: Install dependencies
-      # - name: Build Vite app
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Build Vite app
+        run: npm run build
+        working-directory: ./frontend
+
+      - name: Install OIDC Client from Core Package
+        run: npm install @actions/core@1.6.0 @actions/http-client
+
+      - name: Get Id Token
+        uses: actions/github-script@v6
+        id: idtoken
+        with:
+          script: |
+              const coredemo = require('@actions/core')
+              return await coredemo.getIDToken()
+          result-encoding: string
 
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_MUD_0224F2003 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### App Details ######
-          app_location: "/frontend"
-          api_location: "" # Not using an Azure Functions API
+          app_location: "./frontend"
+          api_location: ""
           output_location: "dist"
-        
-        # This section provides the secrets to the build process
-        env:
-          VITE_AUTH0_DOMAIN: ${{ secrets.VITE_AUTH0_DOMAIN }}
-          VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}
-          VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
-          VITE_AUTH0_CALLBACK_URL: ${{ secrets.VITE_AUTH0_CALLBACK_URL }}
-          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
-          VITE_YOCO_PUBLIC_KEY: ${{ secrets.VITE_YOCO_PUBLIC_KEY }}
-          VITE_API_BASE_URLs: ${{ secrets.VITE_API_BASE_URLS }}
+          github_id_token: ${{ steps.idtoken.outputs.result }}
+          skip_deploy_on_missing_secrets: false
+
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
