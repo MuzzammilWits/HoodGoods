@@ -148,9 +148,6 @@ export default function MyOrdersPage() {
         }
     }, [isAuthenticated, isAuthLoading, fetchMyOrders, isPageRefreshing, isLoading]);
 
-    // Style for the main container to ensure minimum height
-    // This helps keep the footer lower on the page during initial load.
-    // Adjust '70vh' as needed based on your app's header/footer height.
     const containerStyle: React.CSSProperties = {
         minHeight: '70vh', 
         display: 'flex',
@@ -181,8 +178,8 @@ export default function MyOrdersPage() {
         return (
             <main className="my-orders-container" style={containerStyle} aria-busy="true" aria-label="Loading your orders...">
                 <header className="page-top-header">
-                    {/* Skeleton for the main title - matches h1 style from CSS */}
-                    <div className="skeleton-item" style={{ width: '250px', height: '2.2rem', margin: '0 auto 2rem auto', borderRadius: '4px' }}></div>
+                    {/* Skeleton for the main title - H1 equivalent */}
+                    <h1 className="skeleton-item" style={{ width: '250px', height: '2.2rem', margin: '0 auto 2rem auto', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</h1>
                 </header>
                 
                 <ul className="order-list"> {/* Matches your ul.order-list */}
@@ -190,39 +187,50 @@ export default function MyOrdersPage() {
                         <li key={`skeleton-order-${orderIndex}`} className="order-card-item"> {/* Matches li.order-card-item */}
                            <article className="order-card skeleton-item"> {/* Matches article.order-card and adds shimmer */}
                                 <header className="order-header"> {/* Matches header.order-header */}
-                                    {/* Skeleton for Order # */}
-                                    <div className="skeleton-item" style={{ width: '150px', height: '1.4em', borderRadius: '4px' }}></div>
-                                    {/* Skeleton for Placed on Date */}
-                                    <div className="skeleton-item" style={{ width: '120px', height: '0.9em', borderRadius: '4px' }}></div>
+                                    {/* Skeleton for Order # - H2 equivalent */}
+                                    <h2 className="skeleton-item" style={{ width: '150px', height: '1.4em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</h2>
+                                    {/* Skeleton for Placed on Date - P equivalent */}
+                                    <p className="skeleton-item" style={{ width: '120px', height: '0.9em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
                                 </header>
                                 <section className="order-details-overall"> {/* Matches section.order-details-overall */}
-                                   <div className="skeleton-item" style={{ width: '200px', height: '1em', marginBottom: '0.5rem', borderRadius: '4px' }}></div>
-                                   <div className="skeleton-item" style={{ width: '250px', height: '1em', borderRadius: '4px' }}></div>
+                                   {/* P equivalent */}
+                                   <p className="skeleton-item" style={{ width: '200px', height: '1em', marginBottom: '0.5rem', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
+                                   {/* P equivalent */}
+                                   <p className="skeleton-item" style={{ width: '250px', height: '1em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
                                 </section>
 
                                 <section className="shipments-section"> {/* Matches section.shipments-section */}
-                                   {/* Skeleton for "Shipments in this Order:" h3 */}
-                                   <div className="skeleton-item" style={{ width: '220px', height: '1.2em', marginBottom: '1rem', borderRadius: '4px' }}></div>
+                                   {/* Skeleton for "Shipments in this Order:" - H3 equivalent */}
+                                   <h3 className="skeleton-item" style={{ width: '220px', height: '1.2em', marginBottom: '1rem', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</h3>
                                    
                                    {/* Skeleton for one shipment card */}
                                    <section className="shipment-card skeleton-item" style={{padding: '1.25rem'}}> {/* Matches section.shipment-card */}
                                         <header className="shipment-header"> {/* Matches header.shipment-header */}
-                                            <div className="skeleton-item" style={{ width: '180px', height: '1.1em', borderRadius: '4px' }}></div>
-                                            <div className="skeleton-item" style={{ width: '100px', height: '1em', borderRadius: '4px' }}></div> {/* For status line */}
+                                            {/* H4 equivalent */}
+                                            <h4 className="skeleton-item" style={{ width: '180px', height: '1.1em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</h4>
+                                            {/* P equivalent for status line */}
+                                            <p className="skeleton-item" style={{ width: '100px', height: '1em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
                                         </header>
                                         <section className="shipment-details"> {/* Matches section.shipment-details */}
-                                            <div className="skeleton-item" style={{ width: '220px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px' }}></div>
-                                            <div className="skeleton-item" style={{ width: '180px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px' }}></div>
-                                            <div className="skeleton-item" style={{ width: '200px', height: '0.9em', borderRadius: '4px' }}></div>
+                                            {/* P equivalent */}
+                                            <p className="skeleton-item" style={{ width: '220px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
+                                            {/* P equivalent */}
+                                            <p className="skeleton-item" style={{ width: '180px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
+                                            {/* P equivalent */}
+                                            <p className="skeleton-item" style={{ width: '200px', height: '0.9em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
                                         </section>
                                         <ul className="item-list" style={{marginTop: '1rem'}}> {/* Matches ul.item-list */}
                                             {/* Skeleton for one item in shipment */}
                                             <li className="item" style={{display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '0.75rem'}}>
+                                                {/* Figure equivalent for image */}
                                                 <figure className="item-image-figure skeleton-item" style={{width: '50px', height: '50px', borderRadius: '4px', flexShrink: 0}}></figure>
-                                                <div style={{flexGrow: 1}}>
-                                                    <div className="skeleton-item" style={{ width: '80%', height: '0.9em', marginBottom: '0.2rem', borderRadius: '4px' }}></div>
-                                                    <div className="skeleton-item" style={{ width: '60%', height: '0.85em', borderRadius: '4px' }}></div>
-                                                </div>
+                                                {/* Article equivalent for item details info */}
+                                                <article style={{flexGrow: 1}}>
+                                                    {/* P equivalent */}
+                                                    <p className="skeleton-item" style={{ width: '80%', height: '0.9em', marginBottom: '0.2rem', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
+                                                    {/* P equivalent */}
+                                                    <p className="skeleton-item" style={{ width: '60%', height: '0.85em', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</p>
+                                                </article>
                                             </li>
                                         </ul>
                                    </section>
