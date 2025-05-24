@@ -1,7 +1,7 @@
 /* CartPage.css */
 
 /* Main cart container styles merged and corrected */
-.cart-container {
+main.cart-container {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
@@ -9,14 +9,9 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   font-family: 'Hind', sans-serif;
-
-  /* --- Fixes for Layout Shift --- */
-  /* Make the container expand to fill all available vertical space */
   flex-grow: 1;
-  /* Ensure the container itself uses flexbox */
   display: flex;
   flex-direction: column;
-  /* The final guarantee against the footer jumping up. */
   min-height: 65vh;
 }
 
@@ -32,7 +27,6 @@
 .empty-cart {
   text-align: center;
   padding: 3rem 1rem;
-  /* This will center the "Your cart is empty" message vertically */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -190,7 +184,7 @@
 }
 
 /* Cart Summary */
-.cart-summary {
+aside.cart-summary {
   background-color: #f9f6fd;
   padding: 1.5rem;
   border-radius: 8px;
@@ -236,7 +230,7 @@
 }
 
 /* Cart Action Buttons */
-.cart-actions {
+nav.cart-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -284,7 +278,7 @@
   .cart-content {
     grid-template-columns: 1fr;
   }
-  .cart-summary {
+  aside.cart-summary {
     margin-top: 2rem;
   }
 }
