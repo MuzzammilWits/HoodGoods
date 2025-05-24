@@ -174,7 +174,7 @@ figure.product-image-container {
   object-fit: cover;
   border-radius: 8px 8px 0 0;
   margin-bottom: 12px;
-  background-color: #f0f0f0;
+  background-color: white;
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
   display: block;
 }
