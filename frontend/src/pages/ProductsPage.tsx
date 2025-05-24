@@ -280,7 +280,7 @@ const ProductsPage: React.FC = () => {
           </section>
 
           <ul className="products-grid">
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 8 }).map((_, index) => (
                   <li key={index} className="product-card skeleton-card">
                       <article className="product-card-content">
                           <figure className="skeleton-item skeleton-image" aria-hidden="true"></figure>
