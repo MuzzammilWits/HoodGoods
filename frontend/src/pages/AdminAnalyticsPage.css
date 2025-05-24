@@ -13,7 +13,7 @@ main.admin-analytics-page {
 /* --- End header content styles --- */
 
 main.admin-analytics-page header.page-header {
-  border-bottom: 2px solid #007bff; /* Example accent border from your original file */
+  border-bottom: 2px solid #432C53; /* Example accent border from your original file */
   padding-bottom: 0.75rem;
   display: flex; /* Needed for admin-header-content to work as expected */
   align-items: center; /* Align items vertically */
@@ -46,7 +46,7 @@ main.admin-analytics-page header.page-header h1 {
 }
 
 .back-button:hover {
-  background-color: #5a3a6f; /* Darker shade for hover */
+  background-color: #97C9BA; /* Darker shade for hover */
 }
 /* --- End button styles --- */
 
