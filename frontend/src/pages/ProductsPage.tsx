@@ -250,201 +250,191 @@ const ProductsPage: React.FC = () => {
 
   const isPageLoading = isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching);
 
-  if (isPageLoading) {
-    return (
-      <main className="products-container" aria-busy="true" aria-label="Loading products...">
-        <section className="filters-container">
-          <p className="skeleton-item skeleton-header" aria-hidden="true"></p>
-          <section className="search-bar-in-filters">
-              <form className="search-input-group" onSubmit={(e) => e.preventDefault()}>
-                  <label htmlFor="skeleton-search" className="visually-hidden">Search products placeholder</label>
-                  <input type="text" id="skeleton-search" className="skeleton-item skeleton-input" disabled aria-hidden="true" />
-                  <button type="button" className="skeleton-item skeleton-search-btn" disabled aria-hidden="true"></button>
-              </form>
-          </section>
-          <section className="filter-row-sidebyside">
-              <section className="category-filter filters">
-                <label htmlFor="skeleton-cat-filter" className="visually-hidden">Category filter placeholder</label>
-                <select id="skeleton-cat-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
-              </section>
-              <section className="store-filter filters">
-                <label htmlFor="skeleton-store-filter" className="visually-hidden">Store filter placeholder</label>
-                <select id="skeleton-store-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
-              </section>
-          </section>
-        </section>
-        
-        <section className="recommendations-link-below">
-            <button className="skeleton-item skeleton-cta-button" disabled aria-hidden="true"></button>
-        </section>
-
-        <ul className="products-grid">
-            {Array.from({ length: 6 }).map((_, index) => (
-                <li key={index} className="product-card skeleton-card">
-                    <article className="product-card-content">
-                        <figure className="skeleton-item skeleton-image" aria-hidden="true"></figure>
-                        <section className="skeleton-details">
-                            <p className="skeleton-item skeleton-text" aria-hidden="true"></p>
-                            <p className="skeleton-item skeleton-text short" aria-hidden="true"></p>
-                            <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
-                        </section>
-                    </article>
-                </li>
-            ))}
-        </ul>
-      </main>
-    );
-  }
-
-  if (error && !isPageLoading) {
-    return (
-      <main className="products-container">
-        <section className="error-message" role="alert" aria-live="assertive">
-          <h2>Error Loading Products</h2>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="retry-button">
-            Retry
-          </button>
-        </section>
-      </main>
-    );
-  }
-
   return (
     <>
-      <main className="products-container">
-        {notification.type && (
-          <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
-            {notification.message}
-          </aside>
-        )}
-
-        <section className="filters-container" aria-labelledby="filters-heading">
-          <h2 id="filters-heading" className="search-label">Search Products:</h2>
-          <section className="search-bar-in-filters">
-            <form className="search-input-group" onSubmit={(e) => { e.preventDefault(); handleSearchChange(searchInput);}}>
-              <label htmlFor="product-search" className="visually-hidden">Search by name, description, store</label>
-              <input
-                id="product-search"
-                type="search"
-                placeholder="Search by name, description, store..."
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                aria-label="Search products"
-              />
-              <button
-                className="search-products-btn"
-                type="submit"
-                aria-label="Search"
-              >
-                Search
-              </button>
-            </form>
-          </section>
-
-          <section className="filter-row-sidebyside">
-            <section className="category-filter filters">
-              <h3 className="filter-label" id="category-filter-label">Filter by Category:</h3>
-              <label htmlFor="category-select" className="visually-hidden">Select Category</label>
-              <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)} aria-labelledby="category-filter-label">
-                <option value="">All Categories</option>
-                {categories.map(category => (<option key={category} value={category}>{category}</option>))}
-              </select>
+      {isPageLoading ? (
+        <main className="products-container" aria-busy="true" aria-label="Loading products...">
+          <section className="filters-container">
+            <p className="skeleton-item skeleton-header" aria-hidden="true"></p>
+            <section className="search-bar-in-filters">
+                <form className="search-input-group" onSubmit={(e) => e.preventDefault()}>
+                    <label htmlFor="skeleton-search" className="visually-hidden">Search products placeholder</label>
+                    <input type="text" id="skeleton-search" className="skeleton-item skeleton-input" disabled aria-hidden="true" />
+                    <button type="button" className="skeleton-item skeleton-search-btn" disabled aria-hidden="true"></button>
+                </form>
             </section>
-            <section className="store-filter filters">
-              <h3 className="filter-label" id="store-filter-label">Filter by Store:</h3>
-              <label htmlFor="store-select" className="visually-hidden">Select Store</label>
-              <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)} aria-labelledby="store-filter-label">
-                <option value="">All Stores</option>
-                {stores.map(store => (<option key={store} value={store}>{store}</option>))}
-              </select>
+            <section className="filter-row-sidebyside">
+                <section className="category-filter filters">
+                  <label htmlFor="skeleton-cat-filter" className="visually-hidden">Category filter placeholder</label>
+                  <select id="skeleton-cat-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+                </section>
+                <section className="store-filter filters">
+                  <label htmlFor="skeleton-store-filter" className="visually-hidden">Store filter placeholder</label>
+                  <select id="skeleton-store-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+                </section>
             </section>
           </section>
-        </section>
-        
-        <section className="recommendations-link-below">
-          <Link to="/recommendations" className="products-page-cta-button">
-            Recommended for you
-          </Link>
-        </section>
+          
+          <section className="recommendations-link-below">
+              <button className="skeleton-item skeleton-cta-button" disabled aria-hidden="true"></button>
+          </section>
 
-        <ul className="products-grid">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => {
-              const isOwner = isAuthenticated && product.userId === user?.sub;
-              const isOutOfStock = product.productquantity <= 0;
-              // --- MODIFIED: Check if this specific product is being added ---
-              const isCurrentlyAdding = addingProductId === product.prodId;
-              
-              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching) || isCurrentlyAdding; 
-              if (!isDisabled && currentUserRole === 'admin') { isDisabled = true; }
-              
-              let buttonText = 'Add to Cart';
-              if (isCurrentlyAdding) { buttonText = 'Adding...'; }
-              else if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
-              else if (currentUserRole === 'admin') { buttonText = 'Admin View'; } 
-              else if (isOwner) { buttonText = 'Your Product'; } 
-              else if (isOutOfStock) { buttonText = 'Out of Stock'; }
-
-              return (
-                <li key={product.prodId} className="product-card">
-                  <article className="product-card-content">
-                    <figure className="product-image-container">
-                      <img
-                        src={product.imageUrl || '/placeholder-product.jpg'}
-                        alt={product.name || 'Product image'}
-                        className="product-image"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          if (target.src !== '/placeholder-product.jpg') {
-                            target.src = '/placeholder-product.jpg';
-                            target.alt = 'Placeholder image';
-                            target.classList.add('placeholder');
-                          }
-                        }}
-                        loading="lazy"
-                      />
-                    </figure>
-                    <section className="product-details">
-                      <h2 className="product-name">{product.name}</h2>
-                      <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
-                      <p className="product-description">{product.description}</p>
-                      <p className="product-category">Category: {product.category}</p>
-                      <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
-                      <p className="product-quantity">
-                        {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
-                      </p>
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        className="add-to-cart-btn"
-                        aria-label={ 
-                            isCurrentlyAdding ? `Adding ${product.name} to cart`
-                            : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` 
-                            : isOwner ? `Cannot add own product ${product.name}` 
-                            : isOutOfStock ? `${product.name} is out of stock` 
-                            : `Add ${product.name} to cart`
-                        }
-                        type="button" 
-                        disabled={isDisabled} // is disabled if any of these conditions are true
-                      >
-                        {buttonText}
-                      </button>
-                    </section>
-                  </article>
-                </li>
-              );
-            })
-          ) : (
-            <li className="no-products">
-              <p>
-                {selectedCategory || selectedStore || searchQuery
-                  ? 'No products found matching your criteria.'
-                  : 'No products available at the moment.'}
-              </p>
-            </li>
+          <ul className="products-grid">
+              {Array.from({ length: 6 }).map((_, index) => (
+                  <li key={index} className="product-card skeleton-card">
+                      <article className="product-card-content">
+                          <figure className="skeleton-item skeleton-image" aria-hidden="true"></figure>
+                          <section className="skeleton-details">
+                              <p className="skeleton-item skeleton-text" aria-hidden="true"></p>
+                              <p className="skeleton-item skeleton-text short" aria-hidden="true"></p>
+                              <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+                          </section>
+                      </article>
+                  </li>
+              ))}
+          </ul>
+        </main>
+      ) : error ? (
+        <main className="products-container">
+          <section className="error-message" role="alert" aria-live="assertive">
+            <h2>Error Loading Products</h2>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="retry-button">
+              Retry
+            </button>
+          </section>
+        </main>
+      ) : (
+        <main className="products-container">
+          {notification.type && (
+            <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
+              {notification.message}
+            </aside>
           )}
-        </ul>
-      </main>
+
+          <section className="filters-container" aria-labelledby="filters-heading">
+            <h2 id="filters-heading" className="search-label">Search Products:</h2>
+            <section className="search-bar-in-filters">
+              <form className="search-input-group" onSubmit={(e) => e.preventDefault()}>
+                <label htmlFor="product-search" className="visually-hidden">Search by name, description, store</label>
+                <input
+                  id="product-search"
+                  type="search"
+                  placeholder="Search by name, description, store..."
+                  value={searchInput}
+                  onChange={e => {
+                    setSearchInput(e.target.value);
+                    handleSearchChange(e.target.value);
+                  }}
+                  aria-label="Search products"
+                />
+              </form>
+            </section>
+
+            <section className="filter-row-sidebyside">
+              <section className="category-filter filters">
+                <h3 className="filter-label" id="category-filter-label">Filter by Category:</h3>
+                <label htmlFor="category-select" className="visually-hidden">Select Category</label>
+                <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)} aria-labelledby="category-filter-label">
+                  <option value="">All Categories</option>
+                  {categories.map(category => (<option key={category} value={category}>{category}</option>))}
+                </select>
+              </section>
+              <section className="store-filter filters">
+                <h3 className="filter-label" id="store-filter-label">Filter by Store:</h3>
+                <label htmlFor="store-select" className="visually-hidden">Select Store</label>
+                <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)} aria-labelledby="store-filter-label">
+                  <option value="">All Stores</option>
+                  {stores.map(store => (<option key={store} value={store}>{store}</option>))}
+                </select>
+              </section>
+            </section>
+          </section>
+          
+          <section className="recommendations-link-below">
+            <Link to="/recommendations" className="products-page-cta-button">
+              Recommended for you
+            </Link>
+          </section>
+
+          <ul className="products-grid">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => {
+                const isOwner = isAuthenticated && product.userId === user?.sub;
+                const isOutOfStock = product.productquantity <= 0;
+                // --- MODIFIED: Check if this specific product is being added ---
+                const isCurrentlyAdding = addingProductId === product.prodId;
+                
+                let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching) || isCurrentlyAdding; 
+                if (!isDisabled && currentUserRole === 'admin') { isDisabled = true; }
+                
+                let buttonText = 'Add to Cart';
+                if (isCurrentlyAdding) { buttonText = 'Adding...'; }
+                else if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
+                else if (currentUserRole === 'admin') { buttonText = 'Admin View'; } 
+                else if (isOwner) { buttonText = 'Your Product'; } 
+                else if (isOutOfStock) { buttonText = 'Out of Stock'; }
+
+                return (
+                  <li key={product.prodId} className="product-card">
+                    <article className="product-card-content">
+                      <figure className="product-image-container">
+                        <img
+                          src={product.imageUrl || '/placeholder-product.jpg'}
+                          alt={product.name || 'Product image'}
+                          className="product-image"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src !== '/placeholder-product.jpg') {
+                              target.src = '/placeholder-product.jpg';
+                              target.alt = 'Placeholder image';
+                              target.classList.add('placeholder');
+                            }
+                          }}
+                          loading="lazy"
+                        />
+                      </figure>
+                      <section className="product-details">
+                        <h2 className="product-name">{product.name}</h2>
+                        <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                        <p className="product-description">{product.description}</p>
+                        <p className="product-category">Category: {product.category}</p>
+                        <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
+                        <p className="product-quantity">
+                          {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                        </p>
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="add-to-cart-btn"
+                          aria-label={ 
+                              isCurrentlyAdding ? `Adding ${product.name} to cart`
+                              : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` 
+                              : isOwner ? `Cannot add own product ${product.name}` 
+                              : isOutOfStock ? `${product.name} is out of stock` 
+                              : `Add ${product.name} to cart`
+                          }
+                          type="button" 
+                          disabled={isDisabled} // is disabled if any of these conditions are true
+                        >
+                          {buttonText}
+                        </button>
+                      </section>
+                    </article>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="no-products">
+                <p>
+                  {selectedCategory || selectedStore || searchQuery
+                    ? 'No products found matching your criteria.'
+                    : 'No products available at the moment.'}
+                </p>
+              </li>
+            )}
+          </ul>
+        </main>
+      )}
     </>
   );
 };

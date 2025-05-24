@@ -86,6 +86,9 @@ export default function SellerDashboardPage() {
     if (isAuthLoading) {
         return (
             <main className="seller-dashboard-container">
+                <section className="main-titles">
+                    <h1>Seller Dashboard</h1>
+                </section>
                 <p className="auth-loading-message">Loading authentication...</p>
             </main>
         );
@@ -93,6 +96,9 @@ export default function SellerDashboardPage() {
     if (!isAuthenticated) {
         return (
             <main className="seller-dashboard-container">
+                <section className="main-titles">
+                    <h1>Seller Dashboard</h1>
+                </section>
                 <header className="page-main-header"><h1>Seller Dashboard</h1></header>
                 <p className="login-prompt-message">Please log in to view your dashboard.</p>
             </main>
@@ -101,6 +107,9 @@ export default function SellerDashboardPage() {
 
     return (
         <main className="seller-dashboard-container">
+            <section className="main-titles">
+                <h1>Seller Dashboard</h1>
+            </section>
             <header className="page-main-header">
                 <h1>Seller Dashboard</h1>
                 <p className="welcome-message">Welcome, {user?.name ?? 'Seller'}!</p>

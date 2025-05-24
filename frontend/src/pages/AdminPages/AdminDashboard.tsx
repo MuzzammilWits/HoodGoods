@@ -21,9 +21,9 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <main className="admin-dashboard-container">
-      <header className="admin-header">
+      <section className="main-titles">
         <h1>Admin Dashboard</h1>
-      </header>
+      </section>
 
       <ul className="management-cards2">
         {/* Store Management Card */}

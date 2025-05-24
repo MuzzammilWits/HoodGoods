@@ -80,7 +80,7 @@ const Hero: React.FC = () => {
       <article className="hero-container">
         <header className="hero-header">
           <h1 className="hero-title">
-            Find Your Kind<br />
+            Find Your Kind<br/>
             Of Handmade
           </h1>
           <p className="hero-text">
