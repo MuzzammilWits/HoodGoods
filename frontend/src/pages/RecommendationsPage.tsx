@@ -5,11 +5,11 @@ import './RecommendationsPage.css'; // Create this CSS file
 
 const RecommendationsPage: React.FC = () => {
   return (
-    <div className="recommendations-page-container" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
-      <header className="recommendations-page-header">
-        <h1>Discover Products You Might Like</h1>
-        <p>Based on current trends and popular items.</p>
-      </header>
+    // Changed div to main for the primary content container of the page
+    <main className="recommendations-page-container" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+        <h1 className="main-titles">Discover Products You Might Like</h1>
+        <p className="main-titles-sub">Based on current trends and popular items.</p>
+
 
       <section className="recommendation-section">
         <BestSellersList limit={12} timeWindowDays={30} title="Top Selling Products This Month" />
@@ -18,7 +18,7 @@ const RecommendationsPage: React.FC = () => {
       <section className="recommendation-section" style={{ marginTop: '40px' }}>
         <BestSellersList limit={8} timeWindowDays={7} title="Trending This Week" />
       </section>
-    </div>
+    </main>
   );
 };
 

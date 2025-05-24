@@ -1,134 +1,188 @@
 /* src/pages/CheckoutPage.css */
 
 /* Overall container */
-.checkout-container {
-  max-width: 900px; /* Your original width */
-  margin: 40px auto; /* Your original margin */
-  padding: 30px; /* Your original padding */
+main.checkout-container { /* Changed from .checkout-container */
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Hind', sans-serif; /* Ensure consistent font */
 }
 
-.checkout-container > header {
+main.checkout-container > header {
   margin-bottom: 30px;
-  text-align: center; /* Center header text */
+  text-align: center;
   border-bottom: 1px solid #eee;
   padding-bottom: 15px;
 }
 
-.checkout-container > header h1 {
+main.checkout-container > header h1 {
   margin-bottom: 10px;
+  font-family: 'Poppins', sans-serif; /* Consistent heading font */
+  color: var(--primary-color, #432C53); /* Consistent heading color */
 }
 
-.checkout-container > header .instructions {
+main.checkout-container > header .instructions {
   color: #555;
 }
 
+/* Error messages */
+.error-message {
+    color: #d9534f; /* Bootstrap's danger color */
+    background-color: #f2dede;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ebccd1;
+    border-radius: 0.25rem;
+}
+.cart-error { /* Specific cart errors */ }
+.delivery-error { /* Specific delivery errors */ }
+.payment-error { /* Specific payment errors */ }
 
-/* Form styling */
-.checkout-form {
-  display: flex;
-  flex-direction: column;
-  gap: 30px; /* Space between form sections */
+
+/* Layout wrapper */
+section.checkout-layout { /* Changed from .checkout-layout */
+  display: grid;
+  grid-template-columns: 1fr; /* Default to single column */
+  gap: 30px; /* Space between sections */
 }
 
-/* Sections within the form (Delivery Address, Order Summary) */
+@media (min-width: 768px) {
+  section.checkout-layout { /* Two columns on wider screens */
+    grid-template-columns: 1fr 1fr; /* Example: Two equal columns */
+    /* Or use specific fractions e.g., 2fr 1fr for a wider first column */
+  }
+  /* Adjust which sections go into which column using grid-column if needed */
+  .pickup-location-section { grid-column: 1 / 2; }
+  .order-summary-section { grid-column: 1 / 2; } /* Stack summary below pickup on small */
+  .payment-section { grid-column: 1 / -1; } /* Full width for payment below two cols */
+  .actions { grid-column: 1 / -1; } /* Full width for actions */
+
+  @media (min-width: 992px) { /* Example: Side-by-side for larger screens */
+    .pickup-location-section { grid-column: 1 / 2; }
+    .order-summary-section { grid-column: 2 / 3; grid-row: 1 / span 2; } /* Span summary across rows if pickup/payment are stacked */
+    .payment-section { grid-column: 1 / 2; grid-row: 2 / 3; }
+    .actions { grid-column: 1 / 2; grid-row: 3 / 4; }
+  }
+}
+
+
+/* Sections within the form (Pickup Location, Order Summary, Payment) */
 .form-section {
-  background-color: #f9f9f9; /* Light grey background for sections */
-  padding: 25px; /* Slightly more padding */
+  background-color: #f9f9f9;
+  padding: 25px;
   border-radius: 8px;
   border: 1px solid #eaeaea;
+  display: flex; /* Added for better internal alignment */
+  flex-direction: column; /* Stack children vertically */
+  gap: 15px; /* Space between elements within a form-section */
 }
 
 .form-section h2 {
   margin-top: 0;
-  margin-bottom: 20px; /* Space below heading */
+  margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 1px solid #ddd;
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color-darker, #362245); /* Darker for section titles */
 }
 
-/* Form field structure (using <p> now) */
+/* Form field structure (using <p> for grouping label and input) */
 .form-field {
-  margin-bottom: 20px; /* Space below each field group */
-}
-.form-field:last-child {
-  margin-bottom: 0;
+  margin: 0; /* Reset default p margin, rely on gap from parent .form-section */
+  display: flex;
+  flex-direction: column; /* Stack label and input */
+  gap: 8px; /* Space between label and input */
 }
 
 .form-field label {
-  display: block;
-  margin-bottom: 8px; /* Space between label and input */
+  display: block; /* Ensures it takes full width if needed */
   font-weight: 600;
+  color: #495057; /* Subtler label color */
 }
 
 .form-input { /* Style for both input and select */
   width: 100%;
   padding: 12px;
-  /* margin-top: 8px; Removed as label has margin-bottom */
-  border: 1px solid #ccc;
+  border: 1px solid #ced4da; /* Standard border color */
   border-radius: 4px;
-  box-sizing: border-box; /* Important */
+  box-sizing: border-box;
   font-size: 1rem;
+  background-color: #fff; /* Ensure white background */
+  color: #495057;
+}
+.form-input:disabled {
+    background-color: #e9ecef; /* Style for disabled inputs */
+    cursor: not-allowed;
 }
 
-/* Address specific (if needed, but not used in semantic version) */
-/* .address-row { ... } */
+.field-hint {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
 
 /* --- Order Summary Section --- */
 .order-summary-section {
-   /* Keep light grey or make white if preferred */
-   background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
-/* Styling for each store's <article> */
-article.store-group {
-  background-color: #ffffff; /* White background to contrast with section */
-  border: 1px solid #dcdcdc; /* Clearer border */
+article.store-group { /* Targeting article */
+  background-color: #ffffff;
+  border: 1px solid #dcdcdc;
   padding: 20px;
-  margin-bottom: 25px; /* Increased space between store groups */
+  margin-bottom: 25px;
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 article.store-group:last-child {
-  margin-bottom: 0; /* No margin below the last store group */
+  margin-bottom: 0;
 }
 
 .store-name { /* Targeting <h3> */
-  font-size: 1.3rem; /* Slightly larger store name */
+  font-size: 1.3rem;
   font-weight: 600;
   margin-top: 0;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--primary-color, #432C53);
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Delivery option <p> */
-.delivery-option {
+section.delivery-option { /* Changed div to section */
   margin-bottom: 15px;
 }
+p.loading-options-text { /* Style for the loading text if needed */
+    margin:0; color: #555; font-style: italic;
+}
+p.delivery-unavailable-text { /* Style for delivery unavailable text */
+    margin:0; font-weight: bold;
+}
 
-/* Items list <ul> */
-.order-items {
+
+ul.order-items { /* Targeting ul */
   list-style: none;
   padding: 0;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin: 15px 0;
   border-top: 1px dashed #eee;
   padding-top: 15px;
 }
 
-.order-item { /* Targeting <li> */
+li.order-item { /* Targeting li */
   padding: 8px 0;
-  display: flex; /* Helps if you want to align text later */
-  justify-content: space-between; /* Pushes price/qty to the right */
-  flex-wrap: wrap; /* Allow wrapping on small screens */
-  gap: 10px; /* Space between name and price/qty */
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.95rem; /* Slightly smaller item text */
+  color: #333;
 }
-.order-item:not(:last-child) {
+li.order-item:not(:last-child) {
    border-bottom: 1px solid #f5f5f5;
 }
 
-/* Store summary <footer> */
 footer.store-summary {
   margin-top: 15px;
   padding-top: 10px;
@@ -141,81 +195,127 @@ footer.store-summary p {
   margin: 5px 0;
 }
 
-/* Grand total <footer> */
 footer.order-totals {
   width: 100%;
-  margin-top: 25px; /* Space above totals */
-  border-top: 2px solid #333; /* Stronger border */
+  margin-top: 25px;
+  border-top: 2px solid #333;
   padding-top: 20px;
   text-align: right;
 }
 
 p.grand-total {
   font-weight: bold;
-  font-size: 1.2rem; /* Larger total */
+  font-size: 1.3rem; /* Increased size */
   margin: 0;
-  color: #2c3e50;
+  color: var(--primary-color, #432C53); /* Use primary color */
 }
+
+/* Payment Section */
+.payment-section {
+    /* Inherits .form-section styles if class is kept, or define separately */
+}
+.payment-section h2 { /* Targeting h2 directly if it's always "3. Payment" */
+    font-size: 1.5rem; /* Consistent with other section titles */
+    color: var(--primary-color-darker, #362245);
+    margin-top: 0;
+    margin-bottom: 15px; /* Space below "3. Payment" */
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+
+.yoco-pay-button {
+  background-color: #007bff; /* Yoco-like blue or your primary action color */
+  color: white;
+  border: none;
+  padding: 15px;
+  width: 100%;
+  font-size: 1.1rem; /* Prominent button text */
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif; /* Consistent button font */
+}
+.yoco-pay-button:hover:not(:disabled) {
+  background-color: #0069d9; /* Darker blue */
+  transform: translateY(-1px);
+}
+.yoco-pay-button:disabled {
+    background-color: #6c757d; /* Grey when disabled */
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.payment-hint { /* Style for the hint below payment button */
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 10px;
+    text-align: center;
+}
+
 
 /* Actions <menu> */
 menu.actions {
   list-style: none;
   padding: 0;
-  display: flex;
-  flex-direction: column; /* Stack buttons */
-  gap: 15px;
-  margin-top: 30px;
+  margin: 30px 0 0 0; /* Adjusted margin */
+  text-align: center; /* Center link within its grid area if full width */
+}
+menu.actions li { /* If you wrap Link in li */
+    /* No specific li styles needed if Link is styled directly */
 }
 
-/* Buttons and Links */
-.confirm-btn {
-  background-color: #4caf50; /* Green */
-  color: white;
-  border: none;
-  padding: 15px;
-  width: 100%;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-weight: bold;
-}
-.confirm-btn:hover {
-  background-color: #45a049; /* Darker green */
-}
 
 .back-link {
-  display: block;
-  text-align: center;
-  color: #6c757d; /* Grey */
-  padding: 10px; /* Slightly less padding than button */
+  display: inline-block; /* To allow padding and centering if text-align on parent */
+  color: #007bff;
+  padding: 10px 15px;
   text-decoration: none;
-  border: 1px solid #ced4da;
+  border: 1px solid transparent; /* No border by default */
   border-radius: 5px;
-  background-color: #f8f9fa;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 .back-link:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-  color: #495057;
+  color: #0056b3;
+  background-color: #f0f0f0; /* Subtle background on hover */
+  text-decoration: underline;
 }
 
+/* Ensure Yoco popup is on top - if it still has issues */
 .yc-auto-shown-popup {
-  z-index: 2147483647 !important; /* Use a very high z-index */
-  position: fixed !important;     /* ADDED: Ensure it's positioned relative to viewport */
-  top: 0;                         /* ADDED: Ensure it covers screen */
-  left: 0;                        /* ADDED: Ensure it covers screen */
-  width: 100%;                    /* ADDED: Ensure it covers screen */
-  height: 100%;                   /* ADDED: Ensure it covers screen */
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: 0 !important; /* Ensure it starts at the top */
+  left: 0 !important; /* Ensure it starts at the left */
+  width: 100vw !important; /* Full viewport width */
+  height: 100vh !important; /* Full viewport height */
 }
+
+/* Loading states specifically for checkout page if needed */
+.loading-auth-message, .loading-cart-message, .loading-delivery-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: #555;
+    font-family: 'Hind', sans-serif;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
-  /* .address-row { ... } */ /* Your existing responsive rule */
   .checkout-container {
     margin: 20px;
     padding: 20px;
   }
+  .checkout-layout { /* Revert to single column for main layout on small screens */
+    grid-template-columns: 1fr;
+  }
+  .pickup-location-section,
+  .order-summary-section,
+  .payment-section,
+  .actions {
+    grid-column: 1 / -1 !important; /* Ensure they take full width */
+    grid-row: auto !important; /* Reset row positioning */
+  }
 }
-

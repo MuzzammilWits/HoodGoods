@@ -1,155 +1,321 @@
 /* CartPage.css */
 
-/* --- START: Grid rules for Summary Details --- */
+/* Main cart container styles merged and corrected */
+.cart-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: 'Hind', sans-serif;
+
+  /* --- Fixes for Layout Shift --- */
+  /* Make the container expand to fill all available vertical space */
+  flex-grow: 1;
+  /* Ensure the container itself uses flexbox */
+  display: flex;
+  flex-direction: column;
+  /* The final guarantee against the footer jumping up. */
+  min-height: 65vh;
+}
+
+.cart-title {
+  text-align: center;
+  font-size: 2.2rem;
+  color: var(--primary-color, #432C53);
+  margin-bottom: 2rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Empty Cart Styles */
+.empty-cart {
+  text-align: center;
+  padding: 3rem 1rem;
+  /* This will center the "Your cart is empty" message vertically */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-text {
+  font-size: 1.3rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.continue-shopping-btn {
+  display: inline-block;
+  padding: 0.8rem 1.8rem;
+  background-color: var(--primary-color, #432C53);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.continue-shopping-btn:hover {
+  background-color: #5a3a6f;
+}
+
+/* Cart Content Layout */
+.cart-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+/* Cart Items List */
+.cart-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cart-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  position: relative;
+}
+
+.item-image-container {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.item-details p, .item-details h3 {
+    margin: 0;
+}
+
+.item-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.item-price {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-btn {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-btn:hover:not(:disabled) {
+  background-color: #c7c7c7;
+}
+.quantity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity {
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0 0.5rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.item-subtotal {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: auto;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.remove-btn:hover {
+  color: #f44336;
+}
+
+/* Cart Summary */
+.cart-summary {
+  background-color: #f9f6fd;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.summary-title {
+  font-size: 1.5rem;
+  color: var(--primary-color, #432C53);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
 
 .summary-details {
-  display: grid;              /* USE GRID */
-  grid-template-columns: auto 1fr; /* Column 1 (label) sized by content, Column 2 (value) takes remaining space */
-  gap: 0.5rem 1rem;           /* 0.5rem space BETWEEN rows, 1rem space BETWEEN columns */
-  align-items: baseline;      /* Align text baselines vertically within each row */
-  margin: 0;                  /* Reset default dl margin */
-  padding: 0;                 /* Reset default dl padding */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+  font-size: 1.1rem;
+  color: #444;
 }
 
 .summary-details dt {
-  grid-column: 1 / 2;         /* Explicitly place <dt> in the first column */
-  text-align: left;           /* Align label text left */
-  margin: 0;                  /* Reset any default margins */
-  padding: 0;                 /* Reset any default padding */
-  font-weight: normal;
-  /* No width or basis needed - grid handles sizing */
+  grid-column: 1 / 2;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  font-weight: 500;
 }
 
 .summary-details dd {
-  grid-column: 2 / 3;         /* Explicitly place <dd> in the second column */
-  text-align: right;          /* Align value text right */
-  margin: 0;                  /* IMPORTANT: Override default dd indentation (margin-left) */
-  padding: 0;                 /* Reset any default padding */
-  font-weight: normal;
-  /* No width or basis needed */
+  grid-column: 2 / 3;
+  text-align: right;
+  margin: 0;
+  padding: 0;
+  font-weight: 600;
 }
 
-/* Style the total row specifically (inherits grid placement) */
-.summary-details .total-label,
-.summary-details .total-value {
-  font-weight: bold;
-}
-
-/* --- END: Grid rules --- */
-
-
-/* --- START: Loading Indicator Styles --- */
-
-/* Container to center the loading indicator */
-.loading-container {
-  display: flex;
-  flex-direction: column; /* Stack spinner and text vertically */
-  justify-content: center;
-  align-items: center;
-  min-height: 300px; /* Ensure it takes up some space (Adjusted to keep the latter value) */
-  padding: 2rem;
-  text-align: center;
-  color: #555; /* Adjust color as needed */
-}
-
-/* The Spinner itself */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #ccc; /* Light grey border (Adjusted from rgba) */
-  border-top-color: #97c9ba; /* Your desired green instead of blue */
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite; /* faster spin */
-  margin-bottom: 16px; /* Space below spinner */
-}
-
-/* The spin animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading text */
-.loading-container p {
-  font-size: 1.2rem; /* Keeping the latter definition */
-  color: #555;
-  /* Add other styles like font-weight if desired */
-}
-
-/* --- END: Loading Indicator Styles --- */
-
-
-/* --- START: Cart Summary Layout --- */
-
-/* General layout for the summary section */
-.cart-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* --- END: Cart Summary Layout --- */
-
-
-/* --- START: Cart Action Button Styles --- */
-/* Styles for the buttons in the cart summary (Checkout, Clear Cart, Continue Shopping) */
-
+/* Cart Action Buttons */
 .cart-actions {
-display: flex;
-flex-direction: column; /* Stack buttons vertically */
-gap: 0.75rem;          /* Adjust space between buttons as needed */
-margin-top: 1rem;       /* Add space above the buttons */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-/* Common styles for ALL buttons in cart actions */
 .cart-actions .checkout-btn,
 .cart-actions .clear-cart-btn {
-display: block;          /* Ensure Link elements behave like block buttons */
-padding: 0.8rem 1.5rem;  /* ** Adjust padding to match your desired size ** */
-border-radius: 6px;      /* ** Adjust for desired corner rounding ** */
-font-size: 1rem;         /* ** Adjust font size ** */
-font-weight: 600;        /* ** Adjust font weight ** */
-text-align: center;
-text-decoration: none;   /* Removes underline from Link elements */
-border: none;            /* Removes default border */
-cursor: pointer;
-transition: background-color 0.2s ease, color 0.2s ease; /* Smooth hover effect */
-width: 100%;             /* Make buttons fill container width */
-box-sizing: border-box;  /* Ensures padding doesn't add to width */
-}
-
-/* Specific styles for Primary Buttons (Checkout, Continue Shopping) */
-.cart-actions .checkout-btn {
-background-color: #4a2a66; /* ** Dark Purple - VERIFY this hex code matches your design ** */
-color: white;
-}
-
-/* Specific styles for Clear Cart Button */
-.cart-actions .clear-cart-btn {
-background-color: #97c9ba; /* Your desired teal background */
-color: #1f1f1f;          /* Dark text - or use 'white' if you prefer */
-}
-
-/* Optional: Hover Styles */
-.cart-actions .checkout-btn:hover {
-background-color: #3b1a54; /* Slightly darker purple */
-}
-
-.cart-actions .clear-cart-btn:hover {
-background-color: #7fbbaa; /* Slightly darker teal */
-}
-
-/* --- END: Cart Action Button Styles --- */
-
-
-/* --- START: Global Settings (Keep at end or move to global stylesheet) --- */
-
-/* Optional: Ensure global box-sizing */
-*, *::before, *::after {
+  display: block;
+  padding: 0.9rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  width: 100%;
   box-sizing: border-box;
 }
 
-/* --- END: Global Settings --- */
+.cart-actions .checkout-btn {
+  background-color: var(--primary-color, #432C53);
+  color: white;
+}
+.cart-actions .checkout-btn:hover {
+  background-color: #5a3a6f;
+  transform: translateY(-1px);
+}
 
-/* ... Add any other specific CartPage styles below if needed ... */
+.cart-actions .clear-cart-btn {
+  background-color: #e0e0e0;
+  color: #432C53;
+  border: 1px solid #c7c7c7;
+}
+.cart-actions .clear-cart-btn:hover {
+  background-color: #d1d1d1;
+  border-color: #b8b8b8;
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .cart-content {
+    grid-template-columns: 1fr;
+  }
+  .cart-summary {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .cart-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .item-details {
+    align-items: center;
+  }
+  .item-subtotal {
+    margin-top: 0.5rem;
+  }
+  .remove-btn {
+    position: static;
+    margin-top: 1rem;
+    background-color: #fde0e0;
+    color: #f44336;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    width: auto;
+  }
+  .cart-title {
+    font-size: 1.8rem;
+  }
+  .cart-actions .checkout-btn,
+  .cart-actions .clear-cart-btn {
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+  }
+}

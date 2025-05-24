@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useCart } from '../context/ContextCart'; // Assuming path is correct
-import { Link } from 'react-router-dom';
-import './CartPage.css'; // Assuming path is correct
-
-interface CartItemDisplay {
-  productId: number;
-  imageUrl?: string | undefined;
-  productName: string;
-  productPrice: number;
-  quantity: number;
-  availableQuantity?: number;
-}
+// frontend/src/pages/CartPage.tsx
+import React, { useState, useEffect } from 'react';
+import { useCart, CartItemUI } from '../context/ContextCart';
+import { Link, useLocation } from 'react-router-dom';
+import './CartPage.css';
 
 const CartPage: React.FC = () => {
   const {
@@ -19,36 +11,99 @@ const CartPage: React.FC = () => {
     updateQuantity,
     totalPrice,
     clearCart,
-    isLoading
+    isLoading, // We still use the global loading for hard reloads
+    cartError,
+    fetchCart,
   } = useCart();
 
-  // NEW: Local loading state
-  const [isLoadingLocal, setIsLoadingLocal] = useState(true);
+  const location = useLocation();
+
+  // This local state now reliably controls the refresh-on-navigation behavior.
+  const [isRefreshing, setIsRefreshing] = useState(() => {
+    // This function runs only once when the component initializes.
+    const wasRefreshRequested = location.state?.refresh === true;
+    if (wasRefreshRequested) {
+      // We clean up the history state immediately so it doesn't persist.
+      window.history.replaceState({}, document.title);
+      return true; // Set our local refreshing state to true.
+    }
+    return false;
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoadingLocal(false);
-    }, 200); // Wait minimum 200ms
+    // This effect runs only when our local `isRefreshing` state is true.
+    if (isRefreshing) {
+      // We call fetchCart and wait for it to complete.
+      fetchCart().finally(() => {
+        // Once fetchCart is done (successfully or not), we turn off the flag.
+        setIsRefreshing(false);
+      });
+    }
+  }, [isRefreshing, fetchCart]);
 
-    return () => clearTimeout(timer); // Clean up timer
-  }, []);
 
-  // Updated loading logic
-  if (isLoading || isLoadingLocal) {
+  // --- The condition to show the skeleton is now simple and reliable ---
+  // Show if the global context is loading OR if our local refresh flag is active.
+  const showSkeleton = isLoading || isRefreshing;
+
+  if (showSkeleton) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div> {/* Spinner element */}
-        <p>Loading cart...</p>
+      <div className="cart-container" aria-busy="true" aria-label="Loading your shopping cart...">
+        <header>
+          <h1 className="skeleton-item skeleton-title" aria-hidden="true"></h1>
+        </header>
+        <section className="cart-content">
+          <ul className="cart-items">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <li key={index} className="cart-item skeleton-cart-item">
+                <figure className="item-image-container skeleton-item skeleton-image-item" aria-hidden="true"></figure>
+                <article className="item-details">
+                  <p className="skeleton-item skeleton-text" aria-hidden="true"></p>
+                  <p className="skeleton-item skeleton-text short" aria-hidden="true"></p>
+                  <p className="skeleton-item skeleton-text medium" aria-hidden="true"></p>
+                </article>
+              </li>
+            ))}
+          </ul>
+          <footer className="cart-summary">
+            <h3 className="skeleton-item skeleton-summary-title" aria-hidden="true"></h3>
+            <dl className="summary-details">
+              <dt className="skeleton-item skeleton-text short" aria-hidden="true"></dt>
+              <dd className="skeleton-item skeleton-text short" aria-hidden="true"></dd>
+            </dl>
+            <section className="cart-actions">
+              <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+              <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+              <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+            </section>
+          </footer>
+        </section>
+      </div>
+    );
+  }
+
+  if (cartError) {
+    return (
+      <div className="cart-container">
+        <header>
+            <h1 className="cart-title">Your Shopping Cart</h1>
+        </header>
+        <section className="error-message" role="alert">
+            <h2>Could Not Load Cart</h2>
+            <p>{cartError}</p>
+              <button onClick={() => window.location.reload()} className="retry-button">
+                Refresh Page
+            </button>
+        </section>
       </div>
     );
   }
 
   return (
-    <main className="cart-container">
+    <div className="cart-container">
       <header>
         <h1 className="cart-title">Your Shopping Cart</h1>
       </header>
-
       {cartItems.length === 0 ? (
         <section className="empty-cart">
           <p className="empty-text">Your cart is empty</p>
@@ -58,13 +113,13 @@ const CartPage: React.FC = () => {
         </section>
       ) : (
         <section className="cart-content">
-          <section className="cart-items">
-            {cartItems.map((item: CartItemDisplay) => (
-              <article key={item.productId} className="cart-item">
+          <ul className="cart-items">
+            {cartItems.map((item: CartItemUI) => (
+              <li key={item.productId} className="cart-item">
                 <figure className="item-image-container">
                   <img src={item.imageUrl || '/placeholder.png'} alt={item.productName} className="item-image" />
                 </figure>
-                <section className="item-details">
+                <article className="item-details">
                   <h3 className="item-name">{item.productName}</h3>
                   <p className="item-price">R{Number(item.productPrice).toFixed(2)}</p>
                   <section className="quantity-controls">
@@ -86,22 +141,10 @@ const CartPage: React.FC = () => {
                       +
                     </button>
                   </section>
-                  {item.availableQuantity != null && (
-                    <p style={{ fontSize: '0.8em', color: '#666' }}>
-                      {item.availableQuantity - item.quantity >= 0
-                        ? `${item.availableQuantity - item.quantity} more available`
-                        : `${item.availableQuantity} available (in stock)`}
-                    </p>
-                  )}
-                  {item.availableQuantity != null && item.quantity > item.availableQuantity && (
-                    <p style={{ color: 'red', fontSize: '0.8em', fontWeight: 'bold' }}>
-                      Warning: Quantity in cart exceeds available stock! ({item.availableQuantity} available)
-                    </p>
-                  )}
                   <p className="item-subtotal">
                     Subtotal: R{(Number(item.productPrice) * item.quantity).toFixed(2)}
                   </p>
-                </section>
+                </article>
                 <button
                   onClick={() => removeFromCart(item.productId)}
                   className="remove-btn"
@@ -109,10 +152,9 @@ const CartPage: React.FC = () => {
                 >
                   ×
                 </button>
-              </article>
+              </li>
             ))}
-          </section>
-
+          </ul>
           <footer className="cart-summary">
             <h3 className="summary-title">Order Summary</h3>
             <dl className="summary-details">
@@ -128,7 +170,7 @@ const CartPage: React.FC = () => {
               </Link>
               <button
                 onClick={clearCart}
-                className="checkout-btn"
+                className="checkout-btn clear-cart-btn"
               >
                 Clear Cart
               </button>
@@ -136,7 +178,7 @@ const CartPage: React.FC = () => {
           </footer>
         </section>
       )}
-    </main>
+    </div>
   );
 };
 

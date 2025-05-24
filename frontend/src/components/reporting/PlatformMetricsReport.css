@@ -1,41 +1,33 @@
 /* frontend/src/components/reporting/PlatformMetricsReport.css */
-.platform-metrics-report {
+article.platform-metrics-report {
   margin-bottom: 2rem;
-  padding: 1rem;
-  border: 1px solid #ddd;
+  background-color: #fff;
+  padding: 20px;
   border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.report-container { /* General class for report cards */
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .report-header {
   display: flex;
-  flex-direction: column; /* Stack title and controls */
+  flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start; /* Align items to the start */
+  align-items: flex-start;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #eee;
 }
 
 .report-header h2 {
-  margin: 0 0 0.75rem 0; /* Add some bottom margin to h2 */
+  margin: 0 0 0.75rem 0;
   font-size: 1.5rem;
   color: #333;
 }
 
-.report-controls {
+form.report-controls {
   display: flex;
   align-items: center;
-  gap: 10px; /* Space between control elements */
-  flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .report-controls label {
@@ -68,23 +60,25 @@
   cursor: not-allowed;
 }
 
-
-.report-summary .report-generated-at,
-.report-summary .period-covered {
+section.report-summary .report-generated-at,
+section.report-summary .period-covered {
   font-size: 0.85rem;
   color: #666;
   margin-bottom: 0.5rem;
 }
 
-.metrics-grid {
+ul.metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
   margin-bottom: 1.5rem;
+  /* Reset list styles */
+  list-style: none;
+  padding: 0;
 }
 
-.metric-card {
+li.metric-card {
   background-color: #fff;
   padding: 1rem;
   border: 1px solid #e0e0e0;
@@ -107,7 +101,7 @@
   margin-bottom: 0;
 }
 
-.export-buttons {
+section.export-buttons {
   margin-top: 1.5rem;
   text-align: right;
 }
@@ -130,46 +124,46 @@
   background-color: #ccc;
 }
 
-/* Shared loading/error/info messages (can be in a global CSS file too) */
-.loading-message, .error-message, .info-message {
+p.loading-message, p.error-message, p.info-message {
   padding: 1rem;
   text-align: center;
   font-size: 1.1rem;
   border-radius: 4px;
+  margin-top: 1rem;
 }
-.loading-message { background-color: #eef; color: #33a; }
-.error-message { background-color: #fee; color: #a33; }
-.info-message { background-color: #eff; color: #3aa; }
+p.loading-message { background-color: #eef; color: #33a; }
+p.error-message { background-color: #fee; color: #a33; }
+p.info-message { background-color: #eff; color: #3aa; }
 
-.report-content { /* New class for the main content area below header */
-    padding-top: 1rem;
+section.report-content {
+  padding-top: 1rem;
 }
 
-.charts-grid {
+section.charts-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Default to single column */
-  gap: 2rem; /* Space between charts */
+  grid-template-columns: 1fr;
+  gap: 2rem;
   margin-top: 2rem;
   margin-bottom: 1.5rem;
 }
 
-@media (min-width: 992px) { /* For larger screens, display charts side-by-side */
-  .charts-grid {
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
+@media (min-width: 992px) {
+  section.charts-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-.chart-container {
+figure.chart-container {
   background-color: #fff;
   padding: 15px;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  height: 350px; /* Or your preferred chart height */
-  position: relative; /* Important for chart.js responsiveness */
+  height: 350px;
+  position: relative;
+  margin: 0; /* Reset default figure margin */
 }
 
-/* Ensure the chart itself fills the container */
 .chart-container canvas {
   width: 100% !important;
   height: 100% !important;
@@ -177,7 +171,7 @@
 
 .export-buttons .pdf-button {
   padding: 10px 15px;
-  background-color: #dc3545; /* Example: Red color */
+  background-color: #dc3545;
   color: white;
   border: none;
   border-radius: 4px;

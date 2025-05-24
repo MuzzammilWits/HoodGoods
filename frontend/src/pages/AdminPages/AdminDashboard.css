@@ -1,112 +1,178 @@
-/* Add these new styles to your existing AdminDashboard.css */
+/* AdminDashboard.css */
 
 .admin-dashboard-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* This centers child elements horizontally */
-  }
-  
-  .management-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-  
-    .management-cards2 {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center; /* Centers cards horizontally */
-      gap: 2rem;
-      margin-top: 1.5rem;
-      width: 100%;
-    }
-  
-    .management-cards3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-top: 1.5rem;
-      width: 100%;
-      max-width: 1200px; /* Optional: prevents cards from getting too wide */
-       justify-items: center;/* Centers grid items horizontally */
-    }
-    
-    .management-card {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-  
-    .management-card2 {
-      flex: 0 0 280px; /* Fixed width, no grow/shrink */
-    }
-  
-    .management-card3 {
-      width: 100%;
-      max-width: 280px; /* Match your minmax value */
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-    
-    .management-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .manage-btn {
-      width: 100%;
-      padding: 0.75rem;
-      background-color: #432C53;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.2s;
-      margin-top: 1rem;
-    }
-    
-    .manage-btn:hover {
-      background-color: #5a3a6f;
-    }
-    
-    /* Make sure the product image container has consistent height */
-    .management-card .product-image-container {
-      height: 200px;
-      background-color: #f5f5f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .management-card .product-image {
-      max-height: 80%;
-      max-width: 80%;
-      object-fit: contain;
-    }
-  
-    /*Added for Manage-Users Card*/
-    .management-card .users-image-container {
-      height: 200px;
-      background-color: #f5f5f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .management-card .users-image {
-      max-height: 80%;
-      max-width: 80%;
-      object-fit: contain;
-    }
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color, #432C53);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Styles for the ul container for cards */
+ul.management-cards2 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  list-style: none; /* Reset list style */
+  padding: 0; /* Reset list padding */
+}
+
+/* Styles for individual li card items */
+li.management-card3 {
+  width: 100%;
+  max-width: 280px; /* Match your minmax value or desired card width */
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex; /* Added to allow flex properties for children if needed */
+  flex-direction: column; /* Stack image and details vertically */
+}
+
+li.management-card3:hover,
+li.management-card3:focus-within { /* Added focus-within for keyboard navigation */
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+li.management-card3:focus { /* Basic focus style for accessibility */
+    outline: 2px solid var(--primary-color, #432C53);
+    outline-offset: 2px;
+}
+
+
+/* Product Image Container as a figure */
+figure.product-image-container {
+  height: 200px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0; /* Reset default figure margin */
+  padding: 0; /* Reset default figure padding */
+  overflow: hidden; /* Ensure image doesn't break out */
+}
+
+.product-image {
+  max-height: 80%;
+  max-width: 80%;
+  object-fit: contain;
+}
+
+/* Product Details as an article */
+article.product-details {
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow details section to grow and push button to bottom */
+}
+
+.product-details h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.product-description {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+  flex-grow: 1; /* Pushes button down if content is short */
+  line-height: 1.4;
+}
+
+.manage-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #432C53;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  margin-top: auto; /* Pushes button to the bottom if using flex on parent */
+}
+
+.manage-btn:hover {
+  background-color: #5a3a6f;
+}
+
+/* Redundant .management-card and .management-card2 styles from original if not used directly on li */
+/* You can remove these if .management-card3 is the only one in use for <li> elements */
+.management-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.management-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.management-card .product-image-container { /* Targeting figure now */
+  height: 200px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.management-card .product-image {
+  max-height: 80%;
+  max-width: 80%;
+  object-fit: contain;
+}
+
+
+/* Fallback for management-cards and management-cards3 if they target the ul */
+.management-cards, .management-cards3 {
+  display: grid; /* Original style - if you prefer grid for ul */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  justify-items: center;
+  /* Ensure list-style and padding are reset if using these for UL */
+  list-style: none;
+  padding: 0;
+}
+
+
+/* Styles for user image (if used, similar to product image) */
+.users-image-container { /* Assuming this would also become a figure */
+  height: 200px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.users-image {
+  max-height: 80%;
+  max-width: 80%;
+  object-fit: contain;
+}

@@ -1,21 +1,37 @@
 /* frontend/src/pages/AdminAnalyticsPage.css */
-.admin-analytics-page {
-  padding: 1rem; /* Add some padding around the page content */
+main.admin-analytics-page { /* Targeting main element */
+  padding: 1rem;
 }
 
-.admin-analytics-page .page-header {
-  text-align: center; /* Center the main page title */
+main.admin-analytics-page header.page-header { /* Targeting header within main */
+  text-align: center;
   border-bottom: 2px solid #007bff; /* Example accent border */
   padding-bottom: 0.75rem;
 }
 
-.admin-analytics-page .page-header h1 {
+main.admin-analytics-page header.page-header h1 {
   color: #333;
   font-weight: 600;
+  margin-top: 0; /* Good practice to reset default h1 margins */
+  margin-bottom: 0;
 }
 
-.admin-analytics-page .analytics-content .report-group {
+main.admin-analytics-page section.analytics-content article.report-group { /* Targeting article.report-group */
   margin-top: 1.5rem;
+}
+
+/* Visually hidden class for accessibility */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px 1px 1px 1px); /* Deprecated but common fallback */
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap; /* Keep text on one line */
+  border: 0; /* Remove any border */
+  margin: -1px; /* Hide the element */
+  padding: 0; /* Remove any padding */
 }
 
 /* You can reuse .container and .mt-4 from Bootstrap if you have it,
@@ -50,7 +66,7 @@
 }
 
 .mt-4 {
-  margin-top: 1.5rem !important; /* Example margin top */
+  margin-top: 1.5rem !important;
 }
 
 .mb-4 {

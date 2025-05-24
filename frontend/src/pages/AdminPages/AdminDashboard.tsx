@@ -1,14 +1,23 @@
+// frontend/src/pages/AdminPages/AdminDashboard.tsx
 import React from 'react';
-// import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 import storeImage from '../../assets/store-management.png';
 import productImage from '../../assets/product-management.png';
 import reportImage from '../../assets/reports-analytics.png';
 
-
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleCardKeyDown = (
+    event: React.KeyboardEvent<HTMLLIElement>,
+    path: string
+  ) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      navigate(path);
+    }
+  };
 
   return (
     <main className="admin-dashboard-container">
@@ -16,55 +25,63 @@ const AdminDashboard: React.FC = () => {
         <h1>Admin Dashboard</h1>
       </header>
 
-      <div className="management-cards2">
+      <ul className="management-cards2">
         {/* Store Management Card */}
-        <div 
+        <li
           className="management-card3 product-card"
           onClick={() => navigate('/admin/store-approval')}
+          role="link" // Provides semantic meaning for assistive technologies
+          tabIndex={0} // Makes the element focusable
+          onKeyDown={(e) => handleCardKeyDown(e, '/admin/store-approval')}
+          aria-label="Manage Stores"
         >
-          <div className="product-image-container">
+          <figure className="product-image-container">
             <img
-              src={storeImage}  // Use the imported image
-              alt="Manage Store Approval"
+              src={storeImage}
+              alt="Illustration for store management"
               className="product-image"
             />
-          </div>
-          <div className="product-details">
+          </figure>
+          <article className="product-details">
             <h2>Manage Stores</h2>
             <p className="product-description">
               Approve or reject new store applications
             </p>
-            <button 
-              className="manage-btn" 
+            <button
+              className="manage-btn"
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent li's onClick from firing twice
                 navigate('/admin/store-approval');
               }}
             >
               Store Management
             </button>
-          </div>
-        </div>
+          </article>
+        </li>
 
         {/* Product Management Card */}
-        <div 
+        <li
           className="management-card3 product-card"
           onClick={() => navigate('/admin/product-approval')}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => handleCardKeyDown(e, '/admin/product-approval')}
+          aria-label="Manage Products"
         >
-          <div className="product-image-container">
+          <figure className="product-image-container">
             <img
-              src={productImage}  // Use the imported image
-              alt="Manage Product Approval"
+              src={productImage}
+              alt="Illustration for product management"
               className="product-image"
             />
-          </div>
-          <div className="product-details">
+          </figure>
+          <article className="product-details">
             <h2>Manage Products</h2>
             <p className="product-description">
               Approve or reject new product listings
             </p>
-            <button 
-              className="manage-btn" 
+            <button
+              className="manage-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate('/admin/product-approval');
@@ -72,28 +89,32 @@ const AdminDashboard: React.FC = () => {
             >
               Product Management
             </button>
-          </div>
-        </div>
+          </article>
+        </li>
 
         {/* Reports Card */}
-        <div 
+        <li
           className="management-card3 product-card"
           onClick={() => navigate('/admin/analytics')}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => handleCardKeyDown(e, '/admin/analytics')}
+          aria-label="View Reports and Analytics"
         >
-          <div className="product-image-container">
+          <figure className="product-image-container">
             <img
-              src={reportImage}  // Use the imported image
-              alt="View Reports"
+              src={reportImage}
+              alt="Illustration for reports and analytics"
               className="product-image"
             />
-          </div>
-          <div className="product-details">
+          </figure>
+          <article className="product-details">
             <h2>View Reports</h2>
             <p className="product-description">
               View system reports and analytics
             </p>
-            <button 
-              className="manage-btn" 
+            <button
+              className="manage-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate('/admin/analytics');
@@ -101,9 +122,9 @@ const AdminDashboard: React.FC = () => {
             >
               View Reports
             </button>
-          </div>
-        </div>
-      </div>
+          </article>
+        </li>
+      </ul>
     </main>
   );
 };
