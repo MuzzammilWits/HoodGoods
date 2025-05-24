@@ -425,7 +425,7 @@ const ProductsPage: React.FC = () => {
                             : `Add ${product.name} to cart`
                         }
                         type="button" 
-                        disabled={isDisabled} // Button is disabled if any of these conditions are true
+                        disabled={isDisabled} // is disabled if any of these conditions are true
                       >
                         {buttonText}
                       </button>
