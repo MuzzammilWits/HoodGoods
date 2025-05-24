@@ -1,5 +1,5 @@
-// src/pages/AdminPages/AdminProductApproval.tsx
-import React, { useState, useEffect } from 'react';
+// frontend/src/pages/AdminPages/AdminProductApproval.tsx
+import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AdminProductApproval.css';
@@ -26,6 +26,10 @@ const AdminProductApproval: React.FC = () => {
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | null}>({message: '', type: null});
 
+  // --- New state for store name filter ---
+  const [selectedStoreName, setSelectedStoreName] = useState<string>('');
+  // --- End new state ---
+
   const showNotification = (message: string, type: 'success' | 'error') => {
     setNotification({message, type});
     setTimeout(() => {
@@ -46,7 +50,6 @@ const AdminProductApproval: React.FC = () => {
           : err instanceof Error
           ? err.message
           : 'Failed to load products';
-        console.error("Fetch products error:", errorMessage, err);
         setError(errorMessage);
         setProducts([]);
       } finally {
@@ -60,10 +63,10 @@ const AdminProductApproval: React.FC = () => {
   const handleApproveProduct = async (productId: number) => {
     try {
       await axios.patch(`${baseUrl}/products/${productId}/approve`);
-      setProducts(products.filter(p => p.prodId !== productId));
+      // Refetch or filter locally after approval
+      setProducts(prevProducts => prevProducts.filter(p => p.prodId !== productId));
       showNotification('Product approved successfully!', 'success');
     } catch (error) {
-      console.error('Error approving product:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to approve product';
       showNotification(errorMsg, 'error');
     }
@@ -72,14 +75,31 @@ const AdminProductApproval: React.FC = () => {
   const handleDeleteProduct = async (productId: number) => {
     try {
       await axios.delete(`${baseUrl}/products/${productId}`);
-      setProducts(products.filter(p => p.prodId !== productId));
+      // Refetch or filter locally after deletion
+      setProducts(prevProducts => prevProducts.filter(p => p.prodId !== productId));
       showNotification('Product rejected and deleted successfully!', 'success');
     } catch (error) {
-      console.error('Error deleting product:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to delete product';
       showNotification(errorMsg, 'error');
     }
   };
+
+  // --- Derive unique store names for the filter dropdown ---
+  const uniqueStoreNames = useMemo(() => {
+    const storeNames = products.map(product => product.storeName).filter(Boolean); // filter(Boolean) removes null/undefined/empty strings
+    return [...new Set(storeNames)].sort((a, b) => a.localeCompare(b)); // Alphabetical sort
+  }, [products]);
+  // --- End derive unique store names ---
+
+  // --- Filter products based on selectedStoreName ---
+  const filteredProducts = useMemo(() => {
+    if (!selectedStoreName) {
+      return products; // No filter applied or "All Stores" selected
+    }
+    return products.filter(product => product.storeName === selectedStoreName);
+  }, [products, selectedStoreName]);
+  // --- End filter products ---
+
 
   if (loading) {
     return (
@@ -95,10 +115,7 @@ const AdminProductApproval: React.FC = () => {
       <section className="error-message-container" role="alert" aria-live="assertive">
         <h2>Error Loading Products</h2>
         <p>{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="retry-button"
-        >
+        <button onClick={() => window.location.reload()} className="retry-button">
           Retry
         </button>
       </section>
@@ -120,48 +137,68 @@ const AdminProductApproval: React.FC = () => {
         </button>
       </header>
 
-      {products.length === 0 ? (
-        <p className="no-products-message">No products are currently awaiting approval.</p>
+      {/* --- Store Filter UI --- */}
+      <section className="filters-section" aria-labelledby="store-filter-heading">
+        <h2 id="store-filter-heading" className="sr-only">Filter Products by Store</h2> {/* Screen-reader only heading */}
+        <label htmlFor="store-filter-select">Filter by Store:</label>
+        <select
+          id="store-filter-select"
+          value={selectedStoreName}
+          onChange={(e) => setSelectedStoreName(e.target.value)}
+          className="store-filter-select"
+        >
+          <option value="">All Stores</option>
+          {uniqueStoreNames.map(storeName => (
+            <option key={storeName} value={storeName}>
+              {storeName}
+            </option>
+          ))}
+        </select>
+      </section>
+      {/* --- End Store Filter UI --- */}
+
+
+      {filteredProducts.length === 0 ? (
+        <p className="no-products-message">
+          {selectedStoreName ? `No products awaiting approval for ${selectedStoreName}.` : 'No products are currently awaiting approval.'}
+        </p>
       ) : (
         <section className="products-table-container">
           <table className="products-table">
             <thead>
               <tr>
+                <th>Store Name</th>
                 <th>Image</th>
                 <th>Name</th>
-                <th>Store</th>
-                <th>Price</th>
-                <th>Status</th>
+                <th>Description</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {/* Use filteredProducts here */}
+              {filteredProducts.map((product) => (
                 <tr key={product.prodId}>
+                  <td>{product.storeName || 'N/A'}</td>
                   <td>
-                    <img 
-                      src={product.imageUrl || '/placeholder-product.jpg'} 
+                    <img
+                      src={product.imageUrl || '/placeholder-product.jpg'}
                       alt={product.name}
                       className="product-thumbnail"
                     />
                   </td>
                   <td>{product.name}</td>
-                  <td>{product.storeName}</td>
-                  <td>R{product.price.toFixed(2)}</td>
-                  <td>
-                    <p className={`status-badge ${product.isActive ? 'active' : 'inactive'}`}>
-                      {product.isActive ? 'Active' : 'Pending'}
-                    </p>
+                  <td className="product-description-cell">
+                    {product.description}
                   </td>
                   <td className="actions-cell">
-                    <button 
+                    <button
                       onClick={() => handleApproveProduct(product.prodId)}
                       className="edit-button2 action-button2"
                       aria-label={`Approve product ${product.name}`}
                     >
                       Approve
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeleteProduct(product.prodId)}
                       className="remove-button2 action-button2"
                       aria-label={`Reject product ${product.name}`}
