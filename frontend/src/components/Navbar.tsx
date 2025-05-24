@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
 
           {!isAuth0Loading && isAuthenticated && !isRoleLoading && role !== 'seller' && role !== 'admin' && (
             <li className="nav-item">
-              <Link to="/create-store" className="nav-link">Become A Seller</Link>
+              <Link to="/seller-agreement" className="nav-link">Become A Seller</Link>
             </li>
           )}
 
