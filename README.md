@@ -143,7 +143,7 @@ npm run dev
    ```
 4. Click `GET test1` in the sidebar.
 5. Ensure the top bar shows: `GET http://localhost:3000/`
-6. Click the right arrow (>) to send the request.
+6. Click the right arrow (->) to send the request.
 7. You should receive a `200 OK` with `Hello World!` in the response.
 
 ![image](https://github.com/user-attachments/assets/f20a6be8-c851-497e-b802-4270cbd4e5b5)
