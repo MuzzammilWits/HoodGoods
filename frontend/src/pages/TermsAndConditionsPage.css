@@ -1,0 +1,107 @@
+/* frontend/src/pages/TermsAndConditionsPage.css */
+
+/* General container for the page */
+.terms-conditions-container {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 32px 16px;
+  font-family: sans-serif;
+  line-height: 1.6;
+  color: #374151; /* Default text color */
+}
+
+/* Article styling */
+.terms-conditions-article {
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+  padding: 24px;
+  min-height: 70vh;
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+  .terms-conditions-article {
+    padding: 32px;
+  }
+}
+
+/* Main heading */
+.terms-conditions-main-heading {
+  font-size: 1.875rem; /* Adjusted for typical H1 */
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Last updated text */
+.terms-conditions-last-updated {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.terms-conditions-content p {
+  margin-bottom: 1rem;
+}
+
+.terms-conditions-content ul {
+  list-style-type: disc;
+  padding-left: 1.75rem; /* Increased padding for better indentation */
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+}
+
+.terms-conditions-content ul li {
+   margin-bottom: 0.5rem;
+}
+
+
+/* Section headings (h2) */
+.terms-conditions-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937; /* Darker for headings */
+  margin-top: 2rem;   /* More space above H2 */
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb; /* Lighter border */
+}
+
+/* Sub-headings (h3) - if you add any explicitly in T&C */
+.terms-conditions-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Address block styling */
+.terms-conditions-content address {
+  font-style: normal;
+}
+
+.terms-conditions-content address.contact-address-final {
+    margin-top: 1rem; /* Space above the final address block */
+    margin-bottom: 1.5rem; /* Whitespace after the final address block */
+}
+
+/* Strong tag within paragraphs */
+.terms-conditions-content p strong,
+.terms-conditions-content li strong {
+  font-weight: 600;
+}
+
+/* Link styling within the content */
+.terms-conditions-content a {
+  color: #432C53; /* Using a color from your footer SVG fill */
+  text-decoration: underline;
+}
+
+.terms-conditions-content a:hover {
+  color: #2d1d3a; /* Darker shade */
+  text-decoration: none;
+}
