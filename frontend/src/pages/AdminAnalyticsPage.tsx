@@ -9,16 +9,14 @@ const AdminAnalyticsPage: React.FC = () => {
 
   return (
     <main className="admin-analytics-page container mt-4">
-      <header className="page-header mb-4">
-        <div className="admin-header-content">
-          <h1>Admin Analytics Dashboard</h1>
-          <button
-            onClick={() => navigate('/admin-dashboard')}
-            className="back-button" // Reusing class name for consistency
-          >
-            Back to Dashboard
-          </button>
-        </div>
+      <header className="page-header mb-4" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <h1>Admin Analytics Dashboard</h1>
+        <button
+          onClick={() => navigate('/admin-dashboard')}
+          className="back-button"
+        >
+          Back to Dashboard
+        </button>
       </header>
 
       <section className="analytics-content">

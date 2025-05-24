@@ -61,13 +61,13 @@ li.management-card3:focus { /* Basic focus style for accessibility */
 /* Product Image Container as a figure */
 figure.product-image-container {
   height: 200px;
-  background-color: #f5f5f5;
+  background-color: white !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0; /* Reset default figure margin */
-  padding: 0; /* Reset default figure padding */
-  overflow: hidden; /* Ensure image doesn't break out */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .product-image {
@@ -85,20 +85,13 @@ article.product-details {
   flex-grow: 1; /* Allow details section to grow and push button to bottom */
 }
 
-.product-details h2 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-family: 'Poppins', sans-serif;
-}
-
 .product-description {
   font-size: 1rem;
   color: #666;
   margin-bottom: 1rem;
   flex-grow: 1; /* Pushes button down if content is short */
   line-height: 1.4;
+  padding-top: 1.2rem;
 }
 
 .manage-btn {
@@ -112,7 +105,9 @@ article.product-details {
   font-weight: 600;
   font-size: 1rem;
   transition: background-color 0.2s;
-  margin-top: auto; /* Pushes button to the bottom if using flex on parent */
+  margin-top: auto;
+  padding-right: 1em;
+  padding-left: 1em;
 }
 
 .manage-btn:hover {
@@ -133,12 +128,8 @@ article.product-details {
   transform: translateY(-5px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.management-card .product-image-container { /* Targeting figure now */
-  height: 200px;
-  background-color: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.management-card .product-image-container {
+  background-color: transparent !important;
 }
 .management-card .product-image {
   max-height: 80%;
