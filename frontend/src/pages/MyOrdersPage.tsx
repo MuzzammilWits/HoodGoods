@@ -1,10 +1,11 @@
 // src/pages/MyOrdersPage.tsx
-import  { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
-import './MyOrdersPage.css';
+import { Link, useLocation } from 'react-router-dom';
+import './MyOrdersPage.css'; // Ensure this CSS file exists and is styled
 
-// --- Helper Types ---
+// --- Helper Types (as provided in your MyOrdersPage.tsx) ---
 interface ProductSummary {
     prodId: number;
     name: string;
@@ -33,8 +34,7 @@ interface NestedSellerOrder {
     createdAt: string | null;
     updatedAt: string | null;
     items: SellerOrderItemWithProduct[];
-    // Added for displaying store name easily in the shipment card
-    storeName?: string; 
+    storeName?: string;
 }
 interface BuyerOrderDetails {
     orderId: number;
@@ -60,17 +60,38 @@ const statusClassMap: Record<string, string> = {
     Shipped: 'status-shipped',
     Delivered: 'status-delivered',
     Cancelled: 'status-cancelled',
+    Unknown: 'status-unknown',
 };
+
+const MIN_SKELETON_DISPLAY_TIME_MS = 1500; // Make skeleton visible for at least 1.5 seconds
 
 export default function MyOrdersPage() {
     const { isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
     const [orders, setOrders] = useState<BuyerOrderDetails[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // Main data loading state for orders
     const [error, setError] = useState<string | null>(null);
+    const location = useLocation();
+
+    const [isPageRefreshing, setIsPageRefreshing] = useState(() => {
+        const wasNavRefreshRequested = location.state?.refresh === true;
+        if (wasNavRefreshRequested) {
+            window.history.replaceState({}, document.title);
+            return true;
+        }
+        return false;
+    });
 
     const fetchMyOrders = useCallback(async () => {
+        if (!isAuthenticated) {
+            setIsLoading(false);
+            setOrders([]);
+            return;
+        }
         setIsLoading(true);
         setError(null);
+        
+        const startTime = Date.now(); // Record start time for minimum display
+
         try {
             const token = await getAccessTokenSilently();
             const response = await api.get<BuyerOrderDetails[]>('/orders/my-orders', {
@@ -85,23 +106,61 @@ export default function MyOrdersPage() {
             setError(errorMsg);
             setOrders([]);
         } finally {
-            setIsLoading(false);
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = MIN_SKELETON_DISPLAY_TIME_MS - elapsedTime;
+
+            if (remainingTime > 0) {
+                setTimeout(() => {
+                    setIsLoading(false);
+                }, remainingTime);
+            } else {
+                setIsLoading(false);
+            }
         }
-    }, [getAccessTokenSilently]);
+    }, [getAccessTokenSilently, isAuthenticated]);
 
     useEffect(() => {
-        if (!isAuthLoading && isAuthenticated) {
+        // Handles navigation-triggered refresh
+        if (isPageRefreshing) {
+            if (!isAuthLoading && isAuthenticated) {
+                fetchMyOrders().finally(() => {
+                    setIsPageRefreshing(false);
+                });
+            } else {
+                setIsPageRefreshing(false);
+                if (!isAuthenticated && !isAuthLoading) { 
+                    setIsLoading(false);
+                    setOrders([]);
+                }
+            }
+        }
+    }, [isPageRefreshing, isAuthLoading, isAuthenticated, fetchMyOrders]);
+
+    useEffect(() => {
+        // Handles initial load based on authentication, if not already refreshing
+        // and if it's the very first load (isLoading is true)
+        if (!isAuthLoading && isAuthenticated && !isPageRefreshing && isLoading) {
             fetchMyOrders();
         } else if (!isAuthLoading && !isAuthenticated) {
             setIsLoading(false);
             setOrders([]);
             setError(null);
         }
-    }, [isAuthenticated, isAuthLoading, fetchMyOrders]);
+    }, [isAuthenticated, isAuthLoading, fetchMyOrders, isPageRefreshing, isLoading]);
+
+    // Style for the main container to ensure minimum height
+    // This helps keep the footer lower on the page during initial load.
+    // Adjust '70vh' as needed based on your app's header/footer height.
+    const containerStyle: React.CSSProperties = {
+        minHeight: '70vh', 
+        display: 'flex',
+        flexDirection: 'column',
+    };
 
     if (isAuthLoading) {
         return (
-            <main className="my-orders-container">
+            <main className="my-orders-container" style={containerStyle}>
+                 <header className="page-top-header"><h1>My Orders</h1></header>
                 <p className="auth-loading-message">Loading authentication...</p>
             </main>
         );
@@ -109,31 +168,95 @@ export default function MyOrdersPage() {
 
     if (!isAuthenticated) {
         return (
-            <main className="my-orders-container">
-                 <header className="page-top-header"><h1>My Orders</h1></header>
+            <main className="my-orders-container" style={containerStyle}>
+                <header className="page-top-header"><h1>My Orders</h1></header>
                 <p className="login-prompt-message">Please log in to view your order history.</p>
             </main>
         );
     }
 
+    const showSkeleton = isLoading || isPageRefreshing;
+
+    if (showSkeleton) {
+        return (
+            <main className="my-orders-container" style={containerStyle} aria-busy="true" aria-label="Loading your orders...">
+                <header className="page-top-header">
+                    {/* Skeleton for the main title - matches h1 style from CSS */}
+                    <div className="skeleton-item" style={{ width: '250px', height: '2.2rem', margin: '0 auto 2rem auto', borderRadius: '4px' }}></div>
+                </header>
+                
+                <ul className="order-list"> {/* Matches your ul.order-list */}
+                    {Array.from({ length: 2 }).map((_, orderIndex) => ( // Show 2 skeleton order cards
+                        <li key={`skeleton-order-${orderIndex}`} className="order-card-item"> {/* Matches li.order-card-item */}
+                           <article className="order-card skeleton-item"> {/* Matches article.order-card and adds shimmer */}
+                                <header className="order-header"> {/* Matches header.order-header */}
+                                    {/* Skeleton for Order # */}
+                                    <div className="skeleton-item" style={{ width: '150px', height: '1.4em', borderRadius: '4px' }}></div>
+                                    {/* Skeleton for Placed on Date */}
+                                    <div className="skeleton-item" style={{ width: '120px', height: '0.9em', borderRadius: '4px' }}></div>
+                                </header>
+                                <section className="order-details-overall"> {/* Matches section.order-details-overall */}
+                                   <div className="skeleton-item" style={{ width: '200px', height: '1em', marginBottom: '0.5rem', borderRadius: '4px' }}></div>
+                                   <div className="skeleton-item" style={{ width: '250px', height: '1em', borderRadius: '4px' }}></div>
+                                </section>
+
+                                <section className="shipments-section"> {/* Matches section.shipments-section */}
+                                   {/* Skeleton for "Shipments in this Order:" h3 */}
+                                   <div className="skeleton-item" style={{ width: '220px', height: '1.2em', marginBottom: '1rem', borderRadius: '4px' }}></div>
+                                   
+                                   {/* Skeleton for one shipment card */}
+                                   <section className="shipment-card skeleton-item" style={{padding: '1.25rem'}}> {/* Matches section.shipment-card */}
+                                        <header className="shipment-header"> {/* Matches header.shipment-header */}
+                                            <div className="skeleton-item" style={{ width: '180px', height: '1.1em', borderRadius: '4px' }}></div>
+                                            <div className="skeleton-item" style={{ width: '100px', height: '1em', borderRadius: '4px' }}></div> {/* For status line */}
+                                        </header>
+                                        <section className="shipment-details"> {/* Matches section.shipment-details */}
+                                            <div className="skeleton-item" style={{ width: '220px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px' }}></div>
+                                            <div className="skeleton-item" style={{ width: '180px', height: '0.9em', marginBottom: '0.3rem', borderRadius: '4px' }}></div>
+                                            <div className="skeleton-item" style={{ width: '200px', height: '0.9em', borderRadius: '4px' }}></div>
+                                        </section>
+                                        <ul className="item-list" style={{marginTop: '1rem'}}> {/* Matches ul.item-list */}
+                                            {/* Skeleton for one item in shipment */}
+                                            <li className="item" style={{display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '0.75rem'}}>
+                                                <figure className="item-image-figure skeleton-item" style={{width: '50px', height: '50px', borderRadius: '4px', flexShrink: 0}}></figure>
+                                                <div style={{flexGrow: 1}}>
+                                                    <div className="skeleton-item" style={{ width: '80%', height: '0.9em', marginBottom: '0.2rem', borderRadius: '4px' }}></div>
+                                                    <div className="skeleton-item" style={{ width: '60%', height: '0.85em', borderRadius: '4px' }}></div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                   </section>
+                                </section>
+                           </article>
+                        </li>
+                    ))}
+                </ul>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="my-orders-container" style={containerStyle}>
+                <header className="page-top-header"><h1>My Orders</h1></header>
+                <p className="error-message">{error}</p>
+                <button onClick={fetchMyOrders} className="retry-button">Try Again</button>
+            </main>
+        );
+    }
+    
     return (
-        <main className="my-orders-container">
+        <main className="my-orders-container" style={containerStyle}>
             <header className="page-top-header"><h1>My Orders</h1></header>
 
-            {isLoading && (
-                <section className="loading-container" style={{ minHeight: '150px', padding: '1rem 0' }} aria-label="Loading your orders">
-                    <figure className="spinner" role="img" aria-label="Loading animation"></figure>
-                    <p>Loading your orders...</p>
+            {orders.length === 0 ? (
+                <section className="empty-orders" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <p className="no-orders-message">You haven't placed any orders yet.</p>
+                    <Link to="/products" className="continue-shopping-btn">
+                        Start Shopping
+                    </Link>
                 </section>
-            )}
-
-            {error && !isLoading && <p className="error-message">Error loading orders: {error}</p>}
-
-            {!isLoading && orders.length === 0 && !error && (
-                <p className="no-orders-message">You haven't placed any orders yet.</p>
-            )}
-
-            {!isLoading && orders.length > 0 && (
+            ) : (
                 <ul className="order-list">
                     {orders.map((order) => (
                         <li key={order.orderId} className="order-card-item">
@@ -152,7 +275,6 @@ export default function MyOrdersPage() {
                                     {order.sellerOrders.map((sellerOrder) => (
                                         <section key={sellerOrder.sellerOrderId} className="shipment-card">
                                             <header className="shipment-header">
-                                                {/* Assuming sellerOrder.storeName is populated from backend or via a join */}
                                                 <h4>Shipment from {sellerOrder.storeName || `Store ID ${sellerOrder.userId}`}</h4> 
                                                 <p className="status-line">Status: <strong className={`status-badge ${statusClassMap[sellerOrder.status] || 'status-unknown'}`}>{sellerOrder.status}</strong></p>
                                             </header>
