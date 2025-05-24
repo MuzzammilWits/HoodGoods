@@ -26,10 +26,9 @@ import SellerDashboardPage from './pages/SellerDashboardPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import SellerAnalyticsPage from './pages/SellerAnalyticsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
-
-// --- NEW IMPORTS FOR RECOMMENDATIONS ---
 import BestSellersList from './components/recommendations/BestSellersList';
 import RecommendationsPage from './pages/RecommendationsPage'; 
+import SellerAgreementPage from './pages/SellerAgreementPage';
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -140,6 +139,14 @@ const AppContent: React.FC = () => {
                   <OrderConfirmationPage />
                 </ProtectedRoute>
               </section>
+            } />
+
+            <Route path="/seller-agreement" element={
+              <ProtectedRoute allowedRoles={['buyer']}> {/* Assuming same protection as create-store */}
+                <article aria-label="Seller Agreement">
+                  <SellerAgreementPage />
+                </article>
+              </ProtectedRoute>
             } />
 
             {/* --- Protected Routes --- */}
