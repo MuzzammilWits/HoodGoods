@@ -141,14 +141,14 @@ const Navbar: React.FC = () => {
             )
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated && role !== 'admin' && (
             <Link to="/my-orders" className="icon-link first-icon-link" title="My Orders" aria-label="My Orders">
               <img src="https://icons.iconarchive.com/icons/icons8/windows-8/128/Finance-Purchase-Order-icon.png" alt="My Orders" width="28" height="28" style={{verticalAlign: 'middle'}} />
               <span className="icon-help-text">My Orders</span>
             </Link>
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated &&  role !== 'admin' && (
             <Link 
               to="/cart" 
               className="icon-link" 
