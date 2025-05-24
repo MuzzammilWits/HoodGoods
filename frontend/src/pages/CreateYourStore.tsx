@@ -315,7 +315,7 @@ const CreateYourStore: React.FC = () => {
 
                 {/* --- Placeholder: Add Delivery Options Inputs/Selects Here --- */}
                 <fieldset className="delivery-options"> {/* Use fieldset for grouping */}
-                     <legend>Delivery Options</legend> {/* Provide context */}
+                     <h2>Delivery Options</h2> {/* Provide context */}
 
                      {/* Standard Delivery */}
                      <label htmlFor="standardPrice">Standard Delivery Price:</label>
