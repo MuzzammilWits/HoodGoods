@@ -8,26 +8,6 @@ main.recommendations-page-container { /* Changed from .recommendations-page-cont
   font-family: 'Hind', sans-serif; /* Added a base font for consistency */
 }
 
-.recommendations-page-header {
-  text-align: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color-light, #eee);
-}
-
-.recommendations-page-header h1 {
-  font-size: 2.2em;
-  color: var(--text-primary, #333);
-  margin-bottom: 10px;
-  font-family: 'Poppins', sans-serif; /* Consistent heading font */
-}
-
-.recommendations-page-header p {
-  font-size: 1.1em;
-  color: var(--text-secondary, #666);
-  line-height: 1.6; /* Improved readability */
-}
-
 .recommendation-section {
   margin-bottom: 40px;
   background-color: var(--accent-background-subtle, #f8f9fa); /* Subtle background for sections */

@@ -1,7 +1,6 @@
 // src/pages/CreateYourStore.tsx
 import React, { useState, useEffect, useCallback, Fragment } from 'react';
 import supabase from '../supabaseClient';
-import StoreInfoForm from '../components/StoreInfoForm';
 import ProductList from '../components/ProductList';
 import SubmissionStatus from '../components/SubmissionStatus'; // Assumes refactored version
 import ImageGalleryDisplay from '../components/ImageGalleryDisplay';
@@ -258,7 +257,7 @@ const CreateYourStore: React.FC = () => {
     return (
         <section className="create-store-container">
             <header>
-                <h1>Create Your Artisan Store</h1>
+                <h1 className="main-titles">Create Your Artisan Store</h1>
                 <p className="instructions">
                     Set up your store information, delivery options, and add your initial products below.
                 </p>
@@ -267,17 +266,29 @@ const CreateYourStore: React.FC = () => {
             <ImageGalleryDisplay galleryImages={galleryImages} />
 
             <form onSubmit={handleSubmit}>
-                <StoreInfoForm
-                    storeName={formData.storeName}
-                    onStoreNameChange={handleStoreNameChange}
-                    isSubmitting={isSubmitting}
-                />
+                <section className="store-info-section">
+                  <h2 className="section-title">Store Name</h2>
+                  <section className="store-name-box">
+                    <fieldset className="form-group">
+                      <input
+                        type="text"
+                        id="storeName"
+                        value={formData.storeName}
+                        onChange={(e) => handleStoreNameChange(e.target.value)}
+                        placeholder="Enter your store name"
+                        required
+                        disabled={isSubmitting}
+                      />
+                    </fieldset>
+                  </section>
+                </section>
 
+                <h2 className="delivery-options-title">Delivery Options</h2>
                 <fieldset className="delivery-options">
-                    <legend>Delivery Options</legend>
-
-                    <label htmlFor="standardPrice">Standard Delivery Price (R):</label>
-                    <input
+                    <section style={{ marginBottom: '18px' }}>
+                      <h4 style={{ margin: '0 0 12px 0', fontWeight: 600 }}>Standard delivery</h4>
+                      <label htmlFor="standardPrice">Price (R)</label>
+                      <input
                         type="number"
                         id="standardPrice"
                         name="standardPrice"
@@ -289,9 +300,9 @@ const CreateYourStore: React.FC = () => {
                         required
                         disabled={isSubmitting}
                         aria-required="true"
-                    />
-                    <label htmlFor="standardTime">Standard Delivery Time:</label>
-                    <select
+                      />
+                      <label htmlFor="standardTime">Time</label>
+                      <select
                         id="standardTime"
                         name="standardTime"
                         value={formData.standardTime}
@@ -299,14 +310,17 @@ const CreateYourStore: React.FC = () => {
                         required
                         disabled={isSubmitting}
                         aria-required="true"
-                    >
+                      >
                         {STANDARD_DELIVERY_TIMES.map(time => (
-                            <option key={`std-${time}`} value={time}>{time} Days</option>
+                          <option key={`std-${time}`} value={time}>{time} Days</option>
                         ))}
-                    </select>
-
-                    <label htmlFor="expressPrice">Express Delivery Price (R):</label>
-                    <input
+                      </select>
+                    </section>
+                    <hr className="delivery-separator" />
+                    <section>
+                      <h4 style={{ margin: '0 0 12px 0', fontWeight: 600 }}>Express delivery</h4>
+                      <label htmlFor="expressPrice">Price (R)</label>
+                      <input
                         type="number"
                         id="expressPrice"
                         name="expressPrice"
@@ -318,9 +332,9 @@ const CreateYourStore: React.FC = () => {
                         required
                         disabled={isSubmitting}
                         aria-required="true"
-                    />
-                    <label htmlFor="expressTime">Express Delivery Time:</label>
-                    <select
+                      />
+                      <label htmlFor="expressTime">Time</label>
+                      <select
                         id="expressTime"
                         name="expressTime"
                         value={formData.expressTime}
@@ -328,12 +342,13 @@ const CreateYourStore: React.FC = () => {
                         required
                         disabled={isSubmitting}
                         aria-required="true"
-                    >
+                      >
                         {EXPRESS_DELIVERY_TIMES.map(time => (
-                            <option key={`exp-${time}`} value={time}>{time} Days</option>
+                          <option key={`exp-${time}`} value={time}>{time} Days</option>
                         ))}
-                    </select>
-                   </fieldset>
+                      </select>
+                    </section>
+                </fieldset>
 
                 <ProductList
                     products={formData.products}

@@ -37,7 +37,7 @@ const ProductList: React.FC<ProductListProps> = ({
     // Using section for structure
     <section className="product-list-section">
       <h2>Products</h2>
-      <p>Add at least one product. Ensure all fields are filled and an image is selected.</p>
+      <p className="product-disclaimer">Add at least one product. Ensure all fields are filled and an image is selected.</p>
 
       {products.map((product, index) => (
         <ProductForm

@@ -169,6 +169,17 @@ const ProductsPage: React.FC = () => {
   const handleStoreChange = (store: string) => handleFilterChange('store', store);
   const handleSearchChange = (query: string) => handleFilterChange('search', query);
 
+  // Modified search handler
+  const handleSearchButtonClick = () => {
+    handleSearchChange(searchInput);
+  };
+
+  // Remove search handler
+  const handleRemoveSearch = () => {
+    setSearchInput('');
+    handleSearchChange('');
+  };
+
   const handleAddToCart = async (product: Product) => {
     if (isAuth0Loading || isRoleFetching) {
       showNotification("Please wait, verifying user permissions...", "error");
@@ -230,6 +241,10 @@ const ProductsPage: React.FC = () => {
   return (
     <>
       <main className="products-container">
+        {/* Big centered Products header */}
+        <header>
+          <h1 className="main-titles">Products</h1>
+        </header>
         {notification.type && (
           <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
             {notification.message}
@@ -238,7 +253,6 @@ const ProductsPage: React.FC = () => {
 
         <section className="filters-container" aria-labelledby="filters-heading">
           <h2 id="filters-heading" className="search-label">Search Products:</h2>
-          {/* Search bar at the top of the purple box */}
           <section className="search-bar-in-filters">
             <section className="search-input-group">
               <input
@@ -249,9 +263,20 @@ const ProductsPage: React.FC = () => {
                 onChange={e => setSearchInput(e.target.value)}
                 aria-label="Search products"
               />
+              {/* Remove Search button is always visible when input is not empty */}
+              {searchInput.trim() !== '' && (
+                <button
+                  type="button"
+                  className="remove-search-btn"
+                  onClick={handleRemoveSearch}
+                  aria-label="Remove search and show all products"
+                >
+                  Remove Search
+                </button>
+              )}
               <button
                 className="search-products-btn"
-                onClick={() => handleSearchChange(searchInput)}
+                onClick={handleSearchButtonClick}
                 type="button"
                 aria-label="Search"
               >
@@ -299,42 +324,39 @@ const ProductsPage: React.FC = () => {
 
               return (
                 <li key={product.prodId} className="product-card">
-                  <article className="product-card-content">
-                    <figure className="product-image-container">
-                      <img
-                        src={product.imageUrl || '/placeholder-product.jpg'}
-                        alt={product.name || 'Product image'}
-                        className="product-image"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          if (target.src !== '/placeholder-product.jpg') {
-                            target.src = '/placeholder-product.jpg';
-                            target.alt = 'Placeholder image';
-                            target.classList.add('placeholder');
-                          }
-                        }}
-                        loading="lazy"
-                      />
-                    </figure>
-                    <section className="product-details">
-                      <h2 className="product-name">{product.name}</h2>
-                      <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
-                      <p className="product-description">{product.description}</p>
-                      <p className="product-category">Category: {product.category}</p>
-                      <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
-                      <p className="product-quantity">
-                        {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
-                      </p>
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        className="add-to-cart-btn"
-                        aria-label={ currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` : isOwner ? `Cannot add own product ${product.name}` : isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-                        type="button" disabled={isDisabled}
-                      >
-                        {buttonText}
-                      </button>
-                    </section>
-                  </article>
+                  <img
+                    src={product.imageUrl || '/placeholder-product.jpg'}
+                    alt={product.name || 'Product image'}
+                    className="product-image"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== '/placeholder-product.jpg') {
+                        target.src = '/placeholder-product.jpg';
+                        target.alt = 'Placeholder image';
+                        target.classList.add('placeholder');
+                      }
+                    }}
+                    loading="lazy"
+                  />
+                  <section className="product-details">
+                    <h2 className="product-name">{product.name}</h2>
+                    <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                    <p className="product-description">{product.description}</p>
+                    <p className="product-category">Category: {product.category}</p>
+                    <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
+                    <p className="product-quantity">
+                      {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                    </p>
+                  </section>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="add-to-cart-btn"
+                    aria-label={ currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` : isOwner ? `Cannot add own product ${product.name}` : isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+                    type="button"
+                    disabled={isDisabled}
+                  >
+                    {buttonText}
+                  </button>
                 </li>
               );
             })
