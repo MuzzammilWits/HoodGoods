@@ -1,17 +1,131 @@
 /* frontend/src/pages/ProductsPage.css */
 
-main.products-container { /* Targeting main */
+/* Note: @keyframes shimmer and .skeleton-item base styles are assumed to be in a global CSS file like index.css or App.css */
+
+/* --- Page-Specific Skeleton Styles for ProductsPage (Updated) --- */
+
+/* Skeleton for the main title and subtitle if they were part of this page's direct loading state */
+/* For .main-titles and .main-titles-sub, if they appear before products load */
+p.skeleton-main-title { /* Assuming you might add a skeleton for this */
+  height: 40px; /* Approx height of 2.5rem font */
+  width: 60%;
+  max-width: 500px;
+  margin: 0 auto 1rem auto; /* Centered, with bottom margin */
+}
+p.skeleton-main-subtitle { /* Assuming you might add a skeleton for this */
+  height: 20px; /* Approx height of 1.15rem font */
+  width: 80%;
+  max-width: 600px;
+  margin: 0 auto 2.2rem auto; /* Centered, with bottom margin */
+}
+
+
+/* Skeleton styles for the filters section on ProductsPage */
+.filters-container p.skeleton-header { 
+  height: 30px; /* Adjusted to better match .search-label or .filter-label */
+  width: 240px; 
+  margin-bottom: 1rem; /* Matches spacing in filter groups */
+}
+.filters-container input.skeleton-input, 
+.filters-container select.skeleton-input {
+  height: 48px; 
+  flex: 1; 
+  border: 1.5px solid #e0d6ea; /* Match actual input/select border for consistency */
+  background-color: #fff; /* Match actual input/select background */
+  padding: 0; 
+  min-width: 0; 
+}
+.filters-container button.skeleton-search-btn { 
+  height: 48px; 
+  width: 120px; /* Approximate width of search button */
+  border: none; 
+}
+.recommendations-link-below button.skeleton-cta-button { 
+    height: 48px; 
+    width: 220px; 
+    border-radius: 10px; 
+    border: none; 
+}
+
+
+/* Skeleton styles for individual product cards on ProductsPage */
+.skeleton-card { 
+  background-color: #F5F2F8; /* Match new product card background */
+  border: 1px solid #eaeaea; 
+  display: flex; 
+  border-radius: 8px; 
+  overflow: hidden; 
+  padding: 15px; /* Match new product card padding */
+}
+
+.skeleton-card article.product-card-content { 
+    display: flex;
+    flex-direction: column;
+    width: 100%; 
+    height: 100%; 
+}
+
+.skeleton-card figure.skeleton-image { 
+  height: 160px; /* Match new .product-image height */
+  width: 100%;
+  margin: 0 0 12px 0; /* Match new .product-image margin-bottom */
+  border-radius: 8px 8px 0 0; /* Match new .product-image border-radius */
+  /* The figure.product-image-container is 260px, but the image inside is 160px.
+     The skeleton should represent the visible image part primarily.
+     If the container's extra space is visually important, this might need adjustment
+     or a nested skeleton structure. For simplicity, we'll match the image. */
+}
+.skeleton-card section.skeleton-details { 
+  padding: 0; /* Match new .product-details padding */
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem; /* Adjusted for tighter spacing, closer to 1.2rem margins on actual text */
+  flex-grow: 1;
+}
+.skeleton-card p.skeleton-text { 
+  height: 18px; /* Slightly smaller to mimic font size */
+  width: 80%;   
+  border-radius: 4px; 
+  margin: 0 0 0.4rem 0; /* Small bottom margin to separate lines */
+}
+.skeleton-card p.skeleton-text.short { 
+  width: 50%; 
+}
+.skeleton-card p.skeleton-text.price { /* Specific for price line */
+  width: 30%;
+  height: 20px; /* Slightly taller for bold price */
+}
+.skeleton-card button.skeleton-button { 
+  height: 45px; /* Approx height of .add-to-cart-btn */
+  width: 100%;
+  margin-top: auto; 
+  border-radius: 4px; 
+  border: none; 
+}
+
+/* --- Animations for Non-Skeleton Elements (Notifications, etc.) --- */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* --- Main Content Styles (Copied from your provided CSS) --- */
+
+main.products-container { 
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: 'Hind', sans-serif; /* Consistent font */
+  font-family: 'Hind', sans-serif; 
 }
 
 ul.products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
-  /* Reset default list styles */
   list-style: none;
   padding: 0;
   margin: 0;
@@ -25,7 +139,6 @@ li.product-card {
   text-align: left;
   display: flex;
   flex-direction: column;
-  /* justify-content: space-between; REMOVED to allow button to be at bottom naturally */
   transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
 }
@@ -85,15 +198,15 @@ section.product-details {
   font-family: 'Poppins', 'Hind', sans-serif;
 }
 
-.product-name {
-  display: none;
+.product-name { /* This style hides the h2.product-name, ensure this is intended */
+  display: none; 
 }
 
 section.product-details h2, section.product-details p {
-    margin: 0; /* Reset default margins */
+    margin: 0; 
 }
 
-h2.product-name {
+h2.product-name { /* This will be hidden by .product-name above if not more specific */
   margin-bottom: 0.5rem;
   font-size: 1.2rem;
   color: var(--primary-color-darker, #362245);
@@ -145,6 +258,8 @@ p.product-quantity {
 .add-to-cart-btn {
   margin-top: auto;
   width: 100%;
+  /* Base styles for add-to-cart-btn are already defined in your global or component CSS */
+  /* This ensures it's pushed to the bottom */
 }
 
 .add-to-cart-btn:hover:not(:disabled) {
@@ -158,19 +273,19 @@ p.product-quantity {
   opacity: 0.7;
 }
 
-section.error-message { /* Targeting section for error block */
+section.error-message { 
   text-align: center;
   padding: 3rem;
   color: #d32f2f;
   font-size: 1.1rem;
-  background-color: #ffebee; /* Light red background */
-  border: 1px solid #ef9a9a; /* Red border */
+  background-color: #ffebee; 
+  border: 1px solid #ef9a9a; 
   border-radius: 8px;
 }
 
 .retry-button {
   margin-top: 1rem;
-  padding: 0.6rem 1.2rem; /* Adjusted padding */
+  padding: 0.6rem 1.2rem; 
   background-color: var(--primary-color, #432C53);
   color: white;
   border: none;
@@ -183,69 +298,66 @@ section.error-message { /* Targeting section for error block */
     background-color: #5a3a6f;
 }
 
-/* --- Styles for the entire filter area --- */
-section.filters-container { /* Targeting section */
+section.filters-container { 
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Increased gap between filter groups */
+  gap: 1.5rem; 
   margin-bottom: 2rem;
-  padding: 1.5rem; /* Increased padding */
-  background: #ECE4F1; /* Light lavender */
+  padding: 1.5rem; 
+  background: #ECE4F1; 
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
-.visually-hidden { /* For accessible headings for sections */
+.visually-hidden { 
   position: absolute !important;
   height: 1px; width: 1px; 
   overflow: hidden;
-  clip: rect(1px 1px 1px 1px); /* Deprecated but common fallback */
+  clip: rect(1px 1px 1px 1px); 
   clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap; /* Keep on one line */
+  white-space: nowrap; 
 }
 
-section.filter-row-search-recs { /* Targeting section */
+section.filter-row-search-recs { 
   display: flex;
   align-items: center; 
-  gap: 1.5rem; /* Increased gap */
+  gap: 1.5rem; 
   width: 100%;
 }
 
-section.filters { /* Targeting general filter group section */
+section.filters { 
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* Space between label and input/select within a filter group */
+  gap: 0.5rem; 
   width: 100%;
-  /* background-color: #f8f9fa; Removed to let filters-container background show */
-  /* padding: 0.75rem 1rem; Removed padding from individual filter groups */
-  border-radius: 6px; /* Soften corners if background was present */
+  border-radius: 6px; 
 }
 
-section.search-bar.filters { /* Targeting search bar section */
+section.search-bar.filters { 
   flex-grow: 1;
   width: auto;
   min-width: 250px; 
 }
 
 section.filters label {
-  font-weight: 600; /* Bolder labels */
+  font-weight: 600; 
   display: block;
-  font-size: 0.9rem; /* Slightly larger label */
+  font-size: 0.9rem; 
   color: #333;
-  margin-bottom: 0.25rem; /* Small space below label */
+  margin-bottom: 0.25rem; 
   font-family: 'Poppins', sans-serif;
 }
 
 section.filters select,
-section.search-bar input[type="search"] {
-  padding: 0.75rem 1rem; /* Increased padding */
-  border: 1px solid #ced4da; /* Standardized border */
+section.search-bar input[type="search"] { /* This selector might be too broad if .search-bar is used elsewhere */
+  padding: 0.75rem 1rem; 
+  border: 1px solid #ced4da; 
   border-radius: 4px;
-  font-size: 1rem; /* Larger font size */
+  font-size: 1rem; 
   box-sizing: border-box;
   width: 100%;
   line-height: 1.5;
-  background-color: #fff; /* Ensure white background for inputs */
-  font-family: 'Hind', sans-serif; /* Consistent input font */
+  background-color: #fff; 
+  font-family: 'Hind', sans-serif; 
 }
 section.filters select:focus,
 section.search-bar input[type="search"]:focus {
@@ -254,41 +366,13 @@ section.search-bar input[type="search"]:focus {
     box-shadow: 0 0 0 3px rgba(67, 44, 83, 0.2);
 }
 
-section.recommendations-link-container { /* Targeting section */
-  flex-shrink: 0; /* Prevent shrinking */
+section.recommendations-link-container { 
+  flex-shrink: 0; 
 }
 
-.products-page-cta-button {
-  background: #97C9BA;
-  color: #fff;
-  padding: 0.75rem 1.5rem; /* Adjusted padding for consistency */
-  border: 1px solid var(--primary-color, #432C53);
-  box-sizing: border-box;
-  border-radius: 5px;
-  font-size: 1rem; /* Consistent font size */
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Softer shadow */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  white-space: nowrap;
-  line-height: 1.5;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-}
+/* This rule was duplicated, using the one from the new CSS below */
+/* .products-page-cta-button { ... } */
 
-.products-page-cta-button:hover,
-.products-page-cta-button:focus {
-  background-color: #7ab8a5;
-  border-color: #5a3a6f;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Notification Modal Styles */
 aside.notification-modal {
   position: fixed;
   top: 80px;
@@ -306,17 +390,9 @@ aside.notification-modal {
 aside.notification-modal.success { background-color: #97C9BA !important; box-shadow: 0 4px 8px rgba(0,0,0,0.10); }
 aside.notification-modal.error { background-color: #f44336; }
 
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* Loading Container and Spinner */
-section.loading-container { /* Targeting section */
+/* Loading Container and Spinner - These are for the old spinner, can be removed if fully replaced by skeleton */
+/*
+section.loading-container { 
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -332,20 +408,21 @@ section.loading-container p {
   margin-top: 1rem;
 }
 
-figure.spinner { /* Targeting figure */
+figure.spinner { 
   width: 48px;
   height: 48px;
   border: 5px solid rgba(204, 204, 204, 0.3);
   border-top-color: #97c9ba;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  margin: 0; /* Reset figure margin */
+  margin: 0; 
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+*/
 
-li.no-products { /* Styling for the 'no products' list item */
-    grid-column: 1 / -1; /* Span all columns if in a grid */
+li.no-products { 
+    grid-column: 1 / -1; 
     text-align: center;
     padding: 3rem 1rem;
     background-color: #f9f9f9;
@@ -355,7 +432,6 @@ li.no-products { /* Styling for the 'no products' list item */
 }
 li.no-products p { margin: 0; }
 
-/* Responsive adjustments for filters */
 @media (max-width: 768px) {
   section.filter-row-search-recs { flex-wrap: wrap; }
   section.search-bar.filters { min-width: 150px; }
@@ -367,15 +443,14 @@ li.no-products p { margin: 0; }
   section.search-bar.filters { width: 100%; min-width: auto; }
   section.recommendations-link-container { width: 100%; margin-top: 0; }
   .products-page-cta-button { width: 100%; box-sizing: border-box; }
-  ul.products-grid { grid-template-columns: 1fr; } /* Single column for products */
+  ul.products-grid { grid-template-columns: 1fr; } 
 }
 
-/* --- Section Divider Style --- */
-figure.section-divider { /* Changed div to figure */
+figure.section-divider { 
   position: relative;
   width: 100%;
   height: 100px;
-  margin: 2rem 0 0 0; /* Add top margin, reset others */
+  margin: 2rem 0 0 0; 
   overflow: hidden;
   background-color: #97C9BA;
 }
@@ -387,19 +462,13 @@ figure.section-divider svg {
   position: absolute;
   bottom: 0;
   left: 0;
-  fill: var(--light-purple); /* This should ideally match the page background or the section below it */
+  fill: var(--light-purple); 
 }
 
-/* Purple filter box */
-.filters-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: #ECE4F1;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(67,44,83,0.04);
+.filters-container { /* This class is already styled above, ensure consistency or merge */
+  /* display: flex; ... already defined */
+  /* ... other properties ... */
+  border-radius: 12px; /* From new CSS */
 }
 
 .filter-row-sidebyside {
@@ -429,37 +498,40 @@ figure.section-divider svg {
 .category-filter.filters select,
 .store-filter.filters select {
   width: 100%;
-  padding: 1rem;
-  border: 1.5px solid #e0d6ea;
-  border-radius: 8px;
-  font-size: 1.05rem;
+  padding: 1rem; /* From new CSS */
+  border: 1.5px solid #e0d6ea; /* From new CSS */
+  border-radius: 8px; /* From new CSS */
+  font-size: 1.05rem; /* From new CSS */
   background: #fff;
   margin-bottom: 0;
+  /* appearance and background-image for custom arrow are fine from new CSS */
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23432C53" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
 }
 
-.recommendations-link-container {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.2rem;
-}
-.products-page-cta-button {
+/* .recommendations-link-container already styled */
+
+.products-page-cta-button { /* Styles from new CSS for this specific button */
   background: #97C9BA;
   color: #fff;
-  border: none;
+  border: none; /* Overriding previous border */
   border-radius: 10px;
   font-weight: 600;
   font-size: 1.1rem;
-  padding: 0 2.5rem;
+  padding: 0 2.5rem; /* Specific padding */
   height: 48px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   box-shadow: 0 2px 8px rgba(67,44,83,0.08);
   text-align: center;
-  width: 220px;
+  width: 220px; /* Fixed width for this instance */
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none; /* If it's a Link component rendering an <a> */
 }
 .products-page-cta-button:hover,
 .products-page-cta-button:focus {
@@ -472,29 +544,15 @@ figure.section-divider svg {
     flex-direction: column;
     gap: 1.2rem;
   }
-  .recommendations-link-container {
+  .recommendations-link-container { /* Ensure this is the correct class if used */
     justify-content: center;
   }
-}
-
-@media (max-width: 600px) {
-  .search-bar-standalone input[type="search"] {
-    font-size: 1rem;
-    padding: 0.8rem;
-  }
-  .category-filter.filters select,
-  .store-filter.filters select {
-    font-size: 0.98rem;
-    padding: 0.8rem;
-  }
-  .products-page-cta-button {
-    width: 100%;
-    padding: 1rem 0;
-    font-size: 1rem;
+  .recommendations-link-below .products-page-cta-button { /* More specific if needed */
+     width: auto;
+     min-width: 220px; /* Ensure it doesn't get too small */
   }
 }
 
-/* --- Search Bar in Filters (Current) --- */
 .search-bar-in-filters {
   width: 100%;
   display: flex;
@@ -528,7 +586,7 @@ figure.section-divider svg {
   margin: 0;
 }
 
-.search-products-btn {
+.search-products-btn { /* Styles from new CSS */
   background: #97C9BA;
   color: #fff;
   border: none;
@@ -552,7 +610,6 @@ figure.section-divider svg {
   color: #fff;
 }
 
-/* Headings styling */
 .search-label, .filter-label {
   font-family: 'Poppins', sans-serif;
   font-size: 1.35rem;
@@ -570,42 +627,10 @@ figure.section-divider svg {
   margin-top: 0;
 }
 
-/* Filter dropdowns - same height as search bar and button */
-.category-filter.filters select,
-.store-filter.filters select {
-  width: 100%;
-  height: 48px;
-  padding: 0 2.5rem 0 1rem;
-  border: 1.5px solid #e0d6ea;
-  border-radius: 8px;
-  font-size: 1.05rem;
-  background: #fff;
-  margin-bottom: 0;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23432C53" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1.2em;
-}
-
-.category-filter.filters select:focus,
-.store-filter.filters select:focus {
-  border-color: var(--primary-color, #432C53);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(67, 44, 83, 0.2);
-}
-
-/* Add right padding for dropdown arrow */
-.category-filter.filters select,
-.store-filter.filters select {
-  padding-right: 2.5rem;
-}
-
-/* Recommendations button below filter box, left aligned */
-.recommendations-link-below {
+.recommendations-link-below { /* Styles from new CSS */
   background: transparent;
   box-shadow: none;
-  margin: 0;
+  margin: 0; /* Reset margin from previous version if it was different */
   padding-top: 0.5em;
   padding-bottom: 1em;
   display: flex;
@@ -613,35 +638,8 @@ figure.section-divider svg {
   justify-content: flex-start;
 }
 
-.products-page-cta-button {
-  background: #97C9BA;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding: 0 2.5rem;
-  height: 48px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(67,44,83,0.08);
-}
+/* .products-page-cta-button is already styled above with new CSS */
 
-.products-page-cta-button:hover,
-.products-page-cta-button:focus {
-  background: #7ab8a5;
-  color: #fff;
-}
-
-@media (max-width: 900px) {
-  .filter-row-sidebyside {
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .recommendations-link-below {
-    justify-content: center;
-  }
-}
 
 @media (max-width: 700px) {
   .search-input-group {
@@ -656,9 +654,14 @@ figure.section-divider svg {
     padding: 0;
     font-size: 1rem;
   }
-  .products-page-cta-button {
+  .products-page-cta-button { /* Ensure this targets the correct button if it's the one in .recommendations-link-below */
     width: 100%;
-    padding: 0;
+    padding: 0; /* Reset padding for full width */
+    font-size: 1rem;
+  }
+   .recommendations-link-below .products-page-cta-button { /* Be specific for the recommendations button */
+    width: 100%;
+    padding: 1rem 0; /* Use consistent padding for full-width buttons */
     font-size: 1rem;
   }
 }

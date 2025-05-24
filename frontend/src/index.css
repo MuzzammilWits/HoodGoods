@@ -58,3 +58,48 @@ img {
   height: auto;
   display: block; /* Add display block for consistency */
 }
+/* Global Skeleton Styles - Add to your index.css or App.css */
+
+/* Base style for all skeleton items to provide the shimmer background */
+.skeleton-item {
+  background-color: #e0e0e0; /* Light grey base color */
+  border-radius: 6px;     /* Default rounded corners for skeleton shapes */
+  
+  /* Shimmer effect: a subtle gradient that moves */
+  background-image: linear-gradient(
+    to right,
+    #e0e0e0 0%,       /* Start color of gradient */
+    #f0f0f0 50%,      /* Middle color (lighter, creates the shimmer highlight) */
+    #e0e0e0 100%      /* End color of gradient */
+  );
+  background-repeat: no-repeat;
+  background-size: 2000px 100%; /* Gradient is much wider than the element, so it appears to slide across */
+  
+  /* Animation properties */
+  animation-name: shimmer;          /* Name of the @keyframes animation */
+  animation-duration: 1.5s;       /* Duration of one shimmer cycle */
+  animation-timing-function: linear; /* Shimmer moves at a constant speed */
+  animation-iteration-count: infinite; /* Shimmer repeats indefinitely */
+}
+
+/* Shimmer animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0; /* Gradient starts far to the left (off-screen) */
+  }
+  100% {
+    background-position: 1000px 0;  /* Gradient ends far to the right (off-screen) */
+  }
+}
+
+/* Optional: A class for skeleton containers if you want to apply opacity transitions */
+.skeleton-container-active {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.skeleton-container-hidden {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+

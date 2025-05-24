@@ -6,6 +6,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import './ProductsPage.css';
 
+// Helper function to normalize search terms for more effective searching
 const normalizeSearchTerm = (term: string) => {
   if (!term) return '';
   return term
@@ -16,6 +17,7 @@ const normalizeSearchTerm = (term: string) => {
     .trim();
 };
 
+// Interface defining the structure of a Product object
 interface Product {
   prodId: number;
   name: string;
@@ -23,13 +25,14 @@ interface Product {
   category: string;
   price: number;
   productquantity: number;
-  userId: string;
+  userId: string; // ID of the seller
   imageUrl: string;
   storeId: string;
   storeName: string;
-  isActive: boolean;
+  isActive: boolean; // To ensure only active products are shown
 }
 
+// Interface for items being added to the cart
 interface AddToCartItem {
   productId: number;
   productName: string;
@@ -39,11 +42,12 @@ interface AddToCartItem {
   storeName: string;
 }
 
+// Backend URL, dynamically set from environment variables or defaults to localhost
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // For overall page load
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
@@ -52,11 +56,13 @@ const ProductsPage: React.FC = () => {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [isRoleFetching, setIsRoleFetching] = useState(true);
 
+  // --- NEW STATE: Track which product is currently being added to cart ---
+  const [addingProductId, setAddingProductId] = useState<number | null>(null);
+
   const selectedCategory = searchParams.get('category') || '';
   const selectedStore = searchParams.get('store') || '';
   const searchQuery = searchParams.get('search') || '';
 
-  // Local state for search input
   const [searchInput, setSearchInput] = useState(searchQuery);
 
   const showNotification = (message: string, type: 'success' | 'error') => {
@@ -71,8 +77,11 @@ const ProductsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
+        await new Promise(resolve => setTimeout(resolve, 300)); 
+
         const response = await axios.get<{ products: Product[] } | Product[]>(`${backendUrl}/products`);
         let fetchedProducts: Product[] = [];
+
         if (Array.isArray(response.data)) {
             fetchedProducts = response.data;
         } else if (typeof response.data === 'object' && response.data !== null && Array.isArray(response.data.products)) {
@@ -81,6 +90,7 @@ const ProductsPage: React.FC = () => {
             console.error("Unexpected data format for products:", response.data);
             throw new Error('Invalid data format received from server for products');
         }
+
         const validatedProducts = fetchedProducts
           .map(p => ({
               ...p,
@@ -131,7 +141,6 @@ const ProductsPage: React.FC = () => {
     }
   }, [isAuthenticated, user, getAccessTokenSilently, isAuth0Loading, backendUrl]);
 
-  // Update search input when searchQuery changes (e.g., on navigation)
   useEffect(() => {
     setSearchInput(searchQuery);
   }, [searchQuery]);
@@ -160,8 +169,11 @@ const ProductsPage: React.FC = () => {
 
   const handleFilterChange = (filterType: 'category' | 'store' | 'search', value: string) => {
     const newParams = new URLSearchParams(searchParams);
-    if (value) { newParams.set(filterType, value); } 
-    else { newParams.delete(filterType); }
+    if (value) {
+      newParams.set(filterType, value);
+    } else {
+      newParams.delete(filterType);
+    }
     setSearchParams(newParams, { replace: true });
   };
 
@@ -169,18 +181,9 @@ const ProductsPage: React.FC = () => {
   const handleStoreChange = (store: string) => handleFilterChange('store', store);
   const handleSearchChange = (query: string) => handleFilterChange('search', query);
 
-  // Modified search handler
-  const handleSearchButtonClick = () => {
-    handleSearchChange(searchInput);
-  };
-
-  // Remove search handler
-  const handleRemoveSearch = () => {
-    setSearchInput('');
-    handleSearchChange('');
-  };
-
   const handleAddToCart = async (product: Product) => {
+    if (addingProductId === product.prodId) return; // Prevent multiple clicks while already adding
+
     if (isAuth0Loading || isRoleFetching) {
       showNotification("Please wait, verifying user permissions...", "error");
       return;
@@ -189,62 +192,127 @@ const ProductsPage: React.FC = () => {
       alert("An admin cannot add products to cart.");
       return;
     }
+    
+    setAddingProductId(product.prodId); // Set loading state for this specific product
+
     try {
       if (!isAuthenticated) {
         showNotification('Please sign in or create an account to add items to your cart', 'error');
+        setAddingProductId(null); // Reset loading state
         return;
       }
-      if (!product || typeof product.prodId === 'undefined') { throw new Error('Product data is invalid or missing ID'); }
+      if (!product || typeof product.prodId === 'undefined') {
+        throw new Error('Product data is invalid or missing ID');
+      }
       const price = Number(product.price);
-      if (isNaN(price)) { throw new Error('Product price is invalid'); }
-      if (!product.storeId || product.storeId === 'unknown') { console.error("Product missing valid storeId:", product); throw new Error('Product is missing store information.'); }
-      if (product.productquantity <= 0) { showNotification(`${product.name} is currently out of stock.`, 'error'); return; }
-      if (user?.sub === product.userId) { showNotification("You cannot add your own product to the cart.", 'error'); return; }
+      if (isNaN(price)) {
+        throw new Error('Product price is invalid');
+      }
+      if (!product.storeId || product.storeId === 'unknown') {
+        console.error("Product missing valid storeId:", product);
+        throw new Error('Product is missing store information.');
+      }
+      if (product.productquantity <= 0) {
+        showNotification(`${product.name} is currently out of stock.`, 'error');
+        setAddingProductId(null); // Reset loading state
+        return;
+      }
+      if (user?.sub === product.userId) {
+        showNotification("You cannot add your own product to the cart.", 'error');
+        setAddingProductId(null); // Reset loading state
+        return;
+      }
 
       const itemToAdd: AddToCartItem = {
-        productId: product.prodId, productName: product.name, productPrice: price,
-        storeId: product.storeId, storeName: product.storeName, imageUrl: product.imageUrl || undefined
+        productId: product.prodId,
+        productName: product.name,
+        productPrice: price,
+        storeId: product.storeId,
+        storeName: product.storeName,
+        imageUrl: product.imageUrl || undefined
       };
-      await addToCart(itemToAdd);
+      
+      // --- IMPORTANT: Wait for the addToCart operation to complete ---
+      await addToCart(itemToAdd); 
       showNotification(`${product.name} added to cart!`, 'success');
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       const errorMsg = error instanceof Error ? error.message : 'Failed to add item to cart';
       showNotification(errorMsg, 'error');
+    } finally {
+      setAddingProductId(null); // Reset loading state for this product in all cases
     }
   };
 
   const categories = useMemo(() => [...new Set(products.map(product => product.category))], [products]);
   const stores = useMemo(() => [...new Set(products.map(product => product.storeName).filter(Boolean))], [products]);
 
-  if (isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching)) {
+  const isPageLoading = isLoading || isAuth0Loading || (isAuthenticated && isRoleFetching);
+
+  if (isPageLoading) {
     return (
-      <section className="loading-container" aria-label="Loading products and user data">
-        <figure className="spinner" role="img" aria-label="Loading animation"></figure>
-        <p>Loading products and user data...</p>
-      </section>
+      <main className="products-container" aria-busy="true" aria-label="Loading products...">
+        <section className="filters-container">
+          <p className="skeleton-item skeleton-header" aria-hidden="true"></p>
+          <section className="search-bar-in-filters">
+              <form className="search-input-group" onSubmit={(e) => e.preventDefault()}>
+                  <label htmlFor="skeleton-search" className="visually-hidden">Search products placeholder</label>
+                  <input type="text" id="skeleton-search" className="skeleton-item skeleton-input" disabled aria-hidden="true" />
+                  <button type="button" className="skeleton-item skeleton-search-btn" disabled aria-hidden="true"></button>
+              </form>
+          </section>
+          <section className="filter-row-sidebyside">
+              <section className="category-filter filters">
+                <label htmlFor="skeleton-cat-filter" className="visually-hidden">Category filter placeholder</label>
+                <select id="skeleton-cat-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+              </section>
+              <section className="store-filter filters">
+                <label htmlFor="skeleton-store-filter" className="visually-hidden">Store filter placeholder</label>
+                <select id="skeleton-store-filter" className="skeleton-item skeleton-input" disabled aria-hidden="true"><option></option></select>
+              </section>
+          </section>
+        </section>
+        
+        <section className="recommendations-link-below">
+            <button className="skeleton-item skeleton-cta-button" disabled aria-hidden="true"></button>
+        </section>
+
+        <ul className="products-grid">
+            {Array.from({ length: 6 }).map((_, index) => (
+                <li key={index} className="product-card skeleton-card">
+                    <article className="product-card-content">
+                        <figure className="skeleton-item skeleton-image" aria-hidden="true"></figure>
+                        <section className="skeleton-details">
+                            <p className="skeleton-item skeleton-text" aria-hidden="true"></p>
+                            <p className="skeleton-item skeleton-text short" aria-hidden="true"></p>
+                            <button className="skeleton-item skeleton-button" disabled aria-hidden="true"></button>
+                        </section>
+                    </article>
+                </li>
+            ))}
+        </ul>
+      </main>
     );
   }
 
-  if (error && !isLoading) {
+  if (error && !isPageLoading) {
     return (
-      <section className="error-message" role="alert" aria-live="assertive">
-        <h2>Error Loading Products</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className="retry-button">
-          Retry
-        </button>
-      </section>
+      <main className="products-container">
+        <section className="error-message" role="alert" aria-live="assertive">
+          <h2>Error Loading Products</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Retry
+          </button>
+        </section>
+      </main>
     );
   }
 
   return (
     <>
       <main className="products-container">
-        {/* Big centered Products header */}
-        <header>
-          <h1 className="main-titles">Products</h1>
-        </header>
         {notification.type && (
           <aside className={`notification-modal ${notification.type}`} role={notification.type === 'error' ? 'alert' : 'status'}>
             {notification.message}
@@ -254,7 +322,8 @@ const ProductsPage: React.FC = () => {
         <section className="filters-container" aria-labelledby="filters-heading">
           <h2 id="filters-heading" className="search-label">Search Products:</h2>
           <section className="search-bar-in-filters">
-            <section className="search-input-group">
+            <form className="search-input-group" onSubmit={(e) => { e.preventDefault(); handleSearchChange(searchInput);}}>
+              <label htmlFor="product-search" className="visually-hidden">Search by name, description, store</label>
               <input
                 id="product-search"
                 type="search"
@@ -263,46 +332,36 @@ const ProductsPage: React.FC = () => {
                 onChange={e => setSearchInput(e.target.value)}
                 aria-label="Search products"
               />
-              {/* Remove Search button is always visible when input is not empty */}
-              {searchInput.trim() !== '' && (
-                <button
-                  type="button"
-                  className="remove-search-btn"
-                  onClick={handleRemoveSearch}
-                  aria-label="Remove search and show all products"
-                >
-                  Remove Search
-                </button>
-              )}
               <button
                 className="search-products-btn"
-                onClick={handleSearchButtonClick}
-                type="button"
+                type="submit"
                 aria-label="Search"
               >
                 Search
               </button>
-            </section>
+            </form>
           </section>
 
           <section className="filter-row-sidebyside">
             <section className="category-filter filters">
-              <h3 className="filter-label">Filter by Category:</h3>
-              <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)}>
+              <h3 className="filter-label" id="category-filter-label">Filter by Category:</h3>
+              <label htmlFor="category-select" className="visually-hidden">Select Category</label>
+              <select id="category-select" value={selectedCategory} onChange={(e) => handleCategoryChange(e.target.value)} aria-labelledby="category-filter-label">
                 <option value="">All Categories</option>
                 {categories.map(category => (<option key={category} value={category}>{category}</option>))}
               </select>
             </section>
             <section className="store-filter filters">
-              <h3 className="filter-label">Filter by Store:</h3>
-              <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)}>
+              <h3 className="filter-label" id="store-filter-label">Filter by Store:</h3>
+              <label htmlFor="store-select" className="visually-hidden">Select Store</label>
+              <select id="store-select" value={selectedStore} onChange={(e) => handleStoreChange(e.target.value)} aria-labelledby="store-filter-label">
                 <option value="">All Stores</option>
                 {stores.map(store => (<option key={store} value={store}>{store}</option>))}
               </select>
             </section>
           </section>
         </section>
-        {/* Recommended for you button below the purple box, aligned left */}
+        
         <section className="recommendations-link-below">
           <Link to="/recommendations" className="products-page-cta-button">
             Recommended for you
@@ -314,49 +373,64 @@ const ProductsPage: React.FC = () => {
             filteredProducts.map((product) => {
               const isOwner = isAuthenticated && product.userId === user?.sub;
               const isOutOfStock = product.productquantity <= 0;
-              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching); 
+              // --- MODIFIED: Check if this specific product is being added ---
+              const isCurrentlyAdding = addingProductId === product.prodId;
+              
+              let isDisabled = isOutOfStock || isOwner || (isAuth0Loading || isRoleFetching) || isCurrentlyAdding; 
               if (!isDisabled && currentUserRole === 'admin') { isDisabled = true; }
+              
               let buttonText = 'Add to Cart';
-              if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
+              if (isCurrentlyAdding) { buttonText = 'Adding...'; }
+              else if (isAuth0Loading || isRoleFetching) { buttonText = 'Verifying...'; } 
               else if (currentUserRole === 'admin') { buttonText = 'Admin View'; } 
               else if (isOwner) { buttonText = 'Your Product'; } 
               else if (isOutOfStock) { buttonText = 'Out of Stock'; }
 
               return (
                 <li key={product.prodId} className="product-card">
-                  <img
-                    src={product.imageUrl || '/placeholder-product.jpg'}
-                    alt={product.name || 'Product image'}
-                    className="product-image"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (target.src !== '/placeholder-product.jpg') {
-                        target.src = '/placeholder-product.jpg';
-                        target.alt = 'Placeholder image';
-                        target.classList.add('placeholder');
-                      }
-                    }}
-                    loading="lazy"
-                  />
-                  <section className="product-details">
-                    <h2 className="product-name">{product.name}</h2>
-                    <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
-                    <p className="product-description">{product.description}</p>
-                    <p className="product-category">Category: {product.category}</p>
-                    <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
-                    <p className="product-quantity">
-                      {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
-                    </p>
-                  </section>
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="add-to-cart-btn"
-                    aria-label={ currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` : isOwner ? `Cannot add own product ${product.name}` : isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-                    type="button"
-                    disabled={isDisabled}
-                  >
-                    {buttonText}
-                  </button>
+                  <article className="product-card-content">
+                    <figure className="product-image-container">
+                      <img
+                        src={product.imageUrl || '/placeholder-product.jpg'}
+                        alt={product.name || 'Product image'}
+                        className="product-image"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== '/placeholder-product.jpg') {
+                            target.src = '/placeholder-product.jpg';
+                            target.alt = 'Placeholder image';
+                            target.classList.add('placeholder');
+                          }
+                        }}
+                        loading="lazy"
+                      />
+                    </figure>
+                    <section className="product-details">
+                      <h2 className="product-name">{product.name}</h2>
+                      <p className="product-store">Sold by: {product.storeName || 'Unknown Store'}</p>
+                      <p className="product-description">{product.description}</p>
+                      <p className="product-category">Category: {product.category}</p>
+                      <p className="product-price">R{(Number(product.price) || 0).toFixed(2)}</p>
+                      <p className="product-quantity">
+                        {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                      </p>
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        className="add-to-cart-btn"
+                        aria-label={ 
+                            isCurrentlyAdding ? `Adding ${product.name} to cart`
+                            : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart` 
+                            : isOwner ? `Cannot add own product ${product.name}` 
+                            : isOutOfStock ? `${product.name} is out of stock` 
+                            : `Add ${product.name} to cart`
+                        }
+                        type="button" 
+                        disabled={isDisabled} // Button is disabled if any of these conditions are true
+                      >
+                        {buttonText}
+                      </button>
+                    </section>
+                  </article>
                 </li>
               );
             })
@@ -374,5 +448,5 @@ const ProductsPage: React.FC = () => {
     </>
   );
 };
-
+ 
 export default ProductsPage;
