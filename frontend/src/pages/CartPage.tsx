@@ -20,6 +20,7 @@ const CartPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(location.state?.refresh || false);
 
   useEffect(() => {
+    // This effect still runs to fetch the latest cart status
     if (isRefreshing) {
       fetchCart();
       window.history.replaceState({}, document.title);
@@ -27,16 +28,19 @@ const CartPage: React.FC = () => {
     }
   }, [isRefreshing, fetchCart]);
 
-  if (isLoading || isRefreshing) {
+  // --- THE ONLY CHANGE IS ON THIS LINE ---
+  // Only show the skeleton if we are loading AND the cart had items previously.
+  const showSkeleton = (isLoading || isRefreshing) && cartItems.length > 0;
+
+  if (showSkeleton) {
     return (
-      // Changed from <main> to <div>
       <div className="cart-container" aria-busy="true" aria-label="Loading your shopping cart...">
         <header>
           <h1 className="skeleton-item skeleton-title" aria-hidden="true"></h1>
         </header>
         <section className="cart-content">
           <ul className="cart-items">
-            {Array.from({ length: 2 }).map((_, index) => (
+            {Array.from({ length: cartItems.length }).map((_, index) => (
               <li key={index} className="cart-item skeleton-cart-item">
                 <figure className="item-image-container skeleton-item skeleton-image-item" aria-hidden="true"></figure>
                 <article className="item-details">
@@ -66,7 +70,6 @@ const CartPage: React.FC = () => {
 
   if (cartError) {
     return (
-      // Changed from <main> to <div>
       <div className="cart-container">
         <header>
             <h1 className="cart-title">Your Shopping Cart</h1>
@@ -82,8 +85,9 @@ const CartPage: React.FC = () => {
     );
   }
 
+  // If showSkeleton is false, this part will render.
+  // If the cart is empty, it will correctly show the "Your cart is empty" message.
   return (
-    // Changed from <main> to <div>
     <div className="cart-container">
       <header>
         <h1 className="cart-title">Your Shopping Cart</h1>
