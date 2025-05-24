@@ -11,40 +11,53 @@ const CartPage: React.FC = () => {
     updateQuantity,
     totalPrice,
     clearCart,
-    isLoading, // We still use the global loading for hard reloads
+    isLoading: contextIsLoading, // Renamed to avoid conflict with local loading/refreshing state
     cartError,
     fetchCart,
   } = useCart();
 
   const location = useLocation();
 
-  // This local state now reliably controls the refresh-on-navigation behavior.
-  const [isRefreshing, setIsRefreshing] = useState(() => {
-    // This function runs only once when the component initializes.
-    const wasRefreshRequested = location.state?.refresh === true;
-    if (wasRefreshRequested) {
-      // We clean up the history state immediately so it doesn't persist.
-      window.history.replaceState({}, document.title);
-      return true; // Set our local refreshing state to true.
+  // Local state to manage the "refresh requested by navigation" lifecycle.
+  // This state is more robustly controlled within this component.
+  const [isPageRefreshing, setIsPageRefreshing] = useState(() => {
+    // Initialize based on navigation state. This function runs only once.
+    const wasNavRefreshRequested = location.state?.refresh === true;
+    if (wasNavRefreshRequested) {
+      window.history.replaceState({}, document.title); // Clear history state immediately
+      return true; // Start in a refreshing state if navigation requested it
     }
     return false;
   });
 
   useEffect(() => {
-    // This effect runs only when our local `isRefreshing` state is true.
-    if (isRefreshing) {
-      // We call fetchCart and wait for it to complete.
-      fetchCart().finally(() => {
-        // Once fetchCart is done (successfully or not), we turn off the flag.
-        setIsRefreshing(false);
-      });
+    // This effect triggers the actual data fetch if `isPageRefreshing` is true.
+    if (isPageRefreshing) {
+      // We only fetch if the cart had items initially.
+      // This adheres to the "no skeleton for empty cart navigation" rule.
+      if (cartItems.length > 0) {
+        fetchCart().finally(() => {
+          // CRITICAL: Always set isPageRefreshing to false after fetch completes.
+          setIsPageRefreshing(false);
+        });
+      } else {
+        // If cart was empty, no need to fetch, just turn off the refresh state.
+        setIsPageRefreshing(false);
+      }
     }
-  }, [isRefreshing, fetchCart]);
+    // Note: The CartProvider handles the initial fetch on hard reload.
+  }, [isPageRefreshing, cartItems.length, fetchCart]); // Effect dependencies
 
+  // --- FINAL SKELETON DISPLAY LOGIC ---
+  // Show skeleton if:
+  // 1. The CartContext is loading (handles hard reloads where cartItems might be empty initially).
+  // OR
+  // 2. Our local page refresh is active AND there were items in the cart.
+  const showSkeleton =
+    (contextIsLoading && cartItems.length === 0) || // For hard reload: context is loading, cartItems is initially empty.
+    (contextIsLoading && cartItems.length > 0) ||   // For hard reload: context is loading, cartItems might already be populated by a quick context.
+    (isPageRefreshing && cartItems.length > 0);     // For navigation refresh: our local flag is active for a non-empty cart.
 
-  // --- The condition to show the skeleton is now simple and reliable ---
-  // Show if the global context is loading OR if our local refresh flag is active.
-  const showSkeleton = isLoading || isRefreshing;
 
   if (showSkeleton) {
     return (
@@ -54,7 +67,8 @@ const CartPage: React.FC = () => {
         </header>
         <section className="cart-content">
           <ul className="cart-items">
-            {Array.from({ length: 2 }).map((_, index) => (
+            {/* Show a number of skeleton items based on current cart size if known, or default to 1-2 */}
+            {Array.from({ length: Math.max(cartItems.length, 1) }).map((_, index) => (
               <li key={index} className="cart-item skeleton-cart-item">
                 <figure className="item-image-container skeleton-item skeleton-image-item" aria-hidden="true"></figure>
                 <article className="item-details">
