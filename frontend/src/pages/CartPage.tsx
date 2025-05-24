@@ -11,26 +11,40 @@ const CartPage: React.FC = () => {
     updateQuantity,
     totalPrice,
     clearCart,
-    isLoading,
+    isLoading, // We still use the global loading for hard reloads
     cartError,
     fetchCart,
   } = useCart();
 
   const location = useLocation();
-  const [isRefreshing, setIsRefreshing] = useState(location.state?.refresh || false);
+
+  // This local state now reliably controls the refresh-on-navigation behavior.
+  const [isRefreshing, setIsRefreshing] = useState(() => {
+    // This function runs only once when the component initializes.
+    const wasRefreshRequested = location.state?.refresh === true;
+    if (wasRefreshRequested) {
+      // We clean up the history state immediately so it doesn't persist.
+      window.history.replaceState({}, document.title);
+      return true; // Set our local refreshing state to true.
+    }
+    return false;
+  });
 
   useEffect(() => {
-    // This effect still runs to fetch the latest cart status
+    // This effect runs only when our local `isRefreshing` state is true.
     if (isRefreshing) {
-      fetchCart();
-      window.history.replaceState({}, document.title);
-      setIsRefreshing(false);
+      // We call fetchCart and wait for it to complete.
+      fetchCart().finally(() => {
+        // Once fetchCart is done (successfully or not), we turn off the flag.
+        setIsRefreshing(false);
+      });
     }
   }, [isRefreshing, fetchCart]);
 
-  // --- THE ONLY CHANGE IS ON THIS LINE ---
-  // Only show the skeleton if we are loading AND the cart had items previously.
-  const showSkeleton = (isLoading || isRefreshing) && cartItems.length > 0;
+
+  // --- The condition to show the skeleton is now simple and reliable ---
+  // Show if the global context is loading OR if our local refresh flag is active.
+  const showSkeleton = isLoading || isRefreshing;
 
   if (showSkeleton) {
     return (
@@ -40,7 +54,7 @@ const CartPage: React.FC = () => {
         </header>
         <section className="cart-content">
           <ul className="cart-items">
-            {Array.from({ length: cartItems.length }).map((_, index) => (
+            {Array.from({ length: 2 }).map((_, index) => (
               <li key={index} className="cart-item skeleton-cart-item">
                 <figure className="item-image-container skeleton-item skeleton-image-item" aria-hidden="true"></figure>
                 <article className="item-details">
@@ -85,8 +99,6 @@ const CartPage: React.FC = () => {
     );
   }
 
-  // If showSkeleton is false, this part will render.
-  // If the cart is empty, it will correctly show the "Your cart is empty" message.
   return (
     <div className="cart-container">
       <header>
@@ -129,18 +141,6 @@ const CartPage: React.FC = () => {
                       +
                     </button>
                   </section>
-                  {item.availableQuantity != null && (
-                    <p style={{ fontSize: '0.8em', color: '#666' }}>
-                      {item.availableQuantity - item.quantity >= 0
-                        ? `${item.availableQuantity - item.quantity} more available`
-                        : `${item.availableQuantity} available (in stock)`}
-                    </p>
-                  )}
-                  {item.availableQuantity != null && item.quantity > item.availableQuantity && (
-                    <p style={{ color: 'red', fontSize: '0.8em', fontWeight: 'bold' }}>
-                      Warning: Quantity in cart exceeds available stock! ({item.availableQuantity} available)
-                    </p>
-                  )}
                   <p className="item-subtotal">
                     Subtotal: R{(Number(item.productPrice) * item.quantity).toFixed(2)}
                   </p>
