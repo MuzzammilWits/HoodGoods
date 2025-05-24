@@ -1,10 +1,10 @@
 /* frontend/src/components/recommendations/BestSellersList.css */
 section.best-sellers-container {
   margin: 20px 0;
-  padding: 20px 15px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 section.best-sellers-container h2 {
