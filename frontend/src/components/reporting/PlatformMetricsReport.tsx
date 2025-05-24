@@ -190,14 +190,14 @@ const PlatformMetricsReport: React.FC = () => {
         if (!reportData?.timeSeriesMetrics || reportData.timeSeriesMetrics.length === 0) return null;
         const labels = reportData.timeSeriesMetrics.map((dataPoint: PlatformMetricPoint) => new Date(dataPoint.date));
         const salesValues = reportData.timeSeriesMetrics.map((dataPoint: PlatformMetricPoint) => dataPoint.totalSales);
-        return { labels, datasets: [{ label: 'Total Platform Sales (R)', data: salesValues, borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.2)', tension: 0.1, fill: true }] };
+        return { labels, datasets: [{ label: 'Total Platform Sales (R)', data: salesValues, borderColor: 'rgb(151, 201, 186)', backgroundColor: 'rgba(151, 201, 186, 0.2)', tension: 0.1, fill: true }] };
     }, [reportData]);
 
     const ordersChartData = useMemo(() => {
         if (!reportData?.timeSeriesMetrics || reportData.timeSeriesMetrics.length === 0) return null;
         const labels = reportData.timeSeriesMetrics.map((dataPoint: PlatformMetricPoint) => new Date(dataPoint.date));
         const ordersValues = reportData.timeSeriesMetrics.map((dataPoint: PlatformMetricPoint) => dataPoint.totalOrders);
-        return { labels, datasets: [{ label: 'Total Platform Orders', data: ordersValues, borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.2)', tension: 0.1, fill: true }] };
+        return { labels, datasets: [{ label: 'Total Platform Orders', data: ordersValues, borderColor: 'rgb(151, 201, 186)', backgroundColor: 'rgba(151, 201, 186, 0.2)', tension: 0.1, fill: true }] };
     }, [reportData]);
 
     const commonChartOptions = useMemo(() => {

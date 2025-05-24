@@ -45,14 +45,14 @@ form.report-controls {
 }
 
 .report-controls button {
-  background-color: #007bff;
+  background-color: #432C53;
   color: white;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }
 
 .report-controls button:hover {
-  background-color: #0056b3;
+  background-color: #97C9BA;
 }
 
 .report-controls button:disabled {
@@ -97,7 +97,7 @@ li.metric-card {
 .metric-card p {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #007bff;
+  color: #432C53;
   margin-bottom: 0;
 }
 
