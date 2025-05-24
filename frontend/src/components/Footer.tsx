@@ -1,37 +1,8 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import './Footer.css';
 import { logo } from './utils/ImageImports'; // Using the centralized import
 
 const Footer: React.FC = () => {
-  const location = useLocation();
-
-  // About Us link handler
-  const handleAboutUsClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/') {
-      e.preventDefault();
-      const aboutSection = document.getElementById('about-us');
-      if (aboutSection) {
-        aboutSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
-  // Home link handler
-  const handleHomeClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/') {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Products link handler
-  const handleProductsClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/products') {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
 
   return (
     <footer className="footer">
@@ -54,21 +25,6 @@ const Footer: React.FC = () => {
           </figure>
         </section>
 
-        <nav className="footer-menu" aria-label="Footer Menu">
-          <ul className="footer-menu-list">
-            <li><Link to="/" className="nav-link" onClick={handleHomeClick}>Home</Link></li>
-            <li><Link to="/products" className="nav-link" onClick={handleProductsClick}>Products</Link></li>
-            <li>
-              <Link
-                to={{ pathname: '/', hash: '#about-us' }}
-                state={{ scrollToAbout: true }}
-                className="nav-link"
-              >
-                About Us
-              </Link>
-            </li>
-          </ul>
-        </nav>
 
         <section className="footer-social-area">
           <nav className="social-icons" aria-label="Social Links">
