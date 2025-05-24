@@ -1,15 +1,13 @@
+/* frontend/src/App.css */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
 
-/* Define global CSS variables */
+/* ... your :root variables ... */
 :root {
-  /* Define your theme colors here */
-  --primary-color: #432C53; /* Example: Using your main purple as primary */
-  --secondary-color: #432C53; /* --- DEFINED HERE (using same purple for now) --- */
-  /* You might want a different color for secondary, e.g., #8a6a9a */
-  --light-purple: #F9F6FD; /* Defined from Hero section */
-  --text-color: #333333; /* Default text color */
-  --border-color: #e0e0e0; /* Default border color */
-  /* Add any other global variables */
+  --primary-color: #432C53;
+  --secondary-color: #432C53;
+  --light-purple: #F9F6FD;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
 }
 
 .app {
@@ -22,6 +20,17 @@ main {
   flex: 1;
 }
 
+/* --- SOLUTION: Apply minimum height to the main content area --- */
+.app-main-content {
+  /* This forces the container for all your pages to have a minimum height,
+     preventing the footer from jumping up. 70vh is a good starting point,
+     leaving space for your navbar and footer. */
+  min-height: 70vh;
+  /* We also ensure it grows if the content is larger. */
+  flex-grow: 1;
+}
+/* --- End of Solution --- */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -32,6 +41,7 @@ main {
   padding: 2rem 0;
 }
 
+/* ... rest of your App.css file ... */
 .section-title {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
@@ -45,39 +55,6 @@ main {
   /* Uses the defined secondary color */
   color: var(--secondary-color);
   text-decoration: underline;
-}
-/* Global Skeleton Styles - Add to your index.css or App.css */
-
-/* Base style for all skeleton items to provide the shimmer background */
-.skeleton-item {
-  background-color: #e0e0e0; /* Light grey base color */
-  border-radius: 6px;     /* Default rounded corners for skeleton shapes */
-  
-  /* Shimmer effect: a subtle gradient that moves */
-  background-image: linear-gradient(
-    to right,
-    #e0e0e0 0%,       /* Start color of gradient */
-    #f0f0f0 50%,      /* Middle color (lighter, creates the shimmer highlight) */
-    #e0e0e0 100%      /* End color of gradient */
-  );
-  background-repeat: no-repeat;
-  background-size: 2000px 100%; /* Gradient is much wider than the element, so it appears to slide across */
-  
-  /* Animation properties */
-  animation-name: shimmer;          /* Name of the @keyframes animation */
-  animation-duration: 1.5s;       /* Duration of one shimmer cycle */
-  animation-timing-function: linear; /* Shimmer moves at a constant speed */
-  animation-iteration-count: infinite; /* Shimmer repeats indefinitely */
-}
-
-/* Shimmer animation keyframes */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0; /* Gradient starts far to the left (off-screen) */
-  }
-  100% {
-    background-position: 1000px 0;  /* Gradient ends far to the right (off-screen) */
-  }
 }
 
 /* Optional: A class for skeleton containers if you want to apply opacity transitions */
