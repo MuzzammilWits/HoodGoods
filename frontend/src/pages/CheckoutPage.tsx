@@ -28,7 +28,7 @@ interface StoreDeliveryDetails {
     storeName?: string;
 }
 
-type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
+type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>; 
 
 declare const YocoSDK: any;
 
