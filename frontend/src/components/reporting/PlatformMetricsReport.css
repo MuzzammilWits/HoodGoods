@@ -5,7 +5,8 @@ article.platform-metrics-report {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  border: none !important;
+  position: relative; /* Added for positioning the loading overlay */
+
 }
 
 .report-header {
@@ -191,6 +192,33 @@ figure.chart-container {
   background-color: #ccc;
 }
 
+
+/* Styles to hide elements during PDF generation */
+.pdf-generating .report-controls,
+.pdf-generating .export-buttons {
+  display: none !important;
+}
+
+/* Optional: Style for the PDF loading overlay */
+.pdf-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.pdf-loading-overlay p {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+
 /* Skeleton styles for analytics loading state */
 .skeleton-item {
   background: linear-gradient(90deg, #f3f3f3 25%, #ece9f1 37%, #f3f3f3 63%);
@@ -246,4 +274,5 @@ figure.chart-container {
 .skeleton-container-hidden {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+
 }
