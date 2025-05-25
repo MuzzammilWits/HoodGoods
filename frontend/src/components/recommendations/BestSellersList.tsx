@@ -151,98 +151,102 @@ const BestSellersList: React.FC<BestSellersListProps> = ({
     }
   };
 
-  // Main loading for products list
-  if (loading) {
-    return <p className="best-sellers-loading">Loading best sellers...</p>;
-  }
-
-  if (error) {
-    return <p className="best-sellers-error">Error: {error}</p>;
-  }
-
-  if (products.length === 0 && !loading) { // Ensure not to show if still loading
-    return <p className="best-sellers-empty">No best selling products found for the selected period.</p>;
-  }
-
   return (
     <section className="best-sellers-container">
       <h2>{title}</h2>
-      {notification.type && (
-        <aside className={`recommendation-notification ${notification.type} notification-modal`}> {/* Added notification-modal for consistency if styles exist */}
-          {notification.message}
-        </aside>
+      {loading ? (
+        <div className="skeleton-container-active" style={{ width: '100%', minHeight: 220 }}>
+          {/* You can customize the skeleton UI here */}
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+            {[...Array(limit)].map((_, i) => (
+              <div key={i} className="skeleton-item" style={{ width: 200, height: 320, borderRadius: 8, background: '#F5F2F8' }} />
+            ))}
+          </div>
+        </div>
+      ) : error ? (
+        <p className="best-sellers-error">Error: {error}</p>
+      ) : products.length === 0 ? (
+        <p className="best-sellers-empty">No best selling products found for the selected period.</p>
+      ) : (
+        <>
+          {notification.type && (
+            <aside className={`recommendation-notification ${notification.type} notification-modal`}>
+              {notification.message}
+            </aside>
+          )}
+          <ol className="best-sellers-grid">
+            {products.map((product) => {
+              const isOwner = isAuthenticated && product.userId === user?.sub;
+              const isOutOfStock = typeof product.productquantity === 'number' && product.productquantity <= 0;
+              
+              const existingItemInCart = cartItems.find(item => item.productId === product.productId);
+              const currentQuantityInCart = existingItemInCart ? existingItemInCart.quantity : 0;
+              const canAddMore = typeof product.productquantity === 'number' && currentQuantityInCart < product.productquantity;
+
+              // Button disabled logic
+              let isDisabled = isOutOfStock || isOwner || !canAddMore || (isAuth0Loading || isRoleFetching);
+              if (!isDisabled && currentUserRole === 'admin') { // Disable for admin after role is loaded
+                isDisabled = true;
+              }
+
+              // Button text logic
+              let buttonText = 'Add to Cart';
+              if (isAuth0Loading || isRoleFetching) {
+                  buttonText = 'Verifying...';
+              } else if (currentUserRole === 'admin') {
+                  buttonText = 'Admin View';
+              } else if (isOwner) {
+                  buttonText = 'Your Product';
+              } else if (isOutOfStock) {
+                  buttonText = 'Out of Stock';
+              } else if (!canAddMore) {
+                  buttonText = 'Max in Cart';
+              }
+
+              return (
+                <li key={product.productId} className="best-seller-card">
+                  <img
+                    src={product.imageUrl || '/placeholder-image.png'} // Ensure you have a placeholder
+                    alt={product.name}
+                    className="best-seller-image"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src.includes('placeholder-image.png') === false) { // Check to avoid loop if placeholder itself fails
+                        target.src = '/placeholder-image.png';
+                      }
+                    }}
+                  />
+                  <article className="best-seller-info">
+                    <h3 className="best-seller-name">{product.name}</h3>
+                    {product.storeName && (
+                      <p className="best-seller-store">Sold by: {product.storeName}</p>
+                    )}
+                    <p className="best-seller-price">R{product.productPrice.toFixed(2)}</p>
+                    <p className="best-seller-stock">
+                      {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
+                    </p>
+                  </article>
+                  <button
+                    onClick={() => handleAddToCartFromRecommendation(product)}
+                    className="btn-add-to-cart-recommendation" // Make sure this class exists and is styled
+                    disabled={isDisabled}
+                    aria-label={
+                      isAuth0Loading || isRoleFetching ? 'Verifying user permissions'
+                      : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
+                      : isOwner ? `Cannot add own product ${product.name}` 
+                      : isOutOfStock ? `${product.name} is out of stock` 
+                      : !canAddMore ? `Maximum quantity of ${product.name} already in cart`
+                      : `Add ${product.name} to cart`
+                    }
+                  >
+                    {buttonText}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </>
       )}
-      <ol className="best-sellers-grid">
-        {products.map((product) => {
-          const isOwner = isAuthenticated && product.userId === user?.sub;
-          const isOutOfStock = typeof product.productquantity === 'number' && product.productquantity <= 0;
-          
-          const existingItemInCart = cartItems.find(item => item.productId === product.productId);
-          const currentQuantityInCart = existingItemInCart ? existingItemInCart.quantity : 0;
-          const canAddMore = typeof product.productquantity === 'number' && currentQuantityInCart < product.productquantity;
-
-          // Button disabled logic
-          let isDisabled = isOutOfStock || isOwner || !canAddMore || (isAuth0Loading || isRoleFetching);
-          if (!isDisabled && currentUserRole === 'admin') { // Disable for admin after role is loaded
-            isDisabled = true;
-          }
-
-          // Button text logic
-          let buttonText = 'Add to Cart';
-          if (isAuth0Loading || isRoleFetching) {
-              buttonText = 'Verifying...';
-          } else if (currentUserRole === 'admin') {
-              buttonText = 'Admin View';
-          } else if (isOwner) {
-              buttonText = 'Your Product';
-          } else if (isOutOfStock) {
-              buttonText = 'Out of Stock';
-          } else if (!canAddMore) {
-              buttonText = 'Max in Cart';
-          }
-
-          return (
-            <li key={product.productId} className="best-seller-card">
-              <img
-                src={product.imageUrl || '/placeholder-image.png'} // Ensure you have a placeholder
-                alt={product.name}
-                className="best-seller-image"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (target.src.includes('placeholder-image.png') === false) { // Check to avoid loop if placeholder itself fails
-                    target.src = '/placeholder-image.png';
-                  }
-                }}
-              />
-              <article className="best-seller-info">
-                <h3 className="best-seller-name">{product.name}</h3>
-                {product.storeName && (
-                  <p className="best-seller-store">Sold by: {product.storeName}</p>
-                )}
-                <p className="best-seller-price">R{product.productPrice.toFixed(2)}</p>
-                <p className="best-seller-stock">
-                  {isOutOfStock ? 'Out of Stock' : `Available: ${product.productquantity}`}
-                </p>
-              </article>
-              <button
-                onClick={() => handleAddToCartFromRecommendation(product)}
-                className="btn-add-to-cart-recommendation" // Make sure this class exists and is styled
-                disabled={isDisabled}
-                aria-label={
-                  isAuth0Loading || isRoleFetching ? 'Verifying user permissions'
-                  : currentUserRole === 'admin' ? `Admin cannot add ${product.name} to cart`
-                  : isOwner ? `Cannot add own product ${product.name}` 
-                  : isOutOfStock ? `${product.name} is out of stock` 
-                  : !canAddMore ? `Maximum quantity of ${product.name} already in cart`
-                  : `Add ${product.name} to cart`
-                }
-              >
-                {buttonText}
-              </button>
-            </li>
-          );
-        })}
-      </ol>
     </section>
   );
 };
