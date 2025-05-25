@@ -1,5 +1,3 @@
-// frontend/src/components/utils/ImageImports.test.tsx
-
 import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 
