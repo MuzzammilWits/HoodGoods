@@ -1,7 +1,5 @@
-// __tests__/ProtectedRoute.test.tsx
-
 import React from 'react';
-import { vi } from 'vitest'; // vi must be imported first for mocks/stubs at top level
+import { vi } from 'vitest'; 
 
 // --- START Vitest specific mocking for import.meta.env ---
 // This MUST be before ProtectedRoute is imported
@@ -43,7 +41,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return {
     ...actual,
     Navigate: vi.fn(({ to }) => {
-      return <div>Redirecting to {to}</div>;
+      return <p>Redirecting to {to}</p>;
     }),
   };
 });
@@ -60,11 +58,24 @@ const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 
 // Dummy components for testing routes
-const MockPublicPage = () => <div>Public Page</div>;
-const MockProtectedPage = () => <div data-testid="protected-content">Protected Content</div>;
-const AnotherMockProtectedPage = () => <div data-testid="another-protected-content">Another Protected Page Content</div>;
 
+const MockPublicPage = () => (
+  <main>
+    <p>Public Page</p>
+  </main>
+);
 
+const MockProtectedPage = () => (
+  <main data-testid="protected-content">
+    <p>Protected Content</p>
+  </main>
+);
+
+const AnotherMockProtectedPage = () => (
+  <main data-testid="another-protected-content">
+    <p>Another Protected Page Content</p>
+  </main>
+);
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     mockUseAuth0.mockReset();
@@ -224,7 +235,7 @@ describe('ProtectedRoute', () => {
 
  
 
-  // --- NEW TEST CASES ---
+  // NEW TEST CASES 
 
   test('should redirect if allowedRoles is empty and user is authenticated with a role (original behavior: redirect because role not in empty list)', async () => {
     mockFetch.mockResolvedValueOnce({

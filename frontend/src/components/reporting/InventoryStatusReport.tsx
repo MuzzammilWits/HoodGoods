@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/InventoryStatusReport.tsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Pie } from 'react-chartjs-2';
@@ -209,7 +208,7 @@ const InventoryStatusReport: React.FC = () => {
             
             const tableFontSize = 9;
             const titleFontSize = 11;
-            const sectionTitleSpacing = 12; // Space after a section title text (e.g., "Low Stock Items")
+            const sectionTitleSpacing = 12; // Space after a section title text 
             const afterTableSpacing = 15;   // Space after a table
 
             const drawTable = (title: string, head: any[][], body: any[][], headFillColor: string, currentY: number) => {
@@ -244,7 +243,7 @@ const InventoryStatusReport: React.FC = () => {
                 yPos = drawTable('Out of Stock Items', 
                     [['Product ID', 'Product Name']],
                     reportData.outOfStockItems.map(item => [item.prodId, item.productName]),
-                    '#dc3545', // Red hex
+                    '#dc3545', 
                     yPos
                 );
                 console.log('PDF Export: After Out of Stock Table, yPos:', yPos);

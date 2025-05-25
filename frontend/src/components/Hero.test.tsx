@@ -58,7 +58,7 @@ describe('Hero Component', () => {
     // @ts-ignore
     delete window.location;
     (window as any).location = {
-      // Provide a base structure. Specific tests can override pathname.
+      // Providing a base structure. Specific tests can override pathname.
       // Start with a minimal set of properties often checked or used with location.
       href: 'http://localhost:3000/default-test-path',
       pathname: '/default-test-path',

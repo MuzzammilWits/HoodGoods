@@ -1,6 +1,5 @@
-// frontend/src/services/recommendationsService.ts
 import axios from 'axios';
-import { PopularProductDto } from '../types'; // Or '../types/recommendations' if you created a separate file
+import { PopularProductDto } from '../types'; 
 
 const API_URL = import.meta.env.VITE_API_BASE_URLs || 'http://localhost:3000/api';
 
@@ -24,8 +23,6 @@ export const getBestSellingProducts = async (
     return response.data;
   } catch (error) {
     console.error('Error fetching best selling products:', error);
-    // You might want to throw the error or return an empty array
-    // depending on how you want to handle errors in your components
     throw error;
     // return [];
   }

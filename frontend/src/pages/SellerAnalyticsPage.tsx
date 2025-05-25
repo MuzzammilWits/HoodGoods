@@ -1,10 +1,11 @@
 // frontend/src/pages/SellerAnalyticsPage.tsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth0 } from '@auth0/auth0-react'; // For handling user authentication
-import supabase from '../supabaseClient'; // Supabase client for database interactions
+import { useAuth0 } from '@auth0/auth0-react';
+import supabase from '../supabaseClient';
 import SalesTrendReport from '../components/reporting/SalesTrendReport';
 import InventoryStatusReport from '../components/reporting/InventoryStatusReport';
 import './SellerAnalyticsPage.css';
+import { Link } from 'react-router-dom';
 
 const SellerAnalyticsPage: React.FC = () => {
   // Get user authentication status and details from Auth0
@@ -17,14 +18,13 @@ const SellerAnalyticsPage: React.FC = () => {
 
   // State for managing store information, loading states, errors, and active report view
   const [storeId, setStoreId] = useState<string | null>(null);
-  const [storeName, setStoreName] = useState<string | null>(null);
+  const [storeName, setStoreName] = useState<string | null>(null); // Will hold actual store name or default
   const [isLoadingPageData, setIsLoadingPageData] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeReport, setActiveReport] = useState<'inventory' | 'sales' | 'custom'>('inventory'); // Default to inventory report
 
   // Fetches store ID and name from Supabase based on the user ID
   const fetchStoreData = useCallback(async (userId: string) => {
-
     const { data: storeData, error: storeFetchError } = await supabase
       .from('Stores')
       .select('store_id, store_name')
@@ -67,17 +67,19 @@ const SellerAnalyticsPage: React.FC = () => {
 
         if (fetchedStoreData && fetchedStoreData.store_id) {
           setStoreId(fetchedStoreData.store_id);
-          setStoreName(fetchedStoreData.store_name || 'Your Store'); // Default name if none
+
+          setStoreName(fetchedStoreData.store_name || 'Your Store'); // Set storeName here
+
         } else {
           setError("No store associated with this seller account.");
           setStoreId(null);
-          setStoreName(null);
+          setStoreName(null); // Explicitly nullify if no store
         }
       } catch (e: any) {
         console.error('Error loading seller analytics page data:', e);
         setError(`An unexpected error occurred: ${e.message}`);
         setStoreId(null);
-        setStoreName(null);
+        setStoreName(null); // Nullify on error
       } finally {
         setIsLoadingPageData(false);
       }
@@ -86,60 +88,86 @@ const SellerAnalyticsPage: React.FC = () => {
     loadInitialPageData();
   }, [auth0User, isAuthenticated, auth0Loading, getAccessTokenSilently, fetchStoreData]);
 
-  // Display loading message while auth or page data is being fetched
+
+  // Title for loading state - storeName isn't available yet
   if (auth0Loading || isLoadingPageData) {
     return (
-        <main className="seller-analytics-page">
-            <section className="loading-container centered-message" aria-label="Loading Analytics Dashboard">
-                <p>Loading Analytics Dashboard...</p>
-            </section>
-        </main>
+      <main className="seller-analytics-page">
+        <section className="main-titles">
+            <h1>Analytics Dashboard</h1>
+        </section>
+        <section className="loading-container centered-message" aria-label="Loading Analytics Dashboard">
+          <p>Loading Analytics Dashboard...</p>
+        </section>
+      </main>
     );
   }
 
-  // Display error message if something went wrong
+  // Title for error states - storeName might be null or previously fetched
+
   if (error) {
     return (
       <main className="seller-analytics-page message-container error-message-container centered-message">
+        <section className="main-titles">
+            <h1>{storeName ? `${storeName} - ` : ''}Analytics Dashboard</h1>
+        </section>
         <header><h2>Analytics Unavailable</h2></header>
         <p>{error}</p>
       </main>
     );
   }
 
-  // Display message if no store ID could be loaded (e.g., user has no store)
   if (!storeId) {
     return (
       <main className="seller-analytics-page message-container info-message-container centered-message">
+        <section className="main-titles">
+            <h1>Analytics Dashboard</h1> {/* storeName is null here, so prefix won't show */}
+        </section>
         <header><h2>Analytics Unavailable</h2></header>
         <p>Store information could not be loaded. Please ensure you have a store registered.</p>
       </main>
     );
   }
 
-  // Main analytics dashboard content
+
   return (
-    <main className="seller-analytics-page container mt-4">
-      <header className="page-header analytics-header mb-4">
+    <main className="seller-analytics-page">
+      <section className="main-titles">
+        {/* MODIFIED: Restore storeName to the main H1 */}
         <h1>{storeName ? `${storeName} - ` : ''}Analytics Dashboard</h1>
-        {/* Navigation to switch between different reports */}
-        <nav className="report-nav" aria-label="Analytics Reports Navigation">
-          <button
-            onClick={() => setActiveReport('inventory')}
-            className={activeReport === 'inventory' ? 'active' : ''}
-            aria-pressed={activeReport === 'inventory'}
-          >
-            Inventory Status
-          </button>
-          <button
-            onClick={() => setActiveReport('sales')}
-            className={activeReport === 'sales' ? 'active' : ''}
-            aria-pressed={activeReport === 'sales'}
-          >
-            Sales Trends
-          </button>
-        </nav>
+
+      </section>
+
+      {/* REMOVED: The separate page-sub-header for storeName is no longer needed */}
+      {/*
+      <header className="page-sub-header analytics-sub-header">
+        {storeName && <p className="store-name-display">Store: {storeName}</p>}
       </header>
+      */}
+
+      <section className="dashboard-navigation-bar">
+        <Link to="/my-store" className="button-back-to-store">
+          Back to My Store
+        </Link>
+      </section>
+
+      <nav className="report-nav" aria-label="Analytics Reports Navigation">
+        <button
+          onClick={() => setActiveReport('inventory')}
+          className={activeReport === 'inventory' ? 'active' : ''}
+          aria-pressed={activeReport === 'inventory'}
+        >
+          Inventory Status
+        </button>
+        <button
+          onClick={() => setActiveReport('sales')}
+          className={activeReport === 'sales' ? 'active' : ''}
+          aria-pressed={activeReport === 'sales'}
+        >
+          Sales Trends
+        </button>
+        {/* Custom view button commented out */}
+      </nav>
 
       <section className="analytics-content">
         {/* Conditionally render the selected report component */}
@@ -165,6 +193,7 @@ const SellerAnalyticsPage: React.FC = () => {
                 <h2 id="custom-view-heading" className="report-group-title h5 mb-0">Custom Performance View</h2>
               </header>
               <section className="card-body">
+
                 <p className="placeholder-text card-text">Custom View Report - Coming Soon!</p>
               </section>
             </article>

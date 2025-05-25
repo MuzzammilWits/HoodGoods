@@ -1,13 +1,13 @@
-/* frontend/src/pages/RecommendationsPage.css */
 
-/* Main container for the entire recommendations page */
-main.recommendations-page-container {
-  padding: 20px; 
-  max-width: 1200px; 
-  margin: 0 auto; 
+
+main.recommendations-page-container { 
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
   background-color: var(--background-color, #fff); 
   min-height: calc(100vh - var(--navbar-height, 60px) - var(--footer-height, 100px)); 
-  font-family: 'Hind', sans-serif; 
+  font-family: 'Hind', sans-serif; /* Added a base font for consistency */
+
 }
 
 /* Styling for each individual section that shows recommendations */
@@ -21,5 +21,28 @@ main.recommendations-page-container {
 
 /* Remove the bottom margin from the very last recommendation section */
 .recommendation-section:last-child {
-  margin-bottom: 0; 
+
+
+  margin-bottom: 0;
 }
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #7ab8a5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  
+}
+
+.back-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;        
+}
+
