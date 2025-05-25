@@ -329,6 +329,13 @@ const ProductsPage: React.FC = () => {
                   aria-label="Search products"
                 />
               </form>
+
+              <section className="recommendations-link-below">
+            <Link to="/recommendations" className="products-page-cta-button">
+              Popular
+            </Link>
+          </section>
+
             </section>
 
             <section className="filter-row-sidebyside">
@@ -349,12 +356,6 @@ const ProductsPage: React.FC = () => {
                 </select>
               </section>
             </section>
-          </section>
-          
-          <section className="recommendations-link-below">
-            <Link to="/recommendations" className="products-page-cta-button">
-              Recommended for you
-            </Link>
           </section>
 
           <ul className="products-grid">
