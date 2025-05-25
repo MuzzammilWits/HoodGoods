@@ -28,7 +28,7 @@ interface StoreDeliveryDetails {
     storeName?: string;
 }
 
-type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>; 
+type DeliveryOptionsResponse = Record<string, StoreDeliveryDetails>;
 
 declare const YocoSDK: any;
 
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
             performCleanup();
             setPaymentTimeLeft(null);
             if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); paymentIntervalRef.current = null; }
-        }, 45000); // 45 seconds, Yoco default might be longer
+        }, 45000);
 
     } catch (error) {
         const errorMsg = error instanceof AxiosError ? error.response?.data?.message || error.message : 'Payment initiation failed';
@@ -232,9 +232,9 @@ export default function CheckoutPage() {
 
   return (
     <main className="checkout-container" style={{paddingTop: '2.5rem'}}>
-      <section className="main-titles">
+      <header className="main-titles">
         <h1>Checkout</h1>
-      </section>
+      </header>
       <section style={{marginBottom: '1.5rem', textAlign: 'center'}}>
         <p className="instructions">Please select your pickup location, review delivery options, and complete your order.</p>
         {contextCartError && <p className="error-message cart-error">Cart Notice: {contextCartError}</p>}
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
             return (
               <article key={storeId} className="store-group" aria-labelledby={`store-heading-${storeId}`}>
                 <h3 id={`store-heading-${storeId}`} className="store-name">{storeName}</h3>
-                <section className="delivery-option form-field"> {/* Changed div to section */}
+                <section className="delivery-option form-field">
                   <label htmlFor={`delivery-${storeId}`}>Delivery Option:</label>
                   {isLoadingDeliveryOptions ? (<p className="loading-options-text">Loading options...</p>) : !deliveryDetails ? (<p className="error-message delivery-unavailable-text">Delivery Unavailable</p>) : (
                     <select id={`delivery-${storeId}`} className="form-input" value={currentSelection || ''} onChange={(e) => handleDeliveryOptionChange(storeId, e.target.value)} required aria-required="true">
@@ -317,11 +317,12 @@ export default function CheckoutPage() {
               padding: '0.5rem 0.75rem',
               transition: 'color 0.2s, background 0.2s'
             }}>
-              Payment gate is <strong>open</strong> for: <span style={{fontVariantNumeric: 'tabular-nums'}}>0:{paymentTimeLeft.toString().padStart(2, '0')}</span><br/>
-              <span style={{fontSize: '1rem', fontWeight: 500, display: 'block', marginTop: '0.3rem'}}>
-                Please complete your payment before the timer ends.<br/>
+              Payment gate is <strong>open</strong> for: <time style={{fontVariantNumeric: 'tabular-nums'}}>0:{paymentTimeLeft.toString().padStart(2, '0')}</time>
+              <em style={{fontSize: '1rem', fontWeight: 500, display: 'block', marginTop: '0.3rem', fontStyle: 'normal'}}>
+                Please complete your payment before the timer ends.
+                <br/>
                 <strong>If you close the payment window (X), you must wait for the timer to finish before you can try again.</strong>
-              </span>
+              </em>
             </p>
           )}
           {paymentError && (
