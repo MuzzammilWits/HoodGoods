@@ -16,11 +16,11 @@ header.page-main-header { /* For the top H1 and welcome */
 header.page-main-header h1 {
   color: var(--primary-color, #432C53);
   font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
+  font-size: 3rem;
   margin: 0 0 0.5rem 0;
 }
 header.page-main-header p.welcome-message {
-    font-size: 1.1rem;
+    font-size: 2rem;
     color: #555;
     margin:0;
 }
@@ -148,9 +148,7 @@ p.no-orders-message {
   border-radius: 6px; margin-top: 1rem;
 }
 
-li.order-card-item {
-    /* Structural, no specific style needed if article has it all */
-}
+
 
 article.order-card { /* Target article for the card */
   border: 1px solid #d1d9e6;
@@ -269,6 +267,39 @@ select.status-select:focus, select.status-filter-select:focus {
 
 output.updating-indicator { /* Changed span to output */
   margin-left: 10px; font-style: italic; color: #6c757d; font-size: 0.9em;
+}
+
+section.dashboard-navigation-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-end; /* MODIFIED: Changed from flex-start to flex-end */
+}
+
+a.button-back-to-store {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #97C9BA;
+  color: #ffffff !important;
+  text-decoration: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+a.button-back-to-store:hover,
+a.button-back-to-store:focus {
+  background-color: #7ab8a5;
+  color: #ffffff !important;
+  text-decoration: none;
+  transform: translateY(-1px);
+  outline: none;
 }
 
 /* Status Badge Styles (applied to strong) */
