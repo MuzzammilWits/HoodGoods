@@ -6,12 +6,12 @@ import { User } from './user.entity'; // Assuming path to User entity
 
 // Mock User data based on your User entity
 const mockUserPayload = (userId: string, role: string = 'buyer', otherProps: Record<string, any> = {}) => ({
-  sub: userId, // 'sub' is commonly used for user ID in JWT payloads
-  userID: userId, // Matching your User entity's primary key
+  sub: userId, // 
+  userID: userId, // User entity's primary key
   role: role,
-  // Add any other properties that your req.user might have from the JWT payload
+  
   ...otherProps,
-  // Ensure the structure aligns with what AuthGuard('jwt') populates req.user with
+  
 });
 
 describe('AuthController', () => {
@@ -24,7 +24,7 @@ describe('AuthController', () => {
     getUserRole: jest.fn(),
   };
 
-  // Mock request object
+  
   let mockRequest: any;
 
   beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('AuthController', () => {
         },
       ],
     })
-    // Override the AuthGuard('jwt') for all methods in this controller
+    
     .overrideGuard(AuthGuard('jwt'))
     .useValue({
         canActivate: jest.fn(() => true), // Mock canActivate to always return true
@@ -49,7 +49,7 @@ describe('AuthController', () => {
 
     // Initialize mockRequest for each test
     mockRequest = {
-      user: mockUserPayload('test-user-id-123'), // Default mock user for each test
+      user: mockUserPayload('test-user-id-123'), 
     };
   });
 
@@ -113,12 +113,8 @@ describe('AuthController', () => {
     });
 
     it('should handle cases where req.user or req.user.sub might be undefined (though guard should prevent)', async () => {
-      // This scenario should ideally be prevented by the AuthGuard
-      // But good to ensure the controller doesn't break catastrophically if it happens
+  
       const requestWithoutUserSub = { user: {} }; // No 'sub'
-      // We expect getUserRole to potentially throw or handle this,
-      // or the call to it to fail if `undefined` is passed where a string is expected.
-      // Let's assume the service handles it by e.g. throwing an error if sub is undefined.
       mockAuthService.getUserRole.mockImplementation((sub) => {
         if (!sub) return Promise.reject(new Error('User sub not provided'));
         return Promise.resolve({ role: 'unknown' });

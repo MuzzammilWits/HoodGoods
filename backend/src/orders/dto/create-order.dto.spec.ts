@@ -169,7 +169,7 @@ describe('CreateOrderDto', () => {
       const orderDto = plainToInstance(CreateOrderDto, orderData);
       const errors = await validate(orderDto);
       expect(errors.length).toBeGreaterThan(0);
-      // Nested errors appear under the 'cartItems' property, and then within its children
+      
       const cartItemErrors = errors.find(err => err.property === 'cartItems');
       expect(cartItemErrors).toBeDefined();
       expect(cartItemErrors?.children).toBeDefined();
@@ -198,10 +198,6 @@ describe('CreateOrderDto', () => {
     });
 
     it('should pass if deliverySelections has string keys and values like "standard" or "express"', async () => {
-        // Note: class-validator @IsObject doesn't validate the *values* within the Record.
-        // That level of validation (e.g., value must be 'standard' or 'express')
-        // is typically handled in the service or with a custom validator if needed at DTO level.
-        // This test confirms it accepts a valid object structure.
         const orderData = { ...createValidCreateOrderData(), deliverySelections: { 'storeA': 'standard', 'storeB': 'express' } };
         const orderDto = plainToInstance(CreateOrderDto, orderData);
         const errors = await validate(orderDto);
@@ -213,8 +209,8 @@ describe('CreateOrderDto', () => {
         const orderData = { ...createValidCreateOrderData(), deliverySelections: { 'storeA': 'other_value' } };
         const orderDto = plainToInstance(CreateOrderDto, orderData as any); // Cast as any if TS complains about 'other_value'
         const errors = await validate(orderDto);
-        expect(errors.length).toBe(0); // Will pass because @IsObject only checks if it's an object.
-                                        // The service layer is responsible for validating the specific values.
+        expect(errors.length).toBe(0); 
+                                       
     });
   });
 

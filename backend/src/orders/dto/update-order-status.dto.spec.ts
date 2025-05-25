@@ -1,5 +1,5 @@
 // src/orders/dto/update-order-status.dto.spec.ts
-import 'reflect-metadata'; // Ensure this is at the very top
+import 'reflect-metadata'; 
 
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
@@ -10,7 +10,7 @@ const ALLOWED_STATUSES_FOR_TEST = ['Processing', 'Packaging', 'Ready for Pickup'
 
 describe('UpdateOrderStatusDto', () => {
   describe('status', () => {
-    // Test valid statuses
+    
     ALLOWED_STATUSES_FOR_TEST.forEach(validStatus => {
       it(`should validate successfully when status is "${validStatus}"`, async () => {
         const dto = plainToInstance(UpdateOrderStatusDto, { status: validStatus });
@@ -34,7 +34,6 @@ describe('UpdateOrderStatusDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const statusError = errors.find(err => err.property === 'status');
       expect(statusError).toBeDefined();
-      // @IsNotEmpty typically covers empty strings. @IsIn might also fail if "" is not in ALLOWED_STATUSES.
       expect(statusError?.constraints?.isNotEmpty).toBeDefined();
     });
 
@@ -45,7 +44,6 @@ describe('UpdateOrderStatusDto', () => {
       const statusError = errors.find(err => err.property === 'status');
       expect(statusError).toBeDefined();
       expect(statusError?.constraints?.isString).toBeDefined();
-      // It might also trigger @IsIn if the non-string value doesn't match any allowed status
       expect(statusError?.constraints?.isIn).toBeDefined();
     });
 
@@ -64,8 +62,6 @@ describe('UpdateOrderStatusDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const statusError = errors.find(err => err.property === 'status');
       expect(statusError).toBeDefined();
-      // Depending on class-validator version and strictness, null can fail multiple rules.
-      // @IsNotEmpty is a primary candidate.
       expect(statusError?.constraints?.isNotEmpty).toBeDefined();
     });
   });

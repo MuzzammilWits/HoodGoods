@@ -2,8 +2,8 @@
 import 'reflect-metadata'; // Must be the first import
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { SyncCartDto } from './sync-cart.dto'; // Adjust path as necessary
-import { CreateCartItemDto } from './create-cart-item.dto'; // Adjust path
+import { SyncCartDto } from './sync-cart.dto'; 
+import { CreateCartItemDto } from './create-cart-item.dto'; 
 
 describe('SyncCartDto', () => {
   const createValidCartItemData = (productId = 1, quantity = 1) => ({
@@ -20,7 +20,6 @@ describe('SyncCartDto', () => {
   });
 
   it('should validate successfully with an empty array of items', async () => {
-    // An empty array is permissible as there's no @ArrayMinSize decorator
     const dto = plainToInstance(SyncCartDto, { items: [] });
     const errors = await validate(dto);
     expect(errors.length).toBe(0);
@@ -38,7 +37,7 @@ describe('SyncCartDto', () => {
     const errors = await validate(dto);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.find(err => err.property === 'items')?.constraints?.isArray).toBeDefined();
-    // If items must always be present (even if empty), add @IsDefined() or @IsNotEmptyObject() to the DTO.
+   
   });
 
   
@@ -50,7 +49,7 @@ describe('SyncCartDto', () => {
     expect(errors.length).toBeGreaterThan(0);
     const itemsError = errors.find(err => err.property === 'items');
     expect(itemsError).toBeDefined();
-    const nestedError = itemsError?.children?.find(child => child.property === '1'); // Index 1
+    const nestedError = itemsError?.children?.find(child => child.property === '1'); 
     expect(nestedError).toBeDefined();
     expect(nestedError?.children?.find(c => c.property === 'productId')?.constraints?.isNumber).toBeDefined();
   });
@@ -62,7 +61,7 @@ describe('SyncCartDto', () => {
     expect(errors.length).toBeGreaterThan(0);
     const itemsError = errors.find(err => err.property === 'items');
     expect(itemsError).toBeDefined();
-    const nestedError = itemsError?.children?.find(child => child.property === '0'); // Index 0
+    const nestedError = itemsError?.children?.find(child => child.property === '0'); 
     expect(nestedError).toBeDefined();
     const quantityConstraintErrors = nestedError?.children?.find(c => c.property === 'quantity')?.constraints;
     expect(quantityConstraintErrors?.isPositive).toBeDefined();
@@ -70,7 +69,7 @@ describe('SyncCartDto', () => {
   });
 
   it('should correctly transform and validate nested CreateCartItemDto instances', async () => {
-    // This test ensures that @Type(() => CreateCartItemDto) is working.
+    
     const plainItems = [
       { productId: 101, quantity: 1 },
       { productId: 102, quantity: 2 },
