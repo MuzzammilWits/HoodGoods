@@ -1,9 +1,6 @@
-// src/components/__tests__/SubmissionStatus.test.tsx
-
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest'; // For extended Vitest matchers
 import SubmissionStatus from './SubmissionStatus'; // Adjust the import path as needed
-// No vi.fn() is needed here as SubmissionStatus does not take function props
 
 describe('SubmissionStatus Component', () => {
   it('should render null if no error or success message is provided', () => {
@@ -19,7 +16,7 @@ describe('SubmissionStatus Component', () => {
     const errorOutput = screen.getByText(errorMessage);
     expect(errorOutput).toBeInTheDocument();
     expect(errorOutput).toHaveClass('error-message');
-    expect(errorOutput.tagName).toBe('OUTPUT'); // Check if it's an <output> element
+    expect(errorOutput.tagName).toBe('OUTPUT'); // Checking if it's an <output> element
 
     // Ensure success message is not present.
     // Using queryByText for non-existence check.
@@ -78,6 +75,4 @@ describe('SubmissionStatus Component', () => {
   });
 });
 
-// Ensure your Vitest setup includes necessary globals or imports for testing-library/jest-dom.
-// For example, in your vitest.setup.ts or similar:
-// import '@testing-library/jest-dom/vitest';
+

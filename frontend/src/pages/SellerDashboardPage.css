@@ -18,11 +18,11 @@ header.page-main-header {
 header.page-main-header h1 {
   color: var(--primary-color, #432C53); 
   font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
+  font-size: 3rem;
   margin: 0 0 0.5rem 0;
 }
 header.page-main-header p.welcome-message {
-    font-size: 1.1rem;
+    font-size: 2rem;
     color: #555;
     margin:0;
 }
@@ -154,188 +154,6 @@ p.no-orders-message {
   border-radius: 6px; margin-top: 1rem;
 }
 
-/* Individual order card styling */
-article.order-card {
-  border: 1px solid #d1d9e6;
-  border-radius: 8px;
-  padding: 1.5rem;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column; 
-  gap: 1.25rem;
-  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; 
-  height: 100%; 
-}
-article.order-card:hover {
-   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
-   transform: translateY(-3px);
-}
-
-/* Header within each order card (Order #, Status) */
-header.order-header-card {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 1rem;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-header.order-header-card h3 {
-  margin: 0;
-  font-size: 1.3em;
-  color: var(--primary-color, #432C53);
-}
-
-/* Section for displaying order details like date, pickup... */
-section.order-details {
-  font-size: 0.95em;
-  line-height: 1.6;
-  color: #495057;
-}
-section.order-details p { margin: 0 0 0.4rem 0; }
-section.order-details p:last-child { margin-bottom: 0; }
-section.order-details strong { color: #343a40; } 
-
-/* Specific styling for the "Your Total" text */
-p.order-total strong {
-  font-size: 1.1em;
-  color: var(--primary-color-darker, #362245);
-}
-
-/* Section listing items within an order */
-section.items-section {
-  margin-top: 1rem;
-  border-top: 1px solid #e9ecef;
-  padding-top: 1rem;
-}
-section.items-section h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.05em;
-  color: #444;
-  font-family: 'Poppins', sans-serif;
-}
-
-
-ul.item-list {
-  list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: 1rem; /* Space between items */
-}
-/* src/pages/SellerDashboardPage.css */
-
-/* Main container for the whole seller dashboard page */
-main.seller-dashboard-container {
-  padding: 2rem;
-  font-family: 'Hind', sans-serif;
-  max-width: 1200px;
-  margin: 2rem auto; /* Center it and add space top/bottom */
-  background-color: #f0f2f5; /* Light grey background for the page */
-  border-radius: 8px;
-}
-
-/* Styles for the main page title and welcome message area */
-header.page-main-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-header.page-main-header h1 {
-  color: var(--primary-color, #432C53); /* Using a CSS variable for brand color */
-  font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
-  margin: 0 0 0.5rem 0;
-}
-header.page-main-header p.welcome-message {
-    font-size: 1.1rem;
-    color: #555;
-    margin:0;
-}
-
-/* Common styling for messages like loading, login prompts, or no orders */
-p.auth-loading-message, p.login-prompt-message, p.no-orders-message {
-    text-align: center;
-    padding: 2rem;
-    font-size: 1.1rem;
-    color: #555;
-    background-color: #fff; /* White box for these messages */
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Styling for individual sections within the dashboard (e.g., Earnings, Orders) */
-section.dashboard-section {
-  margin-bottom: 2.5rem; /* Space between sections */
-  padding: 1.5rem 2rem;
-  background-color: #ffffff; /* White background for sections */
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07); /* Soft shadow for depth */
-}
-/* Section titles (H2s) */
-section.dashboard-section h2 {
-    color: var(--primary-color-darker, #362245);
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.8rem;
-    margin-top:0;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e9ecef; /* Light line under section titles */
-}
-
-/* General style for error messages */
-p.error-message {
-  color: #dc3545; /* Red for errors */
-  font-weight: 500;
-  margin-top: 0.5rem;
-  font-size: 0.9em;
-  padding: 0.5rem 0.75rem;
-  background-color: #f8d7da; /* Light red background */
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-}
-/* Specific for update errors, maybe needs more space */
-p.error-message.update-error {
-  margin-top: 1rem;
-}
-
-/* How the total earnings are displayed */
-p.earnings-display {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #97C9BA; /* A distinct color for earnings */
-  margin-top: 0.5rem;
-  text-align: center;
-}
-/* Simple loading text, like "Loading earnings..." */
-p.loading-text {
-    font-style: italic;
-    color: #555;
-}
-
-
-/* --- Styles for Orders Section Header & Filter --- */
-/* Header for the orders section, holds title and filter */
-header.orders-header {
-  display: flex;
-  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-  justify-content: space-between; /* Title on left, filter on right */
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-}
-/* "Your Orders" title within the orders header */
-header.orders-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  border-bottom: none; /* No border here, section already has one */
-  padding-bottom: 0;
-}
-
-/* Container for the status filter dropdown */
-section.order-filter-container {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
 
 section.order-filter-container label {
   font-weight: 500;
@@ -619,7 +437,42 @@ output.updating-indicator {
   margin-left: 10px; font-style: italic; color: #6c757d; font-size: 0.9em;
 }
 
-/* General styling for status badges (Processing, Shipped, etc.) */
+
+section.dashboard-navigation-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-end; /* MODIFIED: Changed from flex-start to flex-end */
+}
+
+a.button-back-to-store {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #97C9BA;
+  color: #ffffff !important;
+  text-decoration: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+a.button-back-to-store:hover,
+a.button-back-to-store:focus {
+  background-color: #7ab8a5;
+  color: #ffffff !important;
+  text-decoration: none;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* Status Badge Styles (applied to strong) */
+
 .status-badge {
   padding: 0.3em 0.7em; border-radius: 0.25rem; font-size: 0.85em;
   font-weight: bold; color: #fff; text-align: center; white-space: nowrap;

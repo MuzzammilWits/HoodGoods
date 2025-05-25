@@ -8,7 +8,8 @@ function SellerAgreementPage() {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
   const scrollableContentRef = useRef<HTMLElement>(null);
-  const endOfContentRef = useRef<HTMLDivElement>(null);
+  // MODIFIED: Changed ref type from HTMLDivElement to HTMLUListElement
+  const endOfContentRef = useRef<HTMLUListElement>(null);
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsAgreed(event.target.checked);
@@ -22,7 +23,7 @@ function SellerAgreementPage() {
 
   useEffect(() => {
     const currentScrollableContent = scrollableContentRef.current;
-    const currentEndOfContent = endOfContentRef.current;
+    const currentEndOfContent = endOfContentRef.current; 
 
     if (!currentScrollableContent || !currentEndOfContent) {
       return;
@@ -37,7 +38,7 @@ function SellerAgreementPage() {
       },
       {
         root: currentScrollableContent,
-        threshold: 1.0,
+        threshold: 1.0, 
       }
     );
 
@@ -77,10 +78,10 @@ function SellerAgreementPage() {
           <p>
             Understanding our delivery process is key to a successful selling experience on our platform. We operate a bit differently from traditional direct-to-address delivery services.
           </p>
-          <ul className="list-disc pl-5 space-y-2"> {/* Added space-y-2 for better spacing between main points */}
+          <ul className="list-disc pl-5 space-y-3">
             <li>
               <strong>Designated Pickup Zones & Points:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>We do not deliver to individual customer addresses directly.</li>
                 <li>Instead, we have established three main delivery zones, each with specific pickup points.</li>
                 <li>When customers place an order, they will select their preferred pickup point from the options available within these zones.</li>
@@ -88,7 +89,7 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>Your Delivery Pricing:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>When you set up your store, you'll define prices for "Standard Delivery" and "Express Delivery."</li>
                 <li>These prices should cover your costs to get orders to any of our designated pickup points.</li>
                 <li>You will also set estimated delivery timeframes for these options.</li>
@@ -96,17 +97,17 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>Our Current Pickup Points Are:</strong>
-              <ul className="list-circle pl-5 mt-1 space-y-1">
+              <ul className="list-circle pl-5 mt-1 space-y-2">
                 <li>
                   <strong>Area 1:</strong>
-                  <ul className="list-disc pl-5">
+                  <ul className="list-disc pl-5 space-y-2">
                     <li>Pickup Point Alpha</li>
                     <li>Pickup Point Beta</li>
                   </ul>
                 </li>
                 <li>
                   <strong>Area 2:</strong>
-                  <ul className="list-disc pl-5">
+                  <ul className="list-disc pl-5 space-y-2">
                     <li>Pickup Point Gamma</li>
                     <li>Pickup Point Delta</li>
                     <li>Pickup Point Epsilon</li>
@@ -114,7 +115,7 @@ function SellerAgreementPage() {
                 </li>
                 <li>
                   <strong>Area 3:</strong>
-                  <ul className="list-disc pl-5">
+                  <ul className="list-disc pl-5 space-y-2">
                     <li>Pickup Point Zeta</li>
                     <li>Pickup Point Eta</li>
                     <li>Pickup Point Theta</li>
@@ -124,7 +125,7 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>Seller Responsibility:</strong>
-               <ul className="list-disc pl-5 mt-1 space-y-px">
+                <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>This system allows us to offer reliable and streamlined delivery options.</li>
                 <li>As a seller, you are responsible for ensuring your products can reach these specified pickup points within your stated delivery times.</li>
               </ul>
@@ -132,7 +133,7 @@ function SellerAgreementPage() {
           </ul>
 
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 !mt-4 !mb-1">2. Your Store Name:</h3>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong>Store Name is Permanent:</strong> Once you choose and set your store name during the
               creation process, it cannot be changed.
@@ -153,7 +154,7 @@ function SellerAgreementPage() {
           </p>
 
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 !mt-4 !mb-1">1. Step 1: Store Name Review & Approval</h3>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li>
               When you create your store, your chosen <strong>Store Name</strong> is the first item
               reviewed by our admin team. This review is based on the "Store Name
@@ -161,14 +162,14 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>If Your Store Name is Approved:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Your store is validated.</li>
                 <li>This doesn't immediately change anything visible on your side, but it allows our admins to proceed to the next step: reviewing the products you've created within that store.</li>
               </ul>
             </li>
             <li>
               <strong>If Your Store Name is Rejected:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>If your store name violates our guidelines, the store itself, along with <strong>any products you have created within it (regardless of whether the products themselves were compliant), will be deleted.</strong></li>
                 <li>You will be informed that the store was rejected due to a non-compliant store name.</li>
                 <li>You are welcome to create a new store with a name that meets our guidelines.</li>
@@ -180,7 +181,7 @@ function SellerAgreementPage() {
           </ul>
 
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 !mt-4 !mb-1">2. Step 2: Product Listing Review & Approval (Only for Approved Stores)</h3>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li>
               Once your store name is approved, our admin team will then review each
               individual product you've listed. This review is based on the
@@ -194,7 +195,7 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>Product Rejected:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>If a product is rejected, it is <strong>definitively because its name, description, and/or image(s) did not meet our Content Guidelines.</strong></li>
                 <li>The specific non-compliant element (name, description, or image) will be the reason for rejection.</li>
                 <li>Rejected products will be <strong>deleted</strong> from your "My Store" page.</li>
@@ -206,7 +207,7 @@ function SellerAgreementPage() {
           <p>
             If you edit an already approved product, the following rules apply:
           </p>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong>Changes Requiring Re-Approval:</strong> If you modify the <strong>product name, description, or image(s)</strong>, the product will automatically return to a "Pending" status. It will be temporarily hidden from buyers and will require re-approval from our admin team against our Content Guidelines.
             </li>
@@ -225,10 +226,11 @@ function SellerAgreementPage() {
 
           <h4 className="text-sm sm:text-base font-semibold text-gray-600 !mt-3 !mb-1">A. General Prohibitions:</h4>
           <p>You may NOT list or post content that is:</p>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li><strong>Illegal:</strong> Promotes or facilitates illegal activities or sells illegal products/services according to South African law and any applicable international regulations.</li>
             <li><strong>Hateful or Discriminatory:</strong> Promotes hatred, violence, or discrimination against individuals or groups based on race, ethnicity, national origin, religion, gender, gender identity, sexual orientation, disability, or medical condition.</li>
             <li><strong>Harassing or Abusive:</strong> Threatens, harasses, bullies, defames, or abuses others.</li>
+            {/* ... other General Prohibition list items ... */}
             <li><strong>Violent or Graphic:</strong> Glorifies violence, promotes self-harm, or contains excessively graphic or gratuitous violent content.</li>
             <li><strong>Sexually Explicit or Adult-Themed:</strong> Pornographic, overtly sexually suggestive, or primarily intended for adult audiences.</li>
             <li><strong>Intellectual Property Infringing:</strong> Violates copyright, trademark, patent, or other intellectual property rights of others. This includes counterfeit goods or unauthorized replicas.</li>
@@ -239,24 +241,24 @@ function SellerAgreementPage() {
           </ul>
 
           <h4 className="text-sm sm:text-base font-semibold text-gray-600 !mt-3 !mb-1">B. Product Listing Specifics (Name, Description, Images):</h4>
-          <ul className="list-disc pl-5 space-y-2"> {/* Increased space-y for readability of main B points */}
+          <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong>Accuracy & Honesty:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px"> {/* Changed from list-circle for consistency */}
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>All product information (name, description, price, specifications, condition) must be truthful, accurate, and not misleading.</li>
                 <li>Claims about product benefits, performance, or origin must be verifiable.</li>
               </ul>
             </li>
             <li>
               <strong>Clarity & Professionalism:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Product names and descriptions should be clear, concise, and easy for buyers to understand. Use proper grammar and spelling.</li>
                 <li>Avoid excessive or gimmicky use of capitalization (e.g., "SALE!!! BUY NOW!!!"), special characters, or repeated emojis.</li>
               </ul>
             </li>
             <li>
               <strong>Images:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px">
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Must be clear, well-lit, in focus, and provide an accurate visual representation of the product being sold.</li>
                 <li>The primary image should prominently feature the product, preferably on a simple or neutral background.</li>
                 <li>Show different angles and relevant details of the product where appropriate.</li>
@@ -268,13 +270,13 @@ function SellerAgreementPage() {
             </li>
             <li>
               <strong>Relevance:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px"> {/* Ensured this is a list even for one item */}
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>The product name, description, images, and any chosen categories or tags must be directly relevant to the item being sold. Do not use irrelevant keywords to manipulate search results.</li>
               </ul>
             </li>
             <li>
               <strong>No Off-Platform Transactions:</strong>
-              <ul className="list-disc pl-5 mt-1 space-y-px"> {/* Ensured this is a list even for one item */}
+              <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Product listings must not contain external website links, email addresses, phone numbers, social media handles, QR codes, or any other information or calls to action that attempt to divert buyers or complete transactions outside of our platform. All sales communication and transactions should occur through the platform.</li>
               </ul>
             </li>
@@ -282,7 +284,7 @@ function SellerAgreementPage() {
 
           <h4 className="text-sm sm:text-base font-semibold text-gray-600 !mt-3 !mb-1">C. Store Name Guidelines:</h4>
           <p>Your store name must:</p>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-2">
             <li>Comply with all General Prohibitions listed above.</li>
             <li>Be unique and not attempt to impersonate another brand, seller, or individual.</li>
             <li>Not be offensive, vulgar, or misleading.</li>
@@ -291,7 +293,8 @@ function SellerAgreementPage() {
           </ul>
 
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 !mt-4 !mb-1">5. Our Right to Enforce & Update Guidelines:</h3>
-          <ul className="list-disc pl-5 space-y-1">
+         
+          <ul className="list-disc pl-5 space-y-2" ref={endOfContentRef}>
             <li>
               We reserve the right to interpret these guidelines and determine, at our
               sole discretion, whether content is in violation.
@@ -307,40 +310,42 @@ function SellerAgreementPage() {
               constitutes acceptance of the new guidelines.
             </li>
           </ul>
-          <div ref={endOfContentRef} style={{ height: '1px' }} />
+          
         </section>
 
         <section className="agreement-controls-section">
-          <div className="agreement-checkbox-container">
+          
+          <p className="agreement-checkbox-container">
             <input
               type="checkbox"
               id="agreeCheckbox"
               checked={isAgreed}
               onChange={handleCheckboxChange}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" // Standard Tailwind for checkbox
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               aria-labelledby="agreeCheckboxLabel"
             />
             <label htmlFor="agreeCheckbox" id="agreeCheckboxLabel" className="ml-2 block text-sm text-gray-900">
               I have read, understood, and agree to all the information, policies, and guidelines outlined above.
             </label>
-          </div>
+          </p>
 
-          <div className="agreement-buttons-container">
+          
+          <footer className="agreement-buttons-container">
             <button
               type="button"
               onClick={handleContinue}
               disabled={!(hasScrolledToBottom && isAgreed)}
-              className="agreement-button agreement-continue-btn" // CSS classes for styling
+              className="agreement-button agreement-continue-btn"
             >
               Continue
             </button>
             <Link
               to="/"
-              className="agreement-button agreement-cancel-btn" // CSS classes for styling
+              className="agreement-button agreement-cancel-btn"
             >
               Cancel and return to Home
             </Link>
-          </div>
+          </footer>
           {!hasScrolledToBottom && (
             <p className="agreement-scroll-message text-red-600 text-center sm:text-left">
               Please scroll to the bottom of the agreement to enable the 'Continue' button.

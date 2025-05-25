@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/PlatformMetricsReport.tsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Line } from 'react-chartjs-2';
@@ -45,8 +44,10 @@ const PlatformMetricsReport: React.FC = () => {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
 
+
     const reportContentRef = useRef<HTMLElement>(null);
     const pdfIgnoreClassName = 'pdf-ignore'; // Class to mark elements to be ignored by html2canvas
+
 
     const fetchReportData = useCallback(async (isInitialLoad = false) => {
         if(isInitialLoad) setLoading(true); else setPdfLoading(true); // Use pdfLoading for refresh, setLoading for initial

@@ -1,4 +1,3 @@
-// src/types/index.types.test.ts
 import { describe, it, expect } from 'vitest';
 import type {
   ColorOption,
@@ -6,7 +5,7 @@ import type {
   Shop,
   Feature,
   PopularProductDto,
-} from './index'; // Assuming this test file is in the same directory (src/types/)
+} from './index'; 
 
 describe('Interface Structures in index.ts (Type Checks via Mock Objects)', () => {
   describe('ColorOption', () => {
@@ -49,7 +48,6 @@ describe('Interface Structures in index.ts (Type Checks via Mock Objects)', () =
         price: 19.99,
         productquantity: 200,
         storeId: 'storeABC',
-        // All optional fields (description, category, userId, imageUrl, storeName, isActive) are omitted
       };
       expect(mockProductRequiredOnly.prodId).toBe(102);
       expect(mockProductRequiredOnly.name).toBe('Basic Widget');

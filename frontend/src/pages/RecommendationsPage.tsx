@@ -2,16 +2,24 @@
 
 import React from 'react';
 import BestSellersList from '../components/recommendations/BestSellersList';
-import './RecommendationsPage.css'; 
+import { useNavigate } from 'react-router-dom';
+import './RecommendationsPage.css'; // Create this CSS file
+
 
 // This page is for showing various product recommendations to users.
 const RecommendationsPage: React.FC = () => {
+  const navigate = useNavigate();
   return (
     // Main container for the entire recommendations page content
     <main className="recommendations-page-container" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
         {/* Page title and a brief description */}
         <h1 className="main-titles">Discover Products You Might Like</h1>
         <p className="main-titles-sub">Based on current trends and popular items.</p>
+        <section className="back-button-container">
+        <button onClick={() => navigate('/products')} className="back-button">
+          Back to Products
+        </button>
+        </section>
 
       {/* Section for displaying top-selling products over a longer period (e.g., a month) */}
       <section className="recommendation-section">

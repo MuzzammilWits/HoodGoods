@@ -1,4 +1,3 @@
-// src/types/reporting.types.test.ts
 import { describe, it, expect } from 'vitest';
 import type {
   LowStockItem,
@@ -12,7 +11,7 @@ import type {
   PlatformMetricPoint,
   OverallPlatformMetrics,
   AdminPlatformMetricsData,
-} from './reporting'; // Assuming test file is in src/types/
+} from './reporting'; 
 import { TimePeriod } from './reporting';
 
 describe('Inventory Status Report Interfaces', () => {

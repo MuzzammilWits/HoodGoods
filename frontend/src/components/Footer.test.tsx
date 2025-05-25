@@ -1,6 +1,6 @@
 
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom'; // Import BrowserRouter
+import { BrowserRouter } from 'react-router-dom'; 
 import { describe, it, expect, vi } from 'vitest';
 import Footer from './Footer';
 
@@ -145,7 +145,7 @@ describe('Footer Component', () => {
   });
 
   it('verifies the presence of key structural classes from Footer.css', () => {
-    // Check for classes from Footer.css that define major layout blocks
+    // Checks for classes from Footer.css that define major layout blocks
     // This complements the semantic structure tests
     expect(document.querySelector('.footer-logo .logo')).toBeInTheDocument();
     expect(document.querySelector('.footer-menu ul')).toBeInTheDocument();
