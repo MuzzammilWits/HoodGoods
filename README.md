@@ -44,6 +44,40 @@ Make sure you have the following installed:
 * [Bruno (Optional but Recommended)](https://www.usebruno.com/downloads) – for API testing
 
 ---
+## Test Account Details
+
+For a comprehensive review of HoodsGoods from different user perspectives, we provide the following default test accounts. These will help you explore the platform's full range of features.
+
+**Administrator Access:**
+To explore backend management and overall platform oversight:
+
+* **Username:** `admin@gmail.com`
+* **Password:** `HoodGoods1!`
+
+This account provides access to administrative controls, user management, and content moderation.
+
+**Seller Access:**
+To experience the platform as an artisan managing their shop:
+
+* **Username:** `HandcraftedHaven@gmail.com`
+* **Password:** `HoodGoods1!`
+
+This account allows you to use the seller dashboard, list and manage products, and interact as a creator.
+
+These accounts are for evaluation in the local development or testing environment. We encourage their use to fully assess the project's scope and implemented user experiences.
+
+---
+
+## Testing Payments (Yoco SDK Simulation)
+
+For testing the payment functionality, which is handled by the Yoco SDK and **simulated in the development environment**, please note the following details for achieving a successful payment simulation:
+
+* **Test Card Number**: `4111 1111 1111`
+* **CVV**: Any CVV (e.g., `123`)
+* **Expiry Date**: Any month/year from January 2026 onwards (format `MM/YY`, e.g., `01/26`, `06/27`).
+![yoco](https://github.com/user-attachments/assets/ec82fb2d-a470-40db-b850-487a9f4925da)
+
+---
 
 ##  Setup Instructions
 
