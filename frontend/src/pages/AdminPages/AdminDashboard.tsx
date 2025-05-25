@@ -2,9 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
-import storeImage from '../../assets/store-management.png';
-import productImage from '../../assets/product-management.png';
-import reportImage from '../../assets/reports-analytics.png';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
