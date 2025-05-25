@@ -1,19 +1,10 @@
-// frontend/src/components/utils/ImageImports.tsx
-// import React from 'react'; // Import React is needed for JSX
-
-// Logo import
 // This path goes up two levels (from utils -> components -> src) then into assets
-import logo from '../../assets/logo.svg'; // <-- CORRECTED PATH
-
-// Hero and section images
-// --- IMPORTANT ---
-// The paths below assume your image files are directly inside 'frontend/src/assets/'.
-// Make sure the filenames and extensions (.jpg, .png, .webp, etc.) are correct.
-import jewelleryImg from '../../assets/jewellery.jpg';  // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
-import flowerImg from '../../assets/flowers.jpg';     // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
-import honeyImg from '../../assets/honey.jpg';       // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
-import ceramicsImg from '../../assets/ceramics.jpg';    // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
-import marketplaceImg from '../../assets/marketplace.jpg';    // <-- CORRECTED PATH, UPDATE FILENAME/EXTENSION if needed
+import logo from '../../assets/logo.svg'; 
+import jewelleryImg from '../../assets/jewellery.jpg';
+import flowerImg from '../../assets/flowers.jpg';    
+import honeyImg from '../../assets/honey.jpg';       
+import ceramicsImg from '../../assets/ceramics.jpg'; 
+import marketplaceImg from '../../assets/marketplace.jpg'; 
 
 
 /**

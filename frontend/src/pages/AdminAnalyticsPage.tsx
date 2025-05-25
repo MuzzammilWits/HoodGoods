@@ -1,11 +1,11 @@
 // frontend/src/pages/AdminAnalyticsPage.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import PlatformMetricsReport from '../components/reporting/PlatformMetricsReport';
 import './AdminAnalyticsPage.css';
 
 const AdminAnalyticsPage: React.FC = () => {
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate(); 
 
   return (
     <main className="admin-analytics-page container mt-4">

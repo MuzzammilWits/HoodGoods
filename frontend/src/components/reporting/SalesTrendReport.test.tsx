@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/SalesTrendReport.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest'; // Added MockInstance
 import { render, screen, waitFor } from '@testing-library/react'; // Removed fireEvent
 import userEvent from '@testing-library/user-event';
@@ -111,7 +110,6 @@ describe('SalesTrendReport', () => {
   const user = userEvent.setup();
   let originalUrlCreateObjectURL: typeof window.URL.createObjectURL;
   let originalUrlRevokeObjectURL: typeof window.URL.revokeObjectURL;
-  // Corrected type for the Date constructor spy
   let dateConstructorSpy: MockInstance<any>;
 
   beforeEach(() => {

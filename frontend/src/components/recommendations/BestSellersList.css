@@ -1,4 +1,6 @@
 /* frontend/src/components/recommendations/BestSellersList.css */
+
+/* Main container for the best sellers section */
 section.best-sellers-container {
   margin: 20px 0;
   padding: 0;
@@ -10,6 +12,7 @@ section.best-sellers-container {
   align-items: center;
 }
 
+/* Styling for the section title */
 section.best-sellers-container h2 {
   margin-top: 0;
   margin-bottom: 20px;
@@ -22,6 +25,7 @@ section.best-sellers-container h2 {
   line-height: 1.2;
 }
 
+/* Grid layout for the best seller cards */
 ol.best-sellers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -34,6 +38,7 @@ ol.best-sellers-grid {
   max-width: 1200px;
 }
 
+/* Individual best seller card styling */
 li.best-seller-card {
   background-color: #F5F2F8;
   border: 1px solid #eaeaea;
@@ -42,16 +47,17 @@ li.best-seller-card {
   text-align: left;
   display: flex;
   flex-direction: column;
-  /* justify-content: space-between; REMOVED to allow button to be at bottom naturally */
   transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
 }
 
+/* Hover effect for best seller cards */
 li.best-seller-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Styling for the product image within the card */
 .best-seller-image {
   width: 100%;
   height: 160px;
@@ -61,14 +67,16 @@ li.best-seller-card:hover {
   background-color: #f0f0f0;
 }
 
+/* Container for product information */
 article.best-seller-info {
   font-size: 0.9em;
   flex-grow: 1; /* This will push the button to the bottom */
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px; /* Add space above the button */
+  margin-bottom: 10px; 
 }
 
+/* Styling for the product name */
 h3.best-seller-name {
   font-size: 1.05em;
   font-weight: 600;
@@ -84,12 +92,14 @@ h3.best-seller-name {
   /* margin-bottom: auto; REMOVED - flex-grow on parent handles space */
 }
 
+/* Styling for the product's store name */
 p.best-seller-store {
   font-size: 0.8em;
   color: var(--text-secondary, #666);
   margin: 4px 0; /* Adjusted margin */
 }
 
+/* Styling for the product price */
 p.best-seller-price {
   font-size: 1em;
   font-weight: bold;
@@ -97,6 +107,7 @@ p.best-seller-price {
   margin: 8px 0;
 }
 
+/* Styling for sales information (if re-added) */
 p.best-seller-sales { /* If you re-add this */
   font-size: 0.85em;
   color: var(--text-secondary, #555);
@@ -105,6 +116,8 @@ p.best-seller-sales { /* If you re-add this */
 }
 
 /* --- NOTIFICATION STYLES (simple version) --- */
+
+/* Base styling for recommendation notifications */
 aside.recommendation-notification {
   padding: 10px 15px;
   margin: 0 0 15px 0; /* Display above the grid */
@@ -113,12 +126,14 @@ aside.recommendation-notification {
   font-weight: 500;
 }
 
+/* Success notification styling */
 aside.recommendation-notification.success {
   background-color: #d4edda; /* Greenish for success */
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
+/* Error notification styling */
 aside.recommendation-notification.error {
   background-color: #f8d7da; /* Reddish for error */
   color: #721c24;
@@ -126,6 +141,7 @@ aside.recommendation-notification.error {
 }
 /* --- END NOTIFICATION STYLES --- */
 
+/* Styling for loading, error, and empty states */
 p.best-sellers-loading,
 p.best-sellers-error,
 p.best-sellers-empty {
@@ -141,6 +157,7 @@ p.best-sellers-empty {
   justify-content: center;
 }
 
+/* Utility class to visually hide elements */
 .visually-hidden {
   position: absolute !important;
   height: 1px;
@@ -151,7 +168,7 @@ p.best-sellers-empty {
   white-space: nowrap;
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for various screen sizes */
 @media (max-width: 992px) {
   section.best-sellers-container h2 {
     font-size: 2.5rem;
