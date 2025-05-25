@@ -3,9 +3,9 @@ main.seller-analytics-page { /* Targeting main element */
   padding: 20px;
   background-color: #f4f6f8; 
   min-height: 100vh;
-  max-width: 1200px; /* Ensure container behavior for the whole page if not using .container class directly on main */
-  margin: 20px auto; /* Centering if max-width is applied */
-  font-family: 'Hind', sans-serif; /* Consistent font */
+  max-width: 1200px; 
+  margin: 20px auto; 
+  font-family: 'Hind', sans-serif; 
 }
 
 /* Centering messages for loading/error states */
@@ -17,7 +17,7 @@ main.seller-analytics-page { /* Targeting main element */
   min-height: 70vh; 
   text-align: center;
 }
-/* Ensure main itself is a flex container if it has .centered-message */
+
 main.centered-message {
     display: flex;
     flex-direction: column;
@@ -35,12 +35,12 @@ main.message-container p {
 main.message-container.error-message-container p {
   color: #c0392b; 
 }
-main.message-container header { /* Style for header within message containers */
+main.message-container header { 
     margin-bottom: 1rem;
 }
 
 
-header.analytics-header { /* Targeting header.page-header.analytics-header */
+header.analytics-header { 
   text-align: center;
   margin-bottom: 20px;
 }
@@ -64,7 +64,7 @@ nav.report-nav { /* Targeting nav */
 nav.report-nav button {
   flex-grow: 1;
   text-align: center;
-  padding: 12px 25px; /* Adjusted padding */
+  padding: 12px 25px; 
   font-size: 1em;
   cursor: pointer;
   border: 1px solid #ddd;
@@ -75,7 +75,7 @@ nav.report-nav button {
   box-shadow: none;
   transition: all 0.2s ease-in-out;
   font-weight: 500;
-  margin-bottom: -1px; /* Overlap bottom border */
+  margin-bottom: -1px; 
   margin-right: 5px; 
   font-family: 'Poppins', sans-serif;
 }
@@ -117,15 +117,12 @@ nav.report-nav button:disabled {
   box-shadow: none;
 }
 
-section.analytics-content { /* Targeting section */
-  /* No specific styles needed if report groups handle their own styling */
-}
 
-article.report-group { /* Changed div to article */
+article.report-group { 
   background-color: #ffffff;
   padding: 25px 30px; /* Increased padding */
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Softer, more diffused shadow */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
   margin-bottom: 30px;
 }
 .visually-hidden {
@@ -141,26 +138,26 @@ article.report-group { /* Changed div to article */
 }
 
 
-/* Card styling (if used for placeholders or future reports) */
-article.card { /* Changed div to article */
+/* Card styling */
+article.card { 
   border: 1px solid #e0e0e0;
-  border-radius: 6px; /* Consistent with other cards */
+  border-radius: 6px; 
 }
-header.card-header { /* Changed div to header */
+header.card-header { 
   background-color: #f8f9fa;
   border-bottom: 1px solid #e0e0e0;
   padding: 0.75rem 1.25rem;
-  border-radius: 6px 6px 0 0; /* Round top corners */
+  border-radius: 6px 6px 0 0; 
 }
-header.card-header .report-group-title.h5 { /* Targeting h2 with .h5 class if used */
+header.card-header .report-group-title.h5 { /* h2 with .h5 class */
   font-size: 1.1rem;
   color: #34495e;
-  margin-bottom: 0; /* Reset margin if it's an hN tag */
+  margin-bottom: 0; /
 }
-section.card-body { /* Changed div to section */
+section.card-body { 
   padding: 1.25rem;
 }
-p.placeholder-text.card-text { /* Targeting p for placeholder text */
+p.placeholder-text.card-text { /* p for placeholder text */
   color: #7f8c8d;
   margin:0; /* Reset paragraph margin */
 }
