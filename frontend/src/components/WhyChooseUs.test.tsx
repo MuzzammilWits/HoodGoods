@@ -1,4 +1,3 @@
-// src/pages/__tests__/WhyChooseUs.test.tsx
 import { render, screen} from '@testing-library/react';
 import WhyChooseUs from './WhyChooseUs';
 import { describe, it, expect, vi } from 'vitest';

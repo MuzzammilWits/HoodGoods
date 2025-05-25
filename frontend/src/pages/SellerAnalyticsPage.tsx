@@ -181,6 +181,7 @@ const SellerAnalyticsPage: React.FC = () => {
                 <h2 id="custom-view-heading" className="report-group-title h5 mb-0">Custom Performance View</h2>
               </header>
               <section className="card-body">
+
                 <p className="placeholder-text card-text">Custom View Report - Coming Soon!</p>
               </section>
             </article>
