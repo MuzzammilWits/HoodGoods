@@ -25,25 +25,16 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
+      - name: Install dependencies and Build
         run: |
           cd backend
           npm install
-
-      - name: Build NestJS app
-        run: |
-          cd backend
-          npm run build
-
-      - name: Run tests (optional)
-        run: |
-          cd backend
-      #    npm run test --if-present
+          npm run build --if-present
 
       - name: Zip artifact for deployment
         run: |
           cd backend
-          zip -r ../release.zip dist package.json package-lock.json
+          zip -r ../release.zip . -x "node_modules/*" -x "src/*" -x "test/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -64,8 +55,8 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip -d app
+      - name: Unzip artifact
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -80,4 +71,17 @@ jobs:
         with:
           app-name: 'HoodGoods'
           slot-name: 'Production'
-          package: ./app
+          package: '.' # Deploy the unzipped content
+          # *** THIS IS THE CRITICAL MISSING PIECE ***
+          # It sets the environment variables in Azure from your GitHub secrets.
+          app-settings-json: |
+            [
+                { "name": "DB_HOST", "value": "${{ secrets.DB_HOST }}", "slotSetting": false },
+                { "name": "DB_PORT", "value": "${{ secrets.DB_PORT }}", "slotSetting": false },
+                { "name": "DB_USERNAME", "value": "${{ secrets.DB_USERNAME }}", "slotSetting": false },
+                { "name": "DB_PASSWORD", "value": "${{ secrets.DB_PASSWORD }}", "slotSetting": false },
+                { "name": "DB_DATABASE", "value": "${{ secrets.DB_DATABASE }}", "slotSetting": false },
+                { "name": "AUTH0_DOMAIN", "value": "${{ secrets.AUTH0_DOMAIN }}", "slotSetting": false },
+                { "name": "AUTH0_AUDIENCE", "value": "${{ secrets.AUTH0_AUDIENCE }}", "slotSetting": false },
+                { "name": "YOCO_SECRET_KEY", "value": "${{ secrets.YOCO_SECRET_KEY }}", "slotSetting": false }
+            ]

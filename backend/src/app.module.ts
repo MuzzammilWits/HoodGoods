@@ -15,20 +15,29 @@ import { ReportingModule } from './reporting/reporting.module';
 import { RecommendationsModule } from './recommendations/recommendations.module'; // <--- IMPORT HERE
 
 
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'aws-0-eu-central-1.pooler.supabase.com',
-      port: 5432,
-      username: 'postgres.euudlgzarnvbsvzlizcu',
-      password: 'Muzzammil1!',
-      database: 'postgres',
-      synchronize: false, // set to true if you want TypeORM to auto-create tables (dev only!)
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      ssl: {
-        rejectUnauthorized: false, // required for Supabase (self-signed certs)
-      },
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE'),
+        synchronize: false,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
     }),
 
 
