@@ -1,14 +1,10 @@
-// src/types/createStore.test.ts
 import { describe, it, expect } from 'vitest';
 import {
   PRODUCT_CATEGORIES,
   STANDARD_DELIVERY_TIMES,
   EXPRESS_DELIVERY_TIMES,
-  // We don't import interfaces for runtime testing per se,
-  // but we'll use their structure to create mock objects.
-  // type ProductFormData, // No runtime value
-  // type StoreFormData,   // No runtime value
-} from './createStore'; // Adjust path if your test file is located elsewhere
+  // We don't import interfaces for runtime testing 
+} from './createStore'; 
 
 describe('Product Categories', () => {
   it('PRODUCT_CATEGORIES should be defined and be an array', () => {
@@ -21,7 +17,7 @@ describe('Product Categories', () => {
   });
 
   it('PRODUCT_CATEGORIES should contain expected categories', () => {
-    // Check for a few key categories
+    // Checks for a few key categories
     expect(PRODUCT_CATEGORIES).toContain('Home & Living');
     expect(PRODUCT_CATEGORIES).toContain('Clothing');
     expect(PRODUCT_CATEGORIES).toContain('Art');
@@ -39,9 +35,7 @@ describe('Product Categories', () => {
     });
   });
 
-  // Optional: Check if the array is frozen (immutable) if that's intended.
-  // By default, exported arrays are mutable. If you want to enforce immutability,
-  // you'd typically use `Object.freeze()` in the source file.
+ 
   // it('PRODUCT_CATEGORIES should be immutable (frozen)', () => {
   //   expect(Object.isFrozen(PRODUCT_CATEGORIES)).toBe(true);
   // });
@@ -96,10 +90,6 @@ describe('Delivery Time Options', () => {
 describe('Interface Structures (Type Checks via Mock Objects)', () => {
   // These "tests" primarily serve as a way to ensure that objects
   // conforming to the interfaces can be created without TypeScript errors
-  // and to document the expected structure. They don't "fail" at runtime
-  // in the traditional sense unless the mock object itself is malformed
-  // against the interface, which TypeScript would catch during development/compilation.
-
   it('ProductFormData structure can be satisfied', () => {
     // Define a type alias locally if not importing ProductFormData for runtime
     type ProductFormDataMock = {
@@ -124,8 +114,7 @@ describe('Interface Structures (Type Checks via Mock Objects)', () => {
     };
     // Basic check to ensure the object was created
     expect(mockProduct.productName).toBe('Test Product');
-    // Add more assertions if there are specific default values or behaviors
-    // associated with creating such an object, though not directly from the interface.
+
   });
 
   it('StoreFormData structure can be satisfied', () => {

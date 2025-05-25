@@ -23,7 +23,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   product,
   index,
   productCategories,
-  onProductChange, // Now expects the correctly restricted type
+  onProductChange,
   onImageChange,
   onRemove,
   isSubmitting,
