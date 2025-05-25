@@ -1,83 +1,59 @@
-/* src/pages/CheckoutPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&family=Hind:wght@400;600;700&display=swap');
 
-/* Overall container */
-main.checkout-container { /* Changed from .checkout-container */
+main.checkout-container {
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Hind', sans-serif; /* Ensure consistent font */
+  font-family: 'Hind', sans-serif;
 }
 
 main.checkout-container > header {
   margin-bottom: 30px;
   text-align: center;
   border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
+  padding-bottom: 20px; /* Added a bit more padding */
 }
 
 main.checkout-container > header h1 {
-  margin-bottom: 10px;
-  font-family: 'Poppins', sans-serif; /* Consistent heading font */
-  color: var(--primary-color, #432C53); /* Consistent heading color */
+  margin-bottom: 15px; /* Adjusted margin */
+  color: var(--primary-color, #432C53);
+  font-family: 'Playfair Display', serif; /* Applied Playfair Display */
+  font-size: 2.8rem; /* Matched Create Store heading size */
+  font-weight: 700; /* Matched Create Store heading weight */
 }
 
 main.checkout-container > header .instructions {
   color: #555;
+  font-family: 'Poppins', sans-serif; /* Ensure instructions use Poppins */
 }
 
-/* Error messages */
 .error-message {
-    color: #d9534f; /* Bootstrap's danger color */
+    color: #d9534f;
     background-color: #f2dede;
     padding: 0.75rem 1.25rem;
     margin-bottom: 1rem;
     border: 1px solid #ebccd1;
     border-radius: 0.25rem;
 }
-.cart-error { /* Specific cart errors */ }
-.delivery-error { /* Specific delivery errors */ }
-.payment-error { /* Specific payment errors */ }
 
 
-/* Layout wrapper */
-section.checkout-layout { /* Changed from .checkout-layout */
+section.checkout-layout {
   display: grid;
-  grid-template-columns: 1fr; /* Default to single column */
-  gap: 30px; /* Space between sections */
+  grid-template-columns: 1fr;
+  gap: 30px;
 }
 
-@media (min-width: 768px) {
-  section.checkout-layout { /* Two columns on wider screens */
-    grid-template-columns: 1fr 1fr; /* Example: Two equal columns */
-    /* Or use specific fractions e.g., 2fr 1fr for a wider first column */
-  }
-  /* Adjust which sections go into which column using grid-column if needed */
-  .pickup-location-section { grid-column: 1 / 2; }
-  .order-summary-section { grid-column: 1 / 2; } /* Stack summary below pickup on small */
-  .payment-section { grid-column: 1 / -1; } /* Full width for payment below two cols */
-  .actions { grid-column: 1 / -1; } /* Full width for actions */
-
-  @media (min-width: 992px) { /* Example: Side-by-side for larger screens */
-    .pickup-location-section { grid-column: 1 / 2; }
-    .order-summary-section { grid-column: 2 / 3; grid-row: 1 / span 2; } /* Span summary across rows if pickup/payment are stacked */
-    .payment-section { grid-column: 1 / 2; grid-row: 2 / 3; }
-    .actions { grid-column: 1 / 2; grid-row: 3 / 4; }
-  }
-}
-
-
-/* Sections within the form (Pickup Location, Order Summary, Payment) */
 .form-section {
   background-color: #f9f9f9;
   padding: 25px;
   border-radius: 8px;
   border: 1px solid #eaeaea;
-  display: flex; /* Added for better internal alignment */
-  flex-direction: column; /* Stack children vertically */
-  gap: 15px; /* Space between elements within a form-section */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .form-section h2 {
@@ -86,35 +62,37 @@ section.checkout-layout { /* Changed from .checkout-layout */
   padding-bottom: 10px;
   border-bottom: 1px solid #ddd;
   font-family: 'Poppins', sans-serif;
-  color: var(--primary-color-darker, #362245); /* Darker for section titles */
+  color: var(--primary-color-darker, #362245);
+  font-size: 1.5rem; /* Consistent section title size */
 }
 
-/* Form field structure (using <p> for grouping label and input) */
 .form-field {
-  margin: 0; /* Reset default p margin, rely on gap from parent .form-section */
+  margin: 0;
   display: flex;
-  flex-direction: column; /* Stack label and input */
-  gap: 8px; /* Space between label and input */
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-field label {
-  display: block; /* Ensures it takes full width if needed */
+  display: block;
   font-weight: 600;
-  color: #495057; /* Subtler label color */
+  color: #495057;
+  font-family: 'Poppins', sans-serif; /* Ensure labels use Poppins */
 }
 
-.form-input { /* Style for both input and select */
+.form-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ced4da; /* Standard border color */
+  border: 1px solid #ced4da;
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 1rem;
-  background-color: #fff; /* Ensure white background */
+  background-color: #fff;
   color: #495057;
+  font-family: 'Poppins', sans-serif; /* Ensure inputs use Poppins */
 }
 .form-input:disabled {
-    background-color: #e9ecef; /* Style for disabled inputs */
+    background-color: #e9ecef;
     cursor: not-allowed;
 }
 
@@ -122,15 +100,14 @@ section.checkout-layout { /* Changed from .checkout-layout */
     font-size: 0.85em;
     color: #6c757d;
     margin-top: 4px;
+    font-family: 'Poppins', sans-serif;
 }
 
-
-/* --- Order Summary Section --- */
 .order-summary-section {
   background-color: #f9f9f9;
 }
 
-article.store-group { /* Targeting article */
+article.store-group {
   background-color: #ffffff;
   border: 1px solid #dcdcdc;
   padding: 20px;
@@ -142,7 +119,7 @@ article.store-group:last-child {
   margin-bottom: 0;
 }
 
-.store-name { /* Targeting <h3> */
+.store-name {
   font-size: 1.3rem;
   font-weight: 600;
   margin-top: 0;
@@ -151,18 +128,17 @@ article.store-group:last-child {
   font-family: 'Poppins', sans-serif;
 }
 
-section.delivery-option { /* Changed div to section */
+section.delivery-option {
   margin-bottom: 15px;
 }
-p.loading-options-text { /* Style for the loading text if needed */
-    margin:0; color: #555; font-style: italic;
+p.loading-options-text {
+    margin:0; color: #555; font-style: italic; font-family: 'Poppins', sans-serif;
 }
-p.delivery-unavailable-text { /* Style for delivery unavailable text */
-    margin:0; font-weight: bold;
+p.delivery-unavailable-text {
+    margin:0; font-weight: bold; font-family: 'Poppins', sans-serif;
 }
 
-
-ul.order-items { /* Targeting ul */
+ul.order-items {
   list-style: none;
   padding: 0;
   margin: 15px 0;
@@ -170,14 +146,15 @@ ul.order-items { /* Targeting ul */
   padding-top: 15px;
 }
 
-li.order-item { /* Targeting li */
+li.order-item {
   padding: 8px 0;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  font-size: 0.95rem; /* Slightly smaller item text */
+  font-size: 0.95rem;
   color: #333;
+  font-family: 'Poppins', sans-serif;
 }
 li.order-item:not(:last-child) {
    border-bottom: 1px solid #f5f5f5;
@@ -190,6 +167,7 @@ footer.store-summary {
   text-align: right;
   font-size: 0.95rem;
   color: #555;
+  font-family: 'Poppins', sans-serif;
 }
 footer.store-summary p {
   margin: 5px 0;
@@ -205,94 +183,91 @@ footer.order-totals {
 
 p.grand-total {
   font-weight: bold;
-  font-size: 1.3rem; /* Increased size */
+  font-size: 1.3rem;
   margin: 0;
-  color: var(--primary-color, #432C53); /* Use primary color */
+  color: var(--primary-color, #432C53);
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Payment Section */
-.payment-section {
-    /* Inherits .form-section styles if class is kept, or define separately */
-}
-.payment-section h2 { /* Targeting h2 directly if it's always "3. Payment" */
-    font-size: 1.5rem; /* Consistent with other section titles */
+.payment-section h2 {
+    font-size: 1.5rem;
     color: var(--primary-color-darker, #362245);
     margin-top: 0;
-    margin-bottom: 15px; /* Space below "3. Payment" */
+    margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #ddd;
+    font-family: 'Poppins', sans-serif;
 }
-
 
 .yoco-pay-button {
-  background-color: #007bff; /* Yoco-like blue or your primary action color */
+  background-color: #432C53; /* Matched .create-store-btn */
   color: white;
   border: none;
-  padding: 15px;
+  padding: 15px 30px; /* Matched .create-store-btn */
   width: 100%;
-  font-size: 1.1rem; /* Prominent button text */
-  border-radius: 5px;
+  font-size: 1.1rem; /* Matched .create-store-btn */
+  font-weight: 600; /* Matched .create-store-btn */
+  border-radius: 4px; /* Matched .create-store-btn */
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  font-weight: bold;
-  font-family: 'Poppins', sans-serif; /* Consistent button font */
+  transition: background-color 0.3s, transform 0.1s ease; /* Matched .create-store-btn */
+  font-family: 'Poppins', sans-serif;
 }
 .yoco-pay-button:hover:not(:disabled) {
-  background-color: #0069d9; /* Darker blue */
-  transform: translateY(-1px);
+  background-color: #5a3a6f; /* Matched .create-store-btn:hover */
+  transform: translateY(-1px); /* Matched .create-store-btn:hover */
 }
 .yoco-pay-button:disabled {
-    background-color: #6c757d; /* Grey when disabled */
+    background-color: #9e9e9e; /* Matched .create-store-btn:disabled */
+    color: #e0e0e0; /* Added lighter text color for disabled */
     cursor: not-allowed;
-    opacity: 0.65;
+    opacity: 0.7; /* Matched .create-store-btn:disabled */
 }
 
-.payment-hint { /* Style for the hint below payment button */
+.payment-hint {
     font-size: 0.9em;
     color: #6c757d;
     margin-top: 10px;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 }
 
-
-/* Actions <menu> */
 menu.actions {
   list-style: none;
   padding: 0;
-  margin: 30px 0 0 0; /* Adjusted margin */
-  text-align: center; /* Center link within its grid area if full width */
+  margin: 30px 0 0 0;
+  text-align: center;
 }
-menu.actions li { /* If you wrap Link in li */
-    /* No specific li styles needed if Link is styled directly */
-}
-
 
 .back-link {
-  display: inline-block; /* To allow padding and centering if text-align on parent */
-  color: #007bff;
-  padding: 10px 15px;
+  display: inline-block;
+  background: #97C9BA; /* Matched .add-product-btn */
+  color: #fff; /* Matched .add-product-btn */
+  border: none; /* Matched .add-product-btn */
+  padding: 12px 24px; /* Adapted from .add-product-btn (was 12px 0) */
+  font-size: 1rem; /* Matched .add-product-btn */
+  font-weight: 600; /* Matched .add-product-btn */
+  border-radius: 4px; /* Matched .add-product-btn */
   text-decoration: none;
-  border: 1px solid transparent; /* No border by default */
-  border-radius: 5px;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: background 0.2s, color 0.2s, transform 0.1s ease; /* Added transform */
+  box-shadow: 0 1px 2px rgba(67,44,83,0.04); /* Matched .add-product-btn */
+  font-family: 'Poppins', sans-serif;
 }
 .back-link:hover {
-  color: #0056b3;
-  background-color: #f0f0f0; /* Subtle background on hover */
-  text-decoration: underline;
+  background: #7ab8a5; /* Matched .add-product-btn:hover */
+  color: #fff; /* Matched .add-product-btn:hover */
+  text-decoration: none; /* Ensure no underline on hover if not desired */
+  transform: translateY(-1px); /* Added hover effect */
 }
 
-/* Ensure Yoco popup is on top - if it still has issues */
 .yc-auto-shown-popup {
   z-index: 2147483647 !important;
   position: fixed !important;
-  top: 0 !important; /* Ensure it starts at the top */
-  left: 0 !important; /* Ensure it starts at the left */
-  width: 100vw !important; /* Full viewport width */
-  height: 100vh !important; /* Full viewport height */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
-/* Loading states specifically for checkout page if needed */
 .loading-auth-message, .loading-cart-message, .loading-delivery-message {
     text-align: center;
     padding: 2rem;
@@ -301,21 +276,23 @@ menu.actions li { /* If you wrap Link in li */
     font-family: 'Hind', sans-serif;
 }
 
-
-/* Responsive */
 @media (max-width: 768px) {
-  .checkout-container {
+  main.checkout-container {
     margin: 20px;
     padding: 20px;
   }
-  .checkout-layout { /* Revert to single column for main layout on small screens */
-    grid-template-columns: 1fr;
+  main.checkout-container > header h1 {
+    font-size: 2.2rem; /* Adjusted for mobile */
   }
-  .pickup-location-section,
-  .order-summary-section,
-  .payment-section,
-  .actions {
-    grid-column: 1 / -1 !important; /* Ensure they take full width */
-    grid-row: auto !important; /* Reset row positioning */
+  .form-section h2 {
+    font-size: 1.4rem; /* Adjusted for mobile */
+  }
+  .yoco-pay-button {
+    font-size: 1rem; /* Slightly smaller button text on mobile */
+    padding: 12px 20px;
+  }
+  .back-link {
+    font-size: 0.9rem;
+    padding: 10px 18px;
   }
 }

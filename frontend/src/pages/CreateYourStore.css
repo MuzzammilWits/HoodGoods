@@ -1,6 +1,5 @@
-/* src/pages/CreateYourStore.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600;700&display=swap');
 
-/* Styles for the main <section> container */
 section.create-store-container {
   max-width: 1100px;
   margin: 40px auto;
@@ -10,9 +9,8 @@ section.create-store-container {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Styles for the <header> within the container */
 section.create-store-container > header {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
@@ -22,43 +20,45 @@ section.create-store-container > header {
 
 section.create-store-container > header h1 {
   margin-bottom: 20px;
-  color: var(--primary-color, #432C53); /* Consistent color */
+  color: var(--primary-color, #432C53);
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
 }
 
-section.create-store-container > header {
-  color: #555; /* Adjusted from #666 for slightly better contrast */
+section.create-store-container > header p {
+  color: #555;
   font-size: 1.1rem;
-  line-height: 1.6; /* Improved readability */
+  line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* General Error/Success messages (rendered as <p> by refactored SubmissionStatus) */
-p.error-message { /* Target p tag */
+p.error-message {
   background-color: #fee;
   border-left: 4px solid #d32f2f;
   color: #d32f2f;
   padding: 15px;
   border-radius: 4px;
-  margin: 0 0 15px 0; /* Ensure margin for spacing, especially if multiple messages or above button */
+  margin: 0 0 15px 0;
 }
 
-p.success-message { /* Target p tag */
+p.success-message {
   background-color: #e8f5e9;
   border-left: 4px solid #4caf50;
   color: #97C9BA;
   padding: 15px;
   border-radius: 4px;
-  margin: 0 0 15px 0; /* Ensure margin for spacing */
+  margin: 0 0 15px 0;
 }
 
-/* Styles for form elements (label, input, select, textarea) */
-form label { /* General label styling */
+form label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
   color: #333;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* General input styles */
 form input[type="text"],
 form input[type="number"],
 form textarea,
@@ -70,64 +70,120 @@ form select {
   font-size: 16px;
   box-sizing: border-box;
   transition: border-color 0.3s;
-  margin-bottom: 15px; /* Add space below each form control */
+  margin-bottom: 15px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Styling for placeholders */
+form input[type="text"]::placeholder,
+form input[type="number"]::placeholder,
+form textarea::placeholder {
+  color: #adb5bd; /* A common light grey color for placeholders */
+  font-family: 'Poppins', sans-serif; /* Ensure consistent font */
+  opacity: 1; /* Firefox sometimes reduces opacity by default */
+}
+/* For older browsers, you might need vendor prefixes, but this covers modern ones */
+form input[type="text"]::-ms-input-placeholder, /* Edge */
+form input[type="number"]::-ms-input-placeholder,
+form textarea::-ms-input-placeholder {
+  color: #adb5bd;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+fieldset.delivery-options input[type="number"],
+fieldset.delivery-options select {
+  margin-bottom: 8px;
+}
+
+section.product-section form input[type="text"],
+section.product-section form input[type="number"],
+section.product-section form textarea,
+section.product-section form select {
+  margin-bottom: 35px;
 }
 
 form input:last-of-type,
 form select:last-of-type,
 form textarea:last-of-type {
-    margin-bottom: 0; /* Remove margin for the last control in a group if needed */
+    margin-bottom: 0;
 }
 
 form input[type="text"]:focus,
 form input[type="number"]:focus,
 form textarea:focus,
 form select:focus {
-  border-color: var(--primary-color, #432C53); /* Use primary color for focus */
+  border-color: var(--primary-color, #432C53);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(67, 44, 83, 0.2); /* Adjusted shadow color */
+  box-shadow: 0 0 0 2px rgba(67, 44, 83, 0.2);
 }
 
-/* Assuming StoreInfoForm/ProductList might use <section> or <fieldset> for these */
-/* Adjust selectors if child components use different tags or more specific classes */
-fieldset.delivery-options,
-section.product-section {
-  background-color: #fdfdfd;
-  padding: 25px; /* Increased padding */
-  margin-bottom: 30px;
-}
-
-/* Store info section specific styles */
 section.store-info-section {
   background-color: transparent;
-  padding: 25px;
-  margin-bottom: 30px;
+  padding: 20px 25px 10px 25px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  border: none;
 }
 
-fieldset.delivery-options legend,
-section.product-section h3 { /* Target legend and h3 within product sections */
-  margin-top: 0;
+fieldset.delivery-options {
+  background-color: #fdfdfd;
+  padding: 20px 25px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  border: none;
+}
+
+.section-title,
+section.store-info-section h2,
+fieldset.delivery-options h2,
+.product-list-section > h2 {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #432C53;
+  font-family: 'Poppins', sans-serif;
   margin-bottom: 20px;
+  margin-top: 15px;
+  text-align: left;
   padding-bottom: 10px;
   border-bottom: 1px solid #eaeaea;
-  color: #333;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem; /* Consistent sub-section heading size */
-  font-weight: 600;
 }
 
-/* Assuming ProductList uses figure for image preview */
+.section-title:first-child,
+section.store-info-section:first-child > h2,
+fieldset.delivery-options:first-child > h2,
+section.create-store-container > section.store-info-section:first-child h2,
+section.create-store-container > fieldset.delivery-options:first-child h2,
+section.create-store-container > .product-list-section:first-child > h2 {
+    margin-top: 0;
+}
+
+section.store-info-section label {
+  margin-top: 10px;
+  font-family: 'Poppins', sans-serif;
+}
+fieldset.delivery-options label {
+  margin-top: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+section.store-info-section label:first-of-type,
+fieldset.delivery-options label:first-of-type {
+  margin-top: 0;
+}
+
 figure.image-preview {
-  margin: 15px 0 0 0; /* Reset figure margin and add top margin */
+  margin: 15px 0 0 0;
   border: 1px solid #eaeaea;
   border-radius: 4px;
   overflow: hidden;
   height: 200px;
   width: 200px;
-  display: flex; /* To center placeholder text or image */
+  display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ECE4F1; /* Placeholder background */
+  background-color: #ECE4F1;
 }
 
 figure.image-preview img {
@@ -136,12 +192,11 @@ figure.image-preview img {
   object-fit: cover;
 }
 
-/* Product section styled like add-product-form-section from seller page */
 section.product-section {
   background-color: #fdfdfd;
-  padding: 25px 30px;
+  padding: 25px 25px;
   border-radius: 8px;
-  margin: 30px 0 40px 0;
+  margin: 30px 0 70px 0;
   border: 1px solid #e0e0e0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
@@ -163,19 +218,15 @@ section.product-section label {
   font-weight: 600;
   color: #444;
   font-size: 0.95em;
-  margin-top: 15px;
+  margin-top: 30px;
+  font-family: 'Poppins', sans-serif;
 }
-section.product-section label:first-of-type { margin-top: 0; }
+section.product-section label:first-of-type {
+  margin-top: 0;
+}
 
 .product-disclaimer {
-  background: #fee;
-  border-left: 5px solid #d32f2f;
-  color: #b71c1c;
-  padding: 14px 18px;
-  border-radius: 4px;
-  margin-bottom: 24px;
-  font-size: 1rem;
-  font-weight: 500;
+  display: none;
 }
 
 .add-product-btn {
@@ -191,26 +242,45 @@ section.product-section label:first-of-type { margin-top: 0; }
   text-align: center;
   transition: background 0.2s, color 0.2s;
   box-shadow: 0 1px 2px rgba(67,44,83,0.04);
+  font-family: 'Poppins', sans-serif;
 }
 .add-product-btn:hover:not(:disabled) {
   background: #7ab8a5;
   color: #fff;
 }
 
+section.store-info-section h2 {
+  margin-bottom: 8px;
+}
+
+.store-name-disclaimer {
+  font-style: italic;
+  color: #555;
+  font-size: 0.9em;
+  margin-top: 4px;
+  margin-bottom: 15px;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.4;
+}
+
+.store-name-disclaimer + fieldset.form-group {
+  margin-top: 0;
+}
+
 .remove-product-btn {
-  color: #d32f2f; /* Error red */
+  color: #d32f2f;
   display: block;
-  margin-left: auto; /* Pushes to the right within its container */
+  margin-left: auto;
   margin-top: 10px;
   background-color: transparent;
+  font-family: 'Poppins', sans-serif;
 }
 
 .remove-product-btn:hover {
   background-color: rgba(211, 47, 47, 0.05);
-  color: #b71c1c; /* Darker red */
+  color: #b71c1c;
 }
 
-/* Styles for the submit button */
 .create-store-btn {
   background-color: #432C53;
   color: white;
@@ -238,116 +308,47 @@ section.product-section label:first-of-type { margin-top: 0; }
   opacity: 0.7;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
   section.create-store-container {
     padding: 20px;
     margin: 20px;
   }
-  /* If .form-row was used for side-by-side inputs in child components, adjust: */
-  /* section.form-row { (if it's a section)
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  section.create-store-container > header h1 {
+    font-size: 2.2rem;
   }
-  section.form-row section.form-group { (if form-group is a section)
-    margin-bottom: 20px;
+  .section-title,
+  section.store-info-section h2,
+  fieldset.delivery-options h2,
+  .product-list-section > h2 {
+    font-size: 1.4rem;
   }
-  section.form-row section.form-group:last-child {
-    margin-bottom: 0;
-  } */
 }
 
-/* Remove border from fieldset.form-group */
 fieldset.form-group {
   border: none;
   padding: 0;
   margin: 0;
 }
 
-/* Consistent spacing for headings and input boxes */
-section.product-section h3,
-section.store-info-section h2,
-section.create-store-container > header h1,
-fieldset.delivery-options legend {
-  margin-bottom: 24px;
-}
-
-section.product-section label,
-section.store-info-section label,
-fieldset.delivery-options label {
-  margin-top: 18px;
-}
-
-/* Remove top margin for the first label after a heading */
-section.product-section label:first-of-type,
-section.store-info-section label:first-of-type,
-fieldset.delivery-options label:first-of-type {
-  margin-top: 0;
-}
-
 .delivery-separator {
   border: none;
   border-top: 1.5px solid #e0e0e0;
-  margin: 28px 0 28px 0;
-}
-
-.delivery-options-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #432C53;
-  font-family: 'Poppins', sans-serif;
-  margin-bottom: 24px;
-  margin-top: 40px;
-}
-
-.delivery-options {
-  background-color: #fdfdfd;
-  padding: 25px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  border: none;
-}
-
-.store-name-box {
-  background-color: #fdfdfd;
-  padding: 25px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  border: none;
+  margin: 28px 0;
 }
 
 #storeName {
   background: #fff;
   width: 100%;
   max-width: 900px;
-  margin: 0 auto 15px auto;
-  display: block;
-}
-
-/* Ensure price input boxes have the same max-width for consistency */
-input[type="number"] {
-  max-width: 450px;
-}
-
-.section-title,
-.delivery-options-title,
-.product-list-section > h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #432C53;
+  margin-bottom: 10px;
   font-family: 'Poppins', sans-serif;
-  margin-bottom: 24px;
-  margin-top: 40px;
-  margin-left: 0;
-  text-align: left;
 }
 
-/* Remove extra margin from first section title */
-.section-title:first-child {
-  margin-top: 0;
+form input[type="number"] {
+  max-width: 450px;
 }
 
 form select {
   padding-right: 2.5rem;
+  font-family: 'Poppins', sans-serif;
 }

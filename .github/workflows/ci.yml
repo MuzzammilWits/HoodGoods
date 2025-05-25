@@ -2,20 +2,18 @@ name: CI/CD for React + NestJS
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
 jobs:
   frontend-tests:
-   name: Run Frontend Tests
-   runs-on: ubuntu-latest
-
-   defaults:
-    run:
-      working-directory: ./frontend
-
-   steps:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -24,69 +22,84 @@ jobs:
       with:
         node-version: 22
 
+    - name: Create frontend .env file
+      run: |
+        echo "VITE_AUTH0_DOMAIN=${{ secrets.VITE_AUTH0_DOMAIN }}" > .env
+        echo "VITE_AUTH0_CLIENT_ID=${{ secrets.VITE_AUTH0_CLIENT_ID }}" >> .env
+        echo "VITE_AUTH0_AUDIENCE=${{ secrets.VITE_AUTH0_AUDIENCE }}" >> .env
+        echo "VITE_AUTH0_CALLBACK_URL=${{ secrets.VITE_AUTH0_CALLBACK_URL }}" >> .env
+        echo "VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}" >> .env
+        echo "VITE_YOCO_PUBLIC_KEY=${{ secrets.VITE_YOCO_PUBLIC_KEY }}" >> .env
+        echo "VITE_API_BASE_URLs=${{ secrets.VITE_API_BASE_URLS }}" >> .env
+
     - name: Install dependencies
       run: npm install
 
     - name: Run frontend tests with coverage
       run: npm run coverage
 
+    - name: Upload frontend coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-coverage
+        path: frontend/coverage/lcov.info
+
   backend-tests:
     name: Run Backend Tests
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: ./backend
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-      - name: Install dependencies
-        run: npm install
+    - name: Create backend .env file
+      run: |
+        echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+        echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+        echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
+        echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
+        echo "YOCO_SECRET_KEY=${{ secrets.YOCO_SECRET_KEY }}" >> .env
 
-      - name: Run backend tests with coverage
-        run: npm run test:cov
-        working-directory: ./backend
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run backend tests with coverage
+      run: npm run test:cov
+
+    - name: Upload backend coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-coverage
+        path: backend/coverage/lcov.info
 
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     needs: [frontend-tests, backend-tests]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          fetch-depth: 0  # SonarCloud needs the full history
 
-      - name: Install frontend dependencies
-        run: npm install
-        working-directory: ./frontend
-
-      - name: Run frontend tests with coverage
-        run: npm run coverage
-        working-directory: ./frontend
-
-      - name: Install backend dependencies
-        run: npm install
-        working-directory: ./backend
-
-      - name: Run backend tests with coverage
-        run: npm run test:cov
-        working-directory: ./backend
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage
+          merge-multiple: true # Merges backend and frontend artifacts into one directory
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          projectBaseDir: .
+        uses: SonarSource/sonarcloud-github-action@master
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
