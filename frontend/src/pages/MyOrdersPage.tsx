@@ -290,7 +290,7 @@ export default function MyOrdersPage() {
                                     {order.sellerOrders.map((sellerOrder) => (
                                         <section key={sellerOrder.sellerOrderId} className="shipment-card">
                                             <header className="shipment-header">
-                                                <h4>Shipment from {sellerOrder.storeName || `Store ID ${sellerOrder.userId}`}</h4> 
+                                                <h4>Shipment # {sellerOrder.sellerOrderId}</h4> 
                                                 <p className="status-line">Status: <strong className={`status-badge ${statusClassMap[sellerOrder.status] || 'status-unknown'}`}>{sellerOrder.status}</strong></p>
                                             </header>
                                             <section className="shipment-details">
