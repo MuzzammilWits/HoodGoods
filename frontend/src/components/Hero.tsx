@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import './Hero.css';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
-
+import logoUrl from '/src/assets/logo.svg';
 // --- TypeScript Declaration for Vanta ---
 declare global {
   interface Window {
@@ -108,7 +108,7 @@ const Hero: React.FC = () => {
         </header>
 
         {/* The logo image is positioned by the grid layout */}
-        <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" />
+        <img src={logoUrl} alt="HoodGoods Logo" className="hero-logo" />
       </article>
     </section>
   );

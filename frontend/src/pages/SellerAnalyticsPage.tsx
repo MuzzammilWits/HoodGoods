@@ -164,11 +164,11 @@ const SellerAnalyticsPage: React.FC = () => {
 
         {activeReport === 'custom' && (
           <article className="report-group" aria-labelledby="custom-view-heading">
-            <article className="card"> {/* Changed div to article */}
-              <header className="card-header"> {/* Changed div to header */}
+            <article className="card">
+              <header className="card-header"> 
                 <h2 id="custom-view-heading" className="report-group-title h5 mb-0">Custom Performance View</h2>
               </header>
-              <section className="card-body"> {/* Changed div to section */}
+              <section className="card-body"> 
                 <p className="placeholder-text card-text">Custom View Report - Coming Soon!</p>
               </section>
             </article>
