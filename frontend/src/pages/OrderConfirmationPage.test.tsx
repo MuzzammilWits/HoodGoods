@@ -39,24 +39,32 @@ describe('OrderConfirmationPage', () => {
     expect(continueShoppingLink).toHaveAttribute('href', '/products');
   });
 
-  it('should apply basic inline styles (example check for title color)', () => {
+  it('should render the title with the correct class for styling', () => {
     renderWithRouter(<OrderConfirmationPage />);
     
     const titleElement = screen.getByRole('heading', { name: /Order Confirmed!/i });
-    // Check a specific style property. Note: Testing exact style values can make tests brittle.
-    // It's often better to test for classes if styles are in CSS files.
-    // For inline styles, this is a direct way.
-    expect(titleElement).toHaveStyle('color: rgb(46, 204, 113)'); // #2ecc71 in rgb
-    // Or more generically:
-    // expect(titleElement.style.color).toBe('rgb(46, 204, 113)');
+  
+    // Expect the title to have the class that applies the color in CSS
+    expect(titleElement).toHaveClass('title');
   });
 
-  it('should apply basic inline styles for the container (example check for display flex)', () => {
+  it('should apply the correct container class for layout styling', () => {
     renderWithRouter(<OrderConfirmationPage />);
     
-    // The <main> element is the container in this component
     const containerElement = screen.getByRole('main');
-    expect(containerElement).toHaveStyle('display: flex');
-    expect(containerElement).toHaveStyle('justify-content: center');
+    expect(containerElement).toHaveClass('order-confirmation-container');
+  });
+
+  it('should render the main container using a semantic <main> tag', () => {
+    renderWithRouter(<OrderConfirmationPage />);
+    const mainElement = screen.getByRole('main');
+    expect(mainElement).toBeInTheDocument();
+  });
+
+  it('should render the "Continue Shopping" link styled as a button and navigate correctly', () => {
+    renderWithRouter(<OrderConfirmationPage />);
+    const link = screen.getByRole('link', { name: /Continue Shopping/i });
+    expect(link).toHaveAttribute('href', '/products');
+    expect(link).toHaveClass('continue-shopping-button');
   });
 });
