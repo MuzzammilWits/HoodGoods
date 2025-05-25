@@ -1,6 +1,6 @@
-// src/products/entities/product.entity.ts
+
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Store } from '../../store/entities/store.entity'; // Adjust path if needed
+import { Store } from '../../store/entities/store.entity';
 
 @Entity('Products')
 export class Product {
@@ -35,16 +35,16 @@ export class Product {
   isActive: boolean;
 
   @Column({ name: 'store_id', type: 'bigint', nullable: false })
-  storeId: string; // Property name remains 'storeId', type is string
+  storeId: string; // Property name remains 'storeId', type set as 'string'
 
 
-  // --- Relationship Definition ---
+  // Relationship Definition
   @ManyToOne(() => Store, store => store.products, { nullable: false, eager: false })
   @JoinColumn({
-      name: 'store_id', // Foreign key column name in this (Products) table
-      referencedColumnName: 'storeId' // <<< CORRECTED: Property name of the PK in the Store entity
+      name: 'store_id', // Foreign key in Products table
+      referencedColumnName: 'storeId' //Property name of the Primary Key in the Store entity
   })
   store: Store;
-  // --- End Relationship ---
+  //  End Relationship Definition
 
 }

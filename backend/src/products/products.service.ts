@@ -9,6 +9,7 @@ export class ProductsService {
     private productRepository: Repository<Product>,
   ) {}
 
+  //Returns all product which have isActive status as 'true'
   async findAllActive(): Promise<Product[]> {
     return this.productRepository.find({ 
       where: { isActive: true },
@@ -16,6 +17,7 @@ export class ProductsService {
     });
   }
 
+  //Returns all products from the repository, irrespective of their active status
   async findAll(filters?: { category?: string }): Promise<Product[]> {
     const query = this.productRepository.createQueryBuilder('product');
     
@@ -28,6 +30,7 @@ export class ProductsService {
     return query.getMany();
   }
 
+  //Finds all products which have an inactive status BUT from a store which has an active status
  async findAllInactive(): Promise<Product[]> {
     return this.productRepository.find({ 
       where: { 
@@ -39,6 +42,7 @@ export class ProductsService {
     });
   }
 
+//Changes isActive status of the product from 'false' to 'true', indicating its been set as 'Active' from being 'Inactive' due to admin approval.
   async approveProduct(id: number): Promise<Product> {
     const product = await this.productRepository.findOneBy({ prodId: id });
     if (!product) {
@@ -48,6 +52,7 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
+  //Removes a product from the repository based on the given productId
   async remove(id: number): Promise<void> {
     await this.productRepository.delete(id);
   }
