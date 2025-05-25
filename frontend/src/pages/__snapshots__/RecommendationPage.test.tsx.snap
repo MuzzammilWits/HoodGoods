@@ -2,20 +2,20 @@
 
 exports[`RecommendationsPage > matches snapshot 1`] = `
 <DocumentFragment>
-  <div
+  <main
     class="recommendations-page-container"
     style="padding-top: 20px; padding-bottom: 20px;"
   >
-    <header
-      class="recommendations-page-header"
+    <h1
+      class="main-titles"
     >
-      <h1>
-        Discover Products You Might Like
-      </h1>
-      <p>
-        Based on current trends and popular items.
-      </p>
-    </header>
+      Discover Products You Might Like
+    </h1>
+    <p
+      class="main-titles-sub"
+    >
+      Based on current trends and popular items.
+    </p>
     <section
       class="recommendation-section"
     >
@@ -63,6 +63,6 @@ exports[`RecommendationsPage > matches snapshot 1`] = `
         </p>
       </div>
     </section>
-  </div>
+  </main>
 </DocumentFragment>
 `;
