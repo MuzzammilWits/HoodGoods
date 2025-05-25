@@ -207,8 +207,8 @@ section.products-table-container {
 .remove-button2 {
   background-color: #ff7875;
   color: white;
-  border-top: 1.5px solid #e0e0e0;
-  border-right: 1.5px solid #e0e0e0;
+  /* Remove borders for a clean look */
+  border: none;
 }
 
 .edit-button2:hover:not(:disabled) {

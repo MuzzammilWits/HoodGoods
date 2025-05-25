@@ -13,6 +13,7 @@ article.platform-metrics-report {
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
+  padding: 2rem;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #eee;
@@ -105,11 +106,12 @@ li.metric-card {
 section.export-buttons {
   margin-top: 1.5rem;
   text-align: right;
+  padding-top: 1.2rem;
 }
 
 .export-buttons .csv-button {
   padding: 10px 15px;
-  background-color: #28a745;
+  background-color: #97C9BA;
   color: white;
   border: none;
   border-radius: 4px;
@@ -118,7 +120,7 @@ section.export-buttons {
 }
 
 .export-buttons .csv-button:hover {
-  background-color: #218838;
+  background-color: #7ab8a5;
 }
 
 .export-buttons .csv-button:disabled {
@@ -172,7 +174,7 @@ figure.chart-container {
 
 .export-buttons .pdf-button {
   padding: 10px 15px;
-  background-color: #dc3545;
+  background-color: #f36876;
   color: white;
   border: none;
   border-radius: 4px;
@@ -182,7 +184,7 @@ figure.chart-container {
 }
 
 .export-buttons .pdf-button:hover {
-  background-color: #c82333;
+  background-color: #c93a48;
 }
 
 .export-buttons .pdf-button:disabled {
