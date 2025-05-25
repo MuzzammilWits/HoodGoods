@@ -215,6 +215,9 @@ export default function CheckoutPage() {
 
   return (
     <main className="checkout-container">
+      <section className="main-titles">
+        <h1>Checkout</h1>
+      </section>
       <header>
         <h1>Checkout</h1>
         <p className="instructions">Please select your pickup location, review delivery options, and complete your order.</p>

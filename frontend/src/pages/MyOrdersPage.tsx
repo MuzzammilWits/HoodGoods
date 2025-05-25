@@ -157,7 +157,9 @@ export default function MyOrdersPage() {
     if (isAuthLoading) {
         return (
             <main className="my-orders-container" style={containerStyle}>
-                 <header className="page-top-header"><h1>My Orders</h1></header>
+                <section className="main-titles">
+                    <h1>My Orders</h1>
+                </section>
                 <p className="auth-loading-message">Loading authentication...</p>
             </main>
         );
@@ -166,7 +168,9 @@ export default function MyOrdersPage() {
     if (!isAuthenticated) {
         return (
             <main className="my-orders-container" style={containerStyle}>
-                <header className="page-top-header"><h1>My Orders</h1></header>
+                <section className="main-titles">
+                    <h1>My Orders</h1>
+                </section>
                 <p className="login-prompt-message">Please log in to view your order history.</p>
             </main>
         );
@@ -177,10 +181,9 @@ export default function MyOrdersPage() {
     if (showSkeleton) {
         return (
             <main className="my-orders-container" style={containerStyle} aria-busy="true" aria-label="Loading your orders...">
-                <header className="page-top-header">
-                    {/* Skeleton for the main title - H1 equivalent */}
-                    <h1 className="skeleton-item" style={{ width: '250px', height: '2.2rem', margin: '0 auto 2rem auto', borderRadius: '4px', backgroundClip: 'text', color: 'transparent' }}>&nbsp;</h1>
-                </header>
+                <section className="main-titles">
+                    <h1>My Orders</h1>
+                </section>
                 
                 <ul className="order-list"> {/* Matches your ul.order-list */}
                     {Array.from({ length: 2 }).map((_, orderIndex) => ( // Show 2 skeleton order cards
@@ -246,7 +249,9 @@ export default function MyOrdersPage() {
     if (error) {
         return (
             <main className="my-orders-container" style={containerStyle}>
-                <header className="page-top-header"><h1>My Orders</h1></header>
+                <section className="main-titles">
+                    <h1>My Orders</h1>
+                </section>
                 <p className="error-message">{error}</p>
                 <button onClick={fetchMyOrders} className="retry-button">Try Again</button>
             </main>
@@ -255,7 +260,9 @@ export default function MyOrdersPage() {
     
     return (
         <main className="my-orders-container" style={containerStyle}>
-            <header className="page-top-header"><h1>My Orders</h1></header>
+            <section className="main-titles">
+                <h1>My Orders</h1>
+            </section>
 
             {orders.length === 0 ? (
                 <section className="empty-orders" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>

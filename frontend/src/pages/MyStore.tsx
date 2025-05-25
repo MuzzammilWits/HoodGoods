@@ -404,11 +404,13 @@ const MyStore: React.FC = () => {
     return (
         <Fragment>
             <main className="my-store-container">
+                <section className="main-titles">
+                    <h1>{store.storeName}</h1>
+                </section>
                 {actionError && <p className="error-message global-message" role="alert">{actionError}</p>}
                 {successMessage && <p className="success-message global-message" role="status">{successMessage}</p>}
 
                 <header className="store-header">
-                    <h1>{store.storeName}</h1>
                     <section className="delivery-info-display">
                         <header className="delivery-header">
                             <h2>Delivery Settings</h2>
@@ -494,11 +496,6 @@ const MyStore: React.FC = () => {
                 </dialog>
             </main>
 
-            <figure className="section-divider" role="presentation">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path d="M0,100 L 0,40 L 15,75 L 30,25 L 50,85 L 70,20 L 85,70 L 100,40 L 100,100 Z" fill="#432C53"></path>
-                </svg>
-            </figure>
         </Fragment>
     );
 };

@@ -47,9 +47,9 @@ const CartPage: React.FC = () => {
   if (showSkeleton) {
     return (
       <main className="cart-container" aria-busy="true" aria-label="Loading your shopping cart...">
-        <header>
+        <section className="main-titles">
           <h1 className="skeleton-item skeleton-title" aria-hidden="true"></h1>
-        </header>
+        </section>
         <section className="cart-content">
           <ul className="cart-items">
             {Array.from({ length: Math.max(cartItems.length, 1) }).map((_, index) => (
@@ -83,9 +83,9 @@ const CartPage: React.FC = () => {
   if (cartError) {
     return (
       <main className="cart-container">
-        <header>
-            <h1 className="cart-title">Your Shopping Cart</h1>
-        </header>
+        <section className="main-titles">
+          <h1>Shopping Cart</h1>
+        </section>
         <section className="error-message" role="alert">
             <h2>Could Not Load Cart</h2>
             <p>{cartError}</p>
@@ -99,9 +99,9 @@ const CartPage: React.FC = () => {
 
   return (
     <main className="cart-container">
-      <header>
-        <h1 className="cart-title">Your Shopping Cart</h1>
-      </header>
+      <section className="main-titles">
+        <h1>Shopping Cart</h1>
+      </section>
       {cartItems.length === 0 ? (
         <section className="empty-cart">
           <p className="empty-text">Your cart is empty</p>

@@ -20,6 +20,7 @@ const Footer: React.FC = () => {
             Back to Top
           </button>
         </section>
+
         <section className="footer-logo-area">
           <figure className="footer-logo">
             <img src={logo} alt="Hood Goods" className="logo" /> {/* */}
@@ -57,6 +58,7 @@ const Footer: React.FC = () => {
             <li><Link to="/terms-and-conditions" className="hover:text-white">Terms & Conditions</Link></li>
             <li><hr className="footer-bottom-separator" aria-hidden="true" /></li>
             <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li> {/* <-- Updated Link */}
+
           </ul>
         </nav>
       </section>

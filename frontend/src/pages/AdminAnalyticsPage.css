@@ -1,6 +1,8 @@
 /* frontend/src/pages/AdminAnalyticsPage.css */
 main.admin-analytics-page {
-  padding: 1rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* --- Styles for the header content (title and button) --- */
@@ -13,26 +15,31 @@ main.admin-analytics-page {
 /* --- End header content styles --- */
 
 main.admin-analytics-page header.page-header {
-  border-bottom: 2px solid #432C53; /* Example accent border from your original file */
-  padding-bottom: 0.75rem;
-  display: flex; /* Needed for admin-header-content to work as expected */
-  align-items: center; /* Align items vertically */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  background: none;
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 1.5rem;
 }
 
 main.admin-analytics-page header.page-header h1 {
-  color: #333;
-  font-weight: 600;
-  margin-top: 0;
-  margin-bottom: 0;
-  font-size: 1.6rem; /* Adjusted for space, can be fine-tuned */
-  flex-grow: 1; /* Allow title to take available space */
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color, #432C53);
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 /* --- Styles for the Back to Dashboard button --- */
 /* Copied from AdminProductApproval.css for consistency */
 .back-button {
   padding: 0.5rem 1rem;
-  background-color: #432C53; /* Primary color from other admin pages */
+  background-color: #432C53;
   color: white;
   border: none;
   border-radius: 4px;
@@ -42,11 +49,13 @@ main.admin-analytics-page header.page-header h1 {
   text-decoration: none;
   display: inline-block;
   line-height: normal;
-  white-space: nowrap; /* Prevent button text from wrapping */
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
 }
 
 .back-button:hover {
-  background-color: #97C9BA; /* Darker shade for hover */
+  background-color: #5a3a6f;
 }
 /* --- End button styles --- */
 
@@ -85,7 +94,7 @@ main.admin-analytics-page section.analytics-content article.report-group {
     max-width: 720px;
   }
   main.admin-analytics-page header.page-header h1 {
-    font-size: 1.8rem; /* Restore or set preferred size for larger screens */
+    font-size: 2.8rem !important;
   }
 }
 @media (min-width: 992px) {

@@ -37,9 +37,10 @@
   text-align: left;
   margin-bottom: 2rem;
   color: var(--primary-color);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
+  line-height: 1.2;
 }
 
 .about-us-section .section-title { /* This class is used for the "About Us" h2 */
@@ -158,7 +159,7 @@ figure.selling-point-icon {
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .common-section-heading {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
   }
 }
 
@@ -171,7 +172,7 @@ figure.selling-point-icon {
     font-size: 1.1rem;
   }
   .common-section-heading {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
   .selling-point-item p { /* Adjust description font size for smaller screens */
     font-size: 0.95rem;
@@ -179,5 +180,5 @@ figure.selling-point-icon {
 }
 
 #about-us {
-  scroll-margin-top: 80px;
+  scroll-margin-top: 120px;
 }

@@ -5,16 +5,21 @@ section.best-sellers-container {
   background: none;
   border-radius: 0;
   box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 section.best-sellers-container h2 {
   margin-top: 0;
   margin-bottom: 20px;
-  font-size: 2.5rem;
+  padding-bottom: 0.75rem;
+  font-size: 2.8rem;
   color: var(--primary-color, #432C53);
   text-align: center;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Playfair Display', serif;
+  line-height: 1.2;
 }
 
 ol.best-sellers-grid {
@@ -24,7 +29,9 @@ ol.best-sellers-grid {
   /* Reset default list styles */
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
+  justify-items: center;
+  max-width: 1200px;
 }
 
 li.best-seller-card {
@@ -142,4 +149,20 @@ p.best-sellers-empty {
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  section.best-sellers-container h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  section.best-sellers-container h2 {
+    font-size: 2.2rem;
+  }
+  .best-seller-store {
+    font-size: 0.75em;
+  }
 }
