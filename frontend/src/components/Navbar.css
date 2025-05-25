@@ -1,5 +1,3 @@
-/* In Navbar.css */
-
 .navbar {
   background-color: #fbfcfc;
   padding: 0.8rem 0;
@@ -26,7 +24,7 @@ body {
 
 .logo-container {
   flex-shrink: 0;
-  margin: 0; /* Reset default figure margin */
+  margin: 0; 
 }
 
 .logo {
@@ -120,7 +118,7 @@ p.user-greeting {
   color: var(--text-color, #333);
   font-weight: 500;
   white-space: nowrap;
-  margin: 0; /* Reset default paragraph margin */
+  margin: 0; 
 }
 
 .sign-out-btn {
@@ -159,7 +157,7 @@ p.user-greeting {
   justify-content: center;
   padding: 0.25rem;
   transition: color 0.2s ease;
-  font-size: 25px; /* Set a base size for emoji icons */
+  font-size: 25px; 
   text-decoration: none;
   position: relative;
 }

@@ -1,8 +1,7 @@
-// frontend/src/components/Footer.tsx
 import React from 'react';
-import { Link } from 'react-router-dom'; // <-- Add this import
+import { Link } from 'react-router-dom'; 
 import './Footer.css';
-import { logo } from './utils/ImageImports'; // Using the centralized import
+import { logo } from './utils/ImageImports'; 
 
 const Footer: React.FC = () => {
   return (
@@ -29,7 +28,6 @@ const Footer: React.FC = () => {
 
         <section className="footer-social-area">
           <nav className="social-icons" aria-label="Social Links">
-            {/* Placeholder social links */}
             <a href="https://www.youtube.com/watch?v=xvFZjo5PgG0" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                 <path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" />
@@ -54,10 +52,9 @@ const Footer: React.FC = () => {
           <ul className="footer-bottom-list">
             <li><p className="copyright">Copyright HoodsGoods</p></li>
             <li><hr className="footer-bottom-separator" aria-hidden="true" /></li>
-            {/* Assuming you'll create a TermsAndConditionsPage similar to PrivacyPolicyPage later */}
             <li><Link to="/terms-and-conditions" className="hover:text-white">Terms & Conditions</Link></li>
             <li><hr className="footer-bottom-separator" aria-hidden="true" /></li>
-            <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li> {/* <-- Updated Link */}
+            <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
 
           </ul>
         </nav>

@@ -1,18 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom'; // Still useful for DOM assertions
-import { vi, beforeEach, describe, it, expect } from 'vitest'; // Import test utilities
-import ImageGallery from './ImageGallery'; // Adjust path if your component is elsewhere
-// import supabaseClient from '../supabaseClient'; // Not strictly needed due to full mock
+import { vi, beforeEach, describe, it, expect } from 'vitest'; 
+import ImageGallery from './ImageGallery'; 
 
 // --- Mock Supabase Client for Vitest ---
 
 // These are the top-level mock function instances that your tests will interact with.
 const mockSupabaseList = vi.fn();
 
-// Corrected definition for mockSupabaseFrom:
-// The implementation now accepts a 'bucketName' argument.
-// Even if '_bucketName' isn't used in this specific mock's return,
-// its presence in the signature types the mock function correctly.
 const mockSupabaseFrom = vi.fn((_bucketName: string) => ({
   list: mockSupabaseList,
 }));
@@ -22,7 +17,7 @@ const mockSupabaseFrom = vi.fn((_bucketName: string) => ({
 vi.mock('../supabaseClient', () => {
   // This factory function returns the structure of the mocked module.
   return {
-    __esModule: true, // Necessary for ES6 modules when mocking
+    __esModule: true,
     default: {
       storage: {
         // Define 'from' as a function that matches the expected signature.

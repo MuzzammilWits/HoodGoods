@@ -1,5 +1,3 @@
-// src/components/__tests__/ImageGalleryDisplay.test.tsx
-
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest'; // For extended Vitest matchers
 import ImageGalleryDisplay from './ImageGalleryDisplay'; // Adjust the import path as needed
@@ -76,6 +74,3 @@ describe('ImageGalleryDisplay Component', () => {
   });
 });
 
-// Ensure your Vitest setup includes necessary globals or imports for testing-library/jest-dom.
-// For example, in your vitest.setup.ts or similar:
-// import '@testing-library/jest-dom/vitest';

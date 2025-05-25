@@ -1,5 +1,3 @@
-// frontend/src/components/Hero.test.tsx
-
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -44,7 +42,6 @@ const setupAuth0Mock = (options: Partial<Auth0ContextInterface<User>> = {}) => {
 
 describe('Hero Component', () => {
   let originalVanta: typeof window.VANTA | undefined;
-  // Corrected Spy Types
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
   const originalWindowLocation = window.location;
@@ -70,8 +67,6 @@ describe('Hero Component', () => {
       assign: vi.fn(),
       replace: vi.fn(),
       reload: vi.fn(),
-      // Keep other essential properties from original if necessary, or add as needed
-      // For example: origin, host, hostname, protocol
       // This simplified mock focuses on what's typically interacted with in tests.
     };
 
@@ -168,7 +163,6 @@ describe('Hero Component', () => {
       const user = userEvent.setup();
       const mockLoginWithRedirect = vi.fn();
       
-      // Set the pathname on our mock window.location for this test
       (window as any).location.pathname = '/custom-path-for-this-test';
 
       setupAuth0Mock({
@@ -187,8 +181,4 @@ describe('Hero Component', () => {
       });
     });
   });
-
-  // The notification timeout test that was previously failing and removed:
-  // If you decide to re-add it, it would go here.
-  // For now, it's omitted as per previous discussions.
 });

@@ -1,10 +1,8 @@
-// frontend/src/components/Navbar.tsx
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import { logo } from './utils/ImageImports';
-// Removed useCart import as fetchCart will be triggered by CartPage
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -67,13 +65,11 @@ const Navbar: React.FC = () => {
     fetchTokenAndRole();
   }, [isAuthenticated, getAccessTokenSilently, isAuth0Loading, backendUrl]); 
 
-  // --- MODIFIED handleCartClick ---
   const handleCartClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault(); // Prevent default Link navigation
+    event.preventDefault(); 
     
     console.log('[Navbar] Cart icon clicked. Navigating to /cart with refresh intent.');
     
-    // Navigate to /cart and pass a state to indicate a refresh is desired.
     // CartPage will pick this up and call fetchCart.
     navigate('/cart', { state: { refresh: true } }); 
   };
