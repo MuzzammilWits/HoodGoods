@@ -3,8 +3,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import axios, { AxiosError } from 'axios';
 import './SellerDashboardPage.css';
+import { Link } from 'react-router-dom'; // Import Link
 
 // --- Helper Types ---
+// ... (your existing interface definitions)
 interface ProductSummary { prodId: number; name: string; imageUrl?: string; }
 interface SellerOrderItemWithProduct { sellerOrderItemId: number; productId: number; quantityOrdered: number; pricePerUnit: number; productNameSnapshot: string; product: ProductSummary; createdAt: string | null; updatedAt: string | null; }
 interface NestedOrderDetails { orderId: number; userId: string; orderDate: string; pickupArea: string; pickupPoint: string; }
@@ -12,15 +14,17 @@ interface SellerOrderDetails { sellerOrderId: number; orderId: number; order: Ne
 interface EarningsResponse { totalEarnings: number; }
 // --- End Helper Types ---
 
+
 const api = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000', });
 
 const ORDER_FILTER_STATUSES = ['Processing', 'Packaging', 'Shipped', 'Ready for Pickup', 'Delivered', 'Cancelled'];
-const ORDER_UPDATE_STATUSES = ['Processing', 'Packaging', 'Shipped', 'Ready for Pickup', 'Delivered']; // Assuming 'Cancelled' is a final state not manually set by seller here
+const ORDER_UPDATE_STATUSES = ['Processing', 'Packaging', 'Shipped', 'Ready for Pickup', 'Delivered'];
 
 const statusClassMap: Record<string, string> = { Processing: 'status-processing', Packaging: 'status-packaging', 'Ready for Pickup': 'status-ready', Shipped: 'status-shipped', Delivered: 'status-delivered', Cancelled: 'status-cancelled', };
 
 export default function SellerDashboardPage() {
     const { user, isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
+    // ... (all your existing state variables and functions: fetchSellerOrders, fetchSellerEarnings, etc.)
     const [allSellerOrders, setAllSellerOrders] = useState<SellerOrderDetails[]>([]);
     const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('All');
     const [earnings, setEarnings] = useState<number | null>(null);
@@ -83,6 +87,7 @@ export default function SellerDashboardPage() {
         return allSellerOrders.filter(order => order.status === selectedStatusFilter);
     }, [allSellerOrders, selectedStatusFilter]);
 
+
     if (isAuthLoading) {
         return (
             <main className="seller-dashboard-container">
@@ -97,9 +102,11 @@ export default function SellerDashboardPage() {
         return (
             <main className="seller-dashboard-container">
                 <section className="main-titles">
-                    <h1>Seller Dashboard</h1>
+                    <h1>Orders</h1>
                 </section>
-                <header className="page-main-header"><h1>Seller Dashboard</h1></header>
+                <header className="page-main-header">
+                  {/* Intentionally empty or could have other non-H1 content if needed */}
+                </header>
                 <p className="login-prompt-message">Please log in to view your dashboard.</p>
             </main>
         );
@@ -108,12 +115,20 @@ export default function SellerDashboardPage() {
     return (
         <main className="seller-dashboard-container">
             <section className="main-titles">
-                <h1>Seller Dashboard</h1>
+                <h1>Orders</h1>
             </section>
             <header className="page-main-header">
-                <h1>Seller Dashboard</h1>
                 <p className="welcome-message">Welcome, {user?.name ?? 'Seller'}!</p>
             </header>
+
+            {/* --- Back Button Added Here --- */}
+            <section className="dashboard-navigation-bar">
+                <Link to="/my-store" className="button-back-to-store">
+                    Back to My Store
+                </Link>
+            </section>
+            {/* --- End Back Button --- */}
+
 
             <section className="dashboard-section earnings-summary">
                 <h2>Earnings</h2>
@@ -136,6 +151,7 @@ export default function SellerDashboardPage() {
                     </section>
                 </header>
 
+                {/* ... rest of your orders rendering logic ... */}
                 {isLoadingOrders && (
                     <section className="loading-container orders-loading-inline" aria-label="Loading orders">
                         <figure className="spinner" role="img" aria-label="Loading animation"></figure>
@@ -155,7 +171,7 @@ export default function SellerDashboardPage() {
                         {filteredSellerOrders.map((sellerOrder) => (
                             <li key={sellerOrder.sellerOrderId} className="order-card-item">
                                 <article className="order-card">
-                                    <header className="order-header-card"> {/* Specific class for card's header */}
+                                    <header className="order-header-card">
                                         <h3>Order #{sellerOrder.orderId} (Shipment #{sellerOrder.sellerOrderId})</h3>
                                         <p className="status-line">Status: <strong className={`status-badge ${statusClassMap[sellerOrder.status] || 'status-unknown'}`}>{sellerOrder.status}</strong></p>
                                     </header>
@@ -186,15 +202,14 @@ export default function SellerDashboardPage() {
                                     </section>
                                     <form className="status-update-section" onSubmit={(e) => e.preventDefault()}>
                                         <label htmlFor={`status-${sellerOrder.sellerOrderId}`}>Update Status:</label>
-                                        <select 
-                                          id={`status-${sellerOrder.sellerOrderId}`} 
-                                          value={sellerOrder.status} 
-                                          onChange={(e) => handleStatusUpdate(sellerOrder.sellerOrderId, e.target.value)} 
-                                          className="status-select" 
-                                          disabled={updatingStatusOrderId === sellerOrder.sellerOrderId || !ORDER_UPDATE_STATUSES.includes(sellerOrder.status)}
-                                          aria-label={`Update status for shipment ${sellerOrder.sellerOrderId}`}
+                                        <select
+                                            id={`status-${sellerOrder.sellerOrderId}`}
+                                            value={sellerOrder.status}
+                                            onChange={(e) => handleStatusUpdate(sellerOrder.sellerOrderId, e.target.value)}
+                                            className="status-select"
+                                            disabled={updatingStatusOrderId === sellerOrder.sellerOrderId || !ORDER_UPDATE_STATUSES.includes(sellerOrder.status)}
+                                            aria-label={`Update status for shipment ${sellerOrder.sellerOrderId}`}
                                         >
-                                            {/* Show current status if not updatable, else show options */}
                                             {!ORDER_UPDATE_STATUSES.includes(sellerOrder.status) ? (
                                                 <option value={sellerOrder.status} disabled>{sellerOrder.status}</option>
                                             ) : (
