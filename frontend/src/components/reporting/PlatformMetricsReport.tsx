@@ -232,9 +232,49 @@ const PlatformMetricsReport: React.FC = () => {
     const salesChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Sales Trend' }, tooltip: { ...commonChartOptions.plugins?.tooltip, callbacks: { label: function(context: any) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(context.parsed.y); } return label; } } } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Sales (R)' }, ticks: { callback: function(value: any) { return 'R ' + value; } } } } }), [commonChartOptions]);
     const ordersChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Order Volume Trend' } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Number of Orders' } } } }), [commonChartOptions]);
 
+
     if (loading) return <p className="loading-message">Loading platform metrics...</p>;
     if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Try Again</button>}</p>;
     if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Refresh</button></p>;
+
+    if (loading && !reportData) return (
+        <article className="platform-metrics-report report-container card skeleton-container-active" aria-busy="true">
+            <header className="card-header report-header">
+                <section className="skeleton-item skeleton-header" style={{width: '60%', height: '2.2rem', marginBottom: '1rem'}} aria-hidden="true"></section>
+                <form className="report-controls" aria-hidden="true">
+                    <section className="skeleton-item skeleton-control" style={{width: '120px', height: '2rem'}}></section>
+                    <section className="skeleton-item skeleton-control" style={{width: '100px', height: '2rem'}}></section>
+                    <section className="skeleton-item skeleton-control" style={{width: '100px', height: '2rem'}}></section>
+                    <section className="skeleton-item skeleton-control" style={{width: '120px', height: '2rem'}}></section>
+                </form>
+            </header>
+            <section className="card-body report-content">
+                <section className="report-summary">
+                    <section className="skeleton-item skeleton-summary" style={{width: '40%', height: '1.1rem', marginBottom: '0.5rem'}} aria-hidden="true"></section>
+                    <section className="skeleton-item skeleton-summary" style={{width: '60%', height: '1.1rem'}} aria-hidden="true"></section>
+                </section>
+                <ul className="metrics-grid">
+                    {Array.from({length: 5}).map((_, i) => (
+                        <li className="metric-card" key={i}>
+                            <section className="skeleton-item skeleton-metric-title" style={{width: '60%', height: '1rem', margin: '0 auto 0.5rem'}} aria-hidden="true"></section>
+                            <section className="skeleton-item skeleton-metric-value" style={{width: '70%', height: '2rem', margin: '0 auto'}} aria-hidden="true"></section>
+                        </li>
+                    ))}
+                </ul>
+                <section className="charts-grid">
+                    <figure className="chart-container">
+                        <section className="skeleton-item skeleton-chart" style={{width: '100%', height: '100%', minHeight: '180px', borderRadius: '6px'}} aria-hidden="true"></section>
+                    </figure>
+                    <figure className="chart-container">
+                        <section className="skeleton-item skeleton-chart" style={{width: '100%', height: '100%', minHeight: '180px', borderRadius: '6px'}} aria-hidden="true"></section>
+                    </figure>
+                </section>
+            </section>
+        </article>
+    );
+    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={fetchReportData} disabled={loading}>Try Again</button>}</p>;
+    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={fetchReportData} disabled={loading}>Refresh</button></p>;
+
 
     const { overallMetrics, periodCovered, reportGeneratedAt } = reportData;
 
@@ -261,6 +301,7 @@ const PlatformMetricsReport: React.FC = () => {
                     <button type="button" onClick={() => fetchReportData(false)} disabled={pdfLoading || loading}>
                         {pdfLoading && !loading ? 'Refreshing...' : 'Refresh Report'}
                     </button>
+
                 </form>
             </header>
 

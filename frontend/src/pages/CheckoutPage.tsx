@@ -62,9 +62,11 @@ export default function CheckoutPage() {
   const [deliveryOptionsError, setDeliveryOptionsError] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentTimeLeft, setPaymentTimeLeft] = useState<number | null>(null);
 
   const paymentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const yocoInstanceRef = useRef<any>(null);
+  const paymentIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const uniqueStoreIds = useMemo(() =>
     [...new Set(cartItems.map(item => item.storeId).filter(id => id && id !== 'unknown'))]
@@ -137,12 +139,26 @@ export default function CheckoutPage() {
 
     setIsProcessingPayment(true);
     setPaymentError(null);
+    setPaymentTimeLeft(45);
+    if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); }
+    paymentIntervalRef.current = setInterval(() => {
+      setPaymentTimeLeft(prev => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(paymentIntervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     if (paymentTimeoutRef.current) { clearTimeout(paymentTimeoutRef.current); paymentTimeoutRef.current = null; }
     yocoInstanceRef.current = null;
 
     const performCleanup = () => {
         setIsProcessingPayment(false);
+        setPaymentTimeLeft(null);
+        if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); paymentIntervalRef.current = null; }
         try { if (yocoInstanceRef.current?.closePopup) { yocoInstanceRef.current.closePopup(); } }
         catch (closeError) { console.error("Cleanup: Error closing via SDK:", closeError); }
         setTimeout(() => {
@@ -193,7 +209,8 @@ export default function CheckoutPage() {
         paymentTimeoutRef.current = setTimeout(() => {
             setPaymentError("Payment process timed out. If payment was made, please contact support. Otherwise, try again.");
             performCleanup();
-            paymentTimeoutRef.current = null;
+            setPaymentTimeLeft(null);
+            if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); paymentIntervalRef.current = null; }
         }, 45000); // 45 seconds, Yoco default might be longer
 
     } catch (error) {
@@ -205,26 +222,24 @@ export default function CheckoutPage() {
   };
 
   if (isAuthLoading) return <p className="loading-auth-message">Loading authentication...</p>;
-  if (!isAuthenticated) return ( <main className="checkout-container"><header><h1>Checkout</h1></header><p>Please log in to proceed with checkout.</p></main> );
+  if (!isAuthenticated) return ( <main className="checkout-container" style={{paddingTop: '2.5rem'}}><header><h1>Checkout</h1></header><p>Please log in to proceed with checkout.</p></main> );
   if (cartItems === null) return <p className="loading-cart-message">Loading cart...</p>;
   if (cartItems.length > 0 && isLoadingDeliveryOptions) { return <p className="loading-delivery-message">Loading checkout details...</p>; }
-  if (cartItems.length === 0) return ( <main className="checkout-container"><header><h1>Checkout</h1></header><p>Your cart is empty.</p><Link to="/products" className="back-link">Continue Shopping</Link></main> );
+  if (cartItems.length === 0) return ( <main className="checkout-container" style={{paddingTop: '2.5rem'}}><header><h1>Checkout</h1></header><p>Your cart is empty.</p><Link to="/products" className="back-link">Continue Shopping</Link></main> );
 
   const displayGrandTotal = typeof grandTotal === 'number' && !isNaN(grandTotal) ? grandTotal : 0;
   const isCheckoutReady = !isProcessingPayment && !isLoadingDeliveryOptions && !deliveryOptionsError && selectedArea && selectedPickupPoint && uniqueStoreIds.length > 0 && !uniqueStoreIds.some(id => !deliverySelectionState[id]) && displayGrandTotal > 0;
 
   return (
-    <main className="checkout-container">
+    <main className="checkout-container" style={{paddingTop: '2.5rem'}}>
       <section className="main-titles">
         <h1>Checkout</h1>
       </section>
-      <header>
-        <h1>Checkout</h1>
+      <section style={{marginBottom: '1.5rem', textAlign: 'center'}}>
         <p className="instructions">Please select your pickup location, review delivery options, and complete your order.</p>
         {contextCartError && <p className="error-message cart-error">Cart Notice: {contextCartError}</p>}
         {deliveryOptionsError && <p className="error-message delivery-error">Delivery Error: {deliveryOptionsError}</p>}
-        {paymentError && <p className="error-message payment-error">Payment Error: {paymentError}</p>}
-      </header>
+      </section>
 
       <section className="checkout-layout">
         <section className="form-section pickup-location-section" aria-labelledby="pickup-location-heading">
@@ -289,6 +304,31 @@ export default function CheckoutPage() {
           {!isCheckoutReady && !isProcessingPayment && !deliveryOptionsError &&
             <p className="field-hint payment-hint"> Please select area, pickup point, and delivery options for all items to proceed. </p>
           }
+          {isProcessingPayment && paymentTimeLeft !== null && (
+            <p className="payment-timer" style={{
+              marginTop: '1rem',
+              color: paymentTimeLeft <= 10 ? '#a33' : '#432C53',
+              fontWeight: 700,
+              fontSize: '1.35rem',
+              letterSpacing: '0.02em',
+              textAlign: 'center',
+              background: paymentTimeLeft <= 10 ? '#fff2f0' : 'transparent',
+              borderRadius: '6px',
+              padding: '0.5rem 0.75rem',
+              transition: 'color 0.2s, background 0.2s'
+            }}>
+              Payment gate is <strong>open</strong> for: <span style={{fontVariantNumeric: 'tabular-nums'}}>0:{paymentTimeLeft.toString().padStart(2, '0')}</span><br/>
+              <span style={{fontSize: '1rem', fontWeight: 500, display: 'block', marginTop: '0.3rem'}}>
+                Please complete your payment before the timer ends.<br/>
+                <strong>If you close the payment window (X), you must wait for the timer to finish before you can try again.</strong>
+              </span>
+            </p>
+          )}
+          {paymentError && (
+            <p className="error-message payment-error" style={{marginTop: '1.2rem', textAlign: 'center', fontSize: '1.15rem'}}>
+              Payment Error: {paymentError}
+            </p>
+          )}
         </section>
 
         <menu className="actions">
