@@ -1,82 +1,89 @@
 /* frontend/src/pages/TermsAndConditionsPage.css */
 
-/* General container for the page */
+
+/* This holds everything and centers it on the page. */
 .terms-conditions-container {
-  max-width: 800px;
-  margin-left: auto;
+  max-width: 800px; 
+  margin-left: auto; /* These two center the block */
   margin-right: auto;
-  padding: 32px 16px;
-  font-family: sans-serif;
-  line-height: 1.6;
-  color: #374151; /* Default text color */
+  padding: 32px 16px; 
+  font-family: sans-serif; 
+  line-height: 1.6; 
+  color: #374151; /* Default text color for the page */
 }
 
-/* Article styling */
+
+/* Main box where the terms and conditions is */
 .terms-conditions-article {
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-radius: 0.5rem;
-  padding: 24px;
-  min-height: 70vh;
+  background-color: #ffffff; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+  border-radius: 0.5rem; 
+  padding: 24px; 
+  min-height: 70vh; 
 }
 
-@media (min-width: 768px) { /* md breakpoint */
+/* Responsive design */
+@media (min-width: 768px) { 
   .terms-conditions-article {
     padding: 32px;
   }
 }
 
-/* Main heading */
+/* The big title at the top of the terms and conditions page. */
 .terms-conditions-main-heading {
-  font-size: 1.875rem; /* Adjusted for typical H1 */
-  font-weight: 700;
+  font-size: 1.875rem; 
+  font-weight: 700; 
   color: #1f2937;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin-bottom: 1.5rem; 
+  text-align: center; 
 }
 
-/* Last updated text */
+
+/* Last updated date */
 .terms-conditions-last-updated {
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin-bottom: 1rem;
-  text-align: center;
+  font-size: 0.875rem; 
+  color: #4b5563; 
+  margin-bottom: 1rem; 
+  text-align: center; 
 }
 
+/* Paragraph styling */
 .terms-conditions-content p {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem; 
 }
 
+/* Bullet points styles. */
 .terms-conditions-content ul {
-  list-style-type: disc;
-  padding-left: 1.75rem; /* Increased padding for better indentation */
-  margin-bottom: 1rem;
-  margin-top: 0.5rem;
+  list-style-type: disc; 
+  padding-left: 1.75rem; 
+  margin-bottom: 1rem; 
+  margin-top: 0.5rem; 
 }
 
+/* List Spacing */
 .terms-conditions-content ul li {
-   margin-bottom: 0.5rem;
+   margin-bottom: 0.5rem; 
 }
 
 
-/* Section headings (h2) */
+/* Section headings - h2*/
 .terms-conditions-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937; /* Darker for headings */
-  margin-top: 2rem;   /* More space above H2 */
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb; /* Lighter border */
+  font-size: 1.25rem; 
+  font-weight: 600; 
+  color: #1f2937; 
+  margin-top: 2rem;   
+  margin-bottom: 0.75rem; 
+  padding-bottom: 0.5rem; 
+  border-bottom: 1px solid #e5e7eb; 
 }
 
-/* Sub-headings (h3) - if you add any explicitly in T&C */
+/* Sub-headings - h3 */
 .terms-conditions-content h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.5rem; 
+  margin-bottom: 0.5rem; 
 }
 
 /* Address block styling */
@@ -85,23 +92,21 @@
 }
 
 .terms-conditions-content address.contact-address-final {
-    margin-top: 1rem; /* Space above the final address block */
-    margin-bottom: 1.5rem; /* Whitespace after the final address block */
+    margin-top: 1rem; 
+    margin-bottom: 1.5rem; 
 }
 
-/* Strong tag within paragraphs */
 .terms-conditions-content p strong,
 .terms-conditions-content li strong {
-  font-weight: 600;
+  font-weight: 600; 
 }
 
-/* Link styling within the content */
+/* Link appearance */
 .terms-conditions-content a {
-  color: #432C53; /* Using a color from your footer SVG fill */
-  text-decoration: underline;
+  color: #432C53;
+  text-decoration: underline; 
 }
-
 .terms-conditions-content a:hover {
-  color: #2d1d3a; /* Darker shade */
-  text-decoration: none;
+  color: #2d1d3a; 
+  text-decoration: none; 
 }

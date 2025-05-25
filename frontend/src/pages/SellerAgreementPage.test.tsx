@@ -3,25 +3,25 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import SellerAgreementPage from './SellerAgreementPage';
 
-// Mock useNavigate
+// Mock react-router-dom's useNavigate hook for testing navigation calls
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual('react-router-dom'); // Import actual module
   return {
-    ...actual,
-    useNavigate: () => mockNavigate,
+    ...actual, // Spread actual exports
+    useNavigate: () => mockNavigate, // Override useNavigate
   };
 });
 
-// Mock IntersectionObserver
+// Mocks for IntersectionObserver to simulate scrolling behavior
 const mockObserve = vi.fn();
 const mockUnobserve = vi.fn();
 const mockDisconnect = vi.fn();
 
-// beforeEach will ensure this mock is fresh for each test
+// Setup IntersectionObserver mock before each test
 beforeEach(() => {
   global.IntersectionObserver = vi.fn((callback, options) => {
-    // Store the callback and options if needed for more complex simulation
+    // Store the callback to trigger it manually in tests
     (global.IntersectionObserver as any)._callback = callback;
     (global.IntersectionObserver as any)._options = options;
     return {
@@ -33,27 +33,30 @@ beforeEach(() => {
       thresholds: [],
     };
   }) as any;
+  // Clear mocks for a clean slate per test
   mockNavigate.mockClear();
   mockObserve.mockClear();
   mockUnobserve.mockClear();
   mockDisconnect.mockClear();
 });
 
+// Restore any changed mocks after each test
 afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// Helper to simulate intersection (scrolling to bottom)
+// Helper to manually trigger the IntersectionObserver callback
 const simulateIntersection = (isIntersecting: boolean) => {
   const callback = (global.IntersectionObserver as any)._callback;
   if (callback) {
-    act(() => { // Wrap state updates in act
+    // Wrap in act because this will cause state updates in the component
+    act(() => {
       callback([{ isIntersecting: isIntersecting, target: {} }], {});
     });
   }
 };
 
-// Helper function to render the component within MemoryRouter
+// Helper function to render the component with MemoryRouter for routing context
 const renderComponent = () => {
   return render(
     <MemoryRouter>
@@ -62,7 +65,9 @@ const renderComponent = () => {
   );
 };
 
+// Test suite for the SellerAgreementPage
 describe('SellerAgreementPage', () => {
+  // Checks if the main page heading is rendered
   it('should render the main heading', () => {
     renderComponent();
     expect(
@@ -73,6 +78,7 @@ describe('SellerAgreementPage', () => {
     ).toBeInTheDocument();
   });
 
+  // Verifies that key sections of the agreement text are present
   it('should render key agreement sections', () => {
     renderComponent();
     expect(screen.getByText(/How Our Platform Works/i)).toBeInTheDocument();
@@ -80,6 +86,7 @@ describe('SellerAgreementPage', () => {
     expect(screen.getByText(/Comprehensive Content Guidelines:/i)).toBeInTheDocument();
   });
 
+  // Checks the initial state of the continue button (disabled) and checkbox (unchecked)
   it('should initially have the "Continue" button disabled and checkbox unchecked', () => {
     renderComponent();
     const continueButton = screen.getByRole('button', { name: /Continue/i });
@@ -91,6 +98,7 @@ describe('SellerAgreementPage', () => {
     expect(agreeCheckbox).not.toBeChecked();
   });
 
+  // Ensures the "please scroll" message is visible at first
   it('should show the scroll message initially', () => {
     renderComponent();
     expect(
@@ -100,6 +108,7 @@ describe('SellerAgreementPage', () => {
     ).toBeInTheDocument();
   });
 
+  // Tests that clicking the agreement checkbox checks it
   it('should enable the checkbox when clicked', () => {
     renderComponent();
     const agreeCheckbox = screen.getByRole('checkbox', {
@@ -110,6 +119,7 @@ describe('SellerAgreementPage', () => {
     expect(agreeCheckbox).toBeChecked();
   });
 
+  // Comprehensive test for the logic: scroll message visibility and button enablement based on scrolling and checkbox state
   it('should hide the scroll message and enable the "Continue" button only after scrolling to bottom and checking the box', () => {
     renderComponent();
     const continueButton = screen.getByRole('button', { name: /Continue/i });
@@ -120,53 +130,49 @@ describe('SellerAgreementPage', () => {
         /Please scroll to the bottom of the agreement to enable the 'Continue' button./i
       );
 
-    // Initial state
+    // Initial: button disabled, message visible
     expect(continueButton).toBeDisabled();
     expect(scrollMessage()).toBeInTheDocument();
 
-    // 1. Check the box (but not scrolled)
+    // 1. Check box (not scrolled): button still disabled, message visible
     fireEvent.click(agreeCheckbox);
     expect(agreeCheckbox).toBeChecked();
-    expect(continueButton).toBeDisabled(); // Still disabled
+    expect(continueButton).toBeDisabled();
     expect(scrollMessage()).toBeInTheDocument();
 
-    // 2. Scroll to bottom (but box not checked initially)
-    fireEvent.click(agreeCheckbox); // Uncheck it first
-    expect(agreeCheckbox).not.toBeChecked();
-    simulateIntersection(true); // Simulate scroll to bottom
-    expect(scrollMessage()).not.toBeInTheDocument(); // Message disappears
-    expect(continueButton).toBeDisabled(); // Still disabled because box isn't checked
+    // 2. Scroll (box unchecked): message hidden, button still disabled
+    fireEvent.click(agreeCheckbox); // Uncheck first
+    simulateIntersection(true); // Simulate scroll
+    expect(scrollMessage()).not.toBeInTheDocument();
+    expect(continueButton).toBeDisabled();
 
-    // 3. Scroll to bottom AND check the box
+    // 3. Scroll AND check box: message hidden, button enabled
     fireEvent.click(agreeCheckbox); // Check it
     expect(agreeCheckbox).toBeChecked();
-    // If scroll happened before check, message should already be gone
-    // If scroll happens now, the IntersectionObserver should trigger setHasScrolledToBottom
-    // The order might affect the scroll message visibility test slightly,
-    // but the button state is key.
-    expect(scrollMessage()).not.toBeInTheDocument();
-    expect(continueButton).not.toBeDisabled(); // Now enabled
+    expect(scrollMessage()).not.toBeInTheDocument(); // Message should stay hidden
+    expect(continueButton).not.toBeDisabled();
   });
-  
+
+  // Tests scenario where user scrolls first, then checks the box
   it('should enable the "Continue" button if already scrolled and then checkbox is ticked', () => {
     renderComponent();
     const continueButton = screen.getByRole('button', { name: /Continue/i });
     const agreeCheckbox = screen.getByRole('checkbox', {
       name: /I have read, understood, and agree/i,
     });
-    
-    // 1. Simulate scroll to bottom first
+
+    // 1. Simulate scroll to bottom
     simulateIntersection(true);
     expect(screen.queryByText(/Please scroll to the bottom/i)).not.toBeInTheDocument();
-    expect(continueButton).toBeDisabled(); // Checkbox not ticked yet
+    expect(continueButton).toBeDisabled(); // Button still disabled (checkbox not ticked)
 
-    // 2. Then tick the checkbox
+    // 2. Tick checkbox
     fireEvent.click(agreeCheckbox);
     expect(agreeCheckbox).toBeChecked();
-    expect(continueButton).not.toBeDisabled();
+    expect(continueButton).not.toBeDisabled(); // Button enabled
   });
 
-
+  // Tests navigation when the "Continue" button is clicked after conditions are met
   it('should navigate to /create-store when "Continue" is clicked and conditions are met', () => {
     renderComponent();
     const continueButton = screen.getByRole('button', { name: /Continue/i });
@@ -174,15 +180,16 @@ describe('SellerAgreementPage', () => {
       name: /I have read, understood, and agree/i,
     });
 
-    // Meet conditions
+    // Meet conditions: scroll and check box
     simulateIntersection(true);
     fireEvent.click(agreeCheckbox);
 
     expect(continueButton).not.toBeDisabled();
     fireEvent.click(continueButton);
-    expect(mockNavigate).toHaveBeenCalledWith('/create-store');
+    expect(mockNavigate).toHaveBeenCalledWith('/create-store'); // Check navigation call
   });
 
+  // Verifies the "Cancel" link exists and points to the homepage
   it('should have a "Cancel and return to Home" link that points to "/"', () => {
     renderComponent();
     const cancelLink = screen.getByRole('link', {
@@ -191,13 +198,14 @@ describe('SellerAgreementPage', () => {
     expect(cancelLink).toBeInTheDocument();
     expect(cancelLink).toHaveAttribute('href', '/');
   });
-  
+
+  // Checks if the IntersectionObserver is correctly set up and cleaned up on component unmount
   it('IntersectionObserver should be correctly set up and cleaned up', () => {
     const { unmount } = renderComponent();
-    expect(mockObserve).toHaveBeenCalledTimes(1); // Observer is attached
-    
-    unmount();
-    expect(mockUnobserve).toHaveBeenCalledTimes(1); // Observer is detached on unmount
+    expect(mockObserve).toHaveBeenCalledTimes(1); // Observer should be attached once
+
+    unmount(); // Unmount the component
+    expect(mockUnobserve).toHaveBeenCalledTimes(1); // Observer should be detached
   });
 
 });
