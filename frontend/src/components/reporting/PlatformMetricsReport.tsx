@@ -49,7 +49,7 @@ const PlatformMetricsReport: React.FC = () => {
     const pdfIgnoreClassName = 'pdf-ignore'; // Class to mark elements to be ignored by html2canvas
 
     const fetchReportData = useCallback(async (isInitialLoad = false) => {
-        if(isInitialLoad) setLoading(true); else setPdfLoading(true);
+        if(isInitialLoad) setLoading(true); else setPdfLoading(true); // Use pdfLoading for refresh, setLoading for initial
         setError(null);
         try {
             const token = await getAccessTokenSilently();
@@ -75,8 +75,8 @@ const PlatformMetricsReport: React.FC = () => {
     }, [getAccessTokenSilently, selectedPeriod, startDate, endDate]);
 
     useEffect(() => {
-        fetchReportData(true);
-    }, [fetchReportData]);
+        fetchReportData(true); // Initial fetch
+    }, [fetchReportData]); // fetchReportData is stable due to useCallback
 
     const handleDownloadCsv = async () => {
         if (!reportData) { setError("Report data not available for CSV export."); return; }
@@ -232,11 +232,7 @@ const PlatformMetricsReport: React.FC = () => {
     const salesChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Sales Trend' }, tooltip: { ...commonChartOptions.plugins?.tooltip, callbacks: { label: function(context: any) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(context.parsed.y); } return label; } } } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Sales (R)' }, ticks: { callback: function(value: any) { return 'R ' + value; } } } } }), [commonChartOptions]);
     const ordersChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Order Volume Trend' } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Number of Orders' } } } }), [commonChartOptions]);
 
-
-    if (loading) return <p className="loading-message">Loading platform metrics...</p>;
-    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Try Again</button>}</p>;
-    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Refresh</button></p>;
-
+    // Skeleton Loader for initial data fetch
     if (loading && !reportData) return (
         <article className="platform-metrics-report report-container card skeleton-container-active" aria-busy="true">
             <header className="card-header report-header">
@@ -272,9 +268,12 @@ const PlatformMetricsReport: React.FC = () => {
             </section>
         </article>
     );
-    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={fetchReportData} disabled={loading}>Try Again</button>}</p>;
-    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={fetchReportData} disabled={loading}>Refresh</button></p>;
-
+    
+    // Error state
+    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Try Again</button>}</p>;
+    
+    // No data state (after loading is complete but no data was fetched)
+    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Refresh</button></p>;
 
     const { overallMetrics, periodCovered, reportGeneratedAt } = reportData;
 
@@ -297,11 +296,9 @@ const PlatformMetricsReport: React.FC = () => {
                     {selectedPeriod === 'custom' && (
                         <input type="date" aria-label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginLeft: '10px' }} disabled={pdfLoading}/>
                     )}
-                    {/* Removed marginLeft from this button */}
                     <button type="button" onClick={() => fetchReportData(false)} disabled={pdfLoading || loading}>
                         {pdfLoading && !loading ? 'Refreshing...' : 'Refresh Report'}
                     </button>
-
                 </form>
             </header>
 
