@@ -1,4 +1,3 @@
-// frontend/src/types/reporting.ts
 
 // For Inventory Status Report
 export interface LowStockItem {
@@ -63,14 +62,14 @@ export enum TimePeriod {
   YEARLY = 'yearly',
 }
 
-// --- TYPES FOR ADMIN PLATFORM METRICS ---
+// TYPES FOR ADMIN PLATFORM METRICS
 
-export interface PlatformMetricPoint { // Renamed from PlatformMetricPointDto to align with frontend naming conventions
+export interface PlatformMetricPoint { 
   date: string; // e.g., "2023-10-26"
   totalSales: number;
-  totalOrders: number; // Ensure this is required
-  // newBuyers?: number; // Optional, if you add this data later
-  // newSellers?: number; // Optional, if you add this data later
+  totalOrders: number; // Ensuring this is required
+  // newBuyers?: number; 
+  // newSellers?: number; 
 }
 
 export interface OverallPlatformMetrics {

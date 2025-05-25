@@ -1,5 +1,3 @@
-/* frontend/src/components/reporting/SalesTrendReport.css */
-
 /* Styles for the main container of the sales trend report */
 article.sales-trend-report {
   padding: 20px;
@@ -104,7 +102,6 @@ article.sales-trend-report {
   background-color: #8cb1aa; /* Darker shade for hover - adjust as desired */
 }
 
-/* UPDATED STYLES FOR PDF BUTTON */
 .sales-trend-report .pdf-button {
   padding: 11px 15px;
   border: none;
@@ -125,7 +122,6 @@ article.sales-trend-report {
     cursor: not-allowed;
 }
 
-/* ... (rest of your existing styles) ... */
 /* Styles for loading, error, and info messages */
 .sales-trend-report p.loading-message,
 .sales-trend-report p.error-message,

@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/PlatformMetricsReport.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -289,7 +288,6 @@ describe('PlatformMetricsReport', () => {
   });
 
   describe('PDF Download', () => {
-    // Renamed test to reflect removal of specific animation toggle assertions
     it('should attempt PDF generation and call save, assuming animation is toggled by component', async () => {
       render(<PlatformMetricsReport />);
       await waitFor(() => screen.getByText('Download PDF'));

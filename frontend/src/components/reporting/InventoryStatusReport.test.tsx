@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/InventoryStatusReport.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,7 +8,6 @@ import {
   StockBreakdown,
 } from '../../types';
 
-// --- Use vi.hoisted() for ALL mocks needed in hoisted vi.mock factories ---
 const { mockGetInventoryStatusReport, mockDownloadInventoryStatusCsv } = vi.hoisted(() => {
   return {
     mockGetInventoryStatusReport: vi.fn(),
@@ -128,7 +126,6 @@ describe('InventoryStatusReport', () => {
       const canvas = document.createElement('canvas');
       canvas.width = options?.scale && element.offsetWidth ? element.offsetWidth * options.scale : 400;
       canvas.height = options?.scale && element.offsetHeight ? element.offsetHeight * options.scale : 400;
-      // Add a mock for toDataURL to the canvas instance
       canvas.toDataURL = vi.fn(() => 'data:image/png;base64,mockedimagedata');
       return canvas;
     });

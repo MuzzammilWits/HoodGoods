@@ -20,9 +20,9 @@ vi.mock('../supabaseClient', () => {
     __esModule: true,
     default: {
       storage: {
-        // Define 'from' as a function that matches the expected signature.
+        // Defining 'from' as a function that matches the expected signature.
         // supabase.storage.from() takes one string argument (bucketName).
-        // This calls our top-level `mockSupabaseFrom` with the specific argument.
+        // This is calling our top-level `mockSupabaseFrom` with the specific argument.
         from: (bucketName: string) => mockSupabaseFrom(bucketName),
       },
     },

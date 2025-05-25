@@ -1,4 +1,3 @@
-// frontend/src/services/recommendationsService.test.ts
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import type { PopularProductDto } from '../types'; // Use 'type' import
@@ -8,7 +7,7 @@ vi.mock('axios');
 const mockedAxios = vi.mocked(axios, true);
 
 const MOCK_API_URL = 'http://test-api.com/api';
-// const DEFAULT_API_URL = 'http://localhost:3000/api'; // Kept for reference if you re-add the test
+// const DEFAULT_API_URL = 'http://localhost:3000/api'; 
 
 // Define mockProductsData (ensure this matches your DTO structure)
 const mockProductsData: PopularProductDto[] = [
@@ -26,7 +25,6 @@ const mockProductsData: PopularProductDto[] = [
   {
     productId: 2,
     name: 'Super Gadget',
-    // imageUrl is optional, so can be omitted
     storeName: 'Gadget World',
     salesCount: 120,
     productPrice: 99.50,
@@ -57,16 +55,16 @@ describe('recommendationsService', () => {
     // Use vi.stubEnv to set the environment variable for Vite
     vi.stubEnv('VITE_API_BASE_URLs', MOCK_API_URL);
 
-    // Dynamically import the module AFTER stubbing the environment.
+    // Dynamically importing the module AFTER stubbing the environment.
     // This ensures the API_URL constant in your service gets the mocked value.
-    // Verify this path is correct relative to your test file.
+    // Verify this path is correct relative to your test file.iroknow googled it 
     const serviceModule = await import('./recommendationsService');
     getBestSellingProducts = serviceModule.getBestSellingProducts;
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();   // Clean up environment stubs
-    vi.resetModules();    // CRITICAL: Clears the module cache for the next test
+    vi.unstubAllEnvs();   // Cleaning up environment stubs
+    vi.resetModules();    // Clears the module cache for the next test
   });
 
   it('should fetch best selling products with default parameters', async () => {
@@ -136,9 +134,7 @@ describe('recommendationsService', () => {
     expect(products).toEqual(expectedProducts);
   });
 
-  // Test case for default API URL (previously failing) has been removed as requested.
-  // If you want to re-add it later, ensure vi.isolateModules is available
-  // or find an alternative way to ensure module isolation for that specific env var state.
+  
 
   it('should handle API errors by throwing the error', async () => {
     const errorMessage = 'Network Error';

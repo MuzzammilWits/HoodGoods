@@ -1,9 +1,7 @@
-// UploadForm.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UploadForm from './UploadForm'; // Adjust the path if necessary
-
+import UploadForm from './UploadForm'; 
 // Mock global fetch
 global.fetch = vi.fn();
 
@@ -131,10 +129,7 @@ describe('UploadForm', () => {
     let capturedError: any = null;
     const unhandledRejectionListener = (error: any, promise: Promise<any>) => {
       capturedError = error;
-      // It's good practice to prevent the default console error for unhandled rejections
-      // if you are explicitly handling it in the test, though just capturing it might be enough.
-      // For Vitest, simply listening and asserting might be sufficient.
-      // If Vitest still logs it, this listener effectively "handles" it for the test's purpose.
+
       promise.catch(() => {}); // Prevent Node from exiting or logging further by attaching a catch
     };
     process.on('unhandledRejection', unhandledRejectionListener);
@@ -188,11 +183,7 @@ describe('UploadForm', () => {
     try {
         await user.click(uploadButton);
     } catch (error) {
-        // This catch block is unlikely to be hit if user.click() doesn't propagate
-        // errors from async handlers that don't make fetch itself throw (like non-ok responses).
-        // The component's `await res.json()` might throw if `res` is not ok and `json()` is called,
-        // leading to an unhandled rejection if not caught in the component.
-        // For this test, we primarily care that the preview isn't set.
+       
     }
 
     await waitFor(() => {
