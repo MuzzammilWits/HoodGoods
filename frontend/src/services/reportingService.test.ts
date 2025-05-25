@@ -1,5 +1,3 @@
-// frontend/src/services/reportingService.test.ts
-
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   getSalesTrendReport,
@@ -23,7 +21,7 @@ const EXPECTED_REPORTING_ENDPOINT_PREFIX = `${ACTUAL_SERVICE_API_BASE_URL}/repor
 
 vi.mock('import.meta', () => ({
   env: {
-    VITE_API_URL: undefined, // Ensures service uses its fallback 'http://localhost:3000/api'
+    VITE_API_URL: undefined, // Ensuring service uses its fallback 'http://localhost:3000/api'
   },
 }));
 
@@ -32,7 +30,6 @@ global.fetch = mockFetch;
 
 describe('Reporting Service', () => {
   const mockToken = 'test-auth-token123';
-  // Corrected spy types
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
@@ -98,20 +95,7 @@ describe('Reporting Service', () => {
         .rejects.toThrow(`API Error: 500 Server Error at ${expectedUrl}. Response body: Actual CSV generation failure text`);
     });
 
-    // --- FAILING TEST CASE REMOVED AS PER REQUEST ---
-    // it('should throw if successful blob response is actually JSON error', async () => {
-    //   const errorJson = { message: "Not a CSV, it is a JSON error from backend" };
-    //   const errorJsonString = JSON.stringify(errorJson);
-    //   mockFetch.mockResolvedValueOnce({
-    //     ok: true, status: 200, statusText: 'OK',
-    //     headers: new Headers({ 'Content-Type': 'application/json' }),
-    //     blob: async () => new Blob([errorJsonString], { type: 'application/json' }),
-    //     json: async () => errorJson, text: async () => errorJsonString,
-    //   } as Response);
-    //   await expect(downloadSalesTrendCsv(mockToken, TimePeriod.MONTHLY))
-    //     .rejects.toThrow(errorJson.message);
-    //   expect(consoleErrorSpy).toHaveBeenCalledWith("CSV download failed, server sent JSON error:", errorJson);
-    // });
+
   });
 
   describe('getSalesTrendReport', () => {

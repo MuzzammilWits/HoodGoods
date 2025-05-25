@@ -1,6 +1,3 @@
-// frontend/src/types/index.ts
-
-// ... your existing exports
 export * from './reporting';
 export * from './createStore';
 
@@ -9,19 +6,18 @@ export interface ColorOption {
   color: string;
 }
 
-export interface Product { // This is your general Product type, ensure it's comprehensive
-  prodId: number; // Changed from id to prodId to match backend Product entity
+export interface Product { 
+  prodId: number;
   name: string;
   description?: string;
   category?: string;
-  price: number; // Changed from string to number
+  price: number; 
   productquantity: number;
   userId?: string; // Seller's ID
-  imageUrl?: string; // Changed from image to imageUrl
-  storeId: string; // Added storeId
+  imageUrl?: string; 
+  storeId: string; 
   storeName?: string;
   isActive?: boolean;
-  // colorOptions: ColorOption[]; // This field doesn't seem to exist in the backend Product entity for general products
 }
 
 export interface Shop {
@@ -38,15 +34,15 @@ export interface Feature {
   icon: string;
 }
 
-// --- UPDATED PopularProductDto ---
+// PopularProductDto
 export interface PopularProductDto {
-  productId: number; // Matches backend (Product.prodId)
-  name: string; // Matches backend (Product.name)
-  imageUrl?: string; // Matches backend (Product.imageUrl)
-  storeName?: string; // Matches backend (Product.storeName)
-  salesCount: number; // Calculated field
+  productId: number; 
+  name: string; 
+  imageUrl?: string; 
+  storeName?: string;
+  salesCount: number;
 
-  // --- NEW FIELDS FOR ADD TO CART ---
+  
   productPrice: number;    // From backend (Product.price)
   productquantity: number; // Available stock, from backend (Product.productquantity)
   storeId: string;         // From backend (Product.storeId)
