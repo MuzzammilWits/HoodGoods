@@ -1,82 +1,109 @@
-// src/App.test.tsx
-import { render, screen } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
-import App from './App';
-import { useAuth0 } from '@auth0/auth0-react';
+import React from 'react';
+import { render, screen, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+import App from './App'; // The component being tested
+import { useAuth0 } from '@auth0/auth0-react'; // Auth0Provider removed as it's not used directly in this file
 
-// Mock all components used in App
+// --- Mocking Child Components ---
+// Using React.Fragment or simple text for minimal mock structure where possible,
+// but keeping data-testid for existing query patterns.
+
 vi.mock('./components/Navbar', () => ({
-  default: () => <div data-testid="mock-navbar">Navbar</div>
+  default: () => <nav data-testid="mock-navbar">Navbar</nav>
 }));
 
 vi.mock('./components/Hero', () => ({
-  default: () => <div data-testid="mock-hero">Hero</div>
+  default: () => <section data-testid="mock-hero">Hero</section>
 }));
 
 vi.mock('./components/WhyChooseUs', () => ({
-  default: () => <div data-testid="mock-why-choose-us">WhyChooseUs</div>
+  default: () => <section data-testid="mock-why-choose-us">WhyChooseUs</section>
 }));
 
 vi.mock('./components/Footer', () => ({
-  default: () => <div data-testid="mock-footer">Footer</div>
+  default: () => <footer data-testid="mock-footer">Footer</footer>
 }));
 
 vi.mock('./pages/CartPage', () => ({
-  default: () => <div data-testid="mock-cart-page">CartPage</div>
+  default: () => <div data-testid="mock-cart-page">CartPage Content</div>
 }));
 
 vi.mock('./pages/ProductsPage', () => ({
-  default: () => <div data-testid="mock-products-page">ProductsPage</div>
+  default: () => <div data-testid="mock-products-page">ProductsPage Content</div>
 }));
 
 vi.mock('./pages/CreateYourStore', () => ({
-  default: () => <div data-testid="mock-create-your-store">CreateYourStore</div>
+  default: () => <div data-testid="mock-create-your-store">CreateYourStore Content</div>
 }));
 
 vi.mock('./pages/MyStore', () => ({
-  default: () => <div data-testid="mock-my-store">MyStore</div>
+  default: () => <div data-testid="mock-my-store">MyStore Content</div>
 }));
 
-vi.mock('./pages/AdminDashboard', () => ({
-  default: () => <div data-testid="mock-admin-dashboard">AdminDashboard</div>
+vi.mock('./pages/AdminPages/AdminDashboard', () => ({
+  default: () => <div data-testid="mock-admin-dashboard">AdminDashboard Content</div>
 }));
 
 vi.mock('./pages/CheckoutPage', () => ({
-  default: () => <div data-testid="mock-checkout-page">CheckoutPage</div>
+  default: () => <div data-testid="mock-checkout-page">CheckoutPage Content</div>
 }));
 
 vi.mock('./pages/OrderConfirmationPage', () => ({
-  default: () => <div data-testid="mock-order-confirmation-page">OrderConfirmationPage</div>
+  default: () => <div data-testid="mock-order-confirmation-page">OrderConfirmationPage Content</div>
 }));
 
 vi.mock('./pages/SellerDashboardPage', () => ({
-  default: () => <div data-testid="mock-seller-dashboard-page">SellerDashboardPage</div>
+  default: () => <div data-testid="mock-seller-dashboard-page">SellerDashboardPage Content</div>
 }));
 
 vi.mock('./pages/MyOrdersPage', () => ({
-  default: () => <div data-testid="mock-my-orders-page">MyOrdersPage</div>
+  default: () => <div data-testid="mock-my-orders-page">MyOrdersPage Content</div>
 }));
 
-// Instead of mocking ProtectedRoute to just render its children,
-// we'll implement the actual role-checking logic to test auth properly
+vi.mock('./pages/TermsAndConditionsPage', () => ({
+  default: () => <article data-testid="mock-terms-page">TermsAndConditionsPage Content</article>,
+}));
+
+vi.mock('./pages/PrivacyPolicyPage', () => ({
+    default: () => <article data-testid="mock-privacy-page">PrivacyPolicyPage Content</article>,
+}));
+
+vi.mock('./pages/SellerAgreementPage', () => ({
+    default: () => <article data-testid="mock-seller-agreement-page">SellerAgreementPage Content</article>,
+}));
+
+vi.mock('./pages/RecommendationsPage', () => ({
+    default: () => <section data-testid="mock-recommendations-page">RecommendationsPage Content</section>,
+}));
+
+vi.mock('./pages/AdminPages/AdminProductApproval', () => ({
+    default: () => <article data-testid="mock-admin-product-approval">AdminProductApproval Content</article>,
+}));
+vi.mock('./pages/AdminPages/AdminStoreApproval', () => ({
+    default: () => <article data-testid="mock-admin-store-approval">AdminStoreApproval Content</article>,
+}));
+vi.mock('./pages/AdminAnalyticsPage', () => ({
+    default: () => <section data-testid="mock-admin-analytics-page">AdminAnalyticsPage Content</section>,
+}));
+vi.mock('./pages/SellerAnalyticsPage', () => ({
+    default: () => <section data-testid="mock-seller-analytics-page">SellerAnalyticsPage Content</section>,
+}));
+
+// --- Mocking ProtectedRoute ---
+// This mock is crucial for testing role-based access.
 vi.mock('./components/ProtectedRoute', () => ({
   default: ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
-    const { isAuthenticated, user } = useAuth0();
-    
-    // Get user roles from auth0 user object
+    const { isAuthenticated, user } = useAuth0(); // useAuth0 will be mocked per test scenario
     const userRoles = user?.['https://hoodsgoods.com/roles'] || [];
-    
-    // Check if user is authenticated and has allowed roles
-    const hasRequiredRole = isAuthenticated && 
-      (allowedRoles.some(role => userRoles.includes(role)));
-    
+    const hasRequiredRole = isAuthenticated && (allowedRoles.some(role => userRoles.includes(role)));
+
     return (
-      <div 
-        data-testid="protected-route" 
+      <div
+        data-testid="protected-route"
         data-roles={allowedRoles.join(',')}
-        data-authenticated={isAuthenticated}
-        data-has-role={hasRequiredRole}
+        data-authenticated={String(isAuthenticated)} // Convert boolean to string for attribute
+        data-has-role={String(hasRequiredRole)}       // Convert boolean to string for attribute
       >
         {hasRequiredRole ? children : <div data-testid="access-denied">Access Denied</div>}
       </div>
@@ -84,19 +111,31 @@ vi.mock('./components/ProtectedRoute', () => ({
   }
 }));
 
-// Mock the Auth0 hook with different authentication scenarios
+// --- Mocking Auth0 ---
 const mockUseAuth0 = vi.fn();
 vi.mock('@auth0/auth0-react', async () => {
-  const actual = await vi.importActual('@auth0/auth0-react');
+  const actual = await vi.importActual('@auth0/auth0-react'); // Import actual to spread
   return {
     ...actual,
-    useAuth0: () => mockUseAuth0(),
-    // We're still mocking Auth0Provider, but no need to import it
-    Auth0Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+    useAuth0: () => mockUseAuth0(), // This will be controlled by test scenarios
+    Auth0Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Simplified mock provider
   };
 });
 
-// Auth scenarios
+// --- Mocking Services & Components that make network calls ---
+vi.mock('./services/recommendationsService', () => ({
+  getBestSellingProducts: vi.fn(() => Promise.resolve({ data: [] })), // Mock successful empty response
+}));
+
+vi.mock('./components/recommendations/BestSellersList', () => ({
+    default: ({ limit, title }: {limit?: number, title?: string}) => ( // Made props optional for safety
+        <div data-testid="mock-bestsellers-list" data-limit={limit} data-title={title}>
+            Mocked BestSellersList
+        </div>
+    ),
+}));
+
+// --- Auth0 State Scenarios ---
 const createAuthState = (isAuthenticated: boolean, roles: string[] = []) => {
   return {
     isAuthenticated,
@@ -109,117 +148,116 @@ const createAuthState = (isAuthenticated: boolean, roles: string[] = []) => {
     isLoading: false,
     loginWithRedirect: vi.fn(),
     logout: vi.fn(),
-    getAccessTokenSilently: vi.fn(),
-    getAccessTokenWithPopup: vi.fn(),
-    getIdTokenClaims: vi.fn(),
-    loginWithPopup: vi.fn(),
-    handleRedirectCallback: vi.fn(),
-    buildAuthorizeUrl: vi.fn(),
-    buildLogoutUrl: vi.fn(),
+    getAccessTokenSilently: vi.fn(() => Promise.resolve('mock-token')), // Mock token retrieval
+    getAccessTokenWithPopup: vi.fn(() => Promise.resolve('mock-token')),
+    getIdTokenClaims: vi.fn(() => Promise.resolve({ __raw: 'mock-id-token' })),
+    loginWithPopup: vi.fn(() => Promise.resolve()),
+    handleRedirectCallback: vi.fn(() => Promise.resolve(undefined)),
+    buildAuthorizeUrl: vi.fn(() => Promise.resolve('http://authorize.url')),
+    buildLogoutUrl: vi.fn(() => 'http://logout.url'),
     error: undefined
   };
 };
 
-// Auth scenarios
 const authScenarios = {
-  // Not authenticated
   notAuthenticated: createAuthState(false),
-  
-  // Authenticated as buyer
   authenticatedAsBuyer: createAuthState(true, ['buyer']),
-  
-  // Authenticated as seller
   authenticatedAsSeller: createAuthState(true, ['seller']),
-  
-  // Authenticated as admin
   authenticatedAsAdmin: createAuthState(true, ['admin']),
-  
-  // Authenticated with multiple roles
   authenticatedWithMultipleRoles: createAuthState(true, ['buyer', 'seller'])
 };
 
-// Mock import.meta.env
+// --- Test Setup ---
 beforeEach(() => {
+  // Mock import.meta.env
   vi.stubGlobal('import', {
     meta: {
       env: {
         VITE_AUTH0_DOMAIN: 'test-domain.auth0.com',
         VITE_AUTH0_CLIENT_ID: 'test-client-id',
         VITE_AUTH0_AUDIENCE: 'test-audience',
-        VITE_AUTH0_CALLBACK_URL: 'http://localhost:3000'
+        VITE_AUTH0_CALLBACK_URL: 'http://localhost:5173' // Or your dev server port
       }
     }
   });
-  
-  // Reset auth mock
+
+  // Mock window.scrollTo
+  global.scrollTo = vi.fn();
+
+  // Mock document.getElementById for the homepage scroll effect
+  // and ensure scrollIntoView is also a mock function.
+  document.getElementById = vi.fn((id) => {
+    if (id === 'about-us') {
+      const mockElement = document.createElement('div');
+      mockElement.scrollIntoView = vi.fn(); // Mock scrollIntoView
+      return mockElement;
+    }
+    // Return a generic mock element for other IDs if necessary, or null
+    const genericMockElement = document.createElement('div');
+    genericMockElement.scrollIntoView = vi.fn();
+    return genericMockElement;
+  }) as any;
+
+
+  // Default Auth0 state for tests (can be overridden in specific tests)
   mockUseAuth0.mockReturnValue(authScenarios.notAuthenticated);
 });
 
+afterEach(() => {
+  vi.restoreAllMocks(); // Restore all mocks after each test to avoid interference
+});
+
+// --- Test Suite ---
 describe('App component', () => {
-  // Test 1: Renders main components (Navbar, Footer)
-  test('renders main structural components', () => {
-    render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    );
-    
+  // Helper function to render with MemoryRouter (preferred for testing routes)
+  const renderWithMemoryRouter = (ui: React.ReactElement, { initialEntries = ['/'] } = {}) => {
+    return render(ui, { wrapper: ({ children }) => <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter> });
+  };
+  // renderWithRouter removed as it was unused
+
+  test('renders main structural components', async () => {
+    await act(async () => {
+        renderWithMemoryRouter(<App />);
+    });
     expect(screen.getByTestId('mock-navbar')).toBeInTheDocument();
     expect(screen.getByTestId('mock-footer')).toBeInTheDocument();
   });
 
-  // Test 2: Renders home page components on root route
-  test('renders home page components on root route', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+  test('renders home page components on root route', async () => {
+     await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/'] });
+    });
     expect(screen.getByTestId('mock-hero')).toBeInTheDocument();
     expect(screen.getByTestId('mock-why-choose-us')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-bestsellers-list')).toBeInTheDocument();
   });
 
-  // Test 3: Renders products page on /products route
-  test('renders products page on /products route', () => {
-    render(
-      <MemoryRouter initialEntries={['/products']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+  test('renders products page on /products route', async () => {
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/products'] });
+    });
     expect(screen.getByTestId('mock-products-page')).toBeInTheDocument();
   });
 
-  // Test 4: Access denied for cart page when not authenticated
-  test('shows access denied for cart page when not authenticated', () => {
+  test('shows access denied for cart page when not authenticated', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.notAuthenticated);
-    
-    render(
-      <MemoryRouter initialEntries={['/cart']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/cart'] });
+    });
     const protectedRoute = screen.getByTestId('protected-route');
     expect(protectedRoute).toBeInTheDocument();
-    expect(protectedRoute).toHaveAttribute('data-roles', 'buyer,seller');
+    expect(protectedRoute).toHaveAttribute('data-roles', 'buyer,seller,admin'); // Corrected assertion
     expect(protectedRoute).toHaveAttribute('data-authenticated', 'false');
     expect(protectedRoute).toHaveAttribute('data-has-role', 'false');
     expect(screen.getByTestId('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-cart-page')).not.toBeInTheDocument();
   });
 
-  // Test 5: Access granted for cart page when authenticated as buyer
-  test('shows cart page when authenticated as buyer', () => {
+  test('shows cart page when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/cart']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+     await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/cart'] });
+    });
     const protectedRoute = screen.getByTestId('protected-route');
     expect(protectedRoute).toBeInTheDocument();
     expect(protectedRoute).toHaveAttribute('data-authenticated', 'true');
@@ -228,150 +266,100 @@ describe('App component', () => {
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 6: Access granted for cart page when authenticated as seller
-  test('shows cart page when authenticated as seller', () => {
+  test('shows cart page when authenticated as seller', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsSeller);
-    
-    render(
-      <MemoryRouter initialEntries={['/cart']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/cart'] });
+    });
     expect(screen.getByTestId('mock-cart-page')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 7: Access denied for create store when authenticated as seller
-  test('shows access denied for create store page when authenticated as seller', () => {
+  test('shows access denied for create store page when authenticated as seller', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsSeller);
-    
-    render(
-      <MemoryRouter initialEntries={['/create-store']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/create-store'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'false');
     expect(screen.getByTestId('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-create-your-store')).not.toBeInTheDocument();
   });
 
-  // Test 8: Access granted for create store when authenticated as buyer
-  test('shows create store page when authenticated as buyer', () => {
+  test('shows create store page when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/create-store']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/create-store'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
     expect(screen.getByTestId('mock-create-your-store')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 9: Access denied for my store when authenticated as buyer
-  test('shows access denied for my store page when authenticated as buyer', () => {
+  test('shows access denied for my store page when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/my-store']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/my-store'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'false');
     expect(screen.getByTestId('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-my-store')).not.toBeInTheDocument();
   });
 
-  // Test 10: Access granted for my store when authenticated as seller
-  test('shows my store page when authenticated as seller', () => {
+  test('shows my store page when authenticated as seller', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsSeller);
-    
-    render(
-      <MemoryRouter initialEntries={['/my-store']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/my-store'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
     expect(screen.getByTestId('mock-my-store')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 11: Access denied for admin dashboard when not admin
-  test('shows access denied for admin dashboard when authenticated as buyer', () => {
+  test('shows access denied for admin dashboard when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/admin-dashboard']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/admin-dashboard'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'false');
     expect(screen.getByTestId('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-admin-dashboard')).not.toBeInTheDocument();
   });
 
-  // Test 12: Access granted for admin dashboard when admin
-  test('shows admin dashboard when authenticated as admin', () => {
+  test('shows admin dashboard when authenticated as admin', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsAdmin);
-    
-    render(
-      <MemoryRouter initialEntries={['/admin-dashboard']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/admin-dashboard'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
-
+    expect(screen.getByTestId('mock-admin-dashboard')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 13: Access granted for my orders when authenticated as buyer
-  test('shows my orders page when authenticated as buyer', () => {
+  test('shows my orders page when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/my-orders']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/my-orders'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
     expect(screen.getByTestId('mock-my-orders-page')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 14: Access granted for my orders when authenticated as seller
-  test('shows my orders page when authenticated as seller', () => {
+  test('shows my orders page when authenticated as seller', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsSeller);
-    
-    render(
-      <MemoryRouter initialEntries={['/my-orders']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/my-orders'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'true');
     expect(screen.getByTestId('mock-my-orders-page')).toBeInTheDocument();
     expect(screen.queryByTestId('access-denied')).not.toBeInTheDocument();
   });
 
-  // Test 15: Access denied for seller dashboard when authenticated as buyer
-  test('shows access denied for seller dashboard when authenticated as buyer', () => {
+  test('shows access denied for seller dashboard when authenticated as buyer', async () => {
     mockUseAuth0.mockReturnValue(authScenarios.authenticatedAsBuyer);
-    
-    render(
-      <MemoryRouter initialEntries={['/seller-dashboard']}>
-        <App />
-      </MemoryRouter>
-    );
-    
+    await act(async () => {
+        renderWithMemoryRouter(<App />, { initialEntries: ['/seller-dashboard'] });
+    });
     expect(screen.getByTestId('protected-route')).toHaveAttribute('data-has-role', 'false');
     expect(screen.getByTestId('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-seller-dashboard-page')).not.toBeInTheDocument();
