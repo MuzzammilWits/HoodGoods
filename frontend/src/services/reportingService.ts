@@ -1,10 +1,9 @@
-// frontend/src/services/reportingService.ts
 import {
   SalesReportData,
   TimePeriod,
   InventoryStatusReportData,
-  AdminPlatformMetricsData, // Import the new Admin type
-} from '../types'; // Assuming your types are in 'src/types/index.ts' or 'src/types/reporting.ts' and exported
+  AdminPlatformMetricsData, 
+} from '../types'; 
 
 // The VITE_API_URL should point to your NestJS backend's /api route
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URLs || 'http://localhost:3000/api';
@@ -84,7 +83,7 @@ const fetchBlobWithAuth = async (
 };
 
 
-// --- Seller Sales Trend Reports ---
+//Seller Sales Trend Reports 
 export const getSalesTrendReport = async (
   token: string,
   period: TimePeriod,
@@ -111,7 +110,7 @@ export const downloadSalesTrendCsv = async (
   return fetchBlobWithAuth(url, token);
 };
 
-// --- Seller Inventory Status Reports ---
+//Seller Inventory Status Reports
 export const getInventoryStatusReport = async (
   token: string,
 ): Promise<InventoryStatusReportData> => {
@@ -127,7 +126,6 @@ export const downloadInventoryStatusCsv = async (
 };
 
 
-// --- NEW FUNCTIONS FOR ADMIN PLATFORM METRICS ---
 
 /**
  * Fetches the admin platform metrics report.
@@ -185,10 +183,6 @@ export const downloadAdminPlatformMetricsCsv = async (
   return fetchBlobWithAuth(url, token);
 };
 
-// Your existing placeholder functions for other seller reports
-// SalesTrendDataPointAPI, fetchSalesTrendsForSeller, downloadSalesTrendsForSellerCSV etc.
-// can remain if they are still in use or planned.
-// I'm keeping the focus on the new admin functions and the already implemented seller ones.
 
 // ---- Example of existing functions from your provided file ----
 export interface SalesTrendDataPointAPI {
@@ -214,7 +208,7 @@ export const downloadSalesTrendsForSellerCSV = async (token: string): Promise<Bl
 };
 
 
-// --- Placeholder functions (if needed, or remove if not used) ---
+// Placeholder funcsiiions 
 export interface InventoryStatusDataPointAPI {
   product_id: string;
   product_name: string;
@@ -225,13 +219,13 @@ export interface InventoryStatusDataPointAPI {
 
 export const fetchInventoryStatusForSeller = async (_token: string): Promise<InventoryStatusDataPointAPI[]> => {
   console.warn("fetchInventoryStatusForSeller is a placeholder.");
-  // ... (placeholder implementation)
+  //  placeholder implementation
   return [];
 };
 
 export const downloadInventoryStatusForSellerCSV = async (_token: string): Promise<Blob> => {
   console.warn("downloadInventoryStatusForSellerCSV is a placeholder.");
-  // ... (placeholder implementation)
+  //  placeholder implementation
   return new Blob();
 };
 
@@ -243,12 +237,12 @@ export interface CustomViewDataPointAPI {
 
 export const fetchCustomViewForSeller = async (_token: string, /* viewConfig: Record<string, any> */): Promise<CustomViewDataPointAPI[]> => {
   console.warn("fetchCustomViewForSeller is a placeholder.");
-  // ... (placeholder implementation)
+  //  placeholder implementation
   return [];
 };
 
 export const downloadCustomViewForSellerCSV = async (_token: string, /* viewConfig: Record<string, any> */): Promise<Blob> => {
   console.warn("downloadCustomViewForSellerCSV is a placeholder.");
-  // ... (placeholder implementation)
+  //  placeholder implementation
   return new Blob();
 };

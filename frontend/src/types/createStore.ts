@@ -1,5 +1,3 @@
-// src/types/createStore.ts
-
 // Reusable product categories
 export const PRODUCT_CATEGORIES = [
     'Home & Living', 'Jewellery & Accessories', 'Clothing', 'Bags & Purses',
@@ -7,11 +5,9 @@ export const PRODUCT_CATEGORIES = [
     'Pet Goods', 'Stationery & Paper Goods', 'Food & Beverage', 'Other'
   ];
 
-// --- NEW: Delivery Time Options ---
-// src/types/createStore.ts
+// Delivery Time Options
 export const STANDARD_DELIVERY_TIMES = ['3-5', '5-7', '7-9']; // Corrected (Matches backend) 
 export const EXPRESS_DELIVERY_TIMES = ['0-1', '1-2', '2-3']; // In days
-// --- End NEW ---
 
 
 // Interface for individual product form state within Create Store page
@@ -19,13 +15,12 @@ export const EXPRESS_DELIVERY_TIMES = ['0-1', '1-2', '2-3']; // In days
 export interface ProductFormData {
     productName: string;
     productDescription: string;
-    productPrice: string; // Keep as string for input control, parse on submit
-    productQuantity: string; // Keep as string for input control, parse on submit
+    productPrice: string; //  parse on submit
+    productQuantity: string; // parse on submit
     productCategory: string;
     image: File | null; // File object for upload
     imagePreview: string |null; // Data URL string for preview
-    imageURL?: string; // Final URL from backend (added after upload)
-    // Removed storeName and delivery fields - they belong to the store
+    imageURL?: string; // Final URL from backend 
 }
 
 // Interface for the overall store creation form state
