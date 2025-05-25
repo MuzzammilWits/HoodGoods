@@ -1,4 +1,3 @@
-// frontend/src/components/reporting/PlatformMetricsReport.tsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Line } from 'react-chartjs-2';
@@ -44,7 +43,7 @@ const PlatformMetricsReport: React.FC = () => {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
 
-    const reportContentRef = useRef<HTMLElement>(null); // Use HTMLElement for semantic elements
+    const reportContentRef = useRef<HTMLElement>(null); // Using HTMLElement for semantic elements
 
     const fetchReportData = useCallback(async () => {
         setLoading(true);

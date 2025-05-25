@@ -1,6 +1,5 @@
 import React from 'react';
 import ProductForm from './ProductForm';
-// Ensure ProductFormData is the simplified version (no storeName/delivery)
 import { ProductFormData } from '../types/createStore';
 
 interface ProductListProps {
@@ -38,7 +37,7 @@ const ProductList: React.FC<ProductListProps> = ({
 
       {products.map((product, index) => (
         <ProductForm
-          key={index} // Consider a more stable unique key if available/needed
+          key={index} // Considers a more stable unique key if available/needed
           product={product} // Pass simplified ProductFormData
           index={index}
           productCategories={productCategories}
