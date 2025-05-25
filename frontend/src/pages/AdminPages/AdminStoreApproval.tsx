@@ -106,10 +106,41 @@ const AdminStoreApproval: React.FC = () => {
 
     if (loading) {
         return (
-            <section className="loading-container" aria-label="Loading stores for approval">
-                <figure className="spinner" role="img" aria-label="Loading animation"></figure>
-                <p>Loading stores...</p>
-            </section>
+            <main className="admin-stores-container" aria-busy="true">
+                <header className="admin-header">
+                    <h1>Store Management</h1>
+                    <button onClick={() => navigate('/admin-dashboard')} className="back-button">
+                        Back to Dashboard
+                    </button>
+                </header>
+                <ul className="stores-list">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <li className="store-card" key={i}>
+                            <section className="store-header" aria-hidden="true">
+                                <article className="store-info">
+                                    <section className="skeleton-item skeleton-store-name" style={{width: '40%', height: '1.5rem', marginBottom: '1rem'}}></section>
+                                    <section className="pricing-info" style={{display: 'flex', gap: '2rem'}}>
+                                        <section>
+                                            <section className="skeleton-item skeleton-pricing-title" style={{width: '80px', height: '1rem', marginBottom: '0.5rem'}}></section>
+                                            <section className="skeleton-item skeleton-pricing-value" style={{width: '60px', height: '1rem', marginBottom: '0.3rem'}}></section>
+                                            <section className="skeleton-item skeleton-pricing-value" style={{width: '90px', height: '1rem'}}></section>
+                                        </section>
+                                        <section>
+                                            <section className="skeleton-item skeleton-pricing-title" style={{width: '80px', height: '1rem', marginBottom: '0.5rem'}}></section>
+                                            <section className="skeleton-item skeleton-pricing-value" style={{width: '60px', height: '1rem', marginBottom: '0.3rem'}}></section>
+                                            <section className="skeleton-item skeleton-pricing-value" style={{width: '90px', height: '1rem'}}></section>
+                                        </section>
+                                    </section>
+                                </article>
+                                <section className="store-actions" style={{display: 'flex', gap: '1.2rem', alignItems: 'flex-end'}}>
+                                    <button className="skeleton-item skeleton-button" disabled aria-hidden="true" style={{minWidth: '120px', height: '38px', borderRadius: '4px'}}></button>
+                                    <button className="skeleton-item skeleton-button" disabled aria-hidden="true" style={{minWidth: '120px', height: '38px', borderRadius: '4px'}}></button>
+                                </section>
+                            </section>
+                        </li>
+                    ))}
+                </ul>
+            </main>
         );
     }
 

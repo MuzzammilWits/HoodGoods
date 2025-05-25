@@ -101,6 +101,15 @@ section.products-table-container {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border-radius: 8px;
   width: 100%;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.products-table,
+.products-table th,
+.products-table td {
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .products-table {
@@ -113,12 +122,17 @@ section.products-table-container {
 .products-table td {
   padding: 1.1rem 1.2rem;
   text-align: left;
-  border-bottom: 1px solid #eee;
   vertical-align: middle;
 }
 
 .products-table td.actions-cell {
-  border-bottom: none !important;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center;
+  vertical-align: middle;
+  border: none !important;
 }
 
 .products-table th {
@@ -146,11 +160,17 @@ section.products-table-container {
 
 .actions-cell {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  gap: 1.2rem;
+  padding-left: 0;
 }
 
 .action-button2 {
+  margin: auto 0;
   padding: 0.6rem 1.1rem;
   border: none;
   border-radius: 4px;
@@ -187,6 +207,8 @@ section.products-table-container {
 .remove-button2 {
   background-color: #ff7875;
   color: white;
+  border-top: 1.5px solid #e0e0e0;
+  border-right: 1.5px solid #e0e0e0;
 }
 
 .edit-button2:hover:not(:disabled) {
@@ -223,8 +245,8 @@ section.products-table-container {
 
 .products-table th:nth-child(5),
 .products-table td:nth-child(5) {
-    width: 22%;
-    min-width: 190px;
+    width: 100%;
+    min-width: unset;
 }
 
 section.loading-container {
@@ -364,4 +386,17 @@ aside.notification-modal.error {
       width: auto;
       min-width: 0;
   }
+}
+
+.products-table th:not(:last-child),
+.products-table td:not(:last-child) {
+  border-right: 1.5px solid #e0e0e0;
+}
+
+.actions-cell .action-button2 {
+  margin-left: 0.7rem;
+}
+
+.actions-cell .action-button2:first-child {
+  margin-left: 1.5rem;
 }
