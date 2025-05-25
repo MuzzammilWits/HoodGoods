@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest'; // Added MockInstance
-import { render, screen, waitFor } from '@testing-library/react'; // Removed fireEvent
+import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SalesTrendReport from './SalesTrendReport';
 
@@ -67,11 +67,11 @@ vi.mock('react-chartjs-2', () => ({
 vi.mock('chart.js', async (importActual) => {
   const actual = await importActual<typeof import('chart.js')>();
   return {
-    ...actual, 
-    Chart: { 
-      ...(actual.Chart as object), 
+    ...actual,
+    Chart: {
+      ...(actual.Chart as object),
       register: mockChartJSRegister,
-      defaults: actual.Chart.defaults, 
+      defaults: actual.Chart.defaults,
     },
   };
 });
@@ -83,7 +83,7 @@ const mockCreateObjectURL = vi.fn();
 const mockRevokeObjectURL = vi.fn();
 
 const MOCK_TOKEN = 'mock-seller-token';
-const fixedMockDateString = '2024-08-15'; 
+const fixedMockDateString = '2024-08-15';
 const mockGeneratedDate = new Date(`${fixedMockDateString}T12:00:00.000Z`);
 
 const sampleSalesData: SalesData[] = [
@@ -104,24 +104,33 @@ const mockSalesReportNoData: SalesReportData = {
   reportGeneratedAt: mockGeneratedDate.toISOString(),
 };
 
-const TrueOriginalDate = Date; 
+// Mock data for testing missing summary
+const mockReportDataWithNullSummary: SalesReportData = {
+  salesData: sampleSalesData, // Has sales data, so chartData might exist
+  summary: null as any, // Explicitly null summary (cast to any to bypass strict null check for test)
+  reportGeneratedAt: mockGeneratedDate.toISOString(),
+};
+
+
+const TrueOriginalDate = Date;
 
 describe('SalesTrendReport', () => {
   const user = userEvent.setup();
   let originalUrlCreateObjectURL: typeof window.URL.createObjectURL;
   let originalUrlRevokeObjectURL: typeof window.URL.revokeObjectURL;
-  let dateConstructorSpy: MockInstance<any>;
+  let dateConstructorSpy: MockInstance<(...args: any[]) => Date>;
+
 
   beforeEach(() => {
     const mockTodayInstance = new TrueOriginalDate(`${fixedMockDateString}T12:00:00.000Z`);
-    
+
     dateConstructorSpy = vi.spyOn(global, 'Date')
       .mockImplementation((value?: string | number | Date) => {
-        if (value === undefined) { 
+        if (value === undefined) {
           return new TrueOriginalDate(mockTodayInstance.toISOString());
         }
         return new TrueOriginalDate(value);
-      });
+      }) as MockInstance<(...args: any[]) => Date>;
     (dateConstructorSpy as any).now = vi.fn(() => mockTodayInstance.getTime());
 
 
@@ -151,7 +160,7 @@ describe('SalesTrendReport', () => {
       canvas.toDataURL = vi.fn(() => 'data:image/png;base64,mockchartimagedata');
       return canvas;
     });
-    
+
     mockChartJSRegister.mockClear();
 
     originalUrlCreateObjectURL = global.URL.createObjectURL;
@@ -161,7 +170,7 @@ describe('SalesTrendReport', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks(); 
+    vi.restoreAllMocks();
     global.URL.createObjectURL = originalUrlCreateObjectURL;
     global.URL.revokeObjectURL = originalUrlRevokeObjectURL;
   });
@@ -176,7 +185,7 @@ describe('SalesTrendReport', () => {
     render(<SalesTrendReport />);
     await waitFor(() => expect(screen.getByText('Sales Trend Report')).toBeInTheDocument());
     expect(mockGetSalesTrendReport).toHaveBeenCalledWith(MOCK_TOKEN, TimePeriod.WEEKLY, undefined);
-    
+
     const chart = screen.getByTestId('mock-line-chart');
     expect(chart).toBeInTheDocument();
     expect(chart).toHaveTextContent(`Data Points: ${sampleSalesData.length}`);
@@ -197,19 +206,37 @@ describe('SalesTrendReport', () => {
     expect(screen.queryByTestId('mock-line-chart')).not.toBeInTheDocument();
   });
 
-  it('should display error message if data fetching fails', async () => {
+  it('should display error message if data fetching fails initially', async () => {
     const errorMsg = 'Failed to fetch sales trends';
     mockGetSalesTrendReport.mockRejectedValueOnce(new Error(errorMsg));
     render(<SalesTrendReport />);
     await waitFor(() => expect(screen.getByText(`Error: ${errorMsg}`)).toBeInTheDocument());
   });
-  
-  // The test 'should show date picker only for DAILY period and refetch data on change' was removed.
+
+  it('should refetch data when selectedPeriod is changed', async () => {
+    render(<SalesTrendReport />);
+    await waitFor(() => expect(mockGetSalesTrendReport).toHaveBeenCalledWith(MOCK_TOKEN, TimePeriod.WEEKLY, undefined));
+    mockGetSalesTrendReport.mockClear(); // Clear previous calls
+
+    const periodSelect = screen.getByLabelText('Custom View:');
+    await user.selectOptions(periodSelect, TimePeriod.MONTHLY);
+
+    await waitFor(() => expect(mockGetSalesTrendReport).toHaveBeenCalledWith(MOCK_TOKEN, TimePeriod.MONTHLY, undefined));
+  });
+
+ 
+  it('should display error message if getAccessTokenSilently fails', async () => {
+    const tokenErrorMsg = 'Token retrieval failed';
+    mockGetAccessTokenSilently.mockRejectedValueOnce(new Error(tokenErrorMsg));
+    render(<SalesTrendReport />);
+    await waitFor(() => expect(screen.getByText(`Error: ${tokenErrorMsg}`)).toBeInTheDocument());
+  });
+
 
   describe('CSV Export', () => {
     it('should trigger CSV download with correct parameters (defaulting to Weekly)', async () => {
       render(<SalesTrendReport />);
-      await waitFor(() => screen.getByText('Download CSV')); 
+      await waitFor(() => screen.getByText('Download CSV'));
 
       const csvButton = screen.getByRole('button', { name: 'Download CSV' });
       const createElementSpy = vi.spyOn(document, 'createElement');
@@ -229,24 +256,36 @@ describe('SalesTrendReport', () => {
       await user.click(screen.getByRole('button', { name: 'Download CSV' }));
       await waitFor(() => expect(screen.getByText('Error: CSV Download Error')).toBeInTheDocument());
     });
+
+    it('should show error message if report summary is not available for CSV export', async () => {
+      mockGetSalesTrendReport.mockResolvedValueOnce(mockReportDataWithNullSummary);
+      render(<SalesTrendReport />);
+      await waitFor(() => screen.getByText('Download CSV')); // Wait for component to stabilize
+
+      const csvButton = screen.getByRole('button', { name: 'Download CSV' });
+      await user.click(csvButton);
+
+      await waitFor(() => expect(screen.getByText("Error: Report data not available for CSV export.")).toBeInTheDocument());
+      expect(mockDownloadSalesTrendCsv).not.toHaveBeenCalled();
+    });
   });
 
   describe('PDF Export', () => {
     it('should attempt PDF generation and call save', async () => {
       render(<SalesTrendReport />);
-      await waitFor(() => screen.getByText('Download PDF')); 
+      await waitFor(() => screen.getByText('Download PDF'));
 
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
-      expect(pdfButton).not.toBeDisabled(); 
+      expect(pdfButton).not.toBeDisabled();
 
       await user.click(pdfButton);
 
       await waitFor(() => expect(mockHtml2Canvas).toHaveBeenCalled());
       expect(mockHtml2Canvas).toHaveBeenCalledWith(
-        expect.any(HTMLDivElement), 
-        expect.objectContaining({ scale: 2, logging: true })
+        expect.any(HTMLElement),
+        expect.objectContaining({ scale: 2, useCORS: true })
       );
-      
+
       await waitFor(() => expect(mockJsPDFSave).toHaveBeenCalled());
       expect(mockJsPDFText).toHaveBeenCalledWith(
         `Sales Trends - ${sampleSummary.period} (${sampleSummary.startDate} to ${sampleSummary.endDate})`,
@@ -256,13 +295,31 @@ describe('SalesTrendReport', () => {
       expect(mockJsPDFSave).toHaveBeenCalledWith(`sales_trend_report_${sampleSummary.startDate}_to_${sampleSummary.endDate}.pdf`);
     });
 
-    it('should disable PDF button if chartData is initially null', async () => {
-      mockGetSalesTrendReport.mockResolvedValueOnce(mockSalesReportNoData); 
+    it('should disable PDF button if chartData is initially null (no sales data)', async () => {
+      mockGetSalesTrendReport.mockResolvedValueOnce(mockSalesReportNoData);
       render(<SalesTrendReport />);
       await waitFor(() => expect(screen.getByText('No sales data available for the selected period.')).toBeInTheDocument());
-      
+
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
-      expect(pdfButton).toBeDisabled(); 
+      expect(pdfButton).toBeDisabled();
+    });
+
+    it('should show error message if report summary is not available for PDF export when button is clicked', async () => {
+      // This test ensures the check within handleDownloadPdf is hit if the button somehow becomes enabled
+      // while summary is null (e.g. salesData exists, but summary is missing).
+      mockGetSalesTrendReport.mockResolvedValueOnce(mockReportDataWithNullSummary);
+      render(<SalesTrendReport />);
+      await waitFor(() => screen.getByText('Sales Trend Report')); // Wait for component to render with data
+
+      const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
+      // In this scenario, `chartData` would exist due to `sampleSalesData`, so button might be enabled.
+      expect(pdfButton).not.toBeDisabled(); 
+
+      await user.click(pdfButton);
+      
+      await waitFor(() => expect(screen.getByText("Error: Chart or report data is not available for PDF export.")).toBeInTheDocument());
+      expect(mockHtml2Canvas).not.toHaveBeenCalled();
+      expect(mockJsPDFSave).not.toHaveBeenCalled();
     });
 
 
@@ -271,10 +328,10 @@ describe('SalesTrendReport', () => {
       mockHtml2Canvas.mockRejectedValueOnce(new Error(canvasErrorMsg));
       render(<SalesTrendReport />);
       await waitFor(() => screen.getByText('Download PDF'));
-      
+
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
       await user.click(pdfButton);
-      
+
       await waitFor(() => expect(screen.getByText(`Error: ${canvasErrorMsg}`)).toBeInTheDocument());
       expect(mockJsPDFSave).not.toHaveBeenCalled();
     });

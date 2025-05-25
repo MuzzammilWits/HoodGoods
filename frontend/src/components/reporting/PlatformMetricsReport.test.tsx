@@ -28,7 +28,7 @@ const {
 } = vi.hoisted(() => {
   const pdfInstanceMethods = {
     text: vi.fn(), addImage: vi.fn(), save: vi.fn(), setFontSize: vi.fn(),
-    internal: { pageSize: { getWidth: vi.fn(() => 595.28), getHeight: vi.fn(() => 841.89),}},
+    internal: { pageSize: { getWidth: vi.fn(() => 595.28), getHeight: vi.fn(() => 841.89),}}, // A4 portrait
     getImageProperties: vi.fn(() => ({ width: 1000, height: 500 })),
   };
   return {
@@ -39,12 +39,9 @@ const {
   };
 });
 
-// Hoisted Chart.js related mocks
 const mockChartJSRegister = vi.hoisted(() => vi.fn());
-// This object will be assigned to Chart.defaults. The component will mutate its 'animation' property.
-// We won't assert the specific states of 'animation' in the problematic test anymore.
 const mockChartJSDefaultsObject = vi.hoisted(() => ({
-    animation: {} as any,
+  animation: {} as any,
 }));
 
 
@@ -75,12 +72,12 @@ vi.mock('chart.js', async (importActual) => {
     const actual = await importActual<typeof import('chart.js')>();
     const ChartNamespaceMock = {
         ...(actual.Chart as object),
-        defaults: mockChartJSDefaultsObject, // Use our hoisted object
+        defaults: mockChartJSDefaultsObject,
         register: mockChartJSRegister,
     };
-    return { 
-        ...actual, 
-        Chart: ChartNamespaceMock, 
+    return {
+        ...actual,
+        Chart: ChartNamespaceMock,
     };
 });
 
@@ -141,7 +138,6 @@ describe('PlatformMetricsReport', () => {
       return canvas;
     });
 
-    // Reset animation state on our hoisted defaults object. The component will mutate this.
     mockChartJSDefaultsObject.animation = {};
 
     originalUrlCreateObjectURL = global.URL.createObjectURL;
@@ -156,10 +152,19 @@ describe('PlatformMetricsReport', () => {
     global.URL.revokeObjectURL = originalUrlRevokeObjectURL;
   });
 
-  it('should render loading state initially', () => {
+  it('should render loading skeleton initially', () => {
     mockGetAdminPlatformMetrics.mockImplementationOnce(() => new Promise(() => {}));
-    render(<PlatformMetricsReport />);
-    expect(screen.getByText('Loading platform metrics...')).toBeInTheDocument();
+    const { container } = render(<PlatformMetricsReport />); // Get container for querySelector
+    
+    // Check for the presence of the skeleton container by its role and then assert aria-busy
+    const skeletonContainer = screen.getByRole('article');
+    expect(skeletonContainer).toBeInTheDocument();
+    expect(skeletonContainer).toHaveAttribute('aria-busy', 'true');
+    expect(skeletonContainer).toHaveClass('skeleton-container-active');
+
+    // Optionally, check for specific skeleton items
+    const skeletonItems = container.querySelectorAll('.skeleton-item.skeleton-header');
+    expect(skeletonItems.length).toBeGreaterThan(0);
   });
 
   it('should fetch and display report data successfully', async () => {
@@ -215,11 +220,11 @@ describe('PlatformMetricsReport', () => {
     render(<PlatformMetricsReport />);
     await waitFor(() => expect(screen.getByText('Platform Performance Overview')).toBeInTheDocument());
     const periodSelect = screen.getByLabelText('Report Period:');
-    
+
     await user.selectOptions(periodSelect, 'custom');
     expect(screen.getByLabelText('Start Date')).toBeVisible();
     expect(screen.getByLabelText('End Date')).toBeVisible();
-    
+
     await user.selectOptions(periodSelect, TimePeriod.DAILY);
     expect(screen.getByLabelText('Start Date')).toBeVisible();
     expect(screen.queryByLabelText('End Date')).not.toBeInTheDocument();
@@ -239,7 +244,7 @@ describe('PlatformMetricsReport', () => {
     await user.selectOptions(periodSelect, 'custom');
     const startDateInput = screen.getByLabelText('Start Date') as HTMLInputElement;
     const endDateInput = screen.getByLabelText('End Date') as HTMLInputElement;
-    
+
     fireEvent.change(startDateInput, { target: { value: '2024-07-01' } });
     fireEvent.change(endDateInput, { target: { value: '2024-07-15' } });
     expect(startDateInput.value).toBe('2024-07-01');
@@ -248,7 +253,7 @@ describe('PlatformMetricsReport', () => {
     mockGetAdminPlatformMetrics.mockClear();
     await user.click(refreshButton);
     await waitFor(() => expect(mockGetAdminPlatformMetrics).toHaveBeenCalledWith(MOCK_TOKEN, 'custom', '2024-07-01', '2024-07-15'));
-    
+
     await user.selectOptions(periodSelect, TimePeriod.DAILY);
     const dailyStartDateInput = screen.getByLabelText('Start Date') as HTMLInputElement;
     fireEvent.change(dailyStartDateInput, { target: { value: '2024-07-10' } });
@@ -277,7 +282,7 @@ describe('PlatformMetricsReport', () => {
       expect(createdAnchor.download).toBe(`admin_platform_metrics_${TimePeriod.MONTHLY}.csv`);
       createElementSpy.mockRestore();
     });
-    
+
     it('should show error if CSV download fails', async () => {
       mockDownloadAdminPlatformMetricsCsv.mockRejectedValueOnce(new Error('CSV Gen Error'));
       render(<PlatformMetricsReport />);
@@ -288,33 +293,36 @@ describe('PlatformMetricsReport', () => {
   });
 
   describe('PDF Download', () => {
-    it('should attempt PDF generation and call save, assuming animation is toggled by component', async () => {
+    it('should attempt PDF generation and call save, with correct html2canvas options', async () => {
       render(<PlatformMetricsReport />);
       await waitFor(() => screen.getByText('Download PDF'));
 
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
       await user.click(pdfButton);
-      
-      // We are no longer asserting: expect(mockChartJSDefaultsObject.animation).toBe(false);
-      // We trust the component attempts to set it.
 
       await waitFor(() => expect(mockHtml2Canvas).toHaveBeenCalled());
-      expect(mockHtml2Canvas).toHaveBeenCalledWith(expect.any(HTMLDivElement), expect.objectContaining({ scale: 2 }));
-      
+      expect(mockHtml2Canvas).toHaveBeenCalledWith(
+        expect.any(HTMLElement), 
+        expect.objectContaining({
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          ignoreElements: expect.any(Function)
+        })
+      );
+
       await waitFor(() => expect(mockJsPDFSave).toHaveBeenCalled());
       expect(mockJsPDFText).toHaveBeenCalledWith('Admin Platform Performance Overview', expect.any(Number), expect.any(Number), { align: 'center' });
       expect(mockJsPDFAddImage).toHaveBeenCalledWith('data:image/png;base64,mockedcanvasdata', 'PNG', expect.any(Number), expect.any(Number), expect.any(Number), expect.any(Number));
       expect(mockJsPDFSave).toHaveBeenCalledWith(expect.stringContaining('admin_platform_metrics_allTime.pdf'));
-      
-      // We are no longer asserting: await waitFor(() => expect(mockChartJSDefaultsObject.animation).toEqual({}));
-      // We trust the component's finally block attempts to restore it.
     });
 
     it('should show message and not render PDF button if reportData is null', async () => {
       mockGetAdminPlatformMetrics.mockResolvedValueOnce(null);
       render(<PlatformMetricsReport />);
       await waitFor(() => screen.getByText('No platform metrics data available.'));
-      
+
       expect(screen.queryByRole('button', { name: 'Download PDF' })).not.toBeInTheDocument();
       expect(mockHtml2Canvas).not.toHaveBeenCalled();
     });
@@ -324,18 +332,15 @@ describe('PlatformMetricsReport', () => {
       mockHtml2Canvas.mockRejectedValueOnce(new Error(canvasErrorMsg));
       render(<PlatformMetricsReport />);
       await waitFor(() => screen.getByText('Download PDF'));
-      
+
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
       await user.click(pdfButton);
-      
-      const expectedRenderedErrorText = `Error: ${canvasErrorMsg}`;
+
       await waitFor(() => {
-        // Check for the error text, allowing for other content like the button
-        expect(screen.getByText(expectedRenderedErrorText, { exact: false })).toBeInTheDocument();
+        expect(screen.getByText(`Error: ${canvasErrorMsg}`, { exact: false })).toBeInTheDocument();
       });
       expect(screen.getByRole('button', { name: 'Try Again'})).toBeInTheDocument();
       expect(mockJsPDFSave).not.toHaveBeenCalled();
-      // We assume the finally block in component restores animation; not directly asserting here due to prior issues.
     });
   });
 });

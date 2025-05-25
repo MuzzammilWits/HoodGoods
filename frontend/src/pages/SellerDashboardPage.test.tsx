@@ -1,7 +1,6 @@
-// src/pages/SellerDashboardPage.test.tsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import { BrowserRouter } from 'react-router-dom'; // For components that might use <Link>
+import { BrowserRouter } from 'react-router-dom'; 
 import SellerDashboardPage from './SellerDashboardPage';
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -190,7 +189,8 @@ describe('SellerDashboardPage', () => {
 
       // Check for welcome message and dashboard title
       await waitFor(() => {
-        expect(screen.getAllByText('Seller Dashboard').length).toBeGreaterThanOrEqual(1);
+        // Corrected expectation: The main title is "Orders"
+        expect(screen.getByRole('heading', { name: /Orders/i, level: 1 })).toBeInTheDocument();
         expect(screen.getByText(`Welcome, ${mockUser.name}!`)).toBeInTheDocument();
       });
 
@@ -198,7 +198,8 @@ describe('SellerDashboardPage', () => {
       await waitFor(() => {
         expect(screen.getByText(`Total Earnings (All Orders): R${mockEarningsData.totalEarnings.toFixed(2)}`)).toBeInTheDocument();
       });
-      expect(screen.getByText('Your Orders')).toBeInTheDocument();
+      // This checks for the H2 heading of the orders section
+      expect(screen.getByRole('heading', { name: /Your Orders/i, level: 2 })).toBeInTheDocument();
     });
 
     // Test if fetched orders and their item details are displayed correctly
