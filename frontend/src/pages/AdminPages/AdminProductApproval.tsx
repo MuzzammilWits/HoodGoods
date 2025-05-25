@@ -100,13 +100,73 @@ const AdminProductApproval: React.FC = () => {
   }, [products, selectedStoreName]);
   // --- End filter products ---
 
-
   if (loading) {
     return (
-      <section className="loading-container" aria-label="Loading products">
-        <figure className="spinner" role="img" aria-label="Loading animation"></figure>
-        <p>Loading products...</p>
-      </section>
+      <main className="admin-products-container" aria-busy="true">
+        <header className="admin-header">
+          <h1>Product Management</h1>
+          <button onClick={() => navigate('/admin-dashboard')} className="back-button">
+            Back to Dashboard
+          </button>
+        </header>
+        <section className="filters-section" aria-labelledby="store-filter-heading">
+          <h2 id="store-filter-heading" className="sr-only">Filter Products by Store</h2>
+          <label htmlFor="store-filter-select" className="skeleton-item skeleton-label" style={{width: '120px', height: '1.2rem', marginRight: '1rem'}} aria-hidden="true"></label>
+          <select
+            id="store-filter-select"
+            className="store-filter-select skeleton-item skeleton-select"
+            disabled
+            aria-hidden="true"
+            style={{width: '220px', height: '48px'}}
+          >
+            <option></option>
+          </select>
+        </section>
+        <section className="products-table-container">
+          <table className="products-table" aria-label="Product Approval Table Skeleton">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Store</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <figure className="skeleton-item skeleton-thumbnail" aria-hidden="true" style={{width: '70px', height: '70px', borderRadius: '4px'}}></figure>
+                  </td>
+                  <td>
+                    <section className="skeleton-item skeleton-text" aria-hidden="true" style={{width: '90%', height: '1.2rem', margin: '0.5rem 0'}}></section>
+                  </td>
+                  <td>
+                    <section className="skeleton-item skeleton-text" aria-hidden="true" style={{width: '80%', height: '1.2rem', margin: '0.5rem 0'}}></section>
+                  </td>
+                  <td>
+                    <section className="skeleton-item skeleton-description" aria-hidden="true" style={{width: '95%', height: '2.2rem', margin: '0.5rem 0'}}></section>
+                  </td>
+                  <td>
+                    <section className="actions-cell" aria-hidden="true" style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'flex-end',
+                      gap: '1.2rem',
+                      minHeight: '100px',
+                      paddingLeft: 0,
+                    }}>
+                      <button className="skeleton-item skeleton-button" disabled aria-hidden="true" style={{minWidth: '85px', height: '38px', borderRadius: '4px'}}></button>
+                      <button className="skeleton-item skeleton-button" disabled aria-hidden="true" style={{minWidth: '85px', height: '38px', borderRadius: '4px'}}></button>
+                    </section>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </main>
     );
   }
 
