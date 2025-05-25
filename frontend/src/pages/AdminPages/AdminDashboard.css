@@ -1,5 +1,6 @@
 /* AdminDashboard.css */
 
+/* Main container for the admin dashboard page */
 .admin-dashboard-container {
   padding: 2rem;
   max-width: 1200px;
@@ -9,6 +10,7 @@
   align-items: center;
 }
 
+/* Styling for the main header of the admin dashboard */
 .admin-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -20,80 +22,84 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* Styles for the ul container for cards */
+/* Styles for the unordered list acting as a container for management cards */
 ul.management-cards2 {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
+  flex-wrap: wrap; /* Allows cards to wrap to the next line */
+  justify-content: center; /* Centers cards horizontally */
+  gap: 2rem; /* Space between cards */
   margin-top: 1.5rem;
   width: 100%;
-  list-style: none; /* Reset list style */
-  padding: 0; /* Reset list padding */
+  list-style: none; /* Removes default list bullets */
+  padding: 0; /* Removes default list padding */
 }
 
-/* Styles for individual li card items */
+/* Styles for individual list item cards within the management grid */
 li.management-card3 {
   width: 100%;
-  max-width: 280px; /* Match your minmax value or desired card width */
+  max-width: 280px; /* Defines the maximum width for each card */
   background: white;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-  display: flex; /* Added to allow flex properties for children if needed */
-  flex-direction: column; /* Stack image and details vertically */
+  overflow: hidden; /* Ensures content respects border-radius */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+  transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition for hover effects */
+  cursor: pointer; /* Indicates interactivity */
+  display: flex; /* Enables flexbox for internal layout */
+  flex-direction: column; /* Stacks children (image, details, button) vertically */
 }
 
+/* Hover and focus styles for management cards, adding a subtle lift and stronger shadow */
 li.management-card3:hover,
-li.management-card3:focus-within { /* Added focus-within for keyboard navigation */
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+li.management-card3:focus-within { /* focus-within for better keyboard navigation accessibility */
+  transform: translateY(-5px); /* Lifts the card slightly */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Enhances shadow on hover/focus */
 }
 
-li.management-card3:focus { /* Basic focus style for accessibility */
+/* Basic focus style for accessibility, ensuring clear outline on keyboard focus */
+li.management-card3:focus {
     outline: 2px solid var(--primary-color, #432C53);
     outline-offset: 2px;
 }
 
-
-/* Product Image Container as a figure */
+/* Product Image Container, styled as a figure for semantic HTML */
 figure.product-image-container {
   height: 200px;
-  background-color: transparent !important;
+  background-color: transparent !important; /* Ensures no background interferes */
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: hidden; /* Hides any overflowing image content */
 }
 
+/* Styling for the actual product image within the figure */
 .product-image {
   max-height: 80%;
   max-width: 80%;
-  object-fit: contain;
+  object-fit: contain; /* Ensures the whole image is visible within its container */
 }
 
-/* Product Details as an article */
+/* Product Details section, styled as an article for semantic HTML */
 article.product-details {
   padding: 1.5rem;
   text-align: center;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow details section to grow and push button to bottom */
+  flex-grow: 1; /* Allows this section to expand and push the button to the bottom */
 }
 
+/* Description text within the product details */
 .product-description {
   font-size: 1rem;
   color: #666;
   margin-bottom: 1rem;
-  flex-grow: 1; /* Pushes button down if content is short */
+  flex-grow: 1; /* Helps push the button down even with short content */
   line-height: 1.4;
   padding-top: 1.2rem;
 }
 
+/* Styling for the 'Manage' button */
 .manage-btn {
   width: 100%;
   padding: 0.75rem;
@@ -104,18 +110,20 @@ article.product-details {
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
-  transition: background-color 0.2s;
-  margin-top: auto;
+  transition: background-color 0.2s; /* Smooth transition for background color change */
+  margin-top: auto; /* Pushes the button to the bottom of the flex container */
   padding-right: 1em;
   padding-left: 1em;
 }
 
+/* Hover effect for the 'Manage' button */
 .manage-btn:hover {
   background-color: #5a3a6f;
 }
 
-/* Redundant .management-card and .management-card2 styles from original if not used directly on li */
-/* You can remove these if .management-card3 is the only one in use for <li> elements */
+/* Redundant styles: These classes (.management-card and .management-card2)
+   appear to be leftovers or alternative card styles. If not directly applied
+   to the `<li>` elements, they can likely be removed to simplify the CSS. */
 .management-card {
   background: white;
   border-radius: 8px;
@@ -137,22 +145,22 @@ article.product-details {
   object-fit: contain;
 }
 
-
-/* Fallback for management-cards and management-cards3 if they target the ul */
+/* Fallback/alternative styles for UL containers.
+   These classes (.management-cards, .management-cards3) suggest a grid layout
+   for unordered lists, which might be used elsewhere or represent older iterations.
+   Ensure `list-style` and `padding` are reset if these are applied to a `<ul>`. */
 .management-cards, .management-cards3 {
-  display: grid; /* Original style - if you prefer grid for ul */
+  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   margin-top: 1.5rem;
   width: 100%;
   justify-items: center;
-  /* Ensure list-style and padding are reset if using these for UL */
   list-style: none;
   padding: 0;
 }
 
-
-/* Styles for user image (if used, similar to product image) */
+/* Styles for a user image container (similar to product image, likely for user management cards) */
 .users-image-container { /* Assuming this would also become a figure */
   height: 200px;
   background-color: #f5f5f5;
@@ -162,12 +170,14 @@ article.product-details {
   margin: 0;
 }
 
+/* Styling for the user image itself */
 .users-image {
   max-height: 80%;
   max-width: 80%;
   object-fit: contain;
 }
 
+/* Styles for SVG icons used within dashboard cards (e.g., for categories or sections) */
 .dashboard-card-svg {
   width: 80%;
   height: 80%;
@@ -175,9 +185,10 @@ article.product-details {
   max-height: 180px;
   display: block;
   margin: 0 auto;
-  color: #97C9BA;
+  color: #97C9BA; /* Specific color for these SVGs */
 }
 
+/* Styles for SVGs used specifically in store-related cards */
 .store-card-svg {
   width: 70%;
   height: 70%;
