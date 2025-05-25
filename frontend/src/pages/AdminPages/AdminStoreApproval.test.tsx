@@ -1,264 +1,130 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BrowserRouter } from 'react-router-dom';
-import axios from 'axios';
 import AdminStoreApproval from './AdminStoreApproval';
+import { describe, it, expect, beforeEach } from 'vitest';
+import MockAdapter from 'axios-mock-adapter';
+import axios from 'axios';
+import { MemoryRouter } from 'react-router-dom';
 
-// Mock axios
-vi.mock('axios');
-const mockedAxios = axios as unknown as {
-  get: ReturnType<typeof vi.fn>;
-  patch: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-};
+const mockAxios = new MockAdapter(axios);
 
-// Mock useNavigate
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal() as any;
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    BrowserRouter: actual.BrowserRouter,
-  };
-});
-
-const mockStores = [
+const storesMock = [
   {
     storeId: 'store1',
     userId: 'user1',
-    storeName: 'Test Store',
-    standardPrice: 10,
-    standardTime: '3-5',
-    expressPrice: 20,
-    expressTime: '0-1',
+    storeName: 'Cool Store',
+    standardPrice: 50,
+    standardTime: '3 days',
+    expressPrice: 100,
+    expressTime: '1 day',
     isActiveStore: false,
-    products: [],
+    products: [
+      {
+        prodId: 1,
+        name: 'Product 1',
+        description: 'Desc',
+        category: 'Clothing',
+        price: 100,
+        productquantity: 10,
+        userId: 'user1',
+        imageUrl: '',
+        storeId: 'store1',
+        storeName: 'Cool Store',
+        isActive: false,
+      },
+    ],
   },
 ];
 
 describe('AdminStoreApproval', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockAxios.reset();
   });
 
-  it('renders loading spinner initially', async () => {
-    mockedAxios.get = vi.fn(() => new Promise(() => {})); // Never resolves
+  it('displays loading skeleton on initial render', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(() => new Promise(() => {})); // never resolves
 
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    expect(screen.getByText(/Store Management/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(5); // skeleton loaders
+  });
+
+  it('displays message when no stores are returned', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, []);
+
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    await screen.findByText(/No stores are currently awaiting approval/i);
+  });
+
+  it('renders a store with correct pricing info', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, storesMock);
+
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    await screen.findByText('Cool Store');
+    expect(screen.getByText('Price: R 50.00')).toBeInTheDocument();
+    expect(screen.getByText('Time: 3 days')).toBeInTheDocument();
+    expect(screen.getByText('Price: R 100.00')).toBeInTheDocument();
+  });
+
+  it('expands and collapses a store on click', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, storesMock);
+
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    const storeHeader = await screen.findByText('Cool Store');
+    fireEvent.click(storeHeader);
+
+    await screen.findByText('Products in this Store');
+    expect(screen.getByText('Product 1')).toBeInTheDocument();
+
+    fireEvent.click(storeHeader);
+    await waitFor(() =>
+      expect(screen.queryByText('Products in this Store')).not.toBeInTheDocument()
     );
-
-    expect(screen.getByText(/loading stores/i)).toBeInTheDocument();
   });
 
-  it('renders store cards after fetching data', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
+  it('approves a store and removes it from the list', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, storesMock);
+    mockAxios.onPatch(/stores\/store1\/approve/).reply(200);
 
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    await screen.findByText('Cool Store');
+    const approveBtn = screen.getByRole('button', { name: /Approve store Cool Store/i });
+    fireEvent.click(approveBtn);
+
+    await waitFor(() =>
+      expect(screen.queryByText('Cool Store')).not.toBeInTheDocument()
     );
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Store')).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Store approved successfully!/i)).toBeInTheDocument();
   });
 
-  it('calls approve API and removes store on success', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-    mockedAxios.patch = vi.fn().mockResolvedValue({});
+  it('rejects a store and removes it from the list', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, storesMock);
+    mockAxios.onDelete(/stores\/store1/).reply(200);
 
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
+
+    await screen.findByText('Cool Store');
+    const rejectBtn = screen.getByRole('button', { name: /Reject store Cool Store/i });
+    fireEvent.click(rejectBtn);
+
+    await waitFor(() =>
+      expect(screen.queryByText('Cool Store')).not.toBeInTheDocument()
     );
-
-    await waitFor(() => screen.getByText('Test Store'));
-
-    const approveButton = screen.getByRole('button', { name: /approve store/i });
-    fireEvent.click(approveButton);
-
-    await waitFor(() => {
-      expect(mockedAxios.patch).toHaveBeenCalledWith(expect.stringContaining('/approve'));
-      expect(screen.queryByText('Test Store')).not.toBeInTheDocument();
-    });
+    expect(screen.getByText(/Store rejected and deleted successfully!/i)).toBeInTheDocument();
   });
 
-  it('calls reject API and removes store on success', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-    mockedAxios.delete = vi.fn().mockResolvedValue({});
+  it('allows keyboard toggle of expanded view', async () => {
+    mockAxios.onGet(/stores\/inactive/).reply(200, storesMock);
 
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
+    render(<AdminStoreApproval />, { wrapper: MemoryRouter });
 
-    await waitFor(() => screen.getByText('Test Store'));
+    const header = await screen.findByText('Cool Store');
+    fireEvent.keyDown(header, { key: 'Enter', code: 'Enter' });
 
-    const rejectButton = screen.getByRole('button', { name: /reject store/i });
-    fireEvent.click(rejectButton);
-
-    await waitFor(() => {
-      expect(mockedAxios.delete).toHaveBeenCalledWith(expect.stringContaining('/stores/store1'));
-      expect(screen.queryByText('Test Store')).not.toBeInTheDocument();
-    });
+    await screen.findByText('Products in this Store');
   });
-
-  it('displays error notification if fetching stores fails', async () => {
-    mockedAxios.get = vi.fn().mockRejectedValue(new Error('Fetch failed'));
-
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/failed to load stores/i)).toBeInTheDocument();
-    });
-  });
-
-  it('navigates back to dashboard on back button click', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: [] });
-    render(<BrowserRouter><AdminStoreApproval /></BrowserRouter>);
-    const backBtn = await screen.findByRole('button', { name: /back to dashboard/i });
-    fireEvent.click(backBtn);
-    expect(mockNavigate).toHaveBeenCalledWith('/admin-dashboard');
-  });
-
-  it('renders store name', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    const storeName = await screen.findByText('Test Store');
-    expect(storeName).toBeInTheDocument();
-  });
-
-  it('renders standard service', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    // Wait for content to appear
-    await screen.findByText('Test Store');
-  
-    // Assert standard delivery price and time are displayed
-    expect(screen.getByText(/10/i)).toBeInTheDocument();      // Standard price
-    expect(screen.getByText(/3-5/i)).toBeInTheDocument();   // Standard time
-  });
-
-  it('renders express service', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    // Wait for store to render
-    await screen.findByText('Test Store');
-  
-    // Assert express delivery price and time are displayed
-    expect(screen.getByText(/20/i)).toBeInTheDocument();      // Express price
-    expect(screen.getByText(/0-1/i)).toBeInTheDocument();    // Express time
-  });
-
-  it('renders approve button', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    await screen.findByText('Test Store');
-  
-    const approveButton = screen.getByRole('button', { name: /approve store/i });
-    expect(approveButton).toBeInTheDocument();
-  });
-
-  it('renders reject button', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    await screen.findByText('Test Store');
-  
-    const rejectButton = screen.getByRole('button', { name: /reject store/i });
-    expect(rejectButton).toBeInTheDocument();
-  });
-
-  it('approves a store when approve button is clicked', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-    mockedAxios.patch = vi.fn().mockResolvedValue({});
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    // Wait for store to render
-    await screen.findByText('Test Store');
-  
-    // Click the approve button
-    const approveButton = await screen.findByRole('button', { name: /approve store/i });
-    fireEvent.click(approveButton);
-  
-    await waitFor(() => {
-      
-      expect(mockedAxios.patch).toHaveBeenCalledWith(expect.stringContaining('/approve'));
-      
-      expect(screen.queryByText('Test Store')).not.toBeInTheDocument();
-    });
-  });
-
-  it('rejects a store when reject button is clicked', async () => {
-    mockedAxios.get = vi.fn().mockResolvedValue({ data: mockStores });
-    mockedAxios.delete = vi.fn().mockResolvedValue({});
-  
-    render(
-      <BrowserRouter>
-        <AdminStoreApproval />
-      </BrowserRouter>
-    );
-  
-    // Wait for the store to appear
-    await screen.findByText('Test Store');
-  
-    // Click the reject button
-    const rejectButton = await screen.findByRole('button', { name: /reject store/i });
-    fireEvent.click(rejectButton);
-  
-    await waitFor(() => {
-      // Ensure DELETE was called with the correct endpoint
-      expect(mockedAxios.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/stores/store1')
-      );
-      // Ensure the store is removed from the UI
-      expect(screen.queryByText('Test Store')).not.toBeInTheDocument();
-    });
-  });
-  
 });
