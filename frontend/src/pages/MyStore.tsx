@@ -385,7 +385,70 @@ const MyStore: React.FC = () => {
         return ( <main className="my-store-container no-store"> <header><h2>Access Denied</h2></header> <p>Please log in to manage your store.</p> <button onClick={() => loginWithRedirect({ appState: { returnTo: window.location.pathname }})} className="button-primary"> Log In / Sign Up </button> </main> );
     }
     if (loading) {
-        return ( <main className="my-store-container"> <section className="loading-container" aria-label="Loading your store data"> <figure className="spinner" role="img" aria-label="Loading animation"></figure> <p>Loading Your Store...</p> </section> </main> );
+        return (
+            <main className="my-store-container">
+                <section className="main-titles">
+                    <h1>{storeData?.store?.storeName || 'Store Name'}</h1>
+                </section>
+                <section className="skeleton-container-active">
+                    <header className="store-header">
+                        <section className="delivery-info-display">
+                            <header className="delivery-header">
+                                <section className="skeleton-item skeleton-header" style={{width: '40%', height: '1.5rem', marginBottom: '1rem'}}></section>
+                                <section className="skeleton-item skeleton-button" style={{width: '120px', height: '38px', borderRadius: '4px'}}></section>
+                            </header>
+                            <section>
+                                <section className="skeleton-item skeleton-text" style={{width: '60%', height: '1.1rem', marginBottom: '0.5rem'}}></section>
+                                <section className="skeleton-item skeleton-text" style={{width: '60%', height: '1.1rem'}}></section>
+                            </section>
+                        </section>
+                        <nav className="store-actions-container">
+                            <section className="skeleton-item skeleton-button" style={{width: '180px', height: '38px', borderRadius: '4px'}}></section>
+                            <section className="skeleton-item skeleton-button" style={{width: '180px', height: '38px', borderRadius: '4px'}}></section>
+                            <section className="skeleton-item skeleton-button" style={{width: '180px', height: '38px', borderRadius: '4px'}}></section>
+                        </nav>
+                    </header>
+                    <section className="products-section">
+                        <section className="product-status-section">
+                            <h2>Approved Products</h2>
+                            <ul className="product-list">
+                                {Array.from({length: 3}).map((_, i) => (
+                                    <li key={i} className="product-list-item">
+                                        <article className="product-card active">
+                                            <figure className="skeleton-item skeleton-image" style={{height: '120px', width: '100%', marginBottom: '1rem'}}></figure>
+                                            <section className="skeleton-item skeleton-text" style={{width: '70%', height: '1.2rem', marginBottom: '0.5rem'}}></section>
+                                            <section className="skeleton-item skeleton-text" style={{width: '90%', height: '1.2rem', marginBottom: '0.5rem'}}></section>
+                                            <footer>
+                                                <section className="skeleton-item skeleton-button" style={{width: '80px', height: '32px', borderRadius: '4px', marginRight: '0.7rem'}}></section>
+                                                <section className="skeleton-item skeleton-button" style={{width: '80px', height: '32px', borderRadius: '4px'}}></section>
+                                            </footer>
+                                        </article>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                        <section className="product-status-section">
+                            <h2>Pending Approval</h2>
+                            <ul className="product-list">
+                                {Array.from({length: 2}).map((_, i) => (
+                                    <li key={i} className="product-list-item">
+                                        <article className="product-card inactive">
+                                            <figure className="skeleton-item skeleton-image" style={{height: '120px', width: '100%', marginBottom: '1rem'}}></figure>
+                                            <section className="skeleton-item skeleton-text" style={{width: '70%', height: '1.2rem', marginBottom: '0.5rem'}}></section>
+                                            <section className="skeleton-item skeleton-text" style={{width: '90%', height: '1.2rem', marginBottom: '0.5rem'}}></section>
+                                            <footer>
+                                                <section className="skeleton-item skeleton-button" style={{width: '80px', height: '32px', borderRadius: '4px', marginRight: '0.7rem'}}></section>
+                                                <section className="skeleton-item skeleton-button" style={{width: '80px', height: '32px', borderRadius: '4px'}}></section>
+                                            </footer>
+                                        </article>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    </section>
+                </section>
+            </main>
+        );
     }
     if (error && error.includes("Store not found")) {
         return ( <main className="my-store-container no-store"> <header><h2>Store Not Found</h2></header> <p>It looks like you haven't created your store yet.</p> <Link to="/create-store" className="button-primary">Create Your Store</Link> </main> );
@@ -466,12 +529,12 @@ const MyStore: React.FC = () => {
                 <section className="products-section">
                     <section className="product-status-section" aria-labelledby="approved-products-heading">
                         <h2 id="approved-products-heading">Approved Products</h2>
-                        {approvedProducts.length > 0 ? ( <ul className="product-list"> {approvedProducts.map((product) => ( <li key={product.prodId} className="product-list-item"> <article className="product-card active"> <figure className="product-image"> <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} /> </figure> <section className="product-details"> <h3>{product.name}</h3> <p className="product-description">{product.description}</p> <p className="product-category">Category: {product.category}</p> <p className="product-price">Price: R{product.price.toFixed(2)}</p> <p className="product-quantity">Quantity: {product.productquantity}</p> </section> <footer className="product-actions"> <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button> <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'} </button> </footer> </article> </li> ))} </ul> ) : ( <p className="no-products">No approved products yet.</p> )}
+                        {approvedProducts.length > 0 ? ( <ul className="product-list"> {approvedProducts.map((product) => ( <li key={product.prodId} className="product-list-item"> <article className="product-card active"> <figure className="product-image"> <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} /> </figure> <section className="product-details"> <h3>{product.name}</h3> <p className="product-description">{product.description}</p> <p className="product-category">Category: {product.category}</p> <p className="product-price">Price: R{product.price.toFixed(2)}</p> <p className="product-quantity">Quantity: {product.productquantity}</p> </section> <footer className="product-actions"> <button onClick={()=>openEditModal(product)} className="button-edit button-small" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button> <button onClick={()=>handleDeleteClick(product)} className="button-delete button-small" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'} </button> </footer> </article> </li> ))} </ul> ) : ( <p className="no-products">No approved products yet.</p> )}
                     </section>
 
                     <section className="product-status-section" aria-labelledby="pending-products-heading">
                         <h2 id="pending-products-heading">Pending Approval</h2>
-                        {pendingProducts.length > 0 ? ( <ul className="product-list"> {pendingProducts.map((product) => ( <li key={product.prodId} className="product-list-item"> <article className="product-card inactive"> <p className="product-status-badge">Pending Approval</p> <figure className="product-image"> <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} /> </figure> <section className="product-details"> <h3>{product.name}</h3> <p className="product-description">{product.description}</p> <p className="product-category">Category: {product.category}</p> <p className="product-price">Price: R{product.price.toFixed(2)}</p> <p className="product-quantity">Quantity: {product.productquantity}</p> </section> <footer className="product-actions"> <button onClick={()=>openEditModal(product)} className="button-edit" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button> <button onClick={()=>handleDeleteClick(product)} className="button-delete" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'} </button> </footer> </article> </li> ))} </ul> ) : ( <p className="no-products">No products pending approval.</p> )}
+                        {pendingProducts.length > 0 ? ( <ul className="product-list"> {pendingProducts.map((product) => ( <li key={product.prodId} className="product-list-item"> <article className="product-card inactive"> <p className="product-status-badge">Pending Approval</p> <figure className="product-image"> <img src={product.imageUrl || '/placeholder-image.png'} alt={product.name} /> </figure> <section className="product-details"> <h3>{product.name}</h3> <p className="product-description">{product.description}</p> <p className="product-category">Category: {product.category}</p> <p className="product-price">Price: R{product.price.toFixed(2)}</p> <p className="product-quantity">Quantity: {product.productquantity}</p> </section> <footer className="product-actions"> <button onClick={()=>openEditModal(product)} className="button-edit button-small" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> Edit </button> <button onClick={()=>handleDeleteClick(product)} className="button-delete button-small" disabled={isDeleting || isSavingEdit || isAddingProductLoading}> {isDeleting && productToDelete?.prodId === product.prodId ? 'Deleting...' : 'Delete'} </button> </footer> </article> </li> ))} </ul> ) : ( <p className="no-products">No products pending approval.</p> )}
                     </section>
                 </section>
 
