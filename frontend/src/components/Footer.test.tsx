@@ -13,7 +13,6 @@ vi.mock('./utils/ImageImports', () => ({
 
 describe('Footer Component', () => {
   // Helper function to render the component within BrowserRouter if any links might use it
-  // Although these are hash links, it's good practice if other links might be real routes.
   const renderFooter = () => {
     render(
       <BrowserRouter>
@@ -88,7 +87,6 @@ describe('Footer Component', () => {
     });
 
     it('renders the "Social" heading', () => {
-      // The heading is not inside the social links nav, but in the section containing it
       const socialHeadingSection = socialNav.closest('.footer-social');
       expect(socialHeadingSection).toBeInTheDocument();
       const heading = screen.getByRole('heading', { name: /Social/i, level: 3 });
@@ -108,7 +106,7 @@ describe('Footer Component', () => {
         expect(linkElement).toHaveAttribute('href', linkInfo.href);
         expect(linkElement).toHaveClass('social-icon');
         expect(linkElement.querySelector('svg')).toBeInTheDocument();
-        expect(socialNav).toContainElement(linkElement); // Ensure link is within the correct nav
+        expect(socialNav).toContainElement(linkElement); 
       });
     });
   });

@@ -1,22 +1,18 @@
 import React from 'react';
-// Ensure ProductFormData is the simplified version (no storeName/delivery)
-import { ProductFormData } from '../types/createStore'; // Adjust path if needed
-
+import { ProductFormData } from '../types/createStore'; 
 interface ProductFormProps {
   product: ProductFormData; // Uses simplified ProductFormData
   index: number;
   productCategories: string[];
-  // --- UPDATE the type for the 'field' parameter to match ProductList ---
+  
   onProductChange: (
       index: number,
-      // Omit image fields AND delivery fields
       field: keyof Omit<ProductFormData,
           'image' | 'imagePreview' | 'imageURL' |
           'standardPrice' | 'standardTime' | 'expressPrice' | 'expressTime'
       >,
       value: string
   ) => void;
-  // --- End Update ---
   onImageChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (index: number) => void;
   isSubmitting: boolean;

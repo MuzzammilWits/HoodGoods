@@ -1,14 +1,9 @@
-/* frontend/src/components/Hero.css */
 
-/* --- Reset semantic elements in Hero --- */
-/* Note: This is a very aggressive reset. It makes semantic tags behave like divs. */
 section, article, aside, main, figure, figcaption, ul, li {
   all: unset;
   display: block;
 }
-/* --- End reset --- */
 
-/* Base styles and tweaks for hero section */
 .light-purple-bg {
   background-color: var(--accent-background, #f9f6fd);
 }

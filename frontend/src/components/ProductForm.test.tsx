@@ -1,4 +1,3 @@
-// src/components/ProductForm.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ProductForm from './ProductForm';

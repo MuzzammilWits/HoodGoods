@@ -1,4 +1,3 @@
-// src/components/ProductList.tsx
 import React from 'react';
 import ProductForm from './ProductForm';
 // Ensure ProductFormData is the simplified version (no storeName/delivery)
@@ -7,7 +6,6 @@ import { ProductFormData } from '../types/createStore';
 interface ProductListProps {
   products: ProductFormData[];
   productCategories: string[];
-  // --- UPDATE the type for the 'field' parameter ---
   onProductChange: (
       index: number,
       // Omit image fields AND delivery fields
@@ -17,7 +15,6 @@ interface ProductListProps {
       >,
       value: string
   ) => void;
-  // --- End Update ---
   onImageChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveProduct: (index: number) => void;
   onAddProduct: () => void;
@@ -27,7 +24,7 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({
   products,
   productCategories,
-  onProductChange, // Now expects the correct type
+  onProductChange, 
   onImageChange,
   onRemoveProduct,
   onAddProduct,

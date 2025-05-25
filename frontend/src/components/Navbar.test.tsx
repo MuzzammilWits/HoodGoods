@@ -1,22 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { MemoryRouter, Route, Routes } from 'react-router-dom'; // Import Routes and Route for path checking
-import { vi } from 'vitest'; // Or import { jest } from '@jest/globals'; if using Jest
-import Navbar from './Navbar'; // Adjust path if needed
+import { MemoryRouter, Route, Routes,  } from 'react-router-dom'; // Import Routes and Route for path checking
+import { vi } from 'vitest';
+import Navbar from './Navbar';
 
 // --- Mocks ---
-
-// Mock useAuth0 hook
 const mockUseAuth0 = vi.fn();
 vi.mock('@auth0/auth0-react', () => ({
-    useAuth0: () => mockUseAuth0(), // Return the mock function's result
+    useAuth0: () => mockUseAuth0(),
 }));
 
-// Mock fetch API
 global.fetch = vi.fn();
 const mockedFetch = vi.mocked(global.fetch);
 
-// Mock sessionStorage
 const mockSessionStorage = (() => {
     let store: Record<string, string> = {};
     return {
@@ -28,8 +24,9 @@ const mockSessionStorage = (() => {
 })();
 Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
-// Mock window.location
 const originalLocation = window.location;
+let mockNavigate = vi.fn(); // Mock for useNavigate
+
 beforeAll(() => {
     Object.defineProperty(window, 'location', {
         writable: true,
@@ -39,37 +36,39 @@ beforeAll(() => {
             reload: vi.fn(),
             origin: 'http://localhost:3000',
             href: 'http://localhost:3000/',
-            pathname: '/', // Default to home page for tests
+            pathname: '/',
         },
     });
-    // Mock scrollIntoView
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
-    // Mock getElementById
     document.getElementById = vi.fn();
-
 });
 
 afterAll(() => {
-    // Restore original window.location
     Object.defineProperty(window, 'location', {
         configurable: true,
         value: originalLocation,
     });
-    // Clean up mocks
     vi.restoreAllMocks();
-    // @ts-ignore - Reset mock implementation if needed
+    // @ts-ignore
     document.getElementById.mockRestore?.();
-    // @ts-ignore - Reset mock implementation if needed
+    // @ts-ignore
     window.HTMLElement.prototype.scrollIntoView.mockRestore?.();
 });
 
-
-// Mock ImageImports
 vi.mock('./utils/ImageImports', () => ({
     logo: 'mock-logo.png',
 }));
 
-// Helper to set default Auth0 mock values
+// Mock react-router-dom's useNavigate
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate, // Return our mock navigate function
+    };
+});
+
+
 const setDefaultAuth0Mock = (overrides = {}) => {
     mockUseAuth0.mockReturnValue({
         isAuthenticated: false,
@@ -83,7 +82,6 @@ const setDefaultAuth0Mock = (overrides = {}) => {
     });
 };
 
-// Helper to setup fetch mocks for role/register
 const setupFetchMocks = (roleResponse: any = { role: 'user' }, roleStatus = 200, registerStatus = 200) => {
      mockedFetch.mockImplementation(async (url) => {
          const urlString = url.toString();
@@ -108,7 +106,6 @@ const setupFetchMocks = (roleResponse: any = { role: 'user' }, roleStatus = 200,
      });
 };
 
-// Helper function to render Navbar within MemoryRouter, optionally at a specific route
 const renderNavbar = (initialRoute = '/') => {
     return render(
         <MemoryRouter initialEntries={[initialRoute]}>
@@ -120,46 +117,43 @@ const renderNavbar = (initialRoute = '/') => {
 };
 
 
-// --- Test Suite ---
 describe('Navbar Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockSessionStorage.clear();
         mockedFetch.mockClear();
-        // Reset window.location properties if needed between tests
+        mockNavigate.mockClear(); // Clear navigate mock
         Object.defineProperty(window, 'location', {
             writable: true,
             value: {
-                ...window.location, // Use the potentially modified value from beforeAll
+                ...window.location,
                 href: 'http://localhost:3000/',
-                pathname: '/', // Default to home for most tests
+                pathname: '/',
                 assign: vi.fn(),
                 reload: vi.fn(),
-                origin: window.location.origin // Preserve origin
+                origin: window.location.origin
             },
         });
-        setDefaultAuth0Mock(); // Set default (logged out) state
-        setupFetchMocks(); // Set default fetch mocks
-        // Reset mocks used in specific tests
+        setDefaultAuth0Mock();
+        setupFetchMocks();
         vi.mocked(document.getElementById).mockClear();
         vi.mocked(window.HTMLElement.prototype.scrollIntoView).mockClear();
     });
 
-    // --- Test Cases ---
-
     test('renders standard links and guest icons correctly when logged out', () => {
-        renderNavbar(); // Render at default '/'
+        renderNavbar();
         expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /products/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /about us/i })).toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '🛒' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '📋' })).not.toBeInTheDocument();
+        // Icons are not present when logged out
+        expect(screen.queryByRole('link', { name: 'My Cart' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Orders' })).not.toBeInTheDocument();
     });
 
-    test('renders standard links and authenticated icons correctly when logged in', async () => {
+    test('renders standard links and authenticated icons correctly when logged in as user', async () => {
         setDefaultAuth0Mock({ isAuthenticated: true, isLoading: false, user: { name: 'Test User' } });
-        setupFetchMocks({ role: 'user' });
-        renderNavbar(); // Render at default '/'
+        setupFetchMocks({ role: 'user' }); // Ensure role is 'user'
+        renderNavbar();
 
         await waitFor(() => {
              expect(mockedFetch).toHaveBeenCalledWith(expect.stringContaining('/auth/me'), expect.any(Object));
@@ -168,8 +162,9 @@ describe('Navbar Component', () => {
         expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /products/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /about us/i })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '📋' })).toBeInTheDocument();
+        // Corrected icon names and expectations
+        expect(screen.getByRole('link', { name: 'My Cart' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'My Orders' })).toBeInTheDocument();
     });
 
     test('renders loading state initially', () => {
@@ -181,8 +176,8 @@ describe('Navbar Component', () => {
         expect(screen.queryByRole('link', { name: /become a seller/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /my store/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /admin dashboard/i })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '🛒' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '📋' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Cart' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Orders' })).not.toBeInTheDocument();
     });
 
     test('renders "Sign in" button when logged out', () => {
@@ -194,8 +189,8 @@ describe('Navbar Component', () => {
         expect(screen.queryByRole('link', { name: /become a seller/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /my store/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /admin dashboard/i })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '🛒' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: '📋' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Cart' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Orders' })).not.toBeInTheDocument();
     });
 
     test('calls loginWithRedirect when "Sign in" is clicked', () => {
@@ -223,8 +218,9 @@ describe('Navbar Component', () => {
         expect(screen.getByRole('link', { name: /become a seller/i })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /my store/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /admin dashboard/i })).not.toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '📋' })).toBeInTheDocument();
+        // Corrected icon names
+        expect(screen.getByRole('link', { name: 'My Cart' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'My Orders' })).toBeInTheDocument();
 
         await waitFor(() => {
             expect(mockUseAuth0().getAccessTokenSilently).toHaveBeenCalled();
@@ -236,7 +232,7 @@ describe('Navbar Component', () => {
      test('renders "My Store" link when logged in as seller', async () => {
         const mockUser = { name: 'Seller User', given_name: 'Seller' };
         setDefaultAuth0Mock({ isLoading: false, isAuthenticated: true, user: mockUser });
-        setupFetchMocks({ role: 'seller' });
+        setupFetchMocks({ role: 'seller' }); // Role is seller
         renderNavbar();
 
          await waitFor(() => {
@@ -249,14 +245,15 @@ describe('Navbar Component', () => {
         expect(screen.getByRole('link', { name: /my store/i })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /become a seller/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /admin dashboard/i })).not.toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '📋' })).toBeInTheDocument();
+        // Corrected icon names
+        expect(screen.getByRole('link', { name: 'My Cart' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'My Orders' })).toBeInTheDocument();
     });
 
-     test('renders "Admin Dashboard" link when logged in as admin', async () => {
+     test('renders "Admin Dashboard" link when logged in as admin and NO user-specific icons', async () => {
         const mockUser = { name: 'Admin User', given_name: 'Admin' };
         setDefaultAuth0Mock({ isLoading: false, isAuthenticated: true, user: mockUser });
-        setupFetchMocks({ role: 'admin' });
+        setupFetchMocks({ role: 'admin' }); // Role is admin
         renderNavbar();
 
          await waitFor(() => {
@@ -269,8 +266,9 @@ describe('Navbar Component', () => {
         expect(screen.getByRole('link', { name: /admin dashboard/i })).toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /become a seller/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /my store/i })).not.toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '📋' })).toBeInTheDocument();
+        // Icons should NOT be present for admin
+        expect(screen.queryByRole('link', { name: 'My Cart' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: 'My Orders' })).not.toBeInTheDocument();
     });
 
 
@@ -290,10 +288,10 @@ describe('Navbar Component', () => {
         });
     });
 
-    test('handles role fetch failure gracefully', async () => {
+    test('handles role fetch failure gracefully (user sees default user links and icons)', async () => {
         const mockUser = { name: 'Test User', given_name: 'Test' };
         setDefaultAuth0Mock({ isLoading: false, isAuthenticated: true, user: mockUser });
-        setupFetchMocks(null, 500); // Mock role fetch failure
+        setupFetchMocks(null, 500); // Mock role fetch failure, role will be null
         renderNavbar();
 
         await waitFor(() => {
@@ -302,135 +300,123 @@ describe('Navbar Component', () => {
 
         expect(screen.getByText(/hi, Test/i)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: '📋' })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /become a seller/i })).toBeInTheDocument(); // Should still render if role is null
+        // Corrected icon names
+        expect(screen.getByRole('link', { name: 'My Cart' })).toBeInTheDocument(); // Shown when role is null (not admin)
+        expect(screen.getByRole('link', { name: 'My Orders' })).toBeInTheDocument(); // Shown when role is null (not admin)
+        expect(screen.getByRole('link', { name: /become a seller/i })).toBeInTheDocument(); // Shown when role is null (not admin or seller)
         expect(screen.queryByRole('link', { name: /my store/i })).not.toBeInTheDocument();
         expect(screen.queryByRole('link', { name: /admin dashboard/i })).not.toBeInTheDocument();
     });
 
-     test('redirects when "Become a Seller" is clicked', async () => {
+     test('"Become a Seller" link has correct href', async () => {
         const mockUser = { name: 'Test User', given_name: 'Test' };
         setDefaultAuth0Mock({ isLoading: false, isAuthenticated: true, user: mockUser });
-        setupFetchMocks({ role: 'user' });
+        setupFetchMocks({ role: 'user' }); // Role is user
         renderNavbar();
 
         const becomeSellerLink = await screen.findByRole('link', { name: /become a seller/i });
-        expect(becomeSellerLink).toHaveAttribute('href', '/create-store');
+        // Corrected expected href
+        expect(becomeSellerLink).toHaveAttribute('href', '/seller-agreement'); //
     });
 
-    test('reloads page when Cart icon is clicked', async () => {
+    test('navigates with state when Cart icon is clicked', async () => {
         setDefaultAuth0Mock({ isAuthenticated: true, isLoading: false, user: { name: 'Test' } });
-        setupFetchMocks({ role: 'user' });
+        setupFetchMocks({ role: 'user' }); // Role is user
         renderNavbar();
 
-        const cartLink = await screen.findByRole('link', { name: '🛒' });
+        const cartLink = await screen.findByRole('link', { name: 'My Cart' }); // Corrected name
         fireEvent.click(cartLink);
 
-        expect(window.location.reload).toHaveBeenCalledTimes(1);
+        // Check if navigate was called with the correct path and state
+        expect(mockNavigate).toHaveBeenCalledWith('/cart', { state: { refresh: true } });
+        expect(window.location.reload).not.toHaveBeenCalled(); // Should not reload directly anymore
     });
 
-    // --- New Test Cases ---
 
-    test('"About Us" link scrolls into view when on home page', () => {
-        // Ensure we are on the home page ('/')
+    test('"About Us" link has correct href for home page context', () => {
         Object.defineProperty(window, 'location', {
             writable: true,
             value: { ...window.location, pathname: '/' }
         });
-
-        // Mock getElementById to return a mock element
-        const mockElement = { scrollIntoView: vi.fn() };
-        vi.mocked(document.getElementById).mockReturnValue(mockElement as any);
-
-        renderNavbar(); // Render at '/'
-
+        renderNavbar('/');
         const aboutUsLink = screen.getByRole('link', { name: /about us/i });
         fireEvent.click(aboutUsLink);
-
-        // Verify getElementById and scrollIntoView were called
-        expect(document.getElementById).toHaveBeenCalledWith('about-us');
-        expect(mockElement.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+        // The Navbar itself does not call getElementById or scrollIntoView
+        // It relies on the Link component and potentially the target page to handle scrolling.
+        // We verify the link is correctly formed.
+        expect(aboutUsLink).toHaveAttribute('href', '/#about-us'); //
+        // We can also check if react-router's navigate was called appropriately by the Link click if needed,
+        // but the primary responsibility of Navbar is to render the correct Link.
+        // The click on a Link component is handled by MemoryRouter.
+        // We expect the link to be present and have the correct href.
+        // If a specific navigation side effect (like calling a mock navigate) is expected
+        // from the *Link* component itself (via MemoryRouter), that's harder to test here
+        // without deeper inspection of router internals or if Link had an onClick.
+        // For this test, ensuring the href is correct is the main check for Navbar's responsibility.
+        // The state={{ scrollToAbout: true }} is passed to the Link component.
     });
 
-    test('"About Us" link navigates normally when not on home page', () => {
-        // Set current path to something other than '/'
+    test('"About Us" link navigates normally (has correct href) when not on home page', () => {
         Object.defineProperty(window, 'location', {
             writable: true,
             value: { ...window.location, pathname: '/products' }
         });
-
-        renderNavbar('/products'); // Render at '/products'
-
+        renderNavbar('/products');
         const aboutUsLink = screen.getByRole('link', { name: /about us/i });
-        fireEvent.click(aboutUsLink); // Normal Link behavior should occur
-
-        // Verify scrollIntoView was NOT called
+        fireEvent.click(aboutUsLink);
         expect(document.getElementById).not.toHaveBeenCalled();
         expect(window.HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
-        // Check that the link still points to the correct hash location
-        expect(aboutUsLink).toHaveAttribute('href', '/#about-us');
+        expect(aboutUsLink).toHaveAttribute('href', '/#about-us'); //
     });
 
     test('does not call token/fetch APIs when not authenticated', () => {
-        setDefaultAuth0Mock({ isAuthenticated: false, isLoading: false }); // Ensure logged out and not loading
+        setDefaultAuth0Mock({ isAuthenticated: false, isLoading: false });
         renderNavbar();
-
-        // Verify these functions were NOT called
         expect(mockUseAuth0().getAccessTokenSilently).not.toHaveBeenCalled();
         expect(mockedFetch).not.toHaveBeenCalledWith(expect.stringContaining('/auth/register'), expect.any(Object));
         expect(mockedFetch).not.toHaveBeenCalledWith(expect.stringContaining('/auth/me'), expect.any(Object));
     });
 
     test('clears session storage when not authenticated on load', () => {
-        // Pre-populate mock session storage to simulate a leftover token
         mockSessionStorage.setItem('access_token', 'old-stale-token');
-
-        setDefaultAuth0Mock({ isAuthenticated: false, isLoading: false }); // Logged out, not loading
+        setDefaultAuth0Mock({ isAuthenticated: false, isLoading: false });
         renderNavbar();
-
-        // Verify removeItem was called for the access token
         expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('access_token');
-        expect(mockSessionStorage.getItem('access_token')).toBeNull(); // Ensure it's actually gone
+        expect(mockSessionStorage.getItem('access_token')).toBeNull();
     });
 
     test('clears session storage on logout', async () => {
-        // Start logged in
         const logoutMock = vi.fn();
         setDefaultAuth0Mock({ isAuthenticated: true, isLoading: false, user: { name: 'Test' }, logout: logoutMock });
         setupFetchMocks({ role: 'user' });
-        mockSessionStorage.setItem('access_token', 'active-token'); // Set a token
+        mockSessionStorage.setItem('access_token', 'active-token');
 
         const { rerender } = renderNavbar();
 
-        // Wait for initial auth checks
         await waitFor(() => {
-            expect(mockSessionStorage.getItem('access_token')).toBe('active-token');
+            expect(mockSessionStorage.getItem('access_token')).toBe('active-token'); // Token set initially
         });
 
-        // Simulate logout action (e.g., clicking the button)
         const signOutButton = await screen.findByRole('button', { name: /sign out/i });
         fireEvent.click(signOutButton);
-        expect(logoutMock).toHaveBeenCalled(); // Verify logout was called
+        expect(logoutMock).toHaveBeenCalled();
 
-        // --- Simulate Auth0 state change after logout ---
+        // Simulate Auth0 state change after logout trigger
         setDefaultAuth0Mock({ isAuthenticated: false, isLoading: false, user: null }); // Now logged out
-        // Rerender with the new state
+        
+        // Rerender with the new state (Navbar's useEffect should run again)
         rerender(
-             <MemoryRouter>
+             <MemoryRouter> {/* Ensure consistent environment for rerender */}
                 <Routes>
                     <Route path="*" element={<Navbar />} />
                 </Routes>
             </MemoryRouter>
         );
 
-        // Wait for the effect hook to run with the new state
         await waitFor(() => {
-            // Verify removeItem was called after the state update
+            // Navbar's useEffect should run due to !isAuthenticated && !isAuth0Loading
             expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('access_token');
         });
-         expect(mockSessionStorage.getItem('access_token')).toBeNull(); // Ensure it's actually gone
+         expect(mockSessionStorage.getItem('access_token')).toBeNull();
     });
-
-
 });

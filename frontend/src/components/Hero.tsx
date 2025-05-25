@@ -1,4 +1,3 @@
-// frontend/src/components/Hero.tsx
 import React, { useEffect, useRef } from 'react';
 import './Hero.css';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -110,14 +109,6 @@ const Hero: React.FC = () => {
 
         {/* The logo image is positioned by the grid layout */}
         <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" />
-
-        {/* --- You have commented out this section --- */}
-        {/* <main className="hero-images">
-        // ... (your commented out image grid) ...
-        </main> */}
-        {/* Add the logo image to the right column */}
- {/* <img src="/src/assets/logo.svg" alt="HoodGoods Logo" className="hero-logo" /> */}
-
       </article>
     </section>
   );
