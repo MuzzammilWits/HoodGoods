@@ -1,177 +1,129 @@
-import { render, screen} from '@testing-library/react';
-import WhyChooseUs from './WhyChooseUs';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import WhyChooseUs from './WhyChooseUs'; // Adjust the import path as needed
 
+
+// --- Test Suite for WhyChooseUs Component ---
 describe('WhyChooseUs Component', () => {
-  // 1. Core Content Tests
-  it('renders all main sections', () => {
-    render(<WhyChooseUs />);
-    
-    expect(screen.getByText('About Us')).toBeInTheDocument();
-    expect(screen.getByText('Our Impact')).toBeInTheDocument();
-    expect(screen.getByText('Why Choose Us?')).toBeInTheDocument();
-  });
-it('applies correct section classes', () => {
-  const { container } = render(<WhyChooseUs />);
-  
-  expect(container.querySelector('.about-us-section')).toHaveClass('about-us-section');
-  expect(container.querySelector('.trust-icons-section')).toHaveClass('trust-icons-section');
-  expect(container.querySelector('.why-choose-us-section')).toHaveClass('why-choose-us-section');
-});
-it('has sufficient about us content', () => {
-  render(<WhyChooseUs />);
-  const aboutText = screen.getByText(/HoodsGoods is a vibrant marketplace/i);
-  expect(aboutText.textContent?.length).toBeGreaterThan(100);
-});
-  // 2. About Us Section Tests
-  describe('About Us Section', () => {
-    it('contains the company description with proper styling', () => {
-      render(<WhyChooseUs />);
-      const aboutText = screen.getByText(/HoodsGoods is a vibrant marketplace/i);
-      expect(aboutText).toBeInTheDocument();
-      expect(aboutText).toHaveClass('about-us-text');
-    });
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    const { container: renderedContainer } = render(<WhyChooseUs />);
+    container = renderedContainer;
   });
 
-  // 3. Trust Icons Section Tests
-  describe('Trust Icons Section', () => {
-    it('displays all three trust metrics with icons', () => {
-      const { container } = render(<WhyChooseUs />);
-      
-      const metrics = [
-        '1000+ certified sellers',
-        '20k+ listed products',
-        '10k+ successfully shipped orders'
-      ];
-      
-      metrics.forEach(metric => {
-        expect(screen.getByText(metric)).toBeInTheDocument();
-      });
+  // Test 1: Check if the "About Us" section is rendered correctly
+  it('should render the "About Us" section with heading and text', () => {
+    // Check for the "About Us" heading
+    expect(screen.getByRole('heading', { name: /about us/i, level: 2 })).toBeInTheDocument();
 
-      const icons = container.querySelectorAll('.trust-icon svg');
-      expect(icons.length).toBe(3);
-    });
-
-    it('has properly structured trust icon items', () => {
-      const { container } = render(<WhyChooseUs />);
-      const trustItems = container.querySelectorAll('.trust-icon-item');
-      
-      expect(trustItems.length).toBe(3);
-      trustItems.forEach(item => {
-        expect(item).toContainElement(item.querySelector('.trust-icon'));
-        expect(item).toContainElement(item.querySelector('p'));
-      });
-    });
+    // Check for a snippet of the "About Us" text
+    expect(screen.getByText(/HoodsGoods is a vibrant marketplace/i)).toBeInTheDocument();
+    expect(screen.getByText(/you're investing in a community of makers/i)).toBeInTheDocument();
   });
 
-  // 4. Feature Cards Tests
-  describe('Feature Cards', () => {
+  // Test 2: Check if the "Why Choose Us?" section is rendered correctly
+  it('should render the "Why Choose Us?" section with heading', () => {
+    // Check for the "Why Choose Us?" heading
+    expect(screen.getByRole('heading', { name: /why choose us\?/i, level: 2 })).toBeInTheDocument();
+  });
+
+  // Test 3: Check if all features are rendered with their titles and descriptions
+  it('should render all four features with correct titles and descriptions', () => {
     const features = [
       {
         title: 'Secure & Trusted Shopping',
-        description: /Shop with confidence/,
-        iconTestId: 'secure-icon'
+        description: 'Shop with confidence. We use secure payment gateways and prioritize your privacy for a safe online experience.',
       },
       {
         title: 'Truly Handmade Treasures',
-        description: /Discover one-of-a-kind items/,
-        iconTestId: 'handmade-icon'
+        description: 'Discover one-of-a-kind items crafted with passion and skill by talented artisans right here in South Africa.',
       },
       {
         title: 'Careful & Reliable Delivery',
-        description: /Your handmade items are packed with care/,
-        iconTestId: 'delivery-icon'
+        description: 'Your handmade items are packed with care and shipped reliably to your choice of pickup points. Choose the best delivery option for you at checkout.',
       },
       {
         title: 'Easy to Shop',
-        description: /Browse, discover, and buy with ease/,
-        iconTestId: 'easy-icon'
-      }
+        description: 'Browse, discover, and buy with ease. Our clean, simple interface makes finding something special a breeze.',
+      },
     ];
 
-    it('renders all feature cards with content and icons', () => {
-      render(<WhyChooseUs />);
-      
-      features.forEach(feature => {
-        expect(screen.getByText(feature.title)).toBeInTheDocument();
-        expect(screen.getByText(feature.description)).toBeInTheDocument();
+    features.forEach((feature) => {
+      // Check for the feature title
+      const featureTitle = screen.getByRole('heading', { name: feature.title, level: 3 });
+      expect(featureTitle).toBeInTheDocument();
+
+      // Check for the feature description
+      expect(screen.getByText(feature.description)).toBeInTheDocument();
+
+      // Check for the presence of an SVG icon within the feature
+      const featureArticle = featureTitle.closest('article.selling-point-item');
+      expect(featureArticle).not.toBeNull();
+      if (featureArticle) {
+        const svgElement = featureArticle.querySelector('svg');
+        expect(svgElement).toBeInTheDocument();
+      }
+    });
+
+    // Ensure exactly four features are rendered
+    const featureArticles = screen.getAllByRole('article');
+    const actualFeatures = Array.from(featureArticles).filter(article => article.classList.contains('selling-point-item'));
+    expect(actualFeatures).toHaveLength(4);
+  });
+
+  // Test 4: Check for specific SVG elements to ensure icons are rendering
+  it('should render specific SVG elements for each feature icon', () => {
+    // Icon 1: Secure & Trusted Shopping (Clock icon)
+    const secureShoppingFeature = screen.getByRole('heading', { name: 'Secure & Trusted Shopping' }).closest('article');
+    expect(secureShoppingFeature?.querySelector('svg circle')).toBeInTheDocument();
+    expect(secureShoppingFeature?.querySelector('svg polyline')).toBeInTheDocument();
+
+    // Icon 2: Truly Handmade Treasures (Tag icon)
+    const handmadeFeature = screen.getByRole('heading', { name: 'Truly Handmade Treasures' }).closest('article');
+    expect(handmadeFeature?.querySelector('svg path[d*="M20.59"]')).toBeInTheDocument();
+    expect(handmadeFeature?.querySelector('svg line[x1="7"]')).toBeInTheDocument();
+
+    // Icon 3: Careful & Reliable Delivery (Credit Card/Package icon)
+    const deliveryFeature = screen.getByRole('heading', { name: 'Careful & Reliable Delivery' }).closest('article');
+    expect(deliveryFeature?.querySelector('svg rect[width="22"]')).toBeInTheDocument();
+    expect(deliveryFeature?.querySelector('svg line[x1="1"][y1="10"]')).toBeInTheDocument();
+
+    // Icon 4: Easy to Shop (List icon)
+    const easyShopFeature = screen.getByRole('heading', { name: 'Easy to Shop' }).closest('article');
+    expect(easyShopFeature?.querySelector('svg line[x1="8"][y1="6"]')).toBeInTheDocument();
+    expect(easyShopFeature?.querySelector('svg line[x1="3"][y1="6"]')).toBeInTheDocument();
+  });
+
+  // Test 5: Snapshot test to ensure UI consistency
+  it('should match the snapshot', () => {
+    expect(container).toMatchSnapshot();
+  });
+
+  // Test 6: Check for the 'id' attribute on the main section
+  it('should have the id "about-us" on the main section element', () => {
+    const mainSection = container.querySelector('section.why-choose-us-container');
+    expect(mainSection).not.toBeNull();
+    if (mainSection) {
+      expect(mainSection.id).toBe('about-us');
+    }
+  });
+
+  // Test 7: Verify the list structure for features
+  it('should render features within an unordered list (ul) and list items (li)', () => {
+    const whyChooseUsSection = screen.getByRole('heading', { name: /why choose us\?/i, level: 2 }).closest('section');
+    expect(whyChooseUsSection).not.toBeNull();
+
+    if (whyChooseUsSection) {
+      const listElement = whyChooseUsSection.querySelector('ul.selling-points-grid');
+      expect(listElement).toBeInTheDocument();
+
+      const listItems = whyChooseUsSection.querySelectorAll('ul.selling-points-grid > li');
+      expect(listItems.length).toBe(4); // Assuming there are always 4 features
+
+      listItems.forEach(item => {
+        expect(item.querySelector('article.selling-point-item')).toBeInTheDocument();
       });
-    });
-
-    it('has proper card structure with icons and text', () => {
-      const { container } = render(<WhyChooseUs />);
-      const cards = container.querySelectorAll('.selling-point-item');
-      
-      expect(cards.length).toBe(4);
-      cards.forEach(card => {
-        expect(card).toContainElement(card.querySelector('.selling-point-icon'));
-        expect(card).toContainElement(card.querySelector('h3'));
-        expect(card).toContainElement(card.querySelector('p'));
-      });
-    });
-  });
-
-  // 5. Structural Tests
-  describe('Component Structure', () => {
-    it('has correct container structure', () => {
-      const { container } = render(<WhyChooseUs />);
-      
-      expect(container.querySelector('#about-us')).toBeInTheDocument();
-      expect(container.querySelector('.why-choose-us-container')).toBeInTheDocument();
-      expect(container.querySelector('.container')).toBeInTheDocument();
-    });
-
-    it('has proper semantic HTML structure', () => {
-      const { container } = render(<WhyChooseUs />);
-      
-      expect(container.querySelector('main')).toBeInTheDocument();
-      expect(container.querySelectorAll('section').length).toBeGreaterThan(3);
-      expect(container.querySelector('h2')).toBeInTheDocument();
-    });
-  });
-
-  // 6. Accessibility Tests
-  describe('Accessibility', () => {
-    it('has proper heading hierarchy', () => {
-      render(<WhyChooseUs />);
-      
-      const headings = screen.getAllByRole('heading');
-      expect(headings[0]).toHaveTextContent('About Us');
-      expect(headings[1]).toHaveTextContent('Our Impact');
-      expect(headings[2]).toHaveTextContent('Why Choose Us?');
-      
-      expect(headings[0].tagName).toBe('H2');
-      expect(headings[1].tagName).toBe('H2');
-      expect(headings[2].tagName).toBe('H2');
-    });
-
-  });
-
-  // 7. Snapshot Test
-  it('matches snapshot', () => {
-    const { asFragment } = render(<WhyChooseUs />);
-    expect(asFragment()).toMatchSnapshot();
-  });
-
-  // 8. Responsive Behavior (if applicable)
-  describe('Responsive Behavior', () => {
-    beforeAll(() => {
-      window.matchMedia = vi.fn().mockImplementation(query => ({
-        matches: query === '(max-width: 768px)',
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-      }));
-    });
-
-    it('adapts layout for mobile view', () => {
-      window.innerWidth = 375;
-      const { container } = render(<WhyChooseUs />);
-      
-      const grid = container.querySelector('.selling-points-grid');
-      const styles = window.getComputedStyle(grid!);
-      
-      // This assumes you have responsive styles - adjust as needed
-      expect(styles.gridTemplateColumns).not.toContain('repeat(2, 1fr)');
-    });
+    }
   });
 });

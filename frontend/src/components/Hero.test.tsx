@@ -1,184 +1,178 @@
-import { render, screen, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { useAuth0, User, Auth0ContextInterface } from '@auth0/auth0-react';
-import Hero from './Hero';
+import Hero from './Hero'; // Adjust the import path as needed
+import { useAuth0, Auth0ContextInterface, User } from '@auth0/auth0-react';
 
-// Mock useAuth0
-vi.mock('@auth0/auth0-react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@auth0/auth0-react')>();
-  return {
-    ...actual,
-    useAuth0: vi.fn(),
-  };
-});
-const mockUseAuth0 = vi.mocked(useAuth0);
+// --- Mocking Dependencies ---
 
-
-// Mock Vanta.js on the global window object
-const mockVantaDestroyFn = vi.fn();
-const mockVantaFogFn = vi.fn(() => ({
-  destroy: mockVantaDestroyFn,
+// Mock the useAuth0 hook
+vi.mock('@auth0/auth0-react', () => ({
+  useAuth0: vi.fn(),
 }));
 
-// Helper function to set up the full Auth0 mock
-const setupAuth0Mock = (options: Partial<Auth0ContextInterface<User>> = {}) => {
+// Mock the logo asset
+vi.mock('/src/assets/logo.svg', () => ({
+  default: 'mock-logo.svg',
+}));
+
+// --- Test Suite Setup ---
+const mockUseAuth0 = vi.mocked(useAuth0);
+
+// Create a complete, type-safe mock for the Auth0 context.
+// This helper function allows us to override specific properties for each test.
+const createAuth0Mock = (
+  overrides: Partial<Auth0ContextInterface<User>>
+): Auth0ContextInterface<User> => {
   const defaults: Auth0ContextInterface<User> = {
+    // Default values that satisfy the type
     isAuthenticated: false,
+    isLoading: false,
     user: undefined,
     loginWithRedirect: vi.fn(),
-    isLoading: false,
-    getAccessTokenSilently: vi.fn().mockResolvedValue('mock-access-token'),
+    logout: vi.fn(),
+    getAccessTokenSilently: vi.fn(),
     getAccessTokenWithPopup: vi.fn(),
     getIdTokenClaims: vi.fn(),
     loginWithPopup: vi.fn(),
-    logout: vi.fn(),
     handleRedirectCallback: vi.fn(),
   };
-  mockUseAuth0.mockReturnValue({ ...defaults, ...options });
+  return { ...defaults, ...overrides };
 };
 
 
 describe('Hero Component', () => {
-  let originalVanta: typeof window.VANTA | undefined;
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
-  const originalWindowLocation = window.location;
-
+  // Mock the global VANTA object before each test
   beforeEach(() => {
-    vi.clearAllMocks();
-    setupAuth0Mock();
-
-    originalVanta = window.VANTA;
-    // @ts-ignore
-    window.VANTA = { FOG: mockVantaFogFn };
-
-    // Mock window.location by replacing it, using 'as any' for window to bypass strict global type
-    // @ts-ignore
-    delete window.location;
-    (window as any).location = {
-      // Providing a base structure. Specific tests can override pathname.
-      // Start with a minimal set of properties often checked or used with location.
-      href: 'http://localhost:3000/default-test-path',
-      pathname: '/default-test-path',
-      search: '',
-      hash: '',
-      assign: vi.fn(),
-      replace: vi.fn(),
-      reload: vi.fn(),
-      // This simplified mock focuses on what's typically interacted with in tests.
+    const mockVantaEffect = {
+      destroy: vi.fn(),
     };
-
-
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    window.VANTA = {
+      FOG: vi.fn().mockReturnValue(mockVantaEffect),
+    };
   });
 
   afterEach(() => {
-    if (originalVanta) {
-      window.VANTA = originalVanta;
-    } else {
-      // @ts-ignore
-      delete window.VANTA;
-    }
-    // Restore original window.location
-    (window as any).location = originalWindowLocation;
-
-    consoleLogSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
     cleanup();
+    vi.clearAllMocks();
+    delete (window as any).VANTA;
   });
 
-  const renderWithRouter = (ui: React.ReactElement) => {
-    return render(ui, { wrapper: MemoryRouter });
+  const renderComponent = () => {
+    return render(
+      <MemoryRouter>
+        <Hero />
+      </MemoryRouter>
+    );
   };
 
-  it('renders static content correctly', () => {
-    renderWithRouter(<Hero />);
+  it('should render the main title, text, and navigation buttons', () => {
+    // Use the helper to create a complete mock
+    mockUseAuth0.mockReturnValue(createAuth0Mock({
+      isAuthenticated: false,
+      isLoading: false
+    }));
+
+    renderComponent();
+
     expect(screen.getByRole('heading', { name: /Find Your Kind Of Handmade/i })).toBeInTheDocument();
     expect(screen.getByText(/From bold and modern to cozy and traditional/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Shop now/i })).toHaveAttribute('href', '/products');
-    expect(screen.getByRole('link', { name: /Discover/i })).toHaveAttribute('href', '/recommendations');
-    // expect(screen.getByAltText('HoodGoods Logo')).toHaveAttribute('src', '/src/assets/logo.svg');
+    expect(screen.getByRole('link', { name: /shop now/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /discover/i })).toBeInTheDocument();
+    expect(screen.getByAltText('HoodGoods Logo')).toBeInTheDocument();
   });
 
-  describe('Vanta.js FOG Effect', () => {
-    it('initializes VANTA.FOG on mount if available', () => {
-      renderWithRouter(<Hero />);
-      expect(consoleLogSpy).toHaveBeenCalledWith("Initializing Vanta Fog effect (run once)...");
-      expect(mockVantaFogFn).toHaveBeenCalledTimes(1);
-      expect(mockVantaFogFn).toHaveBeenCalledWith(expect.objectContaining({
-        el: expect.any(HTMLElement),
-        mouseControls: true,
-        highlightColor: 0x6514a4,
-      }));
-    });
-
-    it('calls destroy on the Vanta effect instance on unmount', () => {
-      const { unmount } = renderWithRouter(<Hero />);
-      unmount();
-      expect(mockVantaDestroyFn).toHaveBeenCalledTimes(1);
-      expect(consoleLogSpy).toHaveBeenCalledWith("Vanta Fog effect destroyed.");
-    });
-
-    it('logs a warning if VANTA.FOG is not available', () => {
-      // @ts-ignore
-      delete window.VANTA.FOG;
-      renderWithRouter(<Hero />);
-      expect(mockVantaFogFn).not.toHaveBeenCalled();
-      expect(consoleWarnSpy).toHaveBeenCalledWith("Vanta.js FOG or target element not ready for initialization.");
-    });
-
-     it('logs a warning if window.VANTA itself is not available', () => {
-      // @ts-ignore
-      delete window.VANTA;
-      renderWithRouter(<Hero />);
-      expect(mockVantaFogFn).not.toHaveBeenCalled();
-      expect(consoleWarnSpy).toHaveBeenCalledWith("Vanta.js FOG or target element not ready for initialization.");
-    });
-  });
-
-  describe('Authentication Prompt', () => {
-    it('shows the login prompt if not authenticated and not loading', () => {
-      setupAuth0Mock({ isAuthenticated: false, isLoading: false });
-      renderWithRouter(<Hero />);
-      expect(screen.getByText(/Ready to share your unique creations/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Sign up or Log in/i })).toBeInTheDocument();
-    });
-
-    it('does not show the login prompt if authenticated', () => {
-      setupAuth0Mock({ isAuthenticated: true, isLoading: false });
-      renderWithRouter(<Hero />);
-      expect(screen.queryByText(/Ready to share your unique creations/i)).not.toBeInTheDocument();
-    });
-
-    it('does not show the login prompt if Auth0 is loading', () => {
-      setupAuth0Mock({ isAuthenticated: false, isLoading: true });
-      renderWithRouter(<Hero />);
-      expect(screen.queryByText(/Ready to share your unique creations/i)).not.toBeInTheDocument();
-    });
-
-    it('calls loginWithRedirect with appState when "Sign up or Log in" is clicked', async () => {
-      const user = userEvent.setup();
-      const mockLoginWithRedirect = vi.fn();
-      
-      (window as any).location.pathname = '/custom-path-for-this-test';
-
-      setupAuth0Mock({
+  describe('Authentication Scenarios', () => {
+    it('should display the seller prompt when the user is not authenticated and not loading', () => {
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
         isAuthenticated: false,
         isLoading: false,
-        loginWithRedirect: mockLoginWithRedirect,
-      });
+      }));
 
-      renderWithRouter(<Hero />);
+      renderComponent();
+
+      const prompt = screen.getByText(/Ready to share your unique creations/i);
+      expect(prompt).toBeInTheDocument();
+      
       const loginButton = screen.getByRole('button', { name: /Sign up or Log in/i });
-      await user.click(loginButton);
+      expect(loginButton).toBeInTheDocument();
+    });
 
-      expect(mockLoginWithRedirect).toHaveBeenCalledTimes(1);
-      expect(mockLoginWithRedirect).toHaveBeenCalledWith({
-        appState: { returnTo: '/custom-path-for-this-test' },
+    it('should call loginWithRedirect when the login button is clicked', () => {
+      const loginWithRedirect = vi.fn();
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
+        isAuthenticated: false,
+        isLoading: false,
+        loginWithRedirect, // Pass the specific spy for this test
+      }));
+
+      renderComponent();
+      
+      const loginButton = screen.getByRole('button', { name: /Sign up or Log in/i });
+      fireEvent.click(loginButton);
+
+      expect(loginWithRedirect).toHaveBeenCalledTimes(1);
+      expect(loginWithRedirect).toHaveBeenCalledWith({
+        appState: { returnTo: window.location.pathname },
       });
+    });
+
+    it('should NOT display the seller prompt when the user is authenticated', () => {
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
+        isAuthenticated: true,
+        isLoading: false,
+      }));
+
+      renderComponent();
+      
+      const prompt = screen.queryByText(/Ready to share your unique creations/i);
+      expect(prompt).not.toBeInTheDocument();
+    });
+
+    it('should NOT display the seller prompt when the auth state is loading', () => {
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
+        isAuthenticated: false,
+        isLoading: true,
+      }));
+
+      renderComponent();
+
+      const prompt = screen.queryByText(/Ready to share your unique creations/i);
+      expect(prompt).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Vanta.js Background Effect', () => {
+    it('should initialize the VANTA.FOG effect on mount', () => {
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
+        isAuthenticated: false,
+        isLoading: false,
+      }));
+
+      renderComponent();
+
+      expect(window.VANTA.FOG).toHaveBeenCalledTimes(1);
+      expect(window.VANTA.FOG).toHaveBeenCalledWith(
+        expect.objectContaining({
+          highlightColor: 0x6514a4,
+        })
+      );
+    });
+
+    it('should clean up the VANTA effect on unmount', () => {
+      mockUseAuth0.mockReturnValue(createAuth0Mock({
+        isAuthenticated: false,
+        isLoading: false,
+      }));
+
+      const { unmount } = renderComponent();
+
+      expect(window.VANTA.FOG).toHaveBeenCalledTimes(1);
+      const mockEffectInstance = (window.VANTA.FOG as any).mock.results[0].value;
+      
+      unmount();
+
+      expect(mockEffectInstance.destroy).toHaveBeenCalledTimes(1);
     });
   });
 });

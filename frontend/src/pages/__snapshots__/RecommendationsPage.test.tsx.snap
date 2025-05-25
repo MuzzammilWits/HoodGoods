@@ -17,6 +17,15 @@ exports[`RecommendationsPage > matches snapshot 1`] = `
       Based on current trends and popular items.
     </p>
     <section
+      class="back-button-container"
+    >
+      <button
+        class="back-button"
+      >
+        Back to Products
+      </button>
+    </section>
+    <section
       class="recommendation-section"
     >
       <div
