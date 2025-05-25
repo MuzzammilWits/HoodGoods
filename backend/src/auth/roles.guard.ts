@@ -23,18 +23,16 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // If no @Roles() decorator is used, or if it's empty, allow access.
     // This ensures routes without specific role requirements are not blocked by this guard.
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // This should be populated by JwtAuthGuard
+    const user = request.user; 
 
     if (!user || !user.sub) {
       // This case should ideally be caught by JwtAuthGuard first,
-      // but it's a good safeguard.
       throw new UnauthorizedException('User not authenticated or user ID missing.');
     }
 
@@ -43,7 +41,6 @@ export class RolesGuard implements CanActivate {
 
     if (!userRoleData || !userRoleData.role) {
       // This might happen if the user exists in Auth0 but not in your local DB,
-      // or if getUserRole returns an unexpected structure.
       throw new ForbiddenException('Could not determine user role from the database.');
     }
 

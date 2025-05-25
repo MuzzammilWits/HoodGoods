@@ -1,6 +1,6 @@
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateCartItemDto } from './create-cart-item.dto'; // This DTO now has only productId and quantity
+import { CreateCartItemDto } from './create-cart-item.dto'; 
 
 export class SyncCartDto {
   @IsArray()

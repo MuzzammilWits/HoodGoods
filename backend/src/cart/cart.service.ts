@@ -6,19 +6,18 @@ import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { Product } from '../products/entities/product.entity';
 
-// --- INTERFACE CHANGE ---
-// Interface for the structure returned to the frontend
+
 export interface CartItemWithProductDetails extends Omit<CartItem, 'user' | 'product'> {
-    // Inherits cartID, quantity, userId from CartItem
+    
     productId: number;
     productName: string;
     productPrice: number;
     imageUrl: string | null;
     availableQuantity: number;
     storeName: string;
-    storeId: string; // <<< ADD storeId HERE (using string because Product entity uses string for bigint)
+    storeId: string; 
 }
-// --- END INTERFACE CHANGE ---
+
 
 
 @Injectable()
@@ -51,28 +50,28 @@ export class CartService {
         const cartWithDetails = cartItems.map(item => {
             const product = productMap.get(item.productId);
             if (!product) {
-                // console.warn(`Product with ID ${item.productId} not found for cart item ${item.cartID}. Excluding item.`);
+                
                 return null;
             }
 
-            // ***** START CHANGE HERE *****
+            
             return {
                 cartID: item.cartID,
                 productId: item.productId,
                 quantity: item.quantity,
-                userId: item.userId, // Make sure userId is included if the interface requires it
+                userId: item.userId, 
                 productName: product.name,
                 productPrice: product.price,
                 imageUrl: product.imageUrl,
                 availableQuantity: product.productquantity,
                 storeName: product.storeName,
-                storeId: product.storeId, // <<< ADD storeId from Product entity HERE
+                storeId: product.storeId, 
             };
-            // ***** END CHANGE HERE *****
+            
 
         }).filter(item => item !== null);
 
-        // Add back the type assertion as it might be needed by your setup
+        
         return cartWithDetails as CartItemWithProductDetails[];
 
     } catch (error) {

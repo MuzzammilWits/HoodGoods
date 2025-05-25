@@ -95,8 +95,8 @@ describe('CreateCartItemDto', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       const quantityErrors = errors.find(err => err.property === 'quantity')?.constraints;
-      expect(quantityErrors?.isPositive).toBeUndefined(); // @IsPositive passes for 0.5
-      expect(quantityErrors?.min).toBe('quantity must not be less than 1'); // @Min(1) fails
+      expect(quantityErrors?.isPositive).toBeUndefined(); 
+      expect(quantityErrors?.min).toBe('quantity must not be less than 1'); 
     });
 
     it('should pass if quantity is a float greater than or equal to 1 (e.g. 1.0, 2.5) if integers are not strictly required', async () => {

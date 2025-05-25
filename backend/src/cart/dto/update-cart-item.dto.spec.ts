@@ -2,7 +2,7 @@
 import 'reflect-metadata'; // Must be the first import
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { UpdateCartItemDto } from './update-cart-item.dto'; // Adjust path as necessary
+import { UpdateCartItemDto } from './update-cart-item.dto'; 
 
 describe('UpdateCartItemDto', () => {
   // --- Test suite for quantity ---
@@ -20,11 +20,9 @@ describe('UpdateCartItemDto', () => {
     });
 
     it('should fail if quantity is missing', async () => {
-      const dto = plainToInstance(UpdateCartItemDto, {}); // quantity is undefined
+      const dto = plainToInstance(UpdateCartItemDto, {}); 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      // When undefined, @IsNumber is the first to fail.
-      // If @IsNotEmpty() were present, that would be the primary error.
       expect(errors.find(err => err.property === 'quantity')?.constraints?.isNumber).toBeDefined();
     });
 
@@ -34,11 +32,7 @@ describe('UpdateCartItemDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const quantityError = errors.find(err => err.property === 'quantity');
       expect(quantityError).toBeDefined();
-      // Check for the presence of the isNumber constraint violation.
-      // The exact message can vary slightly between class-validator versions.
       expect(quantityError?.constraints?.isNumber).toBeDefined();
-      // A more specific check if you know the exact default message for your version:
-      // expect(quantityError?.constraints?.isNumber).toBe('quantity must be a number conforming to the specified constraints');
     });
 
     it('should fail if quantity is zero', async () => {
@@ -64,15 +58,11 @@ describe('UpdateCartItemDto', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       const quantityErrors = errors.find(err => err.property === 'quantity')?.constraints;
-      // For quantity = 0.5:
-      // @IsPositive should PASS (0.5 is positive), so isPositive constraint should NOT be present.
       expect(quantityErrors?.isPositive).toBeUndefined();
-      // @Min(1) should FAIL (0.5 is less than 1).
       expect(quantityErrors?.min).toBe('quantity must not be less than 1');
     });
 
     it('should pass if quantity is a float >= 1 (e.g. 1.0, 1.5) if integers are not strictly required', async () => {
-      // If quantity must be an integer, add @IsInt() to the DTO.
       // Currently, 1.5 will pass @IsNumber, @IsPositive, and @Min(1).
       const dto = plainToInstance(UpdateCartItemDto, { quantity: 1.5 });
       const errors = await validate(dto);

@@ -1,5 +1,5 @@
-import { ParsePeriodPipe } from './parse-period.pipe'; // Adjust the path if needed
-import { TimePeriod } from '../../reporting/dto/sales-report.dto'; // Adjust the path if needed
+import { ParsePeriodPipe } from './parse-period.pipe'; 
+import { TimePeriod } from '../../reporting/dto/sales-report.dto'; 
 import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
 
 describe('ParsePeriodPipe', () => {

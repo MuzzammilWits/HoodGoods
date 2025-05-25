@@ -13,13 +13,13 @@ import {
   ArrayMinSize,
   IsDefined,
 } from 'class-validator';
-import { Type } from 'class-transformer'; // Needed for nested validation
+import { Type } from 'class-transformer'; 
 
 // Define the structure for individual items within the cartItems array
-export class CartItemDto { // <<< EXPORTED
+export class CartItemDto { 
   @IsNumber()
   @IsNotEmpty()
-  productId: number; // Matches Product.prodId type
+  productId: number; 
 
   @IsNumber()
   @IsPositive({ message: 'Quantity must be a positive number' })
@@ -31,7 +31,7 @@ export class CartItemDto { // <<< EXPORTED
   @IsNotEmpty()
   pricePerUnitSnapshot: number; // Price at time of checkout
 
-  @IsString() // Assuming Store PK ('storeId' in Product entity) is string or bigint mapped to string
+  @IsString() 
   @IsNotEmpty()
   storeId: string;
 }
@@ -44,8 +44,7 @@ export class CreateOrderDto {
   cartItems: CartItemDto[];
 
   @IsObject()
-  @IsDefined() // Ensures the object itself is present
-  // Validation ensures it's an object; service checks values are 'standard'/'express'
+  @IsDefined() 
   deliverySelections: Record<string, 'standard' | 'express'>; // Key: storeId, Value: 'standard' or 'express'
 
   @IsString()

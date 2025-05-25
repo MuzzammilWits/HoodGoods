@@ -23,7 +23,7 @@ const mockCartItem1: CartItem = {
     productId: mockProductId1,
     quantity: 2,
    
-    // Add relations if needed by entity definition, e.g., user: null, product: null
+    
 };
 
 const mockCartItem2: CartItem = {
@@ -190,7 +190,7 @@ describe('CartService', () => {
     jest.clearAllMocks();
 
     // Mock the transaction implementation
-    // It should immediately call the callback with the mockEntityManager
+    
     cartRepository.manager.transaction.mockImplementation(async (callback) => {
         return await callback(mockEntityManager);
     });
@@ -431,7 +431,7 @@ describe('CartService', () => {
             .mockReturnValueOnce({ userId: mockUserId, productId: mockProductId2, quantity: 1 });
         mockEntityManager.save.mockResolvedValue(undefined); // Simulate successful save
 
-        await service.syncCart(mockUserId, itemsToSync);
+        await service.syncCart(mockUserId, itemsToSync); 
 
         expect(cartRepository.manager.transaction).toHaveBeenCalledTimes(1);
         expect(mockEntityManager.delete).toHaveBeenCalledWith(CartItem, { userId: mockUserId });
@@ -557,7 +557,7 @@ describe('CartService', () => {
         result = await service.removeFromCart(mockUserId, productId);
         expect(result).toBe(false);
 
-        cartRepository.delete.mockResolvedValue({} as DeleteResult); // No affected property
+        cartRepository.delete.mockResolvedValue({} as DeleteResult); 
         result = await service.removeFromCart(mockUserId, productId);
         expect(result).toBe(false);
      });

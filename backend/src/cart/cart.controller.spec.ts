@@ -12,17 +12,17 @@ import { SyncCartDto } from './dto/sync-cart.dto';
 import { CartItem } from './entities/cart-item.entity';
 import { HttpException, HttpStatus, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 
-// --- MOCK DATA (Updated based on latest CartService) ---
+
 
 const mockUserId = 'user-123';
 const mockProductId1 = 1;
 const mockProductId2 = 2;
-const mockStoreId1 = 'store-abc'; // Example store ID as string
-const mockStoreId2 = 'store-xyz'; // Example store ID as string
+const mockStoreId1 = 'store-abc'; 
+const mockStoreId2 = 'store-xyz'; 
 
-// Define mock data conforming to the NEW (flattened) CartItemWithProductDetails interface
+
 const mockCartItemWithDetails1: CartItemWithProductDetails = {
-  cartID: 10, // Assuming CartItem has cartID from getCart implementation
+  cartID: 10, 
   userId: mockUserId,
   productId: mockProductId1,
   quantity: 2,
@@ -49,22 +49,19 @@ const mockCartItemWithDetails2: CartItemWithProductDetails = {
   storeId: mockStoreId2,
 };
 
-// The mock data array returned by the mocked getCart service method
+
 const mockCartData: CartItemWithProductDetails[] = [
   mockCartItemWithDetails1,
   mockCartItemWithDetails2,
 ];
 
-// Mock CartItem entity structure (for methods like addToCart, updateCartItem)
+
 const mockBaseCartItem1: CartItem = {
     cartID: 10,
     userId: mockUserId,
     productId: mockProductId1,
     quantity: 2, // Initial quantity
     
-    // Add user/product relations if they exist in your entity, otherwise omit or set to null
-    // user: null,
-    // product: null,
 };
 
 const mockAddedCartItem: CartItem = {
@@ -73,10 +70,10 @@ const mockAddedCartItem: CartItem = {
  
 }
 
-// --- END MOCK DATA ---
 
 
-// Mock CartService (using jest.fn() for all methods)
+
+
 const mockCartService = {
   getCart: jest.fn(),
   addToCart: jest.fn(),
@@ -95,7 +92,7 @@ const mockRequest = (userId: string) => ({
 
 describe('CartController', () => {
   let controller: CartController;
-  let service: typeof mockCartService; // Use typeof for better type checking on the mock
+  let service: typeof mockCartService; 
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -103,11 +100,11 @@ describe('CartController', () => {
       providers: [
         {
           provide: CartService,
-          useValue: mockCartService, // Use the mock implementation
+          useValue: mockCartService, 
         },
       ],
     })
-      // Override the guard to always allow access for these unit/integration tests
+      
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: jest.fn(() => true) })
       .compile();
@@ -127,7 +124,6 @@ describe('CartController', () => {
   // --- Test getCart ---
   describe('getCart', () => {
     it('should return the user cart with flattened product details', async () => {
-      // Arrange: Mock service resolves with the updated (flattened) data structure
       service.getCart.mockResolvedValue(mockCartData);
       const req = mockRequest(mockUserId);
 
@@ -238,7 +234,7 @@ describe('CartController', () => {
 
     it('should sync the cart successfully and return a success message', async () => {
       // Arrange
-      service.syncCart.mockResolvedValue(undefined); // Sync might not return data on success
+      service.syncCart.mockResolvedValue(undefined); 
       const req = mockRequest(mockUserId);
 
       // Act
