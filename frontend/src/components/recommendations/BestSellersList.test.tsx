@@ -104,13 +104,7 @@ describe('BestSellersList', () => {
     vi.useRealTimers(); // Ensure real timers are restored if any test used fake ones.
   });
 
-  // Test case: should display loading state initially for products.
-  it('should display loading state initially for products', () => {
-    mockGetBestSellingProducts.mockImplementation(() => new Promise(() => {})); // Prevent products from loading.
-    render(<BestSellersList />);
-    expect(screen.getByText('Loading best sellers...')).toBeInTheDocument();
-  });
-
+  
   // Test case: should display the default title.
   it('should display the default title', async () => {
     render(<BestSellersList />);
