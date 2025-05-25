@@ -1,4 +1,4 @@
-// src/products/dto/create-product.dto.ts
+
 import { IsString, IsNotEmpty, IsNumber, IsUrl, IsOptional, Min, IsInt } from 'class-validator';
 
 export class CreateProductDto {
@@ -10,19 +10,19 @@ export class CreateProductDto {
   @IsOptional() // Make description optional
   description?: string;
 
-  @IsNumber({ maxDecimalPlaces: 4 }) // Allow up to 4 decimal places for float4/real
-  @Min(0) // Price cannot be negative
+  @IsNumber({ maxDecimalPlaces: 4 }) // Allow up to 4 decimal places
+  @Min(0) // Price cannot be negative/cannot be less than '0'
   price: number;
 
   @IsString()
   @IsNotEmpty()
   category: string;
 
-  @IsUrl() // Validates if it's a URL format
-  @IsOptional() // Make image URL optional during initial creation? Adjust if required.
+  @IsUrl() // Validates if it's a valid URL format
+  @IsOptional() // Make image URL optional during initial creation
   imageUrl?: string;
 
   @IsInt() // Ensure it's a whole number
-  @Min(0) // Quantity cannot be negative
+  @Min(0) // Quantity cannot be negative/cannot be less than '0'
   productquantity: number;
 }
