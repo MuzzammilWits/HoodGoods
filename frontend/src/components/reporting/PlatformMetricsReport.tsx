@@ -19,7 +19,7 @@ import html2canvas from 'html2canvas';
 
 import { getAdminPlatformMetrics, downloadAdminPlatformMetricsCsv } from '../../services/reportingService';
 import { AdminPlatformMetricsData, TimePeriod, PlatformMetricPoint } from '../../types';
-import './PlatformMetricsReport.css';
+import './PlatformMetricsReport.css'; // Ensure this CSS file is imported
 
 ChartJS.register(
   CategoryScale,
@@ -36,17 +36,21 @@ ChartJS.register(
 const PlatformMetricsReport: React.FC = () => {
     const { getAccessTokenSilently } = useAuth0();
     const [reportData, setReportData] = useState<AdminPlatformMetricsData | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true); // Main data loading
+    const [pdfLoading, setPdfLoading] = useState<boolean>(false); // Specific PDF generation loading
     const [error, setError] = useState<string | null>(null);
 
     const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod | 'allTime' | 'custom'>('allTime');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
 
-    const reportContentRef = useRef<HTMLElement>(null); // Using HTMLElement for semantic elements
 
-    const fetchReportData = useCallback(async () => {
-        setLoading(true);
+    const reportContentRef = useRef<HTMLElement>(null);
+    const pdfIgnoreClassName = 'pdf-ignore'; // Class to mark elements to be ignored by html2canvas
+
+
+    const fetchReportData = useCallback(async (isInitialLoad = false) => {
+        if(isInitialLoad) setLoading(true); else setPdfLoading(true); // Use pdfLoading for refresh, setLoading for initial
         setError(null);
         try {
             const token = await getAccessTokenSilently();
@@ -67,16 +71,17 @@ const PlatformMetricsReport: React.FC = () => {
             setError(err.message || 'An error occurred while fetching the platform metrics report.');
             setReportData(null);
         } finally {
-            setLoading(false);
+            if(isInitialLoad) setLoading(false); else setPdfLoading(false);
         }
     }, [getAccessTokenSilently, selectedPeriod, startDate, endDate]);
 
     useEffect(() => {
-        fetchReportData();
-    }, [fetchReportData]);
+        fetchReportData(true); // Initial fetch
+    }, [fetchReportData]); // fetchReportData is stable due to useCallback
 
     const handleDownloadCsv = async () => {
         if (!reportData) { setError("Report data not available for CSV export."); return; }
+        setPdfLoading(true);
         try {
             const token = await getAccessTokenSilently();
             let periodParam: TimePeriod | 'allTime' | 'custom' = selectedPeriod;
@@ -98,6 +103,7 @@ const PlatformMetricsReport: React.FC = () => {
             a.remove();
             window.URL.revokeObjectURL(url);
         } catch (err: any) { console.error("PlatformMetricsReport: Failed to download CSV:", err); setError(err.message || 'Failed to download CSV.');}
+        finally { setPdfLoading(false); }
     };
 
     const handleDownloadPdf = async () => {
@@ -106,74 +112,82 @@ const PlatformMetricsReport: React.FC = () => {
             console.error("PDF Export: Report data or content ref is missing.");
             return;
         }
-        setLoading(true);
+        setPdfLoading(true); 
 
-        try {
-            ChartJS.defaults.animation = false;
+        ChartJS.defaults.animation = false; 
 
-            const canvas = await html2canvas(reportContentRef.current, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-            });
+        setTimeout(async () => {
+            try {
+                if (!reportContentRef.current) { 
+                    throw new Error("Report content ref became null before capture.");
+                }
+                const canvas = await html2canvas(reportContentRef.current, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false, 
+                    backgroundColor: '#ffffff',
+                    scrollX: 0, 
+                    scrollY: -window.scrollY, 
+                    windowWidth: reportContentRef.current.scrollWidth, 
+                    windowHeight: reportContentRef.current.scrollHeight,
+                    ignoreElements: (element) => element.classList.contains(pdfIgnoreClassName),
+                });
 
-            ChartJS.defaults.animation = {} as any;
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'a4',
+                });
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'pt',
-                format: 'a4',
-            });
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const margin = 40;
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const margin = 40;
+                const imgProps = pdf.getImageProperties(imgData);
+                const aspectRatio = imgProps.width / imgProps.height;
 
-            const imgProps = pdf.getImageProperties(imgData);
-            const aspectRatio = imgProps.width / imgProps.height;
+                let newImgWidth = pdfWidth - 2 * margin;
+                let newImgHeight = newImgWidth / aspectRatio;
 
-            let newImgWidth = pdfWidth - 2 * margin;
-            let newImgHeight = newImgWidth / aspectRatio;
+                if (newImgHeight > pdfHeight - (2 * margin) - 60) { 
+                    newImgHeight = pdfHeight - (2 * margin) - 60;
+                    newImgWidth = newImgHeight * aspectRatio;
+                }
+                
+                const x = (pdfWidth - newImgWidth) / 2;
+                let y = margin;
 
-            if (newImgHeight > pdfHeight - (2 * margin) - 60) {
-                newImgHeight = pdfHeight - (2 * margin) - 60;
-                newImgWidth = newImgHeight * aspectRatio;
+                pdf.setFontSize(18);
+                pdf.text('Admin Platform Performance Overview', pdfWidth / 2, y, { align: 'center' });
+                y += 30; 
+
+                pdf.setFontSize(10);
+                if (reportData.periodCovered) {
+                    let periodText = `Period Covered: ${reportData.periodCovered.period.charAt(0).toUpperCase() + reportData.periodCovered.period.slice(1)}`;
+                    if (reportData.periodCovered.startDate) periodText += ` (From: ${reportData.periodCovered.startDate}`;
+                    if (reportData.periodCovered.endDate) periodText += ` To: ${reportData.periodCovered.endDate}${reportData.periodCovered.startDate ? ')' : ''}`;
+                    else if (reportData.periodCovered.startDate) periodText += `)`;
+
+                    pdf.text(periodText, margin, y);
+                    y += 15;
+                }
+                pdf.text(`Report Generated: ${new Date(reportData.reportGeneratedAt).toLocaleString()}`, margin, y);
+                y += 25; 
+
+                pdf.addImage(imgData, 'PNG', x, y, newImgWidth, newImgHeight);
+                
+                const filename = `admin_platform_metrics_${selectedPeriod}${startDate ? `_${startDate}` : ''}${endDate ? `_to_${endDate}` : ''}.pdf`;
+                pdf.save(filename);
+
+            } catch (err: any) {
+                console.error("PlatformMetricsReport: Failed to generate PDF:", err);
+                setError(err.message || 'Failed to generate PDF.');
+            } finally {
+                ChartJS.defaults.animation = {} as any; 
+                setPdfLoading(false); 
             }
-            
-            const x = (pdfWidth - newImgWidth) / 2;
-            let y = margin;
-
-            pdf.setFontSize(18);
-            pdf.text('Admin Platform Performance Overview', pdfWidth / 2, y, { align: 'center' });
-            y += 30;
-
-            pdf.setFontSize(10);
-            if (reportData.periodCovered) {
-                let periodText = `Period Covered: ${reportData.periodCovered.period.charAt(0).toUpperCase() + reportData.periodCovered.period.slice(1)}`;
-                if (reportData.periodCovered.startDate) periodText += ` (From: ${reportData.periodCovered.startDate}`;
-                if (reportData.periodCovered.endDate) periodText += ` To: ${reportData.periodCovered.endDate}${reportData.periodCovered.startDate ? ')' : ''}`;
-                else if (reportData.periodCovered.startDate) periodText += `)`;
-
-                pdf.text(periodText, margin, y);
-                y += 15;
-            }
-            pdf.text(`Report Generated: ${new Date(reportData.reportGeneratedAt).toLocaleString()}`, margin, y);
-            y += 25;
-
-            pdf.addImage(imgData, 'PNG', x, y, newImgWidth, newImgHeight);
-            
-            const filename = `admin_platform_metrics_${selectedPeriod}${startDate ? `_${startDate}` : ''}${endDate ? `_to_${endDate}` : ''}.pdf`;
-            pdf.save(filename);
-
-        } catch (err: any) {
-            console.error("PlatformMetricsReport: Failed to generate PDF:", err);
-            setError(err.message || 'Failed to generate PDF.');
-            ChartJS.defaults.animation = {} as any;
-        } finally {
-            setLoading(false);
-        }
+        }, 200); 
     };
 
     const handlePeriodChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -212,13 +226,14 @@ const PlatformMetricsReport: React.FC = () => {
         }
         return {
         responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' as const }, tooltip: { mode: 'index' as const, intersect: false } },
-        scales: { x: { type: 'time' as const, time: { unit: timeUnit, tooltipFormat: 'MMM dd, yyyy', displayFormats: { day: 'MMM dd', week: 'MMM dd', month: 'MMM yyyy', year: 'yyyy' } }, title: { display: true, text: 'Date' } }, y: { beginAtZero: true, title: { display: true, text: 'Value' } } }
+        scales: { x: { type: 'time' as const, time: { unit: timeUnit, tooltipFormat: 'MMM dd, yy', displayFormats: { day: 'MMM dd', week: 'MMM dd', month: 'MMM yy', year: 'yyyy' } }, title: { display: true, text: 'Date' } }, y: { beginAtZero: true, title: { display: true, text: 'Value' } } }
         };
     }, [reportData]);
 
     const salesChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Sales Trend' }, tooltip: { ...commonChartOptions.plugins?.tooltip, callbacks: { label: function(context: any) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(context.parsed.y); } return label; } } } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Sales (R)' }, ticks: { callback: function(value: any) { return 'R ' + value; } } } } }), [commonChartOptions]);
     const ordersChartOptions = useMemo(() => ({ ...commonChartOptions, plugins: { ...commonChartOptions.plugins, title: { display: true, text: 'Platform Order Volume Trend' } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'Number of Orders' } } } }), [commonChartOptions]);
 
+    // Skeleton Loader for initial data fetch
     if (loading && !reportData) return (
         <article className="platform-metrics-report report-container card skeleton-container-active" aria-busy="true">
             <header className="card-header report-header">
@@ -254,8 +269,12 @@ const PlatformMetricsReport: React.FC = () => {
             </section>
         </article>
     );
-    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={fetchReportData} disabled={loading}>Try Again</button>}</p>;
-    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={fetchReportData} disabled={loading}>Refresh</button></p>;
+    
+    // Error state
+    if (error) return <p className="error-message">Error: {error} {error === "User not authenticated. Please log in." ? "" : <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Try Again</button>}</p>;
+    
+    // No data state (after loading is complete but no data was fetched)
+    if (!reportData) return <p className="info-message">No platform metrics data available. <button onClick={() => fetchReportData(true)} disabled={pdfLoading}>Refresh</button></p>;
 
     const { overallMetrics, periodCovered, reportGeneratedAt } = reportData;
 
@@ -263,9 +282,9 @@ const PlatformMetricsReport: React.FC = () => {
         <article className="platform-metrics-report report-container card" ref={reportContentRef}>
             <header className="card-header report-header">
                 <h2>Platform Performance Overview</h2>
-                <form className="report-controls">
+                <form className={`report-controls ${pdfIgnoreClassName}`}>
                     <label htmlFor="period-select-admin">Report Period: </label>
-                    <select id="period-select-admin" value={selectedPeriod} onChange={handlePeriodChange}>
+                    <select id="period-select-admin" value={selectedPeriod} onChange={handlePeriodChange} disabled={pdfLoading}>
                         <option value="allTime">All Time</option>
                         {Object.values(TimePeriod).map(p => (
                             <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
@@ -273,12 +292,14 @@ const PlatformMetricsReport: React.FC = () => {
                         <option value="custom">Custom Range</option>
                     </select>
                     {(selectedPeriod === TimePeriod.DAILY || selectedPeriod === 'custom') && (
-                        <input type="date" aria-label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ marginTop: '10px' }}/>
+                        <input type="date" aria-label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ marginLeft: '10px' }} disabled={pdfLoading}/>
                     )}
                     {selectedPeriod === 'custom' && (
-                        <input type="date" aria-label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginTop: '10px' }}/>
+                        <input type="date" aria-label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginLeft: '10px' }} disabled={pdfLoading}/>
                     )}
-                    <button type="button" onClick={fetchReportData} style={{ marginTop: '10px' }} disabled={loading}>Refresh Report</button>
+                    <button type="button" onClick={() => fetchReportData(false)} disabled={pdfLoading || loading}>
+                        {pdfLoading && !loading ? 'Refreshing...' : 'Refresh Report'}
+                    </button>
                 </form>
             </header>
 
@@ -316,10 +337,11 @@ const PlatformMetricsReport: React.FC = () => {
                 ) : (
                     <p className="info-message" style={{marginTop: '20px'}}>No time series data available for graphs for the selected period.</p>
                 )}
-
-                <section className="export-buttons" aria-label="Export options">
-                    <button onClick={handleDownloadCsv} className="csv-button" disabled={loading}>Download CSV</button>
-                    <button onClick={handleDownloadPdf} className="pdf-button" disabled={loading} style={{ marginLeft: '10px' }}>Download PDF</button>
+                <section className={`export-buttons ${pdfIgnoreClassName}`} aria-label="Export options">
+                    <button onClick={handleDownloadCsv} className="csv-button" disabled={pdfLoading || loading}>Download CSV</button>
+                    <button onClick={handleDownloadPdf} className="pdf-button" disabled={pdfLoading || loading} style={{ marginLeft: '10px' }}>
+                        {pdfLoading ? 'Generating PDF...' : 'Download PDF'}
+                    </button>
                 </section>
             </section>
         </article>
