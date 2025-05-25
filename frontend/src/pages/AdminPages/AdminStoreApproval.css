@@ -82,10 +82,6 @@ section.pricing-info {
   color: #555;
 }
 
-section.pricing-info section { /* Targets the inner sections for standard/express */
-    /* No specific styles needed unless distinct visual separation is required */
-}
-
 section.pricing-info h4 {
   margin: 0 0 0.25rem 0;
   font-weight: 600;
