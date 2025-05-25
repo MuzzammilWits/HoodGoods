@@ -62,9 +62,11 @@ export default function CheckoutPage() {
   const [deliveryOptionsError, setDeliveryOptionsError] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentTimeLeft, setPaymentTimeLeft] = useState<number | null>(null);
 
   const paymentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const yocoInstanceRef = useRef<any>(null);
+  const paymentIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const uniqueStoreIds = useMemo(() =>
     [...new Set(cartItems.map(item => item.storeId).filter(id => id && id !== 'unknown'))]
@@ -137,12 +139,26 @@ export default function CheckoutPage() {
 
     setIsProcessingPayment(true);
     setPaymentError(null);
+    setPaymentTimeLeft(45);
+    if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); }
+    paymentIntervalRef.current = setInterval(() => {
+      setPaymentTimeLeft(prev => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(paymentIntervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     if (paymentTimeoutRef.current) { clearTimeout(paymentTimeoutRef.current); paymentTimeoutRef.current = null; }
     yocoInstanceRef.current = null;
 
     const performCleanup = () => {
         setIsProcessingPayment(false);
+        setPaymentTimeLeft(null);
+        if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); paymentIntervalRef.current = null; }
         try { if (yocoInstanceRef.current?.closePopup) { yocoInstanceRef.current.closePopup(); } }
         catch (closeError) { console.error("Cleanup: Error closing via SDK:", closeError); }
         setTimeout(() => {
@@ -193,7 +209,8 @@ export default function CheckoutPage() {
         paymentTimeoutRef.current = setTimeout(() => {
             setPaymentError("Payment process timed out. If payment was made, please contact support. Otherwise, try again.");
             performCleanup();
-            paymentTimeoutRef.current = null;
+            setPaymentTimeLeft(null);
+            if (paymentIntervalRef.current) { clearInterval(paymentIntervalRef.current); paymentIntervalRef.current = null; }
         }, 45000); // 45 seconds, Yoco default might be longer
 
     } catch (error) {
@@ -289,6 +306,12 @@ export default function CheckoutPage() {
           {!isCheckoutReady && !isProcessingPayment && !deliveryOptionsError &&
             <p className="field-hint payment-hint"> Please select area, pickup point, and delivery options for all items to proceed. </p>
           }
+          {isProcessingPayment && paymentTimeLeft !== null && (
+            <p className="payment-timer" style={{marginTop: '0.5rem', color: paymentTimeLeft <= 10 ? '#a33' : '#333', fontWeight: 600}}>
+              Payment gate valid for: 0:{paymentTimeLeft.toString().padStart(2, '0')}
+
+            </p>
+          )}
         </section>
 
         <menu className="actions">
