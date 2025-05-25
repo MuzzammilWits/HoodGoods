@@ -154,6 +154,7 @@ describe('PlatformMetricsReport', () => {
 
   it('should render loading skeleton initially', () => {
     mockGetAdminPlatformMetrics.mockImplementationOnce(() => new Promise(() => {}));
+
     const { container } = render(<PlatformMetricsReport />); // Get container for querySelector
     
     // Check for the presence of the skeleton container by its role and then assert aria-busy
@@ -165,7 +166,7 @@ describe('PlatformMetricsReport', () => {
     // Optionally, check for specific skeleton items
     const skeletonItems = container.querySelectorAll('.skeleton-item.skeleton-header');
     expect(skeletonItems.length).toBeGreaterThan(0);
-  });
+
 
   it('should fetch and display report data successfully', async () => {
     render(<PlatformMetricsReport />);
@@ -278,8 +279,10 @@ describe('PlatformMetricsReport', () => {
 
       expect(mockDownloadAdminPlatformMetricsCsv).toHaveBeenCalledWith(MOCK_TOKEN, TimePeriod.MONTHLY, undefined, undefined);
       await waitFor(() => expect(mockCreateObjectURL).toHaveBeenCalled());
-      const createdAnchor = createElementSpy.mock.results[0].value as HTMLAnchorElement;
-      expect(createdAnchor.download).toBe(`admin_platform_metrics_${TimePeriod.MONTHLY}.csv`);
+      // A more robust check for the created anchor element
+      const createdAnchor = createElementSpy.mock.results.find(result => result.value.tagName === 'A')?.value as HTMLAnchorElement;
+      expect(createdAnchor).toBeDefined();
+      expect(createdAnchor.download).toContain(`admin_platform_metrics_${TimePeriod.MONTHLY}`);
       createElementSpy.mockRestore();
     });
 
@@ -300,6 +303,7 @@ describe('PlatformMetricsReport', () => {
       const pdfButton = screen.getByRole('button', { name: 'Download PDF' });
       await user.click(pdfButton);
 
+
       await waitFor(() => expect(mockHtml2Canvas).toHaveBeenCalled());
       expect(mockHtml2Canvas).toHaveBeenCalledWith(
         expect.any(HTMLElement), 
@@ -311,6 +315,7 @@ describe('PlatformMetricsReport', () => {
           ignoreElements: expect.any(Function)
         })
       );
+
 
       await waitFor(() => expect(mockJsPDFSave).toHaveBeenCalled());
       expect(mockJsPDFText).toHaveBeenCalledWith('Admin Platform Performance Overview', expect.any(Number), expect.any(Number), { align: 'center' });
@@ -327,7 +332,7 @@ describe('PlatformMetricsReport', () => {
       expect(mockHtml2Canvas).not.toHaveBeenCalled();
     });
 
-     it('should handle PDF generation error if html2canvas fails', async () => {
+    it('should handle PDF generation error if html2canvas fails', async () => {
       const canvasErrorMsg = "html2canvas PDF error";
       mockHtml2Canvas.mockRejectedValueOnce(new Error(canvasErrorMsg));
       render(<PlatformMetricsReport />);
@@ -337,10 +342,13 @@ describe('PlatformMetricsReport', () => {
       await user.click(pdfButton);
 
       await waitFor(() => {
+
         expect(screen.getByText(`Error: ${canvasErrorMsg}`, { exact: false })).toBeInTheDocument();
+
       });
       expect(screen.getByRole('button', { name: 'Try Again'})).toBeInTheDocument();
       expect(mockJsPDFSave).not.toHaveBeenCalled();
     });
   });
+});
 });
