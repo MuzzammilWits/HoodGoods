@@ -17,15 +17,12 @@ describe('TermsAndConditionsPage', () => {
   it('should render the main heading and last updated date', () => {
     renderWithRouter();
 
-    // Check for the main H1 heading
     const mainHeading = screen.getByRole('heading', { 
       level: 1, 
       name: /Terms and Conditions for HoodsGoods/i 
     });
     expect(mainHeading).toBeInTheDocument();
 
-    // **FIX:** Check for the two parts of the text separately.
-    // This is more robust and ignores the <strong> tag.
     expect(screen.getByText(/Last Updated:/i)).toBeInTheDocument();
     expect(screen.getByText(/May 24, 2025/i)).toBeInTheDocument();
   });
@@ -59,8 +56,6 @@ describe('TermsAndConditionsPage', () => {
   it('should display the contact email address', () => {
     renderWithRouter();
 
-    // **FIX:** Use a regular expression instead of a plain string.
-    // This is more flexible and handles surrounding whitespace or nodes.
     const emailElement = screen.getByText(/legal@hoodsgoods.example.com/i);
     expect(emailElement).toBeInTheDocument();
   });

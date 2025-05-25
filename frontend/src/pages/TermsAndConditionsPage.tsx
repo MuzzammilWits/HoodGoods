@@ -1,6 +1,6 @@
 // frontend/src/pages/TermsAndConditionsPage.tsx
 import React from 'react';
-import { Link } from 'react-router-dom'; // For linking to Privacy Policy or Seller Agreement
+import { Link } from 'react-router-dom'; 
 import './TermsAndConditionsPage.css';
 
 const TermsAndConditionsPage: React.FC = () => {

@@ -1,20 +1,22 @@
 /* src/pages/SellerDashboardPage.css */
 
-main.seller-dashboard-container { /* Changed from .seller-dashboard-container div */
+/* Main container for the whole seller dashboard page */
+main.seller-dashboard-container {
   padding: 2rem;
-  font-family: 'Hind', sans-serif; /* Consistent font */
+  font-family: 'Hind', sans-serif;
   max-width: 1200px;
-  margin: 2rem auto; /* Added top/bottom margin */
-  background-color: #f0f2f5; /* Light background for the whole page */
-  border-radius: 8px; /* Added border-radius to main container */
+  margin: 2rem auto; 
+  background-color: #f0f2f5; /* Light grey background for the page */
+  border-radius: 8px;
 }
 
-header.page-main-header { /* For the top H1 and welcome */
+/* Styles for the title and welcome message area */
+header.page-main-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 header.page-main-header h1 {
-  color: var(--primary-color, #432C53);
+  color: var(--primary-color, #432C53); 
   font-family: 'Poppins', sans-serif;
   font-size: 3rem;
   margin: 0 0 0.5rem 0;
@@ -25,84 +27,86 @@ header.page-main-header p.welcome-message {
     margin:0;
 }
 
+/* Styling for messages like loading, login prompts, or no orders */
 p.auth-loading-message, p.login-prompt-message, p.no-orders-message {
     text-align: center;
     padding: 2rem;
     font-size: 1.1rem;
     color: #555;
-    background-color: #fff;
+    background-color: #fff; 
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-
+/* Styling for individual sections within the dashboard */
 section.dashboard-section {
-  margin-bottom: 2.5rem; /* Increased space between sections */
-  padding: 1.5rem 2rem; /* Adjusted padding */
-  background-color: #ffffff;
+  margin-bottom: 2.5rem; 
+  padding: 1.5rem 2rem;
+  background-color: #ffffff; 
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07); /* Softer, more diffused shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07); 
 }
-section.dashboard-section h2 { /* Target h2 within dashboard sections */
-    color: var(--primary-color-darker, #362245); /* Darker primary for section titles */
+/* Section titles - H2 */
+section.dashboard-section h2 {
+    color: var(--primary-color-darker, #362245);
     font-family: 'Poppins', sans-serif;
-    font-size: 1.8rem; /* Larger section titles */
+    font-size: 1.8rem;
     margin-top:0;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef; 
 }
 
-
-p.error-message { /* General error message styling */
-  color: #dc3545;
-  font-weight: 500; /* Not too bold */
+/* Style for error messages */
+p.error-message {
+  color: #dc3545; 
+  font-weight: 500;
   margin-top: 0.5rem;
   font-size: 0.9em;
   padding: 0.5rem 0.75rem;
-  background-color: #f8d7da;
+  background-color: #f8d7da; 
   border: 1px solid #f5c6cb;
   border-radius: 4px;
 }
 
-p.error-message.update-error { /* More specific for update errors */
-  margin-top: 1rem; /* Add space above if it's a general update error */
+p.error-message.update-error {
+  margin-top: 1rem;
 }
 
-
+/* How the total earnings are displayed */
 p.earnings-display {
-  font-size: 1.5em; /* Larger earnings display */
+  font-size: 1.5em;
   font-weight: bold;
-  color: #97C9BA;
+  color: #97C9BA; 
   margin-top: 0.5rem;
-  text-align: center; /* Center earnings */
+  text-align: center;
 }
-p.loading-text { /* For simple loading text like "Loading earnings..." */
+
+p.loading-text {
     font-style: italic;
     color: #555;
 }
 
 
-/* --- Styles for Orders Section Header & Filter --- */
-header.orders-header { /* Changed div.orders-header to header */
+/* Styles for Orders Section Header & Filter */
+header.orders-header {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  flex-wrap: wrap; 
+  justify-content: space-between; 
   align-items: center;
   margin-bottom: 1.5rem;
   gap: 1rem;
-  /* border-bottom: 1px solid #eee; */ /* Removed, section has its own border */
-  /* padding-bottom: 1rem; */
 }
+/* "Your Orders" title */
 header.orders-header h2 {
-  margin: 0; /* Reset as it's inside another h2's section */
-  font-size: 1.5rem; /* Sub-section title size */
-  border-bottom: none; /* No border for this h2 */
+  margin: 0;
+  font-size: 1.5rem;
+  border-bottom: none; 
   padding-bottom: 0;
 }
 
-
-section.order-filter-container { /* Changed div to section */
+/* Container for the status filter dropdown */
+section.order-filter-container {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -116,32 +120,34 @@ section.order-filter-container label {
   color: #495057;
 }
 
-select.status-filter-select { /* Shared with status-select below */
+/* Styling for the status filter dropdown */
+select.status-filter-select {
   padding: 0.6rem 0.8rem;
   border-radius: 5px;
-  border: 1px solid #ced4da; /* Standardized border */
-  min-width: 200px; /* Increased min-width */
+  border: 1px solid #ced4da;
+  min-width: 200px;
   background-color: #fff;
   cursor: pointer;
   font-size: 0.9em;
   font-family: 'Hind', sans-serif;
 }
 select.status-filter-select:disabled {
-  background-color: #e9ecef;
+  background-color: #e9ecef; 
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-
-ul.order-list { /* Changed div.order-list to ul */
+/* Grid layout for the list of orders */
+ul.order-list {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Slightly wider cards */
+  gap: 1.5rem; 
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* Message shown when there are no orders */
 p.no-orders-message {
   padding: 2rem; text-align: center; color: #6c757d;
   background-color: #f8f9fa; border: 1px dashed #dee2e6;
@@ -149,27 +155,70 @@ p.no-orders-message {
 }
 
 
+section.order-filter-container label {
+  font-weight: 500;
+  font-size: 0.95em;
+  margin-bottom: 0;
+  flex-shrink: 0; /* Prevent label from shrinking too much */
+  color: #495057;
+}
 
-article.order-card { /* Target article for the card */
+/* Styling for the status filter dropdown */
+select.status-filter-select {
+  padding: 0.6rem 0.8rem;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  min-width: 200px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-family: 'Hind', sans-serif;
+}
+select.status-filter-select:disabled {
+  background-color: #e9ecef; /* Greyed out when disabled */
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Grid layout for the list of orders */
+ul.order-list {
+  display: grid;
+  gap: 1.5rem; /* Space between order cards */
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Responsive columns */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Message shown when there are no orders */
+p.no-orders-message {
+  padding: 2rem; text-align: center; color: #6c757d;
+  background-color: #f8f9fa; border: 1px dashed #dee2e6;
+  border-radius: 6px; margin-top: 1rem;
+}
+
+/* Individual order card styling */
+article.order-card {
   border: 1px solid #d1d9e6;
   border-radius: 8px;
-  padding: 1.5rem; /* Increased padding */
+  padding: 1.5rem;
   background-color: #fff;
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem; /* Increased gap */
-  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
-  height: 100%; /* Ensure cards in a row are same height if grid stretches */
+  flex-direction: column; /* Stack content vertically */
+  gap: 1.25rem;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth hover effect */
+  height: 100%; /* Make cards in the same row equal height */
 }
 article.order-card:hover {
-   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* More prominent hover shadow */
-   transform: translateY(-3px); /* Slight lift */
+   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Lift effect on hover */
+   transform: translateY(-3px);
 }
 
-header.order-header-card { /* Specific class for header within order-card article */
+/* Header within each order card (Order #, Status) */
+header.order-header-card {
   border-bottom: 1px solid #e9ecef;
   padding-bottom: 1rem;
-  margin-bottom: 0; /* Rely on parent gap */
+  margin-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -182,55 +231,62 @@ header.order-header-card h3 {
   color: var(--primary-color, #432C53);
 }
 
-
-section.order-details { /* Changed div.order-details to section */
+/* Section for displaying order details like date, pickup, etc. */
+section.order-details {
   font-size: 0.95em;
   line-height: 1.6;
   color: #495057;
 }
 section.order-details p { margin: 0 0 0.4rem 0; }
 section.order-details p:last-child { margin-bottom: 0; }
-section.order-details strong { color: #343a40; }
+section.order-details strong { color: #343a40; } /* Make bolded text a bit darker */
 
-p.order-total strong { /* Targeting the strong tag within .order-total */
+/* Specific styling for the "Your Total" text */
+p.order-total strong {
   font-size: 1.1em;
   color: var(--primary-color-darker, #362245);
 }
 
-section.items-section { /* Changed div.items-section to section */
+/* Section listing items within an order */
+section.items-section {
   margin-top: 1rem;
   border-top: 1px solid #e9ecef;
   padding-top: 1rem;
 }
 section.items-section h4 {
   margin: 0 0 0.75rem 0;
-  font-size: 1.05em; /* Slightly larger */
+  font-size: 1.05em;
   color: #444;
   font-family: 'Poppins', sans-serif;
 }
 
+/* List of items in an order */
 ul.item-list {
   list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: 1rem;
+  display: flex; flex-direction: column; gap: 1rem; /* Space between items */
 }
+/* Individual item in the list */
 li.item {
   display: flex; align-items: center; gap: 1rem;
   padding-bottom: 0.75rem;
 }
-li.item:not(:last-child) { border-bottom: 1px dashed #e9ecef; }
+li.item:not(:last-child) { border-bottom: 1px dashed #e9ecef; } /* Separator line between items */
 
 
-figure.item-image-figure { /* Added for the image */
-    width: 60px; height: 60px; flex-shrink: 0;
-    margin: 0; border-radius: 4px; overflow: hidden;
+/* Container for the product image */
+figure.item-image-figure {
+    width: 60px; height: 60px; flex-shrink: 0; /* Fixed size, doesn't shrink */
+    margin: 0; border-radius: 4px; overflow: hidden; /* Clip image to rounded corners */
 }
+/* Product image itself */
 img.item-image {
-  width: 100%; height: 100%; object-fit: cover;
-  border: 1px solid #dee2e6; background-color: #f8f9fa;
+  width: 100%; height: 100%; object-fit: cover; /* Ensure image covers the area */
+  border: 1px solid #dee2e6; background-color: #f8f9fa; /* Placeholder background */
   border-radius: 4px;
 }
 
-article.item-details-info { /* Changed div.item-details to article, added class */
+/* Container for item name, quantity, price */
+article.item-details-info {
   display: flex; flex-direction: column; font-size: 0.9em; color: #555; gap: 0.2rem;
 }
 article.item-details-info p { margin: 0; }
@@ -238,10 +294,11 @@ p.item-name-id { font-weight: 500; color: #333; font-size: 0.95em; }
 p.item-qty-price, p.item-line-total { font-size: 0.85em; }
 
 
-form.status-update-section { /* Changed div.status-update-section to form */
-  margin-top: 1.25rem; /* Increased space */
+/* Section for updating the order status */
+form.status-update-section {
+  margin-top: 1.25rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #e9ecef; /* Separator line */
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -251,7 +308,8 @@ form.status-update-section label {
   font-weight: 500; font-size: 0.95em; margin-bottom: 0; color: #495057;
 }
 
-select.status-select { /* Shared with .status-filter-select */
+/* Dropdown for changing order status */
+select.status-select {
   padding: 0.6rem 0.8rem; border-radius: 5px; border: 1px solid #ced4da;
   min-width: 180px; background-color: #fff; cursor: pointer;
   font-size: 0.9em; line-height: 1.4; font-family: 'Hind', sans-serif;
@@ -259,15 +317,126 @@ select.status-select { /* Shared with .status-filter-select */
 select.status-select:disabled {
   background-color: #e9ecef; cursor: not-allowed; opacity: 0.7;
 }
+/* Focus style for select dropdowns */
 select.status-select:focus, select.status-filter-select:focus {
   border-color: var(--primary-color-light, #9e8aa8); outline: none;
-  box-shadow: 0 0 0 3px rgba(158, 138, 168, 0.25); /* Primary light focus */
+  box-shadow: 0 0 0 3px rgba(158, 138, 168, 0.25);
 }
 
-
-output.updating-indicator { /* Changed span to output */
+/* "Updating..." text indicator */
+output.updating-indicator {
   margin-left: 10px; font-style: italic; color: #6c757d; font-size: 0.9em;
 }
+
+/* General styling for status badges (Processing, Shipped, etc.) */
+.status-badge {
+  padding: 0.3em 0.7em; border-radius: 0.25rem; font-size: 0.85em;
+  font-weight: bold; color: #fff; text-align: center; white-space: nowrap;
+  line-height: 1.2; vertical-align: middle;
+}
+/* Color variations for each status */
+.status-processing { background-color: #ffc107; color: #212529; } 
+.status-packaging { background-color: #17a2b8; } 
+.status-ready, .status-ready-for-pickup { background-color: #007bff; } 
+.status-shipped { background-color: #fd7e14; } 
+.status-delivered { background-color: #28a745; } 
+.status-cancelled { background-color: #dc3545; text-decoration: line-through; } 
+.status-unknown { background-color: #6c757d; } 
+
+
+/* Loading Spinner Styles */
+section.loading-container {
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: center; min-height: 200px;
+  padding: 2rem; text-align: center; color: #555;
+}
+
+section.dashboard-section > section.loading-container.orders-loading-inline {
+  min-height: 150px; padding: 1rem 0; background-color: transparent; box-shadow: none;
+}
+
+/* The animated spinner itself */
+figure.spinner {
+  width: 48px; height: 48px; border: 5px solid rgba(0,0,0,0.1); 
+  border-top-color: var(--primary-color, #432C53);
+  border-radius: 50%; animation: spin 0.8s linear infinite; 
+  margin: 0 0 1rem 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } } 
+section.loading-container p { font-size: 1.1em; color: #555; margin:0; }
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  /* Stack orders header items vertically */
+  header.orders-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  /* Make filter take full width */
+  section.order-filter-container { width: 100%; }
+  select.status-filter-select { width: 100%; }
+  /* Stack order cards on top of each other */
+  ul.order-list { grid-template-columns: 1fr; }
+}
+li.item {
+  display: flex; align-items: center; gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+li.item:not(:last-child) { border-bottom: 1px dashed #e9ecef; } 
+
+
+/* Container for the product image */
+figure.item-image-figure {
+    width: 60px; height: 60px; flex-shrink: 0; 
+    margin: 0; border-radius: 4px; overflow: hidden; 
+}
+/* Product image itself */
+img.item-image {
+  width: 100%; height: 100%; object-fit: cover; 
+  border: 1px solid #dee2e6; background-color: #f8f9fa; 
+  border-radius: 4px;
+}
+
+/* Container for item name, quantity, price */
+article.item-details-info {
+  display: flex; flex-direction: column; font-size: 0.9em; color: #555; gap: 0.2rem;
+}
+article.item-details-info p { margin: 0; }
+p.item-name-id { font-weight: 500; color: #333; font-size: 0.95em; }
+p.item-qty-price, p.item-line-total { font-size: 0.85em; }
+
+
+/* Section for updating the order status */
+form.status-update-section {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e9ecef; 
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+form.status-update-section label {
+  font-weight: 500; font-size: 0.95em; margin-bottom: 0; color: #495057;
+}
+
+/* Dropdown for changing order status */
+select.status-select {
+  padding: 0.6rem 0.8rem; border-radius: 5px; border: 1px solid #ced4da;
+  min-width: 180px; background-color: #fff; cursor: pointer;
+  font-size: 0.9em; line-height: 1.4; font-family: 'Hind', sans-serif;
+}
+select.status-select:disabled {
+  background-color: #e9ecef; cursor: not-allowed; opacity: 0.7;
+}
+/* Focus style for select dropdowns */
+select.status-select:focus, select.status-filter-select:focus {
+  border-color: var(--primary-color-light, #9e8aa8); outline: none;
+  box-shadow: 0 0 0 3px rgba(158, 138, 168, 0.25);
+}
+
+/* "Updating..." text indicator */
+output.updating-indicator {
+  margin-left: 10px; font-style: italic; color: #6c757d; font-size: 0.9em;
+}
+
 
 section.dashboard-navigation-bar {
   margin-bottom: 2rem;
@@ -303,44 +472,50 @@ a.button-back-to-store:focus {
 }
 
 /* Status Badge Styles (applied to strong) */
+
 .status-badge {
   padding: 0.3em 0.7em; border-radius: 0.25rem; font-size: 0.85em;
   font-weight: bold; color: #fff; text-align: center; white-space: nowrap;
   line-height: 1.2; vertical-align: middle;
 }
-.status-processing { background-color: #ffc107; color: #212529; }
-.status-packaging { background-color: #17a2b8; }
-.status-ready, .status-ready-for-pickup { background-color: #007bff; }
-.status-shipped { background-color: #fd7e14; }
-.status-delivered { background-color: #28a745; }
-.status-cancelled { background-color: #dc3545; text-decoration: line-through; }
-.status-unknown { background-color: #6c757d; }
+/* Color variations for each status */
+.status-processing { background-color: #ffc107; color: #212529; } 
+.status-packaging { background-color: #17a2b8; } 
+.status-ready, .status-ready-for-pickup { background-color: #007bff; } 
+.status-shipped { background-color: #fd7e14; } 
+.status-delivered { background-color: #28a745; } 
+.status-cancelled { background-color: #dc3545; text-decoration: line-through; } 
+.status-unknown { background-color: #6c757d; } 
 
 
-/* === Loading Spinner Styles === */
+/* Container for the loading spinner and text */
 section.loading-container {
   display: flex; flex-direction: column; justify-content: center;
-  align-items: center; min-height: 200px; /* Reduced from 300px */
+  align-items: center; min-height: 200px;
   padding: 2rem; text-align: center; color: #555;
 }
-/* Specific for inline loading within orders section */
+/* More compact spinner for inline use (e.g., within orders section) */
 section.dashboard-section > section.loading-container.orders-loading-inline {
   min-height: 150px; padding: 1rem 0; background-color: transparent; box-shadow: none;
 }
 
+/* The animated spinner itself */
 figure.spinner {
-  width: 48px; height: 48px; border: 5px solid rgba(0,0,0,0.1);
-  border-top-color: var(--primary-color, #432C53); /* Use primary color for spinner */
-  border-radius: 50%; animation: spin 0.8s linear infinite;
-  margin: 0 0 1rem 0; /* Reset figure margin and add bottom space */
+  width: 48px; height: 48px; border: 5px solid rgba(0,0,0,0.1); 
+  border-top-color: var(--primary-color, #432C53); 
+  border-radius: 50%; animation: spin 0.8s linear infinite; 
+  margin: 0 0 1rem 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } } /* Rotation animation */
 section.loading-container p { font-size: 1.1em; color: #555; margin:0; }
 
-/* Responsive adjustments */
+/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
+  /* Stack orders header items vertically */
   header.orders-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  /* Make filter take full width */
   section.order-filter-container { width: 100%; }
   select.status-filter-select { width: 100%; }
-  ul.order-list { grid-template-columns: 1fr; } /* Stack order cards */
+  /* Stack order cards on top of each other */
+  ul.order-list { grid-template-columns: 1fr; }
 }

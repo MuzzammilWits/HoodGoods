@@ -1,7 +1,7 @@
 // src/pages/SellerDashboardPage.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import axios, { AxiosError } from 'axios';
+import { useAuth0 } from '@auth0/auth0-react'; // For authentication
+import axios, { AxiosError } from 'axios'; // For making HTTP requests
 import './SellerDashboardPage.css';
 import { Link } from 'react-router-dom'; // Import Link
 
@@ -17,14 +17,18 @@ interface EarningsResponse { totalEarnings: number; }
 
 const api = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000', });
 
+// Possible statuses for filtering orders
 const ORDER_FILTER_STATUSES = ['Processing', 'Packaging', 'Shipped', 'Ready for Pickup', 'Delivered', 'Cancelled'];
+
 const ORDER_UPDATE_STATUSES = ['Processing', 'Packaging', 'Shipped', 'Ready for Pickup', 'Delivered'];
 
+// Maps order status to a CSS class for styling
 const statusClassMap: Record<string, string> = { Processing: 'status-processing', Packaging: 'status-packaging', 'Ready for Pickup': 'status-ready', Shipped: 'status-shipped', Delivered: 'status-delivered', Cancelled: 'status-cancelled', };
 
 export default function SellerDashboardPage() {
+    // Auth0 hook for user authentication details
     const { user, isAuthenticated, isLoading: isAuthLoading, getAccessTokenSilently } = useAuth0();
-    // ... (all your existing state variables and functions: fetchSellerOrders, fetchSellerEarnings, etc.)
+
     const [allSellerOrders, setAllSellerOrders] = useState<SellerOrderDetails[]>([]);
     const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('All');
     const [earnings, setEarnings] = useState<number | null>(null);
@@ -33,8 +37,9 @@ export default function SellerDashboardPage() {
     const [ordersError, setOrdersError] = useState<string | null>(null);
     const [earningsError, setEarningsError] = useState<string | null>(null);
     const [updateError, setUpdateError] = useState<string | null>(null);
-    const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState<number | null>(null);
+    const [updatingStatusOrderId, setUpdatingStatusOrderId] = useState<number | null>(null); // Tracks which order is currently being updated
 
+    // Fetches the seller's orders from the backend
     const fetchSellerOrders = useCallback(async () => {
         if (!isAuthenticated) return;
         setIsLoadingOrders(true); setOrdersError(null);
@@ -49,6 +54,7 @@ export default function SellerDashboardPage() {
         } finally { setIsLoadingOrders(false); }
     }, [isAuthenticated, getAccessTokenSilently]);
 
+    // Fetches the seller's total earnings
     const fetchSellerEarnings = useCallback(async () => {
         if (!isAuthenticated) return; setIsLoadingEarnings(true); setEarningsError(null);
         try {
@@ -62,18 +68,23 @@ export default function SellerDashboardPage() {
         } finally { setIsLoadingEarnings(false); }
     }, [isAuthenticated, getAccessTokenSilently]);
 
+    // Fetch data when user is authenticated
     useEffect(() => {
         if (isAuthenticated && !isAuthLoading) { fetchSellerOrders(); fetchSellerEarnings(); }
-        else if (!isAuthLoading && !isAuthenticated) { setIsLoadingOrders(false); setIsLoadingEarnings(false); setAllSellerOrders([]); setEarnings(null); }
+        else if (!isAuthLoading && !isAuthenticated) { // Clear data if user logs out or isn't authenticated
+            setIsLoadingOrders(false); setIsLoadingEarnings(false); setAllSellerOrders([]); setEarnings(null); }
     }, [isAuthenticated, isAuthLoading, fetchSellerOrders, fetchSellerEarnings]);
 
+    // Handles changes to the order status filter dropdown
     const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => { setSelectedStatusFilter(event.target.value); };
 
+    // Updates the status of a specific order
     const handleStatusUpdate = async (sellerOrderId: number, newStatus: string) => {
         setUpdateError(null); setUpdatingStatusOrderId(sellerOrderId);
         try {
             const token = await getAccessTokenSilently();
             await api.patch<SellerOrderDetails>( `/orders/seller/${sellerOrderId}/status`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` } } );
+            // Update local state immediately for better UX
             setAllSellerOrders(currentOrders => currentOrders.map(order => order.sellerOrderId === sellerOrderId ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } : order ));
         } catch (error) {
             console.error(`Failed to update status for order ${sellerOrderId}:`, error);
@@ -82,44 +93,49 @@ export default function SellerDashboardPage() {
         } finally { setUpdatingStatusOrderId(null); }
     };
 
+    // Memoized calculation for filtered orders based on selected status
     const filteredSellerOrders = useMemo(() => {
         if (selectedStatusFilter === 'All') return allSellerOrders;
         return allSellerOrders.filter(order => order.status === selectedStatusFilter);
     }, [allSellerOrders, selectedStatusFilter]);
 
-
     if (isAuthLoading) {
         return (
             <main className="seller-dashboard-container">
-                <section className="main-titles">
-                    <h1>Seller Dashboard</h1>
-                </section>
+                <section className="main-titles"><h1>Seller Dashboard</h1></section>
                 <p className="auth-loading-message">Loading authentication...</p>
             </main>
         );
     }
+    // Prompt to login if not authenticated
     if (!isAuthenticated) {
         return (
             <main className="seller-dashboard-container">
+
                 <section className="main-titles">
                     <h1>Orders</h1>
                 </section>
                 <header className="page-main-header">
                   {/* Intentionally empty or could have other non-H1 content if needed */}
                 </header>
+
                 <p className="login-prompt-message">Please log in to view your dashboard.</p>
             </main>
         );
     }
 
+    // Main dashboard content
     return (
         <main className="seller-dashboard-container">
+
             <section className="main-titles">
                 <h1>Orders</h1>
             </section>
+
             <header className="page-main-header">
                 <p className="welcome-message">Welcome, {user?.name ?? 'Seller'}!</p>
             </header>
+
 
             {/* --- Back Button Added Here --- */}
             <section className="dashboard-navigation-bar">
@@ -139,9 +155,11 @@ export default function SellerDashboardPage() {
                 )}
             </section>
 
+            {/* Orders Management Section */}
             <section className="dashboard-section orders-management">
                 <header className="orders-header">
                     <h2>Your Orders</h2>
+                    {/* Filter for orders by status */}
                     <section className="order-filter-container">
                         <label htmlFor="status-filter">Filter by Status:</label>
                         <select id="status-filter" value={selectedStatusFilter} onChange={handleFilterChange} disabled={isLoadingOrders} className="status-filter-select">
@@ -151,8 +169,10 @@ export default function SellerDashboardPage() {
                     </section>
                 </header>
 
+
                 {/* ... rest of your orders rendering logic ... */}
                 {isLoadingOrders && (
+
                     <section className="loading-container orders-loading-inline" aria-label="Loading orders">
                         <figure className="spinner" role="img" aria-label="Loading animation"></figure>
                         <p>Loading orders...</p>
@@ -166,6 +186,7 @@ export default function SellerDashboardPage() {
                 )}
                 {updateError && <p className="error-message update-error">Update Error: {updateError}</p>}
 
+                {/* Display list of orders if available */}
                 {!isLoadingOrders && filteredSellerOrders.length > 0 && (
                     <ul className="order-list">
                         {filteredSellerOrders.map((sellerOrder) => (
@@ -200,9 +221,11 @@ export default function SellerDashboardPage() {
                                             ))}
                                         </ul>
                                     </section>
+                                    {/* Form to update order status */}
                                     <form className="status-update-section" onSubmit={(e) => e.preventDefault()}>
                                         <label htmlFor={`status-${sellerOrder.sellerOrderId}`}>Update Status:</label>
                                         <select
+
                                             id={`status-${sellerOrder.sellerOrderId}`}
                                             value={sellerOrder.status}
                                             onChange={(e) => handleStatusUpdate(sellerOrder.sellerOrderId, e.target.value)}
@@ -210,6 +233,7 @@ export default function SellerDashboardPage() {
                                             disabled={updatingStatusOrderId === sellerOrder.sellerOrderId || !ORDER_UPDATE_STATUSES.includes(sellerOrder.status)}
                                             aria-label={`Update status for shipment ${sellerOrder.sellerOrderId}`}
                                         >
+
                                             {!ORDER_UPDATE_STATUSES.includes(sellerOrder.status) ? (
                                                 <option value={sellerOrder.status} disabled>{sellerOrder.status}</option>
                                             ) : (

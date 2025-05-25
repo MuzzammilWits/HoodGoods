@@ -1,4 +1,5 @@
 
+
 main.recommendations-page-container { 
   padding: 20px;
   max-width: 1200px;
@@ -6,17 +7,22 @@ main.recommendations-page-container {
   background-color: var(--background-color, #fff); 
   min-height: calc(100vh - var(--navbar-height, 60px) - var(--footer-height, 100px)); 
   font-family: 'Hind', sans-serif; /* Added a base font for consistency */
+
 }
 
+/* Styling for each individual section that shows recommendations */
 .recommendation-section {
-  margin-bottom: 40px;
-  background-color: var(--accent-background-subtle, #f8f9fa); /* Subtle background for sections */
-  padding: 20px; /* Add padding within each recommendation section */
-  border-radius: 8px; /* Rounded corners for sections */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Soft shadow for sections */
+  margin-bottom: 40px; 
+  background-color: var(--accent-background-subtle, #f8f9fa); 
+  padding: 20px; 
+  border-radius: 8px; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
 }
 
+/* Remove the bottom margin from the very last recommendation section */
 .recommendation-section:last-child {
+
+
   margin-bottom: 0;
 }
 
@@ -39,3 +45,4 @@ main.recommendations-page-container {
   justify-content: flex-end;
   margin-bottom: 1rem;        
 }
+

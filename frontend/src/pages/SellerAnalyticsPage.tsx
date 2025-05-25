@@ -8,6 +8,7 @@ import './SellerAnalyticsPage.css';
 import { Link } from 'react-router-dom';
 
 const SellerAnalyticsPage: React.FC = () => {
+  // Get user authentication status and details from Auth0
   const {
     user: auth0User,
     isAuthenticated,
@@ -15,18 +16,20 @@ const SellerAnalyticsPage: React.FC = () => {
     getAccessTokenSilently,
   } = useAuth0();
 
+  // State for managing store information, loading states, errors, and active report view
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storeName, setStoreName] = useState<string | null>(null); // Will hold actual store name or default
   const [isLoadingPageData, setIsLoadingPageData] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeReport, setActiveReport] = useState<'inventory' | 'sales' | 'custom'>('inventory');
+  const [activeReport, setActiveReport] = useState<'inventory' | 'sales' | 'custom'>('inventory'); // Default to inventory report
 
+  // Fetches store ID and name from Supabase based on the user ID
   const fetchStoreData = useCallback(async (userId: string) => {
     const { data: storeData, error: storeFetchError } = await supabase
       .from('Stores')
       .select('store_id, store_name')
-      .eq('userID', userId)
-      .single();
+      .eq('userID', userId) // Match store to the logged-in user
+      .single(); // Expecting one store per user
 
     if (storeFetchError) {
       console.error('Error fetching store data from Supabase:', storeFetchError);
@@ -35,9 +38,10 @@ const SellerAnalyticsPage: React.FC = () => {
     return storeData;
   }, []);
 
+  // Effect to load initial page data once authentication is resolved
   useEffect(() => {
     if (auth0Loading) {
-      setIsLoadingPageData(true);
+      setIsLoadingPageData(true); // Still loading auth, so page data is also loading
       return;
     }
 
@@ -47,12 +51,14 @@ const SellerAnalyticsPage: React.FC = () => {
       return;
     }
 
-    const auth0UserId = auth0User.sub;
+    const auth0UserId = auth0User.sub; // Auth0 user ID
 
+    // Async function to fetch store details
     const loadInitialPageData = async () => {
       setIsLoadingPageData(true);
       setError(null);
       try {
+        // Get token silently for secure API calls (if reports were fetched from a custom backend)
         const token = await getAccessTokenSilently();
         if (!token) {
           throw new Error("Authentication token could not be retrieved.");
@@ -61,7 +67,9 @@ const SellerAnalyticsPage: React.FC = () => {
 
         if (fetchedStoreData && fetchedStoreData.store_id) {
           setStoreId(fetchedStoreData.store_id);
+
           setStoreName(fetchedStoreData.store_name || 'Your Store'); // Set storeName here
+
         } else {
           setError("No store associated with this seller account.");
           setStoreId(null);
@@ -80,6 +88,7 @@ const SellerAnalyticsPage: React.FC = () => {
     loadInitialPageData();
   }, [auth0User, isAuthenticated, auth0Loading, getAccessTokenSilently, fetchStoreData]);
 
+
   // Title for loading state - storeName isn't available yet
   if (auth0Loading || isLoadingPageData) {
     return (
@@ -95,6 +104,7 @@ const SellerAnalyticsPage: React.FC = () => {
   }
 
   // Title for error states - storeName might be null or previously fetched
+
   if (error) {
     return (
       <main className="seller-analytics-page message-container error-message-container centered-message">
@@ -107,7 +117,6 @@ const SellerAnalyticsPage: React.FC = () => {
     );
   }
 
-  // Title for no store ID state - storeName will be null
   if (!storeId) {
     return (
       <main className="seller-analytics-page message-container info-message-container centered-message">
@@ -120,12 +129,13 @@ const SellerAnalyticsPage: React.FC = () => {
     );
   }
 
-  // Main authenticated and data-loaded view
+
   return (
     <main className="seller-analytics-page">
       <section className="main-titles">
         {/* MODIFIED: Restore storeName to the main H1 */}
         <h1>{storeName ? `${storeName} - ` : ''}Analytics Dashboard</h1>
+
       </section>
 
       {/* REMOVED: The separate page-sub-header for storeName is no longer needed */}
@@ -160,20 +170,22 @@ const SellerAnalyticsPage: React.FC = () => {
       </nav>
 
       <section className="analytics-content">
+        {/* Conditionally render the selected report component */}
         {activeReport === 'inventory' && (
           <article className="report-group mb-5" aria-labelledby="inventory-status-heading">
             <h2 id="inventory-status-heading" className="visually-hidden">Inventory Status Report Section</h2>
-            <InventoryStatusReport />
+            <InventoryStatusReport /> {/* Component to display inventory data */}
           </article>
         )}
 
         {activeReport === 'sales' && (
           <article className="report-group mb-5" aria-labelledby="sales-trends-heading">
             <h2 id="sales-trends-heading" className="visually-hidden">Sales Trends Report Section</h2>
-            <SalesTrendReport />
+            <SalesTrendReport /> {/* Component to display sales trend data */}
           </article>
         )}
 
+        {/* Placeholder for a future 'Custom View' report */}
         {activeReport === 'custom' && (
           <article className="report-group" aria-labelledby="custom-view-heading">
             <article className="card">
